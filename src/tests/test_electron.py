@@ -1,6 +1,6 @@
 """Test the Electron class."""
 
-from {{project_name}}.main import Electron
+from prism.main import Electron
 
 
 def test_electron():

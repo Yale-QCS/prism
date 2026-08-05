@@ -3,10 +3,10 @@ requires = ["setuptools", "wheel", "setuptools_rust"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "{{project_name}}"
-description = "{{project_description}}"
+name = "prism"
+description = "transpiler for dual-rail multi-realization gate sets"
 version = "0.1.0"
-authors = [{ name = "{{author_name}}" }]
+authors = [{ name = "evmckinney9" }]
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,9 +17,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/{{github_username}}/{{project_name}}"
-Repository = "https://github.com/{{github_username}}/{{project_name}}"
-Issues = "https://github.com/{{github_username}}/{{project_name}}/issues"
+Homepage = "https://github.com/evmckinney9/prism"
+Repository = "https://github.com/evmckinney9/prism"
+Issues = "https://github.com/evmckinney9/prism/issues"
 
 [project.optional-dependencies]
 format = ["pre-commit", "ruff"]
@@ -32,7 +32,7 @@ docs = [
     "pypandoc_binary", # bundles the pandoc binary nbsphinx needs
 ]
 dev = [
-    "{{project_name}}[format,test,docs]",
+    "prism[format,test,docs]",
     "pylatexenc",
     "ipywidgets",
 ]
@@ -62,7 +62,7 @@ convention = "google"
 [[tool.setuptools-rust.ext-modules]]
 # Private Rust extension module nested into the Python package
 # https://github.com/PyO3/setuptools-rust
-target = "{{project_name}}._accelerate"
+target = "prism._accelerate"
 path = "crates/Cargo.toml"
 binding = "PyO3"
 debug = false

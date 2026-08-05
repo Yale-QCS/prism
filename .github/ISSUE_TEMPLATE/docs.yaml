@@ -1,9 +1,9 @@
 name: 📚 Documentation Update
-description: Request an update to the {{project_name}} documentation
+description: Request an update to the prism documentation
 title: "[Documentation]: "
 labels: ["documentation"]
 assignees:
-  - {{github_username}}
+  - evmckinney9
 body:
   - type: markdown
     attributes:

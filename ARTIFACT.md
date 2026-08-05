@@ -1,4 +1,4 @@
-# Artifact: {{project_name}}
+# Artifact: prism
 
 <!-- Repo-side artifact documentation, structured after the cTuning/ACM
      artifact appendix (https://github.com/ctuning/artifact-evaluation) used by
@@ -26,7 +26,7 @@ One paragraph: what the artifact contains and which of the paper's claims it sup
 | Disk space required | ~ GB |
 | Workflow preparation time | ~ minutes |
 | Experiment completion time | ~ hours |
-| Publicly available | Yes: <https://github.com/{{github_username}}/{{project_name}}> |
+| Publicly available | Yes: <https://github.com/evmckinney9/prism> |
 | Code licenses | MIT |
 | Archived (DOI) | <!-- Zenodo version DOI of the evaluated release --> |
 
@@ -34,9 +34,9 @@ One paragraph: what the artifact contains and which of the paper's claims it sup
 
 ### How to access
 
-- Source: <https://github.com/{{github_username}}/{{project_name}}> at tag `vX.Y.Z`
+- Source: <https://github.com/evmckinney9/prism> at tag `vX.Y.Z`
 - Archived snapshot: Zenodo DOI above
-- Container image: `ghcr.io/{{github_username}}/{{project_name}}:vX.Y.Z` (code + environment + passing tests frozen at build; `requirements-frozen.txt` on the release records exact dependency versions)
+- Container image: `ghcr.io/evmckinney9/prism:vX.Y.Z` (code + environment + passing tests frozen at build; `requirements-frozen.txt` on the release records exact dependency versions)
 
 ### Hardware dependencies
 
@@ -48,7 +48,7 @@ Docker (for the container path), or Python 3.12 + `rustup` (for the source path)
 
 One command, pick by what you already have:
 
-- **Docker:** `docker run -it --rm ghcr.io/{{github_username}}/{{project_name}}:vX.Y.Z`
+- **Docker:** `docker run -it --rm ghcr.io/evmckinney9/prism:vX.Y.Z`
 - **Browser (GitHub Codespaces):** "Open in GitHub Codespaces" badge in the README
 - **From source:** `make init`
 

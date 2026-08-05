@@ -1,9 +1,9 @@
 name: 🚀 Feature Request
-description: Suggest a new idea for {{project_name}}
+description: Suggest a new idea for prism
 title: "[Feature Request]: "
 labels: ["enhancement"]
 assignees:
-  - {{github_username}}
+  - evmckinney9
 body:
   - type: markdown
     attributes:

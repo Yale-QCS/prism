@@ -1,10 +1,10 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite the paper below."
 type: software
-title: "{{project_name}}"
+title: "prism"
 authors:
-  - name: "{{author_name}}"
-repository-code: "https://github.com/{{github_username}}/{{project_name}}"
+  - name: "evmckinney9"
+repository-code: "https://github.com/evmckinney9/prism"
 license: MIT
 # No version/date fields on purpose: pyproject.toml is the version's single
 # source of truth, and Zenodo stamps version + date per archived release.
@@ -16,7 +16,7 @@ preferred-citation:
   type: article
   title: "PAPER TITLE"
   authors:
-    - name: "{{author_name}}"
+    - name: "evmckinney9"
   year: 2026
   url: "https://arxiv.org/abs/XXXX.XXXXX"
   # For a published venue version, prefer the DOI and venue fields:

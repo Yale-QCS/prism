@@ -1,9 +1,9 @@
 API reference
 =============
 
-The public API of the :mod:`{{project_name}}` package.
+The public API of the :mod:`prism` package.
 
-.. currentmodule:: {{project_name}}
+.. currentmodule:: prism
 
 .. autosummary::
    :toctree: stubs/

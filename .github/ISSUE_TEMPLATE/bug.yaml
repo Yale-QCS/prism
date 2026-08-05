@@ -1,9 +1,9 @@
 name: 🐛 Bug Report
-description: File a bug report for {{project_name}}
+description: File a bug report for prism
 title: "[Bug]: "
 labels: ["bug", "triage"]
 assignees:
-  - {{github_username}}
+  - evmckinney9
 body:
   - type: markdown
     attributes:
@@ -21,7 +21,7 @@ body:
     attributes:
       label: Minimal Reproducible Example
       placeholder: |
-        from {{project_name}} import ...
+        from prism import ...
       render: python
     validations:
       required: true

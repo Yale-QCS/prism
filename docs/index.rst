@@ -1,7 +1,7 @@
-{{project_name}}
+prism
 ========================================
 
-{{project_description}}
+transpiler for dual-rail multi-realization gate sets
 
 Start here
 ----------
@@ -20,4 +20,4 @@ Start here
    :hidden:
 
    apidocs/index
-   GitHub <https://github.com/{{github_username}}/{{project_name}}>
+   GitHub <https://github.com/evmckinney9/prism>

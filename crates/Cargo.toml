@@ -1,11 +1,11 @@
 [package]
-name = "{{project_name}}_accelerate"
+name = "prism_accelerate"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
 # setuptools-rust renames the built artifact to the ext-module target declared
-# in pyproject.toml ({{project_name}}._accelerate); this is just the crate name.
+# in pyproject.toml (prism._accelerate); this is just the crate name.
 name = "_accelerate"
 crate-type = ["cdylib"]
 path = "src/lib.rs"

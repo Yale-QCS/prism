@@ -1,15 +1,15 @@
-"""Sphinx configuration for the {{project_name}} documentation site."""
+"""Sphinx configuration for the prism documentation site."""
 
 import os
 from importlib.metadata import version as _pkg_version
 
-project = "{{project_name}}"
-author = "{{author_name}}"
-copyright = "{{author_name}}"
+project = "prism"
+author = "evmckinney9"
+copyright = "evmckinney9"
 
 # Single-source the version from installed package metadata (pyproject.toml),
 # so a version bump never has to be repeated here.
-release = _pkg_version("{{project_name}}")  # full, e.g. "0.1.0"
+release = _pkg_version("prism")  # full, e.g. "0.1.0"
 version = ".".join(release.split(".")[:2])  # short X.Y
 html_title = f"{project} {release}"
 
@@ -39,7 +39,7 @@ autoclass_content = "both"
 
 html_theme = "furo"
 html_theme_options = {
-    "source_repository": "https://github.com/{{github_username}}/{{project_name}}",
+    "source_repository": "https://github.com/evmckinney9/prism",
     "source_branch": "main",
     "source_directory": "docs/",
 }
