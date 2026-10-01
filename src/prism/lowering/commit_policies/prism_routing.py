@@ -10,7 +10,6 @@ the routed circuit, and the output permutation. The kernel is
 from __future__ import annotations
 
 import random
-import time
 from dataclasses import dataclass
 from dataclasses import replace as _dc_replace
 from typing import TYPE_CHECKING

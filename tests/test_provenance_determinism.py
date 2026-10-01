@@ -12,7 +12,7 @@ from qiskit.transpiler import CouplingMap
 from prism.encodings import DualRail
 from prism.pipeline import build_pm
 
-SRC = Path(__file__).resolve().parents[1]
+SRC = Path(__file__).resolve().parents[1] / "src"
 
 
 def canonical_hash(qc: QuantumCircuit) -> str:

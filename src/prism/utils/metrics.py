@@ -8,7 +8,7 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import Instruction
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.dagcircuit import DAGCircuit
-from qiskit.transpiler import AnalysisPass, PropertySet
+from qiskit.transpiler import AnalysisPass
 
 FREE_GATES: frozenset[str] = frozenset({"rz", "u1", "p", "z"})
 SYNTHETIC_PREPARATION_LABEL = "dualrail_synthetic_preparation"

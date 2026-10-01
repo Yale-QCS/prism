@@ -16,7 +16,7 @@ use qiskit_circuit::{PhysicalQubit, getenv_use_multiple_threads};
 use crate::prism_routing::input::sabre_dag_from_flat;
 use crate::sabre::dag::SabreDAG;
 use crate::sabre::heuristic::Heuristic;
-use crate::sabre::route::{flatten_routing_result, swap_map, PyRoutingTarget, RoutingProblem};
+use crate::sabre::route::{PyRoutingTarget, RoutingProblem, flatten_routing_result, swap_map};
 
 /// One flattened prism precompute: `(virt_pairs, succ, pred_count, local_default)`.
 type Flat = (Vec<Vec<Vec<[u32; 2]>>>, Vec<Vec<u32>>, Vec<u32>, Vec<u32>);
@@ -29,7 +29,12 @@ fn dag_from_flat(flat: &Flat) -> PyResult<SabreDAG> {
             "virt_pairs, succ, pred_count, local_default must have the same outer length",
         ));
     }
-    Ok(sabre_dag_from_flat(virt_pairs, succ, pred_count, local_default))
+    Ok(sabre_dag_from_flat(
+        virt_pairs,
+        succ,
+        pred_count,
+        local_default,
+    ))
 }
 
 fn layout_of(v2p: &[u32]) -> NLayout {
@@ -72,8 +77,7 @@ pub fn prism_layout_and_routing(
         heuristic,
     };
     let problem_rev = problem_fwd.with_sabre(&sabre_rev);
-    let parallel = starts.len() > 1
-        && run_in_parallel.unwrap_or_else(getenv_use_multiple_threads);
+    let parallel = starts.len() > 1 && run_in_parallel.unwrap_or_else(getenv_use_multiple_threads);
 
     let run_start = |(seed, initial_v2p): (u64, Vec<u32>)| {
         let n_phys = initial_v2p.len() as u32;
@@ -99,7 +103,10 @@ pub fn prism_layout_and_routing(
         let final_route = swap_map(
             problem_fwd,
             &layout_of(&v2p),
-            Some(seed.wrapping_mul(1000).wrapping_add(2 * max_iterations as u64)),
+            Some(
+                seed.wrapping_mul(1000)
+                    .wrapping_add(2 * max_iterations as u64),
+            ),
             swap_trials.max(1),
             Some(false),
         );

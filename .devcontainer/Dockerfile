@@ -18,5 +18,5 @@ WORKDIR /artifact
 RUN python -m venv /home/vscode/venv
 ENV PATH="/home/vscode/venv/bin:${PATH}"
 # Failing tests fail the image build: a broken artifact cannot be published.
-RUN pip install ".[test]" --quiet && pytest src/tests
+RUN pip install ".[test]" --quiet && pytest tests
 CMD ["bash"]

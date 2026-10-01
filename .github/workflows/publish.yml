@@ -10,10 +10,6 @@ permissions:
 
 jobs:
   publish:
-    # Dormant until PyPI publishing is turned on: configure a trusted publisher
-    # on pypi.org for this workflow, then set the repository variable
-    # PYPI_PUBLISH=true (Settings -> Secrets and variables -> Actions).
-    if: vars.PYPI_PUBLISH == 'true'
     runs-on: ubuntu-latest
     environment: pypi
     steps:
@@ -34,3 +30,4 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
+          attestations: false

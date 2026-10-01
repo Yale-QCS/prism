@@ -243,7 +243,9 @@ impl SabreDAG {
         let mut dag = DiGraph::with_capacity(self.dag.node_count(), self.dag.edge_count());
         for node in self.dag.node_weights() {
             let kind = match &node.kind {
-                InteractionKind::Synchronize | InteractionKind::TwoQ(_) | InteractionKind::MultiTwoQ { .. } => node.kind.clone(),
+                InteractionKind::Synchronize
+                | InteractionKind::TwoQ(_)
+                | InteractionKind::MultiTwoQ { .. } => node.kind.clone(),
                 InteractionKind::ControlFlow(_) => InteractionKind::Synchronize,
             };
             // `NodeWeights` guarantees that the weights come out in index order, so the new indexes

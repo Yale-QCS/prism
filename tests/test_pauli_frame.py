@@ -2,8 +2,7 @@
 
 import math
 
-import pytest
-from qiskit.circuit import ClassicalRegister, QuantumCircuit
+from qiskit.circuit import QuantumCircuit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.quantum_info import Operator, Statevector
 

@@ -1,6 +1,5 @@
 """Semantic logical SWAPs are elided before dual-rail expansion."""
 
-import pytest
 from qiskit import QuantumCircuit
 from qiskit.transpiler import CouplingMap
 

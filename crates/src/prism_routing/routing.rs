@@ -7,13 +7,13 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
+use qiskit_circuit::PhysicalQubit;
 use qiskit_circuit::dag_circuit::DAGCircuit;
 use qiskit_circuit::nlayout::NLayout;
-use qiskit_circuit::PhysicalQubit;
 
 use crate::prism_routing::input::sabre_dag_from_flat;
 use crate::sabre::heuristic::Heuristic;
-use crate::sabre::route::{flatten_routing_result, swap_map, PyRoutingTarget, RoutingProblem};
+use crate::sabre::route::{PyRoutingTarget, RoutingProblem, flatten_routing_result, swap_map};
 
 /// Multi-realization SABRE routing pyfunction. Builds a `SabreDAG` with
 /// `MultiTwoQ` variants from the flat prism precompute, runs

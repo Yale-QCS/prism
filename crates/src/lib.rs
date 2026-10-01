@@ -1,3 +1,5 @@
+//! Rust kernels for prism: the realization-aware router and its SABRE fork.
+
 use pyo3::prelude::*;
 
 mod prism_routing;

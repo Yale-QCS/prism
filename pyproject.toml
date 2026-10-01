@@ -4,77 +4,87 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prism-compiler"
-description = "transpiler for dual-rail multi-realization gate sets"
+description = "A Qiskit transpiler for dual-rail qubits that binds each gate's realization at routing time."
 version = "0.1.0"
-authors = [{ name = "evmckinney9" }]
-license = { text = "MIT" }
+authors = [{ name = "Evan McKinney", email = "evmckinney9@gmail.com" }]
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.10"
+keywords = ["quantum", "compiler", "qiskit", "dual-rail", "routing", "erasure-qubits"]
 classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Rust",
     "Topic :: Scientific/Engineering :: Physics",
 ]
-dependencies = [
-    "qiskit>=2.5,<2.6",
-    "numpy",
-]
+dependencies = ["qiskit>=2.5,<2.6", "numpy"]
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.distutils.bdist_wheel]
+py_limited_api = "cp310"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["prism", "prism.*"]
+namespaces = false
 
 [project.urls]
 Homepage = "https://github.com/evmckinney9/prism"
 Repository = "https://github.com/evmckinney9/prism"
 Issues = "https://github.com/evmckinney9/prism/issues"
-
 [project.optional-dependencies]
+viz = ["matplotlib", "pylatexenc"]
 format = ["pre-commit", "ruff"]
 test = ["pytest"]
-eval = ["mqt.bench==2.2.2", "matplotlib"]  # benchmark circuits for the QEC and mqt.bench scripts
+eval = ["mqt.bench==2.2.2", "prism-compiler[viz]"] # benchmark circuits for the QEC and mqt.bench scripts
 docs = [
+    "prism-compiler[viz]",
     "sphinx",
     "furo",
     "nbsphinx",
     "ipykernel",
-    "pypandoc_binary", # bundles the pandoc binary nbsphinx needs
-]
-dev = [
-    "prism[format,test,docs,eval]",
-    "pylatexenc",
     "ipywidgets",
+    "pypandoc_binary", # bundles the pandoc binary nbsphinx needs
+    "sphinx-autobuild",
 ]
+dev = ["prism-compiler[format,test,docs,eval]"]
 
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["prism*"]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+filterwarnings = ["error"]
 
 [tool.ruff]
-target-version = "py312"
-fix = true
-extend-include = ["*.ipynb"]
+extend-exclude = ["dev"]
+target-version = "py310"
 
 [tool.ruff.lint]
-select = ["D", "ANN"]
+select = ["D", "ANN", "F", "I"]
 ignore = [
     "D105",   # magic methods like __init__ don't need docstrings
-    "ANN401", # Any is legitimate at FFI / numpy seams
+    "ANN401", # Any is legitimate at the PyO3 FFI / numpy / Qiskit seam
     "ANN002", # *args doesn't need type annotations
     "ANN003", # **kwargs doesn't need type annotations
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"scripts/**" = ["D", "ANN"]
-"src/tests/**/*.py" = ["D1", "ANN"]
-"**/*.ipynb" = ["D", "ANN"]
+"tests/**/*.py" = ["D1", "ANN"]
+"src/notebooks/**" = ["D", "ANN"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [[tool.setuptools-rust.ext-modules]]
-# Private Rust extension module nested into the Python package
-# https://github.com/PyO3/setuptools-rust
 target = "prism._accelerate"
 path = "crates/Cargo.toml"
 binding = "PyO3"
+features = ["extension-module"]
+cargo-manifest-args = ["--locked"]
 debug = false
-
-[tool.distutils.bdist_wheel]
-py_limited_api = "cp310"

@@ -1,39 +1,15 @@
-cff-version: 1.2.0
-message: "If you use this software, please cite the paper below."
-type: software
-title: "prism"
-authors:
-  - family-names: "McKinney"
-    given-names: "Evan"
-    orcid: "https://orcid.org/0000-0002-4865-5458"
-repository-code: "https://github.com/evmckinney9/prism"
-license: MIT
-# No version/date fields on purpose: pyproject.toml is the version's single
-# source of truth, and Zenodo stamps version + date per archived release.
-
-# GitHub's "Cite this repository" button emits this paper reference instead of
-# the software entry above (which Zenodo still uses for deposit metadata).
 preferred-citation:
   type: article
   title: "PRISM: A Logical-Physical Boundary Compiler for Dual-Rail Qubits"
   authors:
     - family-names: "McKinney"
       given-names: "Evan"
-      orcid: "https://orcid.org/0000-0002-4865-5458"
     - family-names: "Liu"
       given-names: "Kun"
-      orcid: "https://orcid.org/0009-0002-9038-8733"
     - family-names: "Babla"
       given-names: "Harshvardhan K."
-      orcid: "https://orcid.org/0009-0009-0601-3500"
     - family-names: "Schoelkopf"
       given-names: "Robert J."
-      orcid: "https://orcid.org/0000-0002-2469-5068"
     - family-names: "Ding"
       given-names: "Yongshan"
-      orcid: "https://orcid.org/0000-0002-2338-1315"
   year: 2026
-  url: "https://arxiv.org/abs/XXXX.XXXXX"
-  # For a published venue version, prefer the DOI and venue fields:
-  # doi: 10.XXXX/XXXXXXX
-  # collection-title: "Proceedings of ..."

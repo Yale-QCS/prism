@@ -4,16 +4,15 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
-
 from dataclasses import replace as _dc_replace
+from typing import TYPE_CHECKING
 
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import GenericPass, PropertySet
 from qiskit.transpiler import Layout
 from qiskit.transpiler.basepasses import BasePass
 
-from prism.lowering.ir import LoweredProgram, apply_commits
+from prism.lowering.ir import LoweredProgram
 
 if TYPE_CHECKING:
     from prism.encodings.base import QubitEncoding

@@ -35,16 +35,18 @@ use rustworkx_core::token_swapper::token_swapper;
 use smallvec::{SmallVec, smallvec};
 
 use super::dag::{InteractionKind, SabreDAG};
-use crate::prism_routing::ext::{self, RealizationExtendedSet as ExtendedSet, RealizationFrontLayer as FrontLayer, SubGate};
 use super::heuristic::{BasicHeuristic, DecayHeuristic, Heuristic, LookaheadHeuristic, SetScaling};
-use qiskit_transpiler::TranspilerError;
-use qiskit_transpiler::neighbors::Neighbors;
-use qiskit_transpiler::target::{Target, TargetCouplingError};
+use crate::prism_routing::ext::{
+    self, RealizationExtendedSet as ExtendedSet, RealizationFrontLayer as FrontLayer, SubGate,
+};
 use qiskit_circuit::dag_circuit::{DAGCircuit, DAGCircuitBuilder, NodeType, Wire};
 use qiskit_circuit::nlayout::NLayout;
 use qiskit_circuit::operations::{ControlFlow, StandardGate};
 use qiskit_circuit::packed_instruction::PackedInstruction;
 use qiskit_circuit::{BlocksMode, PhysicalQubit, Qubit, VirtualQubit, getenv_use_multiple_threads};
+use qiskit_transpiler::TranspilerError;
+use qiskit_transpiler::neighbors::Neighbors;
+use qiskit_transpiler::target::{Target, TargetCouplingError};
 
 /// Number of trials for control flow block swap epilogues.
 const SWAP_EPILOGUE_TRIALS: usize = 4;
@@ -77,7 +79,10 @@ impl From<u32> for ControlFlowBlockCount {
 enum RoutedItemKind {
     Simple,
     MultiTwoQ(u32),
-    SubRoutedMultiTwoQ { real_idx: u32, schedule: Box<[SubGate]> },
+    SubRoutedMultiTwoQ {
+        real_idx: u32,
+        schedule: Box<[SubGate]>,
+    },
     /// How many blocks out of [RoutingResult::control_flow] we need to take.  This is stored
     /// out-of-band of the item kind because control-flow is expected to be very uncommon, and we
     /// don't want to needless increase the size of the enum.
@@ -216,8 +221,9 @@ impl RoutingResult<'_> {
 
             match &item.kind {
                 RoutedItemKind::Simple => apply_op(inst, &layout, &mut dag)?,
-                RoutedItemKind::MultiTwoQ(_) | RoutedItemKind::SubRoutedMultiTwoQ { .. } =>
-                    unreachable!("MultiTwoQ uses prism's emission path, not stock rebuild"),
+                RoutedItemKind::MultiTwoQ(_) | RoutedItemKind::SubRoutedMultiTwoQ { .. } => {
+                    unreachable!("MultiTwoQ uses prism's emission path, not stock rebuild")
+                }
                 RoutedItemKind::ControlFlow(num_blocks) => {
                     let mut blocks = blocks
                         .by_ref()
@@ -489,8 +495,15 @@ impl<'a> RoutingState<'a> {
                         continue;
                     }
                 }
-                InteractionKind::MultiTwoQ { realizations, default_realization } => {
-                    let Some(kind) = self.commit_or_defer_multi(node_id, realizations, *default_realization) else { continue };
+                InteractionKind::MultiTwoQ {
+                    realizations,
+                    default_realization,
+                } => {
+                    let Some(kind) =
+                        self.commit_or_defer_multi(node_id, realizations, *default_realization)
+                    else {
+                        continue;
+                    };
                     kind
                 }
                 InteractionKind::ControlFlow(blocks) => {
@@ -719,9 +732,8 @@ impl<'a> RoutingState<'a> {
         // Front-layer wrappers can enumerate the same candidate edge in a
         // different order. Canonicalize before random equal-score selection
         // so representation order alone cannot change the SABRE trajectory.
-        self.swap_scores.sort_unstable_by_key(|(swap, _)| {
-            (swap[0].index(), swap[1].index())
-        });
+        self.swap_scores
+            .sort_unstable_by_key(|(swap, _)| (swap[0].index(), swap[1].index()));
         self.swap_scores.dedup_by_key(|(swap, _)| *swap);
 
         let dist = &self.target.distance.view();
@@ -931,8 +943,13 @@ pub fn swap_map_trial<'a>(
         for node in &routable_nodes {
             state.front_layer.remove(node);
         }
-        state.update_route(&routable_nodes, (!routable_nodes.is_empty()).then_some(current_swaps));
-        state.front_layer.decay_phys_load(state.heuristic.phys_load_decay);
+        state.update_route(
+            &routable_nodes,
+            (!routable_nodes.is_empty()).then_some(current_swaps),
+        );
+        state
+            .front_layer
+            .decay_phys_load(state.heuristic.phys_load_decay);
         // Ideally we'd know how to mutate the extended set directly, but since its limited size
         // easy to do better than just emptying it and rebuilding.
         state.extended_set.clear();

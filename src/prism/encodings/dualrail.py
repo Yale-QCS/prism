@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 from typing import ClassVar
 
 from qiskit.circuit import Instruction, QuantumCircuit
@@ -10,8 +9,8 @@ from qiskit.circuit.library import XGate
 from qiskit.transpiler import PassManager
 
 from prism.encodings.base import QubitEncoding
-from prism.lowering.ir import LoweredOp
 from prism.logical import ElideLogicalPermutations, basic_logical_pm
+from prism.lowering.ir import LoweredOp
 from prism.synthesis.delocal_decomp import build_equivalence_library
 from prism.synthesis.early_measure import EarlyMeasurement
 from prism.synthesis.h_reduction import HadamardReduction

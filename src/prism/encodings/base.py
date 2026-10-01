@@ -24,8 +24,8 @@ from qiskit.circuit.controlflow import ControlFlowOp, IfElseOp
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary
 from qiskit.transpiler import CouplingMap, PassManager
 
-from prism.lowering.ir import LoweredOp
 from prism.logical import basic_logical_pm
+from prism.lowering.ir import LoweredOp
 from prism.physical import physical_pm as _physical_pm
 
 

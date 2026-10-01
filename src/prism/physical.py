@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import contextlib
-
 import os
 from typing import TYPE_CHECKING
 
@@ -22,7 +21,6 @@ from qiskit.circuit.library import (
     SwapGate,
     XGate,
 )
-from qiskit.converters import dag_to_circuit
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import MultiStagePassManager
 from qiskit.transpiler import (
@@ -35,13 +33,10 @@ from qiskit.transpiler import (
 )
 from qiskit.transpiler.passes import (
     CommutativeCancellation,
-    ElidePermutations,
     OptimizeSwapBeforeMeasure,
-    SetLayout,
 )
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
-from prism.lowering.commit_policies.prism_routing import score as routing_score
 from prism.synthesis.reschedule import RescheduleCommutingDiagonals
 from prism.utils.metrics import (
     RecordCircuitMetrics,
@@ -50,10 +45,9 @@ from prism.utils.metrics import (
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from qiskit.circuit import QuantumCircuit, Qubit
+    from qiskit.circuit import Qubit
 
     from prism.encodings.base import QubitEncoding
-    from prism.lowering.commit_policies.prism_routing import Score
 
 
 # Qiskit 2.5 runs CommutationAnalysis on rayon workers while holding the GIL; the

@@ -41,10 +41,7 @@ pub struct SubGate {
 /// `min_r sum_p dist[p]`: the multi-realization per-op cost is the closest
 /// realization by summed pair distance. THE single change vs stock SABRE: a
 /// `min` over candidate realizations folded into the front-layer score.
-pub fn op_cost_min(
-    realizations: &[Box<[[PhysicalQubit; 2]]>],
-    dist: &ArrayView2<f64>,
-) -> f64 {
+pub fn op_cost_min(realizations: &[Box<[[PhysicalQubit; 2]]>], dist: &ArrayView2<f64>) -> f64 {
     realizations
         .iter()
         .map(|real| {
@@ -83,10 +80,7 @@ pub fn op_cost_min_post_swap(
 }
 
 /// Sum-of-pair-distances for one selected realization.
-pub fn realization_cost(
-    realization: &[[PhysicalQubit; 2]],
-    dist: &ArrayView2<f64>,
-) -> f64 {
+pub fn realization_cost(realization: &[[PhysicalQubit; 2]], dist: &ArrayView2<f64>) -> f64 {
     realization
         .iter()
         .map(|p| dist[[p[0].index(), p[1].index()]])
@@ -188,10 +182,7 @@ pub fn executable_choice_balanced(
 }
 
 /// Materialize virtual realizations into physical-qubit coordinates.
-pub fn materialize_phys_reals(
-    realizations: &VirtRealizations,
-    layout: &NLayout,
-) -> Realizations {
+pub fn materialize_phys_reals(realizations: &VirtRealizations, layout: &NLayout) -> Realizations {
     realizations
         .iter()
         .map(|real| {
@@ -378,25 +369,23 @@ impl RealizationFrontLayer {
                             default_realization as usize,
                         )
                     } else {
-                        executable_choice_default(
-                            &phys_reals,
-                            dist,
-                            default_realization as usize,
-                        )
+                        executable_choice_default(&phys_reals, dist, default_realization as usize)
                     };
                     if exec.is_none() {
-                        let idx = closest_realization(
-                            &phys_reals,
-                            dist,
-                            default_realization as usize,
-                        );
+                        let idx =
+                            closest_realization(&phys_reals, dist, default_realization as usize);
                         self.frozen.insert(node_id, idx);
                     }
                     exec
                 }
             }
         } else if tie_break_load {
-            executable_choice_balanced(&phys_reals, dist, &self.phys_load, default_realization as usize)
+            executable_choice_balanced(
+                &phys_reals,
+                dist,
+                &self.phys_load,
+                default_realization as usize,
+            )
         } else {
             executable_choice_default(&phys_reals, dist, default_realization as usize)
         };
@@ -409,12 +398,7 @@ impl RealizationFrontLayer {
                 Some(r_idx as u32)
             }
             None => {
-                self.insert_multi(
-                    node_id,
-                    phys_reals,
-                    default_realization as usize,
-                    dist,
-                );
+                self.insert_multi(node_id, phys_reals, default_realization as usize, dist);
                 None
             }
         }
@@ -711,8 +695,7 @@ mod tests {
     #[test]
     fn op_cost_min_post_swap_permutes_without_mutation() {
         let dist = array![[0.0, 1.0, 2.0], [1.0, 0.0, 1.0], [2.0, 1.0, 0.0]];
-        let reals: Vec<Box<[[PhysicalQubit; 2]]>> =
-            vec![vec![[pq(0), pq(2)]].into_boxed_slice()];
+        let reals: Vec<Box<[[PhysicalQubit; 2]]>> = vec![vec![[pq(0), pq(2)]].into_boxed_slice()];
         assert_eq!(op_cost_min(&reals, &dist.view()), 2.0);
         // swapping 1<->2 relabels the pair to (0,1), distance 1
         assert_eq!(
@@ -788,7 +771,10 @@ mod tests {
         // Load-balanced choice moves off the default under load; the neutral
         // choice must not.
         let load = [0.0, 5.0, 0.0];
-        assert_eq!(executable_choice_balanced(&reals, &dist.view(), &load, 0), Some(1));
+        assert_eq!(
+            executable_choice_balanced(&reals, &dist.view(), &load, 0),
+            Some(1)
+        );
         assert_eq!(executable_choice_default(&reals, &dist.view(), 0), Some(0));
     }
 
@@ -802,14 +788,26 @@ mod tests {
         ];
         let load = [0.5, 0.2, 0.2];
         // load tie: default wins when it is executable ...
-        assert_eq!(executable_choice_balanced(&reals, &dist.view(), &load, 2), Some(2));
+        assert_eq!(
+            executable_choice_balanced(&reals, &dist.view(), &load, 2),
+            Some(2)
+        );
         // ... and the first executable stands when the default is not.
-        assert_eq!(executable_choice_balanced(&reals, &dist.view(), &load, 0), Some(1));
+        assert_eq!(
+            executable_choice_balanced(&reals, &dist.view(), &load, 0),
+            Some(1)
+        );
         // lower load beats the default.
         let load = [0.5, 0.9, 0.0];
-        assert_eq!(executable_choice_balanced(&reals, &dist.view(), &load, 1), Some(2));
+        assert_eq!(
+            executable_choice_balanced(&reals, &dist.view(), &load, 1),
+            Some(2)
+        );
         // nothing adjacent: None.
         let far = array![[0.0, 3.0, 3.0], [3.0, 0.0, 3.0], [3.0, 3.0, 0.0]];
-        assert_eq!(executable_choice_balanced(&reals, &far.view(), &load, 0), None);
+        assert_eq!(
+            executable_choice_balanced(&reals, &far.view(), &load, 0),
+            None
+        );
     }
 }
