@@ -138,3 +138,6 @@ dmypy.json
 # Experiment data directory: raw rows land here (Zenodo or a local
 # run_experiment.py run); nothing under it is tracked.
 artifacts/
+
+# Local research state and scratch, never packaged
+.local/
