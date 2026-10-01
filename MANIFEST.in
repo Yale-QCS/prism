@@ -1,4 +1,7 @@
-include pyproject.toml
-include crates/Cargo.toml
-recursive-include crates *.rs
-recursive-include src *
+include pyproject.toml README.md LICENSE
+include crates/Cargo.toml crates/Cargo.lock
+recursive-include crates/src *.rs
+recursive-include src/prism *.py
+recursive-include src/tests *.py
+prune crates/target
+global-exclude *.pyc *.pyo *.so __pycache__

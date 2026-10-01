@@ -134,3 +134,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Experiment data directory: raw rows land here (Zenodo or a local
+# run_experiment.py run); nothing under it is tracked.
+artifacts/

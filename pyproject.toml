@@ -3,17 +3,21 @@ requires = ["setuptools", "wheel", "setuptools_rust"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "prism"
+name = "prism-compiler"
 description = "transpiler for dual-rail multi-realization gate sets"
 version = "0.1.0"
 authors = [{ name = "evmckinney9" }]
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Physics",
+]
 dependencies = [
+    "qiskit>=2.5,<2.6",
     "numpy",
-    "matplotlib",
-    "LovelyPlots",
 ]
 
 [project.urls]
@@ -24,6 +28,7 @@ Issues = "https://github.com/evmckinney9/prism/issues"
 [project.optional-dependencies]
 format = ["pre-commit", "ruff"]
 test = ["pytest"]
+eval = ["mqt.bench==2.2.2", "matplotlib"]  # benchmark circuits for the QEC and mqt.bench scripts
 docs = [
     "sphinx",
     "furo",
@@ -32,10 +37,14 @@ docs = [
     "pypandoc_binary", # bundles the pandoc binary nbsphinx needs
 ]
 dev = [
-    "prism[format,test,docs]",
+    "prism[format,test,docs,eval]",
     "pylatexenc",
     "ipywidgets",
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["prism*"]
 
 [tool.ruff]
 target-version = "py312"

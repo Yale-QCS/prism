@@ -8,3 +8,6 @@ docs/apidocs/stubs
 *.egg-info
 dist
 build
+# Zenodo-archived raw rows; the artifact image runs tests, not the figure
+# notebooks, and must build without them.
+artifacts/hpca/raw/*.jsonl

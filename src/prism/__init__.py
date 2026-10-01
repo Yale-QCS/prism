@@ -1,1 +1,1 @@
-"""Main module for prism."""
+"""prism: dual-rail compiler primitives for Qiskit."""
