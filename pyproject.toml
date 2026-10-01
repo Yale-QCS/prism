@@ -36,9 +36,10 @@ include = ["prism", "prism.*"]
 namespaces = false
 
 [project.urls]
-Homepage = "https://github.com/evmckinney9/prism"
-Repository = "https://github.com/evmckinney9/prism"
-Issues = "https://github.com/evmckinney9/prism/issues"
+Homepage = "https://github.com/Yale-QCS/prism"
+Documentation = "https://yale-qcs.github.io/prism/"
+Repository = "https://github.com/Yale-QCS/prism"
+Issues = "https://github.com/Yale-QCS/prism/issues"
 [project.optional-dependencies]
 viz = ["matplotlib", "pylatexenc"]
 format = ["pre-commit", "ruff"]
@@ -47,12 +48,13 @@ eval = ["mqt.bench==2.2.2", "prism-compiler[viz]"] # benchmark circuits for the 
 docs = [
     "prism-compiler[viz]",
     "sphinx",
-    "furo",
-    "nbsphinx",
+    "jupyter-sphinx",
+    "myst-parser",
     "ipykernel",
-    "ipywidgets",
-    "pypandoc_binary", # bundles the pandoc binary nbsphinx needs
     "sphinx-autobuild",
+    "sphinx-copybutton>=0.5,<1",
+    "sphinx-sitemap>=2.9,<3",
+    "qiskit-sphinx-theme>=2",
 ]
 dev = ["prism-compiler[format,test,docs,eval]"]
 

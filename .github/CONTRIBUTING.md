@@ -5,12 +5,10 @@
 Development uses Python 3.12 and Rust 1.97 or newer.
 
 ```sh
-git clone https://github.com/evmckinney9/prism.git
+git clone https://github.com/Yale-QCS/prism.git
 cd prism
 make init
 ```
-
-`.devcontainer/` provides the same toolchain in a container.
 
 ## Making changes
 
@@ -28,7 +26,11 @@ The HPCA paper artifact, with its baselines and evaluation pipeline, is on the
 ## Documentation
 
 Edit the [user guide](../docs/index.rst) and preview it with `make docs-serve`.
-Run `make docs` to check it.
+Use `jupyter-execute` blocks for Python examples. Run `make docs` to check them.
+
+For writing and presentation, follow the
+[Qiskit documentation style guide](https://github.com/Qiskit/documentation/blob/main/style-guide.md)
+and the [Qiskit Sphinx theme documentation](https://qiskit.github.io/qiskit_sphinx_theme/index.html).
 
 ## Releases
 

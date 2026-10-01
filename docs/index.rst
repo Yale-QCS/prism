@@ -1,7 +1,9 @@
-prism
-========================================
+PRISM
+=====
 
-transpiler for dual-rail multi-realization gate sets
+PRISM is a Qiskit transpiler for dual-rail qubits. It keeps every physical
+realization of each logical gate through lowering and picks one at routing time,
+against the live layout.
 
 Start here
 ----------
@@ -20,4 +22,4 @@ Start here
    :hidden:
 
    apidocs/index
-   GitHub <https://github.com/evmckinney9/prism>
+   GitHub <https://github.com/Yale-QCS/prism>

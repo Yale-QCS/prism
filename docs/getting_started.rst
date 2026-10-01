@@ -14,10 +14,10 @@ Or from source (requires a Rust toolchain, ``rustup``):
 
 .. code-block:: bash
 
-   pip install git+https://github.com/evmckinney9/prism
+   pip install git+https://github.com/Yale-QCS/prism
 
 Or install a pre-built wheel from the
-`releases page <https://github.com/evmckinney9/prism/releases>`_
+`releases page <https://github.com/Yale-QCS/prism/releases>`_
 (no build dependencies needed).
 
 Verify
@@ -25,7 +25,7 @@ Verify
 
 Compile a 4-qubit GHZ circuit onto a 2x4 grid with PRISM:
 
-.. code-block:: python
+.. jupyter-execute::
 
    from qiskit import QuantumCircuit
    from qiskit.transpiler import CouplingMap

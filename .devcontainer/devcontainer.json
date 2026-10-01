@@ -1,9 +1,0 @@
-{
-    "name": "prism",
-    "build": {
-        "dockerfile": "Dockerfile",
-        "context": "..",
-        "target": "dev"
-    },
-    "postCreateCommand": "make init"
-}
