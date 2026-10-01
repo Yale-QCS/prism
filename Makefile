@@ -11,7 +11,7 @@ else
 endif
 
 .DEFAULT_GOAL := help
-.PHONY: help init update-hooks reset-venv rebuild test format lint docs docs-serve clean
+.PHONY: help init update-hooks reset-venv rebuild test format lint clean
 
 help:  ## List targets
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*?##/ {printf "  %-24s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -44,18 +44,10 @@ format:  ## Format Rust and Python in place
 lint:  ## Check formatting, clippy, and ruff without changing anything
 	cargo fmt --manifest-path crates/Cargo.toml --check
 	cargo clippy --manifest-path crates/Cargo.toml --all-targets --all-features -- -D warnings
-	$(VENV)/bin/ruff check src tests docs
-	$(VENV)/bin/ruff format --check src tests docs
-
-docs: rebuild  ## Build the docs site (HTML in docs/_build/html)
-	@rm -rf docs/_build/html docs/jupyter_execute
-	$(VENV)/bin/sphinx-build -b html -W --keep-going docs docs/_build/html
-
-docs-serve: rebuild  ## Serve docs at http://localhost:8000/ and rebuild on every edit
-	$(VENV)/bin/sphinx-autobuild --port 8000 docs docs/_build/html
+	$(VENV)/bin/ruff check src tests
+	$(VENV)/bin/ruff format --check src tests
 
 clean:  ## Remove build artifacts and caches
 	rm -rf build dist src/*.egg-info .pytest_cache .ruff_cache crates/target \
-	       docs/_build docs/jupyter_execute docs/apidocs/stubs \
 	       src/prism/_accelerate*.so src/prism/_accelerate*.pyd
-	find src tests docs -name __pycache__ -type d -prune -exec rm -rf {} +
+	find src tests -name __pycache__ -type d -prune -exec rm -rf {} +

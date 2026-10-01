@@ -15,11 +15,6 @@ uv.lock
 target/
 *.so
 
-# Documentation build
-docs/_build/
-docs/apidocs/stubs/
-docs/jupyter_execute/
-
 # Experiment data: raw rows land here (Zenodo or a local run), never tracked
 artifacts/
 

@@ -2,7 +2,6 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![CI](https://github.com/Yale-QCS/prism/actions/workflows/ci.yml/badge.svg)](https://github.com/Yale-QCS/prism/actions/workflows/ci.yml)
-[![Docs](https://github.com/Yale-QCS/prism/actions/workflows/docs.yml/badge.svg?branch=main)](https://yale-qcs.github.io/prism/)
 
 PRISM is a Qiskit transpiler for dual-rail qubits.
 In the dual-rail encoding a logical qubit is carried by a pair of physical modes, so one logical gate has several physical realizations that touch different wires.

@@ -23,15 +23,6 @@ Commit hooks enforce [Conventional Commits](https://www.conventionalcommits.org/
 The HPCA paper artifact, with its baselines and evaluation pipeline, is on the
 `hpca-r1` and `hpca-r2` branches, not here.
 
-## Documentation
-
-Edit the [user guide](../docs/index.rst) and preview it with `make docs-serve`.
-Use `jupyter-execute` blocks for Python examples. Run `make docs` to check them.
-
-For writing and presentation, follow the
-[Qiskit documentation style guide](https://github.com/Qiskit/documentation/blob/main/style-guide.md)
-and the [Qiskit Sphinx theme documentation](https://qiskit.github.io/qiskit_sphinx_theme/index.html).
-
 ## Releases
 
 Push a stable `vX.Y.Z` tag matching the version in `pyproject.toml`.
