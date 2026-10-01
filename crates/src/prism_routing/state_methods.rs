@@ -1,4 +1,4 @@
-// Marabbecca-specific `RoutingState` methods, textually included into
+// PRISM-specific `RoutingState` methods, textually included into
 // `sabre/route.rs` via `include!` so they share the file's imports and have
 // direct access to private fields without forcing any `pub`/`pub(super)`
 // markers onto the vendored struct.

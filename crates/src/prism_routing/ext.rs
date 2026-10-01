@@ -1,4 +1,4 @@
-// Marabbecca extension types, scoring helpers, and newtype wrappers around
+// PRISM extension types, scoring helpers, and newtype wrappers around
 // upstream `FrontLayer`/`ExtendedSet`. The wrappers (`RealizationFrontLayer`,
 // `RealizationExtendedSet`) fold multi-realization state into the upstream
 // types via `Deref`/`DerefMut`-based composition, so `layer.rs` carries no
@@ -254,7 +254,7 @@ pub fn build_mini_sabredag(virt_real: &[[VirtualQubit; 2]]) -> SabreDAG {
 
 #[pymethods]
 impl PyRoutingTarget {
-    /// Build a target from an undirected edge list. Marabbecca uses this
+    /// Build a target from an undirected edge list. PRISM uses this
     /// because upstream's ``from_target`` requires a wrapped ``BaseTarget``
     /// that ``Target.from_configuration(...)`` doesn't satisfy from Python.
     #[staticmethod]

@@ -52,7 +52,7 @@ pub fn prism_routing(
         initial_v2p.iter().map(|&p| PhysicalQubit::new(p)).collect(),
     )?;
     // Stock SABRE's `RoutingProblem.dag` is required for `ControlFlow` nodes
-    // and for `RoutingResult::rebuild`. Marabbecca's IR never produces either,
+    // and for `RoutingResult::rebuild`. PRISM's IR never produces either,
     // so an empty `DAGCircuit` satisfies the type without affecting behavior.
     let dummy_dag = DAGCircuit::new();
     let problem = RoutingProblem {

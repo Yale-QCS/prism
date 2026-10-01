@@ -10,7 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-// Marabbecca: vendored from Qiskit 2.3.1; dropped `layout` submodule;
+// PRISM: vendored from Qiskit 2.3.1; dropped `layout` submodule;
 // multi-realization extensions live in `crate::prism_routing`.
 #![allow(dead_code)]
 
