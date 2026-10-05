@@ -1,0 +1,556 @@
+diff --git a/crates/src/prism_routing/ext.rs b/crates/src/prism_routing/ext.rs
+index 934c19b..692e80b 100644
+--- a/crates/src/prism_routing/ext.rs
++++ b/crates/src/prism_routing/ext.rs
+@@ -7,7 +7,7 @@
+ 
+ use std::ops::{Deref, DerefMut};
+ 
+-use hashbrown::HashSet;
++use hashbrown::{HashMap, HashSet};
+ use indexmap::IndexMap;
+ use ndarray::prelude::*;
+ use pyo3::exceptions::PyValueError;
+@@ -82,6 +82,71 @@ pub fn op_cost_min_post_swap(
+         .fold(f64::INFINITY, f64::min)
+ }
+ 
++/// `min_r (sum_p dist[p] + pen[r])`, optionally under a virtual `swap`.
++pub fn op_cost_min_pen(
++    realizations: &[Box<[[PhysicalQubit; 2]]>],
++    swap: Option<[PhysicalQubit; 2]>,
++    dist: &ArrayView2<f64>,
++    pen: &[f64],
++) -> f64 {
++    let permute = |p: PhysicalQubit| match swap {
++        Some([a, b]) if p == a => b,
++        Some([a, b]) if p == b => a,
++        _ => p,
++    };
++    realizations
++        .iter()
++        .zip(pen)
++        .map(|(real, pen)| {
++            real.iter()
++                .map(|p| dist[[permute(p[0]).index(), permute(p[1]).index()]])
++                .sum::<f64>()
++                + pen
++        })
++        .fold(f64::INFINITY, f64::min)
++}
++
++/// `(logical qubit, rail)` of every virtual wire a realization touches.
++pub fn rails_of(real: &[[VirtualQubit; 2]], wpl: u32) -> Box<[(u32, u8)]> {
++    let mut out: Vec<(u32, u8)> = Vec::with_capacity(2 * real.len());
++    for pair in real {
++        for v in pair {
++            let v = v.index() as u32;
++            let entry = (v / wpl, (v % wpl) as u8);
++            if !out.contains(&entry) {
++                out.push(entry);
++            }
++        }
++    }
++    out.into_boxed_slice()
++}
++
++/// Adjacent realization with the lowest `(pen, phys_load)`, ties toward `default_idx`.
++pub fn executable_choice_sibling(
++    realizations: &[Box<[[PhysicalQubit; 2]]>],
++    dist: &ArrayView2<f64>,
++    phys_load: &[f64],
++    pen: &[f64],
++    default_idx: usize,
++) -> Option<usize> {
++    let mut best: Option<(usize, (f64, f64))> = None;
++    for (r_idx, real) in realizations.iter().enumerate() {
++        if !real.iter().all(|p| dist[[p[0].index(), p[1].index()]] == 1.0) {
++            continue;
++        }
++        let load: f64 = real.iter().flat_map(|p| [p[0].index(), p[1].index()]).map(|i| phys_load[i]).sum();
++        let key = (pen[r_idx], load);
++        let take = match best {
++            None => true,
++            Some((_, b)) => key < b || (key == b && r_idx == default_idx),
++        };
++        if take {
++            best = Some((r_idx, key));
++        }
++    }
++    best.map(|(idx, _)| idx)
++}
++
+ /// Sum-of-pair-distances for one selected realization.
+ pub fn realization_cost(
+     realization: &[[PhysicalQubit; 2]],
+@@ -308,6 +373,14 @@ pub struct RealizationFrontLayer {
+     multi_witness: IndexMap<NodeIndex, usize, ::ahash::RandomState>,
+     phys_to_nodes: Vec<HashSet<NodeIndex>>,
+     sticky_witness: bool,
++    /// Sibling-rail penalty weight (0 = off) and wires per logical qubit.
++    sibling_weight: f64,
++    wpl: u32,
++    /// Rails each committed op used, by node index: `[(logical, rail)]`.
++    committed_rails: HashMap<usize, Box<[(u32, u8)]>>,
++    /// Per deferred multi node: its commuting-run neighbors and each realization's rails.
++    multi_siblings: IndexMap<NodeIndex, Box<[(u32, u32)]>, ::ahash::RandomState>,
++    multi_rails: IndexMap<NodeIndex, Box<[Box<[(u32, u8)]>]>, ::ahash::RandomState>,
+     /// Per-physical-qubit cumulative load accumulator for the MultiTwoQ
+     /// adjacent-realization tiebreak.
+     phys_load: Vec<f64>,
+@@ -330,13 +403,18 @@ fn deref_mut(&mut self) -> &mut FrontLayer {
+ }
+ 
+ impl RealizationFrontLayer {
+-    pub fn new(num_qubits: u32, sticky_witness: bool) -> Self {
++    pub fn new(num_qubits: u32, sticky_witness: bool, sibling_weight: f64, wpl: u32) -> Self {
+         Self {
+             inner: FrontLayer::new(num_qubits),
+             multi: IndexMap::with_hasher(::ahash::RandomState::default()),
+             multi_witness: IndexMap::with_hasher(::ahash::RandomState::default()),
+             phys_to_nodes: (0..num_qubits as usize).map(|_| HashSet::new()).collect(),
+             sticky_witness,
++            sibling_weight,
++            wpl: wpl.max(1),
++            committed_rails: HashMap::new(),
++            multi_siblings: IndexMap::with_hasher(::ahash::RandomState::default()),
++            multi_rails: IndexMap::with_hasher(::ahash::RandomState::default()),
+             phys_load: vec![0.0; num_qubits as usize],
+             frozen: IndexMap::with_hasher(::ahash::RandomState::default()),
+         }
+@@ -353,12 +431,15 @@ pub fn commit_or_defer_multi(
+         node_id: NodeIndex,
+         realizations: &VirtRealizations,
+         default_realization: u32,
++        siblings: &[(u32, u32)],
+         layout: &NLayout,
+         dist: &ArrayView2<f64>,
+         tie_break_load: bool,
+         front_commit: bool,
+     ) -> Option<u32> {
+         let phys_reals = materialize_phys_reals(realizations, layout);
++        let rails: Box<[Box<[(u32, u8)]>]> = realizations.iter().map(|r| rails_of(r, self.wpl)).collect();
++        let pen: Vec<f64> = rails.iter().map(|r| self.sibling_weight * self.sibling_matches(siblings, r) as f64).collect();
+         let adjacent = |real: &Box<[[PhysicalQubit; 2]]>| {
+             real.iter()
+                 .all(|p| dist[[p[0].index(), p[1].index()]] == 1.0)
+@@ -395,6 +476,8 @@ pub fn commit_or_defer_multi(
+                     exec
+                 }
+             }
++        } else if self.sibling_weight != 0.0 {
++            executable_choice_sibling(&phys_reals, dist, &self.phys_load, &pen, default_realization as usize)
+         } else if tie_break_load {
+             executable_choice_balanced(&phys_reals, dist, &self.phys_load, default_realization as usize)
+         } else {
+@@ -406,6 +489,7 @@ pub fn commit_or_defer_multi(
+                     self.phys_load[pair[0].index()] += 1.0;
+                     self.phys_load[pair[1].index()] += 1.0;
+                 }
++                self.committed_rails.insert(node_id.index(), rails[r_idx].clone());
+                 Some(r_idx as u32)
+             }
+             None => {
+@@ -415,11 +499,39 @@ pub fn commit_or_defer_multi(
+                     default_realization as usize,
+                     dist,
+                 );
++                self.multi_siblings.insert(node_id, siblings.to_vec().into_boxed_slice());
++                self.multi_rails.insert(node_id, rails);
+                 None
+             }
+         }
+     }
+ 
++    /// Remember the rails a committed op used (sub-routed commits call this directly).
++    pub fn record_commit(&mut self, node: NodeIndex, realizations: &VirtRealizations, r_idx: usize) {
++        self.committed_rails.insert(node.index(), rails_of(&realizations[r_idx], self.wpl));
++    }
++
++    /// Number of `siblings` already committed on the same rail of the shared logical qubit as `rails`.
++    fn sibling_matches(&self, siblings: &[(u32, u32)], rails: &[(u32, u8)]) -> u32 {
++        siblings
++            .iter()
++            .filter(|(lq, other)| {
++                let Some(mine) = rails.iter().find(|(l, _)| l == lq).map(|(_, r)| *r) else { return false };
++                self.committed_rails
++                    .get(&(*other as usize))
++                    .is_some_and(|theirs| theirs.iter().any(|(l, r)| l == lq && *r == mine))
++            })
++            .count() as u32
++    }
++
++    /// Per-realization sibling penalty for a deferred node (empty when the weight is 0).
++    fn node_penalties(&self, node: &NodeIndex) -> Vec<f64> {
++        match (self.multi_siblings.get(node), self.multi_rails.get(node)) {
++            (Some(sib), Some(rails)) => rails.iter().map(|r| self.sibling_weight * self.sibling_matches(sib, r) as f64).collect(),
++            _ => Vec::new(),
++        }
++    }
++
+     /// Bump `phys_load` by 1 on each endpoint of a sub-gate fire.
+     pub fn bump_pair_load(&mut self, a: PhysicalQubit, b: PhysicalQubit) {
+         self.phys_load[a.index()] += 1.0;
+@@ -452,6 +564,9 @@ pub fn is_active(&self, qubit: PhysicalQubit) -> bool {
+                 let witness = self.multi_witness[node];
+                 total += realization_cost_post_swap(&reals[witness], swap, dist)
+                     - realization_cost(&reals[witness], dist);
++            } else if self.sibling_weight != 0.0 {
++                let pen = self.node_penalties(node);
++                total += op_cost_min_pen(reals, Some(swap), dist, &pen) - op_cost_min_pen(reals, None, dist, &pen);
+             } else {
+                 total += op_cost_min_post_swap(reals, swap, dist) - op_cost_min(reals, dist);
+             }
+@@ -467,6 +582,8 @@ pub fn total_score(&self, dist: &ArrayView2<f64>) -> f64 {
+                 .map(|(node, reals)| {
+                     if self.sticky_witness || self.frozen.contains_key(node) {
+                         realization_cost(&reals[self.multi_witness[node]], dist)
++                    } else if self.sibling_weight != 0.0 {
++                        op_cost_min_pen(reals, None, dist, &self.node_penalties(node))
+                     } else {
+                         op_cost_min(reals, dist)
+                     }
+@@ -499,6 +616,8 @@ pub fn total_score(&self, dist: &ArrayView2<f64>) -> f64 {
+     pub fn remove(&mut self, index: &NodeIndex) {
+         if let Some(reals) = self.multi.swap_remove(index) {
+             self.multi_witness.swap_remove(index);
++            self.multi_siblings.swap_remove(index);
++            self.multi_rails.swap_remove(index);
+             for real in reals.iter() {
+                 for p in real.iter() {
+                     self.phys_to_nodes[p[0].index()].remove(index);
+diff --git a/crates/src/prism_routing/input.rs b/crates/src/prism_routing/input.rs
+index 0d63cd5..d133d98 100644
+--- a/crates/src/prism_routing/input.rs
++++ b/crates/src/prism_routing/input.rs
+@@ -36,6 +36,7 @@ pub fn sabre_dag_from_flat(
+     succ: &[Vec<u32>],
+     pred_count: &[u32],
+     local_default: &[u32],
++    siblings: &[Vec<[u32; 2]>],
+ ) -> SabreDAG {
+     let n_ops = virt_pairs.len();
+     let mut dag: DiGraph<SabreNode, ()> = DiGraph::with_capacity(n_ops, n_ops);
+@@ -57,6 +58,7 @@ pub fn sabre_dag_from_flat(
+                 InteractionKind::MultiTwoQ {
+                     realizations,
+                     default_realization: local_default[k],
++                    siblings: siblings[k].iter().map(|s| (s[0], s[1])).collect(),
+                 }
+             };
+             dag.add_node(SabreNode {
+diff --git a/crates/src/prism_routing/layout.rs b/crates/src/prism_routing/layout.rs
+index 02f91f1..75974c1 100644
+--- a/crates/src/prism_routing/layout.rs
++++ b/crates/src/prism_routing/layout.rs
+@@ -18,18 +18,18 @@
+ use crate::sabre::heuristic::Heuristic;
+ use crate::sabre::route::{flatten_routing_result, swap_map, PyRoutingTarget, RoutingProblem};
+ 
+-/// One flattened prism precompute: `(virt_pairs, succ, pred_count, local_default)`.
+-type Flat = (Vec<Vec<Vec<[u32; 2]>>>, Vec<Vec<u32>>, Vec<u32>, Vec<u32>);
++/// One flattened prism precompute: `(virt_pairs, succ, pred_count, local_default, siblings)`.
++type Flat = (Vec<Vec<Vec<[u32; 2]>>>, Vec<Vec<u32>>, Vec<u32>, Vec<u32>, Vec<Vec<[u32; 2]>>);
+ 
+ fn dag_from_flat(flat: &Flat) -> PyResult<SabreDAG> {
+-    let (virt_pairs, succ, pred_count, local_default) = flat;
++    let (virt_pairs, succ, pred_count, local_default, siblings) = flat;
+     let n_ops = virt_pairs.len();
+-    if succ.len() != n_ops || pred_count.len() != n_ops || local_default.len() != n_ops {
++    if succ.len() != n_ops || pred_count.len() != n_ops || local_default.len() != n_ops || siblings.len() != n_ops {
+         return Err(PyValueError::new_err(
+             "virt_pairs, succ, pred_count, local_default must have the same outer length",
+         ));
+     }
+-    Ok(sabre_dag_from_flat(virt_pairs, succ, pred_count, local_default))
++    Ok(sabre_dag_from_flat(virt_pairs, succ, pred_count, local_default, siblings))
+ }
+ 
+ fn layout_of(v2p: &[u32]) -> NLayout {
+diff --git a/crates/src/prism_routing/routing.rs b/crates/src/prism_routing/routing.rs
+index 7b356bd..704333c 100644
+--- a/crates/src/prism_routing/routing.rs
++++ b/crates/src/prism_routing/routing.rs
+@@ -22,12 +22,13 @@
+ ///
+ /// Returns `(events, final_v2p, n_swaps)`.
+ #[pyfunction]
+-#[pyo3(signature=(virt_pairs, succ, pred_count, local_default, target, heuristic, initial_v2p, swap_trials=1, seed=0, run_in_parallel=None))]
++#[pyo3(signature=(virt_pairs, succ, pred_count, local_default, siblings, target, heuristic, initial_v2p, swap_trials=1, seed=0, run_in_parallel=None))]
+ pub fn prism_routing(
+     virt_pairs: Vec<Vec<Vec<[u32; 2]>>>,
+     succ: Vec<Vec<u32>>,
+     pred_count: Vec<u32>,
+     local_default: Vec<u32>,
++    siblings: Vec<Vec<[u32; 2]>>,
+     target: &PyRoutingTarget,
+     heuristic: &Heuristic,
+     initial_v2p: Vec<u32>,
+@@ -41,13 +42,13 @@ pub fn prism_routing(
+         ));
+     };
+     let n_ops = virt_pairs.len();
+-    if succ.len() != n_ops || pred_count.len() != n_ops || local_default.len() != n_ops {
++    if succ.len() != n_ops || pred_count.len() != n_ops || local_default.len() != n_ops || siblings.len() != n_ops {
+         return Err(PyValueError::new_err(
+             "virt_pairs, succ, pred_count, local_default must have the same outer length",
+         ));
+     }
+     let n_phys = initial_v2p.len() as u32;
+-    let sabre_dag = sabre_dag_from_flat(&virt_pairs, &succ, &pred_count, &local_default);
++    let sabre_dag = sabre_dag_from_flat(&virt_pairs, &succ, &pred_count, &local_default, &siblings);
+     let initial_layout = NLayout::from_virtual_to_physical(
+         initial_v2p.iter().map(|&p| PhysicalQubit::new(p)).collect(),
+     )?;
+diff --git a/crates/src/prism_routing/state_methods.rs b/crates/src/prism_routing/state_methods.rs
+index e9b708e..e66a634 100644
+--- a/crates/src/prism_routing/state_methods.rs
++++ b/crates/src/prism_routing/state_methods.rs
+@@ -12,11 +12,13 @@ fn commit_or_defer_multi(
+         node_id: NodeIndex,
+         realizations: &ext::VirtRealizations,
+         default_realization: u32,
++        siblings: &[(u32, u32)],
+     ) -> Option<RoutedItemKind> {
+         let r_idx = self.front_layer.commit_or_defer_multi(
+             node_id,
+             realizations,
+             default_realization,
++            siblings,
+             &self.layout,
+             &self.target.distance.view(),
+             self.heuristic.multi_tie_break_load,
+@@ -32,6 +34,7 @@ fn maybe_push_multi_extended(&mut self, successor_node: NodeIndex) {
+         if let InteractionKind::MultiTwoQ {
+             realizations,
+             default_realization,
++            ..
+         } =
+             &self.sabre.dag[successor_node].kind
+         {
+@@ -138,6 +141,9 @@ fn commit_sub_routed_node(
+         schedule: Box<[SubGate]>,
+     ) {
+         self.front_layer.remove(&node);
++        if let InteractionKind::MultiTwoQ { realizations, .. } = &self.sabre.dag[node].kind {
++            self.front_layer.record_commit(node, realizations, real_idx as usize);
++        }
+         self.order.push(RoutedItem {
+             initial_swaps: None,
+             node,
+diff --git a/crates/src/sabre/dag.rs b/crates/src/sabre/dag.rs
+index ae791b9..1a394ee 100644
+--- a/crates/src/sabre/dag.rs
++++ b/crates/src/sabre/dag.rs
+@@ -38,6 +38,8 @@ pub enum InteractionKind {
+     MultiTwoQ {
+         realizations: VirtRealizations,
+         default_realization: u32,
++        /// Commuting-run neighbors: `(logical qubit, node index of the neighbor on it)`.
++        siblings: Box<[(u32, u32)]>,
+     },
+     /// A control-flow operation on more than two qubits.  If it's only on a single qubit, it'll be
+     /// handled by `Synchronize`.  If it's on 2q, it'll be handled by `TwoQ`.  We need to store both
+diff --git a/crates/src/sabre/heuristic.rs b/crates/src/sabre/heuristic.rs
+index d3dddd7..a9bc806 100644
+--- a/crates/src/sabre/heuristic.rs
++++ b/crates/src/sabre/heuristic.rs
+@@ -187,6 +187,12 @@ pub struct Heuristic {
+     /// that layout and hold the choice fixed (scoring, executability, and the
+     /// final commit all target only the frozen realization).
+     pub multi_front_commit: bool,
++    /// Penalty per commuting sibling already committed on the same rail of a shared
++    /// logical qubit, added to a realization's cost in SWAP scoring and used as the
++    /// primary key among executable realizations. `0.0` = off (paper behavior).
++    pub multi_sibling_weight: f64,
++    /// Wires per logical qubit: virtual wire `v` is rail `v % wpl` of logical `v / wpl`.
++    pub multi_wires_per_logical: u32,
+ }
+ 
+ #[pymethods]
+@@ -205,7 +211,7 @@ impl Heuristic {
+     ///     best_epsilon (float): the floating-point epsilon to use when comparing scores to find
+     ///         the best value.
+     #[new]
+-    #[pyo3(signature = (basic=None, lookahead=None, decay=None, attempt_limit=1000, best_epsilon=1e-10, phys_load_decay=1.0, multi_tie_break_load=true, multi_sticky_witness=false, multi_front_commit=false))]
++    #[pyo3(signature = (basic=None, lookahead=None, decay=None, attempt_limit=1000, best_epsilon=1e-10, phys_load_decay=1.0, multi_tie_break_load=true, multi_sticky_witness=false, multi_front_commit=false, multi_sibling_weight=0.0, multi_wires_per_logical=2))]
+     pub fn new(
+         basic: Option<BasicHeuristic>,
+         lookahead: Option<LookaheadHeuristic>,
+@@ -216,6 +222,8 @@ pub fn new(
+         multi_tie_break_load: bool,
+         multi_sticky_witness: bool,
+         multi_front_commit: bool,
++        multi_sibling_weight: f64,
++        multi_wires_per_logical: u32,
+     ) -> Self {
+         Self {
+             basic,
+@@ -227,6 +235,8 @@ pub fn new(
+             multi_tie_break_load,
+             multi_sticky_witness,
+             multi_front_commit,
++            multi_sibling_weight,
++            multi_wires_per_logical,
+         }
+     }
+ 
+@@ -241,6 +251,8 @@ pub fn __getnewargs__(&self, py: Python) -> PyResult<Py<PyAny>> {
+             self.multi_tie_break_load,
+             self.multi_sticky_witness,
+             self.multi_front_commit,
++            self.multi_sibling_weight,
++            self.multi_wires_per_logical,
+         )
+             .into_py_any(py)
+     }
+diff --git a/crates/src/sabre/route.rs b/crates/src/sabre/route.rs
+index 6767c87..9470166 100644
+--- a/crates/src/sabre/route.rs
++++ b/crates/src/sabre/route.rs
+@@ -489,8 +489,8 @@ fn update_route(
+                         continue;
+                     }
+                 }
+-                InteractionKind::MultiTwoQ { realizations, default_realization } => {
+-                    let Some(kind) = self.commit_or_defer_multi(node_id, realizations, *default_realization) else { continue };
++                InteractionKind::MultiTwoQ { realizations, default_realization, siblings } => {
++                    let Some(kind) = self.commit_or_defer_multi(node_id, realizations, *default_realization, siblings) else { continue };
+                     kind
+                 }
+                 InteractionKind::ControlFlow(blocks) => {
+@@ -868,7 +868,12 @@ pub fn swap_map_trial<'a>(
+         heuristic,
+         order: Vec::with_capacity(problem.sabre.dag.node_count()),
+         control_flow: Vec::new(),
+-        front_layer: FrontLayer::new(num_qubits, heuristic.multi_sticky_witness),
++        front_layer: FrontLayer::new(
++            num_qubits,
++            heuristic.multi_sticky_witness,
++            heuristic.multi_sibling_weight,
++            heuristic.multi_wires_per_logical,
++        ),
+         extended_set: ExtendedSet::new(num_qubits, heuristic.multi_sticky_witness),
+         decay: vec![1.; num_qubits as usize],
+         required_predecessors: vec![0; sabre.dag.node_count()],
+diff --git a/src/prism/lowering/commit_policies/prism_routing.py b/src/prism/lowering/commit_policies/prism_routing.py
+index aa868f6..e383448 100644
+--- a/src/prism/lowering/commit_policies/prism_routing.py
++++ b/src/prism/lowering/commit_policies/prism_routing.py
+@@ -68,6 +68,7 @@ class _Ctx:
+     real_idx_map: list[tuple[int, ...]]
+     local_default: list[int]
+     diagonal: list[bool]
++    siblings: list[list[tuple[int, int]]]
+     n_phys: int
+     n_virt: int
+ 
+@@ -108,6 +109,9 @@ class PrismRouting(CommitPolicy):
+     PHYS_LOAD_DECAY = 0.9
+     # Diagonal ops commute with each other: route them as independent (per-rail) work.
+     COMMUTE_DIAGONAL = True
++    # Penalty for putting a CRZ on the rail its commuting sibling already used on the shared
++    # logical qubit (0 = off, the paper configuration).
++    SIBLING_WEIGHT = 0.0
+     DIAGONAL_OPS = frozenset({"crz", "rz"})
+ 
+     def __init__(
+@@ -188,6 +192,8 @@ def _make_heuristic(self, n_phys: int) -> Heuristic:
+             phys_load_decay=self.PHYS_LOAD_DECAY,
+             multi_tie_break_load=True,
+             multi_sticky_witness=False,
++            multi_sibling_weight=self.SIBLING_WEIGHT,
++            multi_wires_per_logical=self.enc.WIRES_PER_LOGICAL,
+         )
+ 
+     def _make_router(
+@@ -202,12 +208,13 @@ def _make_router(
+         def _route(
+             flat_args: tuple, v2p: list[int], seed: int, swap_trials: int
+         ) -> tuple:
+-            virt_pairs, succ, pred_count, local_default = flat_args
++            virt_pairs, succ, pred_count, local_default, siblings = flat_args
+             return prism_routing(
+                 virt_pairs,
+                 succ,
+                 pred_count,
+                 local_default,
++                siblings,
+                 target,
+                 heuristic,
+                 v2p,
+@@ -227,7 +234,8 @@ def _flatten_ctx(ctx: "_Ctx") -> tuple:
+         succ = [[int(s) for s in succs] for succs in ctx.succ]
+         pred_count = [int(c) for c in ctx.pred_count]
+         local_default = [int(d) for d in ctx.local_default]
+-        return (virt_pairs, succ, pred_count, local_default)
++        siblings = [[[int(lq), int(o)] for lq, o in sibs] for sibs in ctx.siblings]
++        return (virt_pairs, succ, pred_count, local_default, siblings)
+ 
+     # Rust event-kind constants (must match input.rs).
+     _EVENT_COMMIT = 0
+@@ -357,6 +365,9 @@ def _reversed_ctx(self, ctx: _Ctx) -> _Ctx:
+         virts_used_rev = list(reversed(ctx.virts_used))
+         diagonal_rev = list(reversed(ctx.diagonal))
+         succ_rev, pred_count_rev = self._build_deps(virts_used_rev, diagonal_rev)
++        siblings_rev = self._build_siblings(
++            virts_used_rev, diagonal_rev, self.enc.WIRES_PER_LOGICAL
++        )
+         # real_idx_map / local_default are indexed by op-node order; reverse to match.
+         real_idx_map_rev = list(reversed(ctx.real_idx_map))
+         local_default_rev = list(reversed(ctx.local_default))
+@@ -370,6 +381,7 @@ def _reversed_ctx(self, ctx: _Ctx) -> _Ctx:
+             real_idx_map=real_idx_map_rev,
+             local_default=local_default_rev,
+             diagonal=diagonal_rev,
++            siblings=siblings_rev,
+         )
+ 
+     def _build_result(
+@@ -442,6 +454,9 @@ def _precompute(self, dag: DAGCircuit) -> _Ctx:
+             for n in op_nodes
+         ]
+         succ, pred_count = self._build_deps(virts_used, diagonal)
++        siblings = self._build_siblings(
++            virts_used, diagonal, self.enc.WIRES_PER_LOGICAL
++        )
+         local_default: list[int] = []
+         for k, node in enumerate(op_nodes):
+             di = node.op.default_index
+@@ -458,6 +473,7 @@ def _precompute(self, dag: DAGCircuit) -> _Ctx:
+             real_idx_map=real_idx_map,
+             local_default=local_default,
+             diagonal=diagonal,
++            siblings=siblings,
+             n_phys=n_phys,
+             n_virt=n_virt,
+         )
+@@ -488,6 +504,28 @@ def _precompute_op_data(
+             virts_used.append(frozenset(virts))
+         return virt_pairs, virts_used
+ 
++    @staticmethod
++    def _build_siblings(
++        virts_used: list[frozenset[int]], diagonal: list[bool], wpl: int
++    ) -> list[list[tuple[int, int]]]:
++        """Per op, ``(logical qubit, other op)`` for the previous/next diagonal op in the same commuting run."""
++        n_ops = len(virts_used)
++        siblings: list[list[tuple[int, int]]] = [[] for _ in range(n_ops)]
++        run_tail: dict[
++            int, int
++        ] = {}  # logical qubit -> last diagonal op in its open run
++        for k, vs in enumerate(virts_used):
++            for lq in {v // wpl for v in vs}:
++                if diagonal[k]:
++                    if lq in run_tail:
++                        j = run_tail[lq]
++                        siblings[j].append((lq, k))
++                        siblings[k].append((lq, j))
++                    run_tail[lq] = k
++                else:
++                    run_tail.pop(lq, None)
++        return siblings
++
+     @staticmethod
+     def _build_deps(
+         virts_used: list[frozenset[int]],

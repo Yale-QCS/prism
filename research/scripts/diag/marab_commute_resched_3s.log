@@ -1,0 +1,20 @@
+dj                       gri/c0/greedy=  2 gri/c0/prism=  2 gri/c1/greedy=  2 gri/c1/prism=  2 hex/c0/greedy=  5 hex/c0/prism=  4 hex/c1/greedy=  4 hex/c1/prism=  4
+qaoa                     gri/c0/greedy= 10 gri/c0/prism=  5 gri/c1/greedy=  4 gri/c1/prism=  4 hex/c0/greedy= 12 hex/c0/prism= 14 hex/c1/greedy= 12 hex/c1/prism=  8
+draper_qft_adder         gri/c0/greedy=  9 gri/c0/prism=  6 gri/c1/greedy=  4 gri/c1/prism=  5 hex/c0/greedy= 18 hex/c0/prism= 13 hex/c1/greedy= 11 hex/c1/prism=  8
+modular_adder            gri/c0/greedy=  6 gri/c0/prism=  3 gri/c1/greedy=  3 gri/c1/prism=  2 hex/c0/greedy= 12 hex/c0/prism= 12 hex/c1/greedy= 12 hex/c1/prism=  9
+qft                      gri/c0/greedy= 19 gri/c0/prism= 13 gri/c1/greedy= 15 gri/c1/prism= 12 hex/c0/greedy= 25 hex/c0/prism= 22 hex/c1/greedy= 23 hex/c1/prism= 18
+qpeexact                 gri/c0/greedy= 20 gri/c0/prism= 15 gri/c1/greedy= 16 gri/c1/prism= 13 hex/c0/greedy= 29 hex/c0/prism= 22 hex/c1/greedy= 24 hex/c1/prism= 18
+qpeinexact               gri/c0/greedy= 20 gri/c0/prism= 15 gri/c1/greedy= 16 gri/c1/prism= 13 hex/c0/greedy= 29 hex/c0/prism= 22 hex/c1/greedy= 24 hex/c1/prism= 18
+qftentangled             gri/c0/greedy= 18 gri/c0/prism= 16 gri/c1/greedy= 19 gri/c1/prism= 13 hex/c0/greedy= 33 hex/c0/prism= 24 hex/c1/greedy= 24 hex/c1/prism= 21
+bmw_quark_copula         gri/c0/greedy= 15 gri/c0/prism= 14 gri/c1/greedy= 18 gri/c1/prism= 11 hex/c0/greedy= 32 hex/c0/prism= 27 hex/c1/greedy= 33 hex/c1/prism= 24
+hhl                      gri/c0/greedy= 33 gri/c0/prism= 30 gri/c1/greedy= 27 gri/c1/prism= 23 hex/c0/greedy= 53 hex/c0/prism= 42 hex/c1/greedy= 45 hex/c1/prism= 34
+ae                       gri/c0/greedy= 21 gri/c0/prism= 18 gri/c1/greedy= 18 gri/c1/prism= 15 hex/c0/greedy= 31 hex/c0/prism= 25 hex/c1/greedy= 30 hex/c1/prism= 24
+cdkm_ripple_carry_adder  gri/c0/greedy=  0 gri/c0/prism=  0 gri/c1/greedy=  0 gri/c1/prism=  0 hex/c0/greedy=  0 hex/c0/prism=  0 hex/c1/greedy=  4 hex/c1/prism=  2
+full_adder               gri/c0/greedy=  0 gri/c0/prism=  0 gri/c1/greedy=  0 gri/c1/prism=  0 hex/c0/greedy=  0 hex/c0/prism=  0 hex/c1/greedy=  4 hex/c1/prism=  2
+vqe_two_local            gri/c0/greedy= 70 gri/c0/prism= 59 gri/c1/greedy= 63 gri/c1/prism= 46 hex/c0/greedy=102 hex/c0/prism= 85 hex/c1/greedy= 96 hex/c1/prism= 72
+rg_qft_multiplier        gri/c0/greedy= 50 gri/c0/prism= 23 gri/c1/greedy= 34 gri/c1/prism= 21 hex/c0/greedy= 82 hex/c0/prism= 43 hex/c1/greedy= 60 hex/c1/prism= 32
+multiplier               gri/c0/greedy= 47 gri/c0/prism= 25 gri/c1/greedy= 34 gri/c1/prism= 17 hex/c0/greedy= 74 hex/c0/prism= 46 hex/c1/greedy= 60 hex/c1/prism= 29
+obj=swaps seeds=[0, 1, 2] commute=False resched=False: greedy swaps 885 depth 1883 dur 628 | prism swaps 643 depth 1733 dur 579 | prism vs greedy swaps +27.3% depth +8.0% duration +7.8%
+obj=swaps seeds=[0, 1, 2] commute=False resched=True : greedy swaps 885 depth 1804 dur 605 | prism swaps 643 depth 1613 dur 537 | prism vs greedy swaps +27.3% depth +10.6% duration +11.3%
+obj=swaps seeds=[0, 1, 2] commute=True  resched=False: greedy swaps 738 depth 1808 dur 600 | prism swaps 521 depth 1734 dur 590 | prism vs greedy swaps +29.4% depth +4.1% duration +1.7%
+obj=swaps seeds=[0, 1, 2] commute=True  resched=True : greedy swaps 738 depth 1755 dur 583 | prism swaps 521 depth 1673 dur 568 | prism vs greedy swaps +29.4% depth +4.7% duration +2.5%

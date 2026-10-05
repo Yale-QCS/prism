@@ -1,0 +1,20 @@
+dj                       4x4/greedy=  2 4x4/prism=  2 3x6/greedy=  2 3x6/prism=  2 5x4/greedy=  2 5x4/prism=  2 6x4/greedy=  2 6x4/prism=  2
+qaoa                     4x4/greedy=  8 4x4/prism=  8 3x6/greedy=  8 3x6/prism=  8 5x4/greedy= 10 5x4/prism=  4 6x4/greedy=  9 6x4/prism=  4
+draper_qft_adder         4x4/greedy=  9 4x4/prism=  7 3x6/greedy= 11 3x6/prism=  8 5x4/greedy=  9 5x4/prism=  6 6x4/greedy=  7 6x4/prism=  7
+modular_adder            4x4/greedy=  7 4x4/prism=  8 3x6/greedy=  9 3x6/prism=  7 5x4/greedy=  5 5x4/prism=  3 6x4/greedy=  4 6x4/prism=  3
+qft                      4x4/greedy= 15 4x4/prism= 12 3x6/greedy= 18 3x6/prism= 15 5x4/greedy= 19 5x4/prism= 13 6x4/greedy= 17 6x4/prism= 14
+qpeexact                 4x4/greedy= 19 4x4/prism= 15 3x6/greedy= 19 3x6/prism= 16 5x4/greedy= 20 5x4/prism= 15 6x4/greedy= 20 6x4/prism= 16
+qpeinexact               4x4/greedy= 19 4x4/prism= 15 3x6/greedy= 19 3x6/prism= 16 5x4/greedy= 20 5x4/prism= 15 6x4/greedy= 20 6x4/prism= 16
+qftentangled             4x4/greedy= 20 4x4/prism= 18 3x6/greedy= 22 3x6/prism= 17 5x4/greedy= 22 5x4/prism= 16 6x4/greedy= 22 6x4/prism= 16
+bmw_quark_copula         4x4/greedy= 14 4x4/prism= 15 3x6/greedy= 21 3x6/prism= 12 5x4/greedy= 15 5x4/prism= 14 6x4/greedy= 20 6x4/prism= 17
+hhl                      4x4/greedy= 27 4x4/prism= 29 3x6/greedy= 37 3x6/prism= 30 5x4/greedy= 38 5x4/prism= 30 6x4/greedy= 35 6x4/prism= 30
+ae                       4x4/greedy= 18 4x4/prism= 16 3x6/greedy= 21 3x6/prism= 16 5x4/greedy= 21 5x4/prism= 18 6x4/greedy= 20 6x4/prism= 17
+cdkm_ripple_carry_adder  4x4/greedy=  0 4x4/prism=  0 3x6/greedy=  0 3x6/prism=  0 5x4/greedy=  0 5x4/prism=  0 6x4/greedy=  0 6x4/prism=  0
+full_adder               4x4/greedy=  0 4x4/prism=  0 3x6/greedy=  0 3x6/prism=  0 5x4/greedy=  0 5x4/prism=  0 6x4/greedy=  0 6x4/prism=  0
+vqe_two_local            4x4/greedy= 74 4x4/prism= 56 3x6/greedy= 78 3x6/prism= 60 5x4/greedy= 70 5x4/prism= 59 6x4/greedy= 66 6x4/prism= 59
+rg_qft_multiplier        4x4/greedy= 50 4x4/prism= 22 3x6/greedy= 52 3x6/prism= 24 5x4/greedy= 50 5x4/prism= 23 6x4/greedy= 51 6x4/prism= 24
+multiplier               4x4/greedy= 53 4x4/prism= 21 3x6/greedy= 50 3x6/prism= 29 5x4/greedy= 53 5x4/prism= 23 6x4/greedy= 47 6x4/prism= 23
+grid 4x4: greedy swaps 335 depth 857 dur 293 | prism swaps 244 depth 862 dur 295 | prism vs greedy swaps +27.2% depth -0.6% duration -0.6%
+grid 3x6: greedy swaps 367 depth 900 dur 304 | prism swaps 260 depth 806 dur 281 | prism vs greedy swaps +29.2% depth +10.4% duration +7.6%
+grid 5x4: greedy swaps 354 depth 948 dur 322 | prism swaps 241 depth 818 dur 280 | prism vs greedy swaps +31.9% depth +13.7% duration +13.0%
+grid 6x4: greedy swaps 340 depth 915 dur 312 | prism swaps 248 depth 809 dur 281 | prism vs greedy swaps +27.1% depth +11.6% duration +9.8%

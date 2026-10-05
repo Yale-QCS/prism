@@ -1,0 +1,21 @@
+dj                       crz   7->  7 | gri off g/p=2/2 on g/p=2/2 | hex off g/p=5/4 on g/p=6/4
+qaoa                     crz  28-> 28 | gri off g/p=10/4 on g/p=10/4 | hex off g/p=12/14 on g/p=12/14
+draper_qft_adder         crz  22->  6 | gri off g/p=9/6 on g/p=2/2 | hex off g/p=18/12 on g/p=2/2
+modular_adder            crz  51-> 44 | gri off g/p=5/3 on g/p=2/2 | hex off g/p=12/12 on g/p=8/8
+qft                      crz  28->  0 | gri off g/p=19/13 on g/p=0/0 | hex off g/p=25/22 on g/p=0/0
+qpeexact                 crz  28->  7 | gri off g/p=20/15 on g/p=2/2 | hex off g/p=29/22 on g/p=6/5
+qpeinexact               crz  28->  7 | gri off g/p=20/15 on g/p=2/2 | hex off g/p=29/22 on g/p=6/5
+qftentangled             crz  35->  7 | gri off g/p=22/16 on g/p=0/0 | hex off g/p=34/24 on g/p=0/0
+bmw_quark_copula         crz  52-> 50 | gri off g/p=15/14 on g/p=15/14 | hex off g/p=32/27 on g/p=31/25
+hhl                      crz  48-> 36 | gri off g/p=38/30 on g/p=23/19 | hex off g/p=51/42 on g/p=39/29
+ae                       crz  35-> 14 | gri off g/p=21/18 on g/p=2/2 | hex off g/p=31/25 on g/p=6/5
+cdkm_ripple_carry_adder  crz  39-> 33 | gri off g/p=0/0 on g/p=0/0 | hex off g/p=0/0 on g/p=0/0
+full_adder               crz  39-> 33 | gri off g/p=0/0 on g/p=0/0 | hex off g/p=0/0 on g/p=0/0
+vqe_two_local            crz  84-> 84 | gri off g/p=70/59 on g/p=74/58 | hex off g/p=102/85 on g/p=105/84
+rg_qft_multiplier        crz  92->  6 | gri off g/p=50/23 on g/p=2/2 | hex off g/p=77/43 on g/p=2/2
+multiplier               crz  92->  6 | gri off g/p=53/23 on g/p=2/2 | hex off g/p=74/46 on g/p=2/2
+EM=False grid       : greedy swaps 354 depth 948 dur 322 | prism swaps 241 depth 818 dur 280 | prism vs greedy swaps +31.9% depth +13.7% duration +13.0%
+EM=False hex_lattice: greedy swaps 531 depth 926 dur 302 | prism swaps 400 depth 918 dur 300 | prism vs greedy swaps +24.7% depth +0.9% duration +0.7%
+EM=True  grid       : greedy swaps 138 depth 622 dur 167 | prism swaps 111 depth 583 dur 168 | prism vs greedy swaps +19.6% depth +6.3% duration -0.3%
+EM=True  hex_lattice: greedy swaps 225 depth 639 dur 179 | prism swaps 185 depth 584 dur 161 | prism vs greedy swaps +17.8% depth +8.6% duration +9.9%
+with EM, prism fewer/tie/more swaps than greedy per circuit: {'grid': [4, 12, 0], 'hex_lattice': [7, 8, 1]}

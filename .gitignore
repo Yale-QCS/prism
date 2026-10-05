@@ -27,3 +27,4 @@ tmp/
 
 # Editors
 .vscode/
+!research/**/*.log

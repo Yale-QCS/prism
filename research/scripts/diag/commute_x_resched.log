@@ -1,0 +1,8 @@
+objective=swaps  commute=False reschedule=False: swaps 641 (+0.0%) depth 1737 (+0.0%) dur 581 (+0.0%)
+objective=swaps  commute=False reschedule=True : swaps 641 (+0.0%) depth 1607 (-7.5%) dur 534 (-8.1%)
+objective=swaps  commute=True  reschedule=False: swaps 521 (-18.7%) depth 1737 (+0.0%) dur 592 (+1.8%)
+objective=swaps  commute=True  reschedule=True : swaps 521 (-18.7%) depth 1677 (-3.5%) dur 569 (-2.1%)
+objective=depth  commute=False reschedule=False: swaps 749 (+0.0%) depth 1506 (+0.0%) dur 506 (+0.0%)
+objective=depth  commute=False reschedule=True : swaps 749 (+0.0%) depth 1436 (-4.6%) dur 481 (-4.8%)
+objective=depth  commute=True  reschedule=False: swaps 633 (-15.5%) depth 1558 (+3.5%) dur 529 (+4.6%)
+objective=depth  commute=True  reschedule=True : swaps 633 (-15.5%) depth 1501 (-0.3%) dur 508 (+0.5%)

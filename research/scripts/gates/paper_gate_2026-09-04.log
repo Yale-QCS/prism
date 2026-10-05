@@ -1,0 +1,97 @@
+dj                       grid        s0 quotient_sabre       old=  2, 11,  3300.0 new=  2, 11,  3300.0 same | frozen(2.4.1) swaps,depth=(2, 9) 0.0s
+dj                       grid        s0 greedy_early_commit  old=  2,  8,  2600.0 new=  2,  8,  2600.0 same | frozen(2.4.1) swaps,depth=(2, 8) 0.3s
+dj                       grid        s0 prism_retained_set   old=  2,  7,  2600.0 new=  2,  7,  2600.0 same | frozen(2.4.1) swaps,depth=(2, 7) 0.2s
+dj                       hex_lattice s0 quotient_sabre       old=  5, 12,  3700.0 new=  5, 12,  3700.0 same | frozen(2.4.1) swaps,depth=(5, 12) 2.6s
+dj                       hex_lattice s0 greedy_early_commit  old=  5, 10,  2800.0 new=  5, 10,  2800.0 same | frozen(2.4.1) swaps,depth=(5, 10) 0.3s
+dj                       hex_lattice s0 prism_retained_set   old=  4, 10,  3300.0 new=  4, 10,  3300.0 same | frozen(2.4.1) swaps,depth=(4, 10) 0.3s
+qaoa                     grid        s0 quotient_sabre       old= 28, 33, 11400.0 new= 28, 33, 11400.0 same | frozen(2.4.1) swaps,depth=(26, 30) 0.0s
+qaoa                     grid        s0 greedy_early_commit  old= 10, 24,  8500.0 new= 10, 24,  8500.0 same | frozen(2.4.1) swaps,depth=(10, 24) 0.6s
+qaoa                     grid        s0 prism_retained_set   old=  4, 21,  8400.0 new=  4, 21,  8400.0 same | frozen(2.4.1) swaps,depth=(4, 21) 0.5s
+qaoa                     hex_lattice s0 quotient_sabre       old= 43, 34, 10500.0 new= 43, 34, 10500.0 same | frozen(2.4.1) swaps,depth=(39, 32) 2.6s
+qaoa                     hex_lattice s0 greedy_early_commit  old= 12, 20,  7300.0 new= 12, 20,  7300.0 same | frozen(2.4.1) swaps,depth=(12, 20) 0.6s
+qaoa                     hex_lattice s0 prism_retained_set   old= 14, 22,  7700.0 new= 14, 22,  7700.0 same | frozen(2.4.1) swaps,depth=(14, 22) 0.6s
+draper_qft_adder         grid        s0 quotient_sabre       old= 11, 28,  9700.0 new= 11, 28,  9700.0 same | frozen(2.4.1) swaps,depth=(16, 27) 0.0s
+draper_qft_adder         grid        s0 greedy_early_commit  old=  9, 27,  9500.0 new=  9, 27,  9500.0 same | frozen(2.4.1) swaps,depth=(9, 27) 0.4s
+draper_qft_adder         grid        s0 prism_retained_set   old=  6, 21,  6600.0 new=  6, 21,  6600.0 same | frozen(2.4.1) swaps,depth=(6, 21) 0.4s
+draper_qft_adder         hex_lattice s0 quotient_sabre       old= 27, 33,  9400.0 new= 27, 33,  9400.0 same | frozen(2.4.1) swaps,depth=(30, 33) 2.5s
+draper_qft_adder         hex_lattice s0 greedy_early_commit  old= 18, 29,  9700.0 new= 18, 29,  9700.0 same | frozen(2.4.1) swaps,depth=(18, 29) 0.5s
+draper_qft_adder         hex_lattice s0 prism_retained_set   old= 12, 24,  7100.0 new= 12, 24,  7100.0 same | frozen(2.4.1) swaps,depth=(12, 24) 0.4s
+modular_adder            grid        s0 quotient_sabre       old= 21, 88, 29500.0 new= 21, 88, 29500.0 same | frozen(2.4.1) swaps,depth=(18, 85) 0.1s
+modular_adder            grid        s0 greedy_early_commit  old=  5, 81, 28100.0 new=  5, 81, 28100.0 same | frozen(2.4.1) swaps,depth=(5, 81) 1.1s
+modular_adder            grid        s0 prism_retained_set   old=  3, 78, 27000.0 new=  3, 78, 27000.0 same | frozen(2.4.1) swaps,depth=(3, 78) 0.9s
+modular_adder            hex_lattice s0 quotient_sabre       old= 37, 92, 30200.0 new= 37, 92, 30200.0 same | frozen(2.4.1) swaps,depth=(34, 100) 0.4s
+modular_adder            hex_lattice s0 greedy_early_commit  old= 12, 81, 27600.0 new= 12, 81, 27600.0 same | frozen(2.4.1) swaps,depth=(12, 81) 1.2s
+modular_adder            hex_lattice s0 prism_retained_set   old= 12, 83, 28500.0 new= 12, 83, 28500.0 same | frozen(2.4.1) swaps,depth=(12, 83) 1.0s
+qft                      grid        s0 quotient_sabre       old= 28, 30, 10600.0 new= 28, 30, 10600.0 same | frozen(2.4.1) swaps,depth=(22, 30) 0.0s
+qft                      grid        s0 greedy_early_commit  old= 19, 33, 10800.0 new= 19, 33, 10800.0 same | frozen(2.4.1) swaps,depth=(19, 33) 0.5s
+qft                      grid        s0 prism_retained_set   old= 13, 28,  9300.0 new= 13, 28,  9300.0 same | frozen(2.4.1) swaps,depth=(13, 28) 0.5s
+qft                      hex_lattice s0 quotient_sabre       old= 41, 39, 11500.0 new= 41, 39, 11500.0 same | frozen(2.4.1) swaps,depth=(39, 42) 1.7s
+qft                      hex_lattice s0 greedy_early_commit  old= 25, 38, 11500.0 new= 25, 38, 11500.0 same | frozen(2.4.1) swaps,depth=(25, 38) 0.6s
+qft                      hex_lattice s0 prism_retained_set   old= 22, 25,  8000.0 new= 22, 25,  8000.0 same | frozen(2.4.1) swaps,depth=(22, 25) 0.6s
+qpeexact                 grid        s0 quotient_sabre       old= 27, 30, 10400.0 new= 27, 30, 10400.0 same | frozen(2.4.1) swaps,depth=(22, 29) 0.1s
+qpeexact                 grid        s0 greedy_early_commit  old= 20, 35, 11300.0 new= 20, 35, 11300.0 same | frozen(2.4.1) swaps,depth=(19, 35) 0.6s
+qpeexact                 grid        s0 prism_retained_set   old= 15, 30,  9900.0 new= 15, 30,  9900.0 same | frozen(2.4.1) swaps,depth=(14, 30) 0.5s
+qpeexact                 hex_lattice s0 quotient_sabre       old= 44, 45, 12400.0 new= 44, 45, 12400.0 same | frozen(2.4.1) swaps,depth=(41, 41) 2.7s
+qpeexact                 hex_lattice s0 greedy_early_commit  old= 29, 40, 13300.0 new= 29, 40, 13300.0 same | frozen(2.4.1) swaps,depth=(28, 40) 0.7s
+qpeexact                 hex_lattice s0 prism_retained_set   old= 22, 42, 12700.0 new= 22, 42, 12700.0 same | frozen(2.4.1) swaps,depth=(21, 42) 0.7s
+qpeinexact               grid        s0 quotient_sabre       old= 27, 30, 10400.0 new= 27, 30, 10400.0 same | frozen(2.4.1) swaps,depth=(22, 29) 0.0s
+qpeinexact               grid        s0 greedy_early_commit  old= 20, 35, 11300.0 new= 20, 35, 11300.0 same | frozen(2.4.1) swaps,depth=(19, 35) 0.6s
+qpeinexact               grid        s0 prism_retained_set   old= 15, 30,  9900.0 new= 15, 30,  9900.0 same | frozen(2.4.1) swaps,depth=(14, 30) 0.5s
+qpeinexact               hex_lattice s0 quotient_sabre       old= 44, 45, 12400.0 new= 44, 45, 12400.0 same | frozen(2.4.1) swaps,depth=(41, 41) 2.5s
+qpeinexact               hex_lattice s0 greedy_early_commit  old= 29, 40, 13300.0 new= 29, 40, 13300.0 same | frozen(2.4.1) swaps,depth=(28, 40) 0.6s
+qpeinexact               hex_lattice s0 prism_retained_set   old= 22, 42, 12700.0 new= 22, 42, 12700.0 same | frozen(2.4.1) swaps,depth=(21, 42) 0.6s
+qftentangled             grid        s0 quotient_sabre       old= 38, 50, 16300.0 new= 38, 50, 16300.0 same | frozen(2.4.1) swaps,depth=(34, 46) 0.1s
+qftentangled             grid        s0 greedy_early_commit  old= 22, 38, 11900.0 new= 22, 38, 11900.0 same | frozen(2.4.1) swaps,depth=(22, 38) 0.7s
+qftentangled             grid        s0 prism_retained_set   old= 16, 31, 10100.0 new= 16, 31, 10100.0 same | frozen(2.4.1) swaps,depth=(16, 31) 0.6s
+qftentangled             hex_lattice s0 quotient_sabre       old= 50, 46, 13600.0 new= 50, 46, 13600.0 same | frozen(2.4.1) swaps,depth=(53, 55) 0.1s
+qftentangled             hex_lattice s0 greedy_early_commit  old= 34, 46, 14200.0 new= 34, 46, 14200.0 same | frozen(2.4.1) swaps,depth=(34, 46) 0.8s
+qftentangled             hex_lattice s0 prism_retained_set   old= 24, 36, 11100.0 new= 24, 36, 11100.0 same | frozen(2.4.1) swaps,depth=(24, 36) 0.7s
+bmw_quark_copula         grid        s0 quotient_sabre       old= 28, 42, 13100.0 new= 28, 42, 13100.0 same | frozen(2.4.1) swaps,depth=(30, 80) 0.1s
+bmw_quark_copula         grid        s0 greedy_early_commit  old= 15, 70, 24100.0 new= 15, 70, 24100.0 same | frozen(2.4.1) swaps,depth=(15, 70) 1.1s
+bmw_quark_copula         grid        s0 prism_retained_set   old= 14, 35, 10400.0 new= 14, 35, 10400.0 same | frozen(2.4.1) swaps,depth=(14, 35) 1.0s
+bmw_quark_copula         hex_lattice s0 quotient_sabre       old= 39, 85, 27700.0 new= 39, 85, 27700.0 same | frozen(2.4.1) swaps,depth=(48, 46) 2.9s
+bmw_quark_copula         hex_lattice s0 greedy_early_commit  old= 32, 52, 15700.0 new= 32, 52, 15700.0 same | frozen(2.4.1) swaps,depth=(32, 52) 1.2s
+bmw_quark_copula         hex_lattice s0 prism_retained_set   old= 27, 60, 18600.0 new= 27, 60, 18600.0 same | frozen(2.4.1) swaps,depth=(27, 60) 1.1s
+hhl                      grid        s0 quotient_sabre       old= 44, 56, 20500.0 new= 44, 56, 20500.0 same | frozen(2.4.1) swaps,depth=(78, 78) 0.1s
+hhl                      grid        s0 greedy_early_commit  old= 38, 54, 18900.0 new= 38, 54, 18900.0 same | frozen(2.4.1) swaps,depth=(37, 54) 0.9s
+hhl                      grid        s0 prism_retained_set   old= 30, 50, 17700.0 new= 30, 50, 17700.0 same | frozen(2.4.1) swaps,depth=(29, 50) 1.0s
+hhl                      hex_lattice s0 quotient_sabre       old= 79, 79, 24800.0 new= 79, 79, 24800.0 same | frozen(2.4.1) swaps,depth=(99, 86) 2.6s
+hhl                      hex_lattice s0 greedy_early_commit  old= 51, 52, 18200.0 new= 51, 52, 18200.0 same | frozen(2.4.1) swaps,depth=(50, 52) 1.0s
+hhl                      hex_lattice s0 prism_retained_set   old= 42, 58, 18800.0 new= 42, 58, 18800.0 same | frozen(2.4.1) swaps,depth=(41, 58) 1.0s
+ae                       grid        s0 quotient_sabre       old= 30, 58, 18800.0 new= 30, 58, 18800.0 same | frozen(2.4.1) swaps,depth=(34, 64) 0.1s
+ae                       grid        s0 greedy_early_commit  old= 21, 57, 18800.0 new= 21, 57, 18800.0 same | frozen(2.4.1) swaps,depth=(21, 57) 0.8s
+ae                       grid        s0 prism_retained_set   old= 18, 53, 17700.0 new= 18, 53, 17700.0 same | frozen(2.4.1) swaps,depth=(18, 53) 0.8s
+ae                       hex_lattice s0 quotient_sabre       old= 41, 67, 19900.0 new= 41, 67, 19900.0 same | frozen(2.4.1) swaps,depth=(41, 65) 2.6s
+ae                       hex_lattice s0 greedy_early_commit  old= 31, 61, 19200.0 new= 31, 61, 19200.0 same | frozen(2.4.1) swaps,depth=(31, 61) 0.8s
+ae                       hex_lattice s0 prism_retained_set   old= 25, 57, 18100.0 new= 25, 57, 18100.0 same | frozen(2.4.1) swaps,depth=(25, 57) 0.9s
+cdkm_ripple_carry_adder  grid        s0 quotient_sabre       old=  8, 71, 24200.0 new=  8, 71, 24200.0 same | frozen(2.4.1) swaps,depth=(14, 75) 0.1s
+cdkm_ripple_carry_adder  grid        s0 greedy_early_commit  old=  0, 64, 22200.0 new=  0, 64, 22200.0 same | frozen(2.4.1) swaps,depth=(0, 64) 0.9s
+cdkm_ripple_carry_adder  grid        s0 prism_retained_set   old=  0, 62, 21200.0 new=  0, 62, 21200.0 same | frozen(2.4.1) swaps,depth=(0, 62) 0.7s
+cdkm_ripple_carry_adder  hex_lattice s0 quotient_sabre       old= 18, 70, 23200.0 new= 18, 70, 23200.0 same | frozen(2.4.1) swaps,depth=(15, 68) 0.4s
+cdkm_ripple_carry_adder  hex_lattice s0 greedy_early_commit  old=  0, 62, 21200.0 new=  0, 62, 21200.0 same | frozen(2.4.1) swaps,depth=(0, 62) 1.0s
+cdkm_ripple_carry_adder  hex_lattice s0 prism_retained_set   old=  0, 62, 21200.0 new=  0, 62, 21200.0 same | frozen(2.4.1) swaps,depth=(0, 62) 0.8s
+full_adder               grid        s0 quotient_sabre       old=  8, 71, 24200.0 new=  8, 71, 24200.0 same | frozen(2.4.1) swaps,depth=(14, 75) 0.1s
+full_adder               grid        s0 greedy_early_commit  old=  0, 64, 22200.0 new=  0, 64, 22200.0 same | frozen(2.4.1) swaps,depth=(0, 64) 1.1s
+full_adder               grid        s0 prism_retained_set   old=  0, 62, 21200.0 new=  0, 62, 21200.0 same | frozen(2.4.1) swaps,depth=(0, 62) 0.8s
+full_adder               hex_lattice s0 quotient_sabre       old= 18, 70, 23200.0 new= 18, 70, 23200.0 same | frozen(2.4.1) swaps,depth=(15, 68) 0.4s
+full_adder               hex_lattice s0 greedy_early_commit  old=  0, 62, 21200.0 new=  0, 62, 21200.0 same | frozen(2.4.1) swaps,depth=(0, 62) 1.0s
+full_adder               hex_lattice s0 prism_retained_set   old=  0, 62, 21200.0 new=  0, 62, 21200.0 same | frozen(2.4.1) swaps,depth=(0, 62) 0.8s
+vqe_two_local            grid        s0 quotient_sabre       old=120,114, 34500.0 new=120,114, 34500.0 same | frozen(2.4.1) swaps,depth=(96, 106) 0.1s
+vqe_two_local            grid        s0 greedy_early_commit  old= 70, 88, 30300.0 new= 70, 88, 30300.0 same | frozen(2.4.1) swaps,depth=(70, 88) 1.7s
+vqe_two_local            grid        s0 prism_retained_set   old= 59, 85, 28100.0 new= 59, 85, 28100.0 same | frozen(2.4.1) swaps,depth=(59, 85) 2.1s
+vqe_two_local            hex_lattice s0 quotient_sabre       old=144, 74, 22400.0 new=144, 74, 22400.0 same | frozen(2.4.1) swaps,depth=(158, 134) 1.7s
+vqe_two_local            hex_lattice s0 greedy_early_commit  old=102, 93, 29100.0 new=102, 93, 29100.0 same | frozen(2.4.1) swaps,depth=(102, 93) 2.0s
+vqe_two_local            hex_lattice s0 prism_retained_set   old= 85, 86, 26200.0 new= 85, 86, 26200.0 same | frozen(2.4.1) swaps,depth=(85, 86) 2.2s
+rg_qft_multiplier        grid        s0 quotient_sabre       old= 89,163, 53000.0 new= 89,163, 53000.0 same | frozen(2.4.1) swaps,depth=(108, 159) 0.1s
+rg_qft_multiplier        grid        s0 greedy_early_commit  old= 50,151, 51800.0 new= 50,151, 51800.0 same | frozen(2.4.1) swaps,depth=(50, 149) 1.6s
+rg_qft_multiplier        grid        s0 prism_retained_set   old= 23,102, 36800.0 new= 23,102, 36800.0 same | frozen(2.4.1) swaps,depth=(23, 101) 1.9s
+rg_qft_multiplier        hex_lattice s0 quotient_sabre       old=120,172, 52400.0 new=120,172, 52400.0 same | frozen(2.4.1) swaps,depth=(144, 173) 0.3s
+rg_qft_multiplier        hex_lattice s0 greedy_early_commit  old= 76,120, 39000.0 new= 76,120, 39000.0 same | frozen(2.4.1) swaps,depth=(77, 120) 1.8s
+rg_qft_multiplier        hex_lattice s0 prism_retained_set   old= 43,126, 43300.0 new= 43,126, 43300.0 same | frozen(2.4.1) swaps,depth=(43, 125) 1.7s
+multiplier               grid        s0 quotient_sabre       old= 89,165, 53700.0 new= 89,165, 53700.0 same | frozen(2.4.1) swaps,depth=(108, 161) 0.1s
+multiplier               grid        s0 greedy_early_commit  old= 53,121, 40900.0 new= 53,121, 40900.0 same | frozen(2.4.1) swaps,depth=(53, 121) 1.7s
+multiplier               grid        s0 prism_retained_set   old= 23,123, 43500.0 new= 23,123, 43500.0 same | frozen(2.4.1) swaps,depth=(23, 124) 1.5s
+multiplier               hex_lattice s0 quotient_sabre       old=120,174, 53100.0 new=120,174, 53100.0 same | frozen(2.4.1) swaps,depth=(144, 177) 0.3s
+multiplier               hex_lattice s0 greedy_early_commit  old= 74,121, 39800.0 new= 74,121, 39800.0 same | frozen(2.4.1) swaps,depth=(74, 120) 1.7s
+multiplier               hex_lattice s0 prism_retained_set   old= 46,124, 42300.0 new= 46,124, 42300.0 same | frozen(2.4.1) swaps,depth=(46, 124) 1.7s
+OLD-vs-NEW MISMATCHES: 0 of 96   |   NEW-vs-FROZEN(2.4.1) differing cells: 36 of 96
