@@ -1,14 +1,14 @@
 # PRISM
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/downloads/)
-[![CI](https://github.com/Yale-QCS/prism/actions/workflows/ci.yml/badge.svg)](https://github.com/Yale-QCS/prism/actions/workflows/ci.yml)
+[![CI](https://github.com/evmckinney9/prism/actions/workflows/ci.yml/badge.svg)](https://github.com/evmckinney9/prism/actions/workflows/ci.yml)
 
 PRISM is a Qiskit transpiler for dual-rail qubits.
 In the dual-rail encoding a logical qubit is carried by a pair of physical modes, so one logical gate has several physical realizations that touch different wires.
 PRISM keeps every realization of each gate through lowering and picks one at routing time, against the live layout.
 
 ```bash
-pip install git+https://github.com/Yale-QCS/prism
+pip install git+https://github.com/evmckinney9/prism
 ```
 
 Building from source needs a Rust toolchain.
@@ -34,4 +34,4 @@ Citation: TODO, once the paper is out.
 > [!IMPORTANT]
 > This software is provided as-is with no guarantee of support or maintenance.
 > AI tools were used to assist in writing code in this repository.
-> Bug reports and pull requests are welcome. For more information, see [the contribution guide](https://github.com/Yale-QCS/prism/blob/main/.github/CONTRIBUTING.md).
+> Bug reports and pull requests are welcome. For more information, see [the contribution guide](https://github.com/evmckinney9/prism/blob/main/.github/CONTRIBUTING.md).

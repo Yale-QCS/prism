@@ -22,7 +22,7 @@ classifiers = [
     "Programming Language :: Rust",
     "Topic :: Scientific/Engineering :: Physics",
 ]
-dependencies = ["qiskit>=2.5,<2.6", "numpy"]
+dependencies = ["qiskit>=2.5,<2.6", "numpy", "rustworkx>=0.15"]
 
 [tool.setuptools]
 include-package-data = false
@@ -36,15 +36,14 @@ include = ["prism", "prism.*"]
 namespaces = false
 
 [project.urls]
-Homepage = "https://github.com/Yale-QCS/prism"
-Repository = "https://github.com/Yale-QCS/prism"
-Issues = "https://github.com/Yale-QCS/prism/issues"
+Homepage = "https://github.com/evmckinney9/prism"
+Repository = "https://github.com/evmckinney9/prism"
+Issues = "https://github.com/evmckinney9/prism/issues"
 [project.optional-dependencies]
 viz = ["matplotlib", "pylatexenc"]
 format = ["pre-commit", "ruff"]
 test = ["pytest"]
-eval = ["mqt.bench==2.2.2", "prism-compiler[viz]"] # benchmark circuits for the QEC and mqt.bench scripts
-dev = ["prism-compiler[format,test,eval]"]
+dev = ["prism-compiler[format,test]"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -52,7 +51,7 @@ addopts = "--import-mode=importlib"
 filterwarnings = ["error"]
 
 [tool.ruff]
-extend-exclude = ["dev", "research"]
+extend-exclude = ["dev"]
 target-version = "py310"
 
 [tool.ruff.lint]

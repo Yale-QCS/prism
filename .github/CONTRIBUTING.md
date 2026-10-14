@@ -5,7 +5,7 @@
 Development uses Python 3.12 and Rust 1.97 or newer.
 
 ```sh
-git clone https://github.com/Yale-QCS/prism.git
+git clone https://github.com/evmckinney9/prism.git
 cd prism
 make init
 ```

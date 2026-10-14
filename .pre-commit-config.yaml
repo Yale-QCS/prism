@@ -1,4 +1,4 @@
-exclude: "^(dev|research)/"
+exclude: "^dev/"
 fail_fast: true
 
 repos:

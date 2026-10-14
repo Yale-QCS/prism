@@ -27,7 +27,7 @@ vendored kernel; Python keeps starting layouts, emission, and scoring.
 PYO3_PYTHON=$(which python3) cargo build
 ```
 
-Maturin sets `PYO3_PYTHON` automatically when building wheels.
+setuptools-rust sets `PYO3_PYTHON` to the building interpreter.
 
 ## Dependency pinning
 
