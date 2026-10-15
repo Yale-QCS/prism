@@ -24,7 +24,6 @@ from qiskit.transpiler.passes import (
     HighLevelSynthesis,
     HLSConfig,
     Optimize1qGatesDecomposition,
-    OptimizeSwapBeforeMeasure,
     RemoveBarriers,
     Unroll3qOrMore,
 )
@@ -71,7 +70,6 @@ def basic_logical_pm(
     return PassManager(
         [
             RemoveBarriers(),
-            OptimizeSwapBeforeMeasure(),
             HighLevelSynthesis(hls_config=HLSConfig(mcx=[], mcphase=[])),
             Decompose(["c-unitary", "unitary"]),
             Unroll3qOrMore(target=_unroll_target(enc, keep_mc=True)),

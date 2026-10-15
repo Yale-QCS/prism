@@ -23,25 +23,45 @@ def _logical(seed: int, n: int = 3) -> QuantumCircuit:
     return qc
 
 
-def _encode(logical_state: np.ndarray, n: int) -> np.ndarray:
-    """|b_1..b_n> -> rails (wire0, wire1) = |01> for 0, |10> for 1; wire order follows the lowering registers."""
+def _trailing_swap(seed: int) -> QuantumCircuit:
+    """Random circuit ending in an unmeasured SWAP (the logical stage must record it)."""
+    qc = random_circuit(3, 4, max_operands=2, seed=seed)
+    qc.swap(1, 2)
+    return qc
+
+
+def _trailing_x(seed: int) -> QuantumCircuit:
+    """Random circuit ending in unmeasured X, a rail SWAP the physical stage must keep."""
+    qc = random_circuit(3, 4, max_operands=2, seed=seed)
+    qc.x(0)
+    qc.crz(0.4, 1, 2)
+    qc.x(2)
+    return qc
+
+
+def _encode(logical_state: np.ndarray, n: int, perm: tuple[int, ...]) -> np.ndarray:
+    """|b_1..b_n> -> rails (wire0, wire1) = |01> for 0, |10> for 1; wire order follows the lowering registers.
+
+    Output logical position ``i`` holds input qubit ``perm[i]`` (the elided logical permutation).
+    """
     out = np.zeros(2 ** (2 * n), dtype=complex)
     for idx, amp in enumerate(logical_state):
         if abs(amp) < 1e-14:
             continue
         rails = 0
         for i in range(n):
-            bit = (idx >> i) & 1  # qiskit little-endian: qubit i is bit i
+            bit = (idx >> perm[i]) & 1  # qiskit little-endian: qubit i is bit i
             w0, w1 = 2 * i, 2 * i + 1
             rails |= ((bit) << w0) | ((1 - bit) << w1)
         out[rails] += amp
     return out
 
 
+@pytest.mark.parametrize("make", [_logical, _trailing_swap])
 @pytest.mark.parametrize("seed", [0, 1, 2])
-def test_routed_rails_match_encoded_logical_state(seed):
+def test_routed_rails_match_encoded_logical_state(make, seed):
     n = 3
-    qc = _logical(seed, n)
+    qc = make(seed)
     cmap = CouplingMap.from_grid(2, 4)  # 8 rails: 3 logical pairs + one spare
     pm = build_pm(
         cmap,
@@ -65,7 +85,7 @@ def test_routed_rails_match_encoded_logical_state(seed):
         reg = v_qubit._register
         by_index[2 * int(reg.name[1:]) + v_qubit._index] = pos
     sv_out = Statevector(out).data
-    expected_rails = _encode(Statevector(qc).data, n)
+    expected_rails = _encode(Statevector(qc).data, n, ps["logical_output_permutation"])
     # place expected rail state at the final physical positions, spare rails |0>
     n_phys = out.num_qubits
     expected = np.zeros(2**n_phys, dtype=complex)
