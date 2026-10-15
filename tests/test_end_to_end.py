@@ -135,16 +135,6 @@ def test_unsupported_control_flow_raises():
         pm.run(qc)
 
 
-def test_swap_before_measure_is_retargeted_only_on_measured_wires():
-    """X_L is a rail SWAP: dropped before a measurement, kept on an unmeasured qubit."""
-    qc = QuantumCircuit(2, 1)
-    qc.x(0)
-    qc.x(1)
-    qc.measure(0, 0)
-    out = build_pm(CouplingMap.from_grid(2, 3), enc=DualRail, seed=0).run(qc)
-    assert out.count_ops().get("swap", 0) == 1
-
-
 _NO_HANG = """
 from qiskit import QuantumCircuit
 from qiskit.transpiler import CouplingMap

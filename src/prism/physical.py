@@ -18,11 +18,10 @@ from qiskit.circuit.library import (
     SwapGate,
     XGate,
 )
-from qiskit.dagcircuit import DAGCircuit, DAGOpNode, DAGOutNode
+from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import (
     AnalysisPass,
     CouplingMap,
-    Layout,
     PassManager,
     StagedPassManager,
     Target,
@@ -40,57 +39,6 @@ if TYPE_CHECKING:
     from qiskit.circuit import Qubit
 
     from prism.encodings.base import QubitEncoding
-
-
-class SwapBeforeMeasureToLayout(TransformationPass):
-    """Remove a SWAP that only feeds final measurements; re-target them and update ``final_layout``.
-
-    A SWAP qualifies when each of its wires next reaches a final measurement or
-    the circuit's end, and at least one is measured. The measurements move to
-    the other wire and ``final_layout`` absorbs the exchange, so the output keeps
-    the measurement outcomes and, under ``final_layout``, every unmeasured state.
-    Stock ``OptimizeSwapBeforeMeasure`` also removes a SWAP before two output
-    nodes and updates no layout.
-    """
-
-    def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Remove qualifying SWAPs, last first, so a chain of them before a measurement goes too."""
-        final = self.property_set["final_layout"] or Layout(
-            {q: i for i, q in enumerate(dag.qubits)}
-        )
-        removed = False
-        for swap in reversed(list(dag.topological_op_nodes())):
-            if not isinstance(swap.op, SwapGate):
-                continue
-            succ = list(dag.quantum_successors(swap))
-            measures = [n for n in succ if isinstance(n, DAGOpNode)]
-            if not measures or not all(_is_final_measure(dag, n) for n in measures):
-                continue
-            a, b = swap.qargs
-            for m in measures:
-                dag.remove_op_node(m)
-            dag.remove_op_node(swap)
-            for m in measures:
-                other = b if m.qargs[0] == a else a
-                dag.apply_operation_back(m.op, (other,), m.cargs, check=False)
-            ia, ib = dag.find_bit(a).index, dag.find_bit(b).index
-            final = Layout(
-                {
-                    q: {ia: ib, ib: ia}.get(p, p)
-                    for q, p in final.get_virtual_bits().items()
-                }
-            )
-            removed = True
-        if removed:
-            self.property_set["final_layout"] = final
-        return dag
-
-
-def _is_final_measure(dag: DAGCircuit, node: DAGOpNode) -> bool:
-    """``node`` is a measurement and nothing follows it on any wire."""
-    return isinstance(node.op, Measure) and all(
-        isinstance(s, DAGOutNode) for s in dag.successors(node)
-    )
 
 
 class SeedVF2ErrorMap(AnalysisPass):
@@ -202,7 +150,6 @@ def physical_pm(
     )
     preset.layout = PassManager()
     preset.pre_routing = PassManager([SeedVF2ErrorMap(coupling_map)])
-    preset.post_routing = PassManager([SwapBeforeMeasureToLayout()])
     # ``CancelRailX`` strips the X-on-rail that O3's 2Q resynthesis leaves behind.
     preset.post_optimization = PassManager(
         [CancelRailX(), RescheduleCommutingDiagonals(), RecordCircuitMetrics()]
