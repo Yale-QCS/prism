@@ -172,11 +172,16 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             self.budget.refinement_iterations,
             self.budget.swap_trials,
         )
+        edges = frozenset(
+            e for a, b in self.coupling_map.get_edges() for e in ((a, b), (b, a))
+        )
         best = None  # (score, placed program, choices, n_swaps); first start wins ties
         for events, final_v2p, n_swaps, refined_v2p in results:
             data, chosen = self._replay(events, ctx, list(refined_v2p))
             placed = replace(
-                ir, data=data, placement=Placement(tuple(refined_v2p), tuple(final_v2p))
+                ir,
+                data=data,
+                placement=Placement(tuple(refined_v2p), tuple(final_v2p), edges),
             )
             s = score(placed.to_circuit(), self.budget.objective)
             if best is None or s < best[0]:

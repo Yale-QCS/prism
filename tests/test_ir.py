@@ -190,3 +190,26 @@ def test_loose_clbit_condition_compiles():
     out = build_pm(CouplingMap.from_grid(2, 3), DualRail, seed=0).run(qc)
     assert bit in out.clbits
     assert out.count_ops()["if_else"] == 1
+
+
+def test_verify_rejects_a_choice_off_the_device_edges():
+    """A pass after routing may revise a choice, but only to one the device can run."""
+    placed = PrismRouting(CouplingMap.from_line(4), seed=0).run(_program(_bell()))
+    placed.verify()
+    edges = placed.placement.edges
+    for k, ins in enumerate(placed.data):
+        op = ins.operation
+        if not isinstance(op, MultiRealizationOp):
+            continue
+        for r, real in enumerate(op.candidates):
+            pairs = [
+                tuple(ins.qubits[real.find_bit(q).index] for q in ci.qubits)
+                for ci in real.data
+                if len(ci.qubits) == 2
+            ]
+            if any(p not in edges for p in pairs):
+                placed.data[k] = ins._replace(operation=replace(op, choice=r))
+                with pytest.raises(TranspilerError, match="not a device edge"):
+                    placed.verify()
+                return
+    pytest.fail("every candidate is on an edge; pick a sparser coupling map")

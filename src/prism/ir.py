@@ -147,10 +147,13 @@ class Placement(NamedTuple):
 
     Virtual wire ``v`` (the rails, then ancillas) starts on physical qubit
     ``initial[v]`` and ends on ``final[v]``. Both have one entry per physical qubit.
+    ``edges`` are the device's coupled pairs, in both orientations: every
+    two-qubit gate of a placed program must sit on one.
     """
 
     initial: tuple[int, ...]
     final: tuple[int, ...]
+    edges: frozenset[tuple[int, int]]
 
 
 @dataclass(eq=False)
@@ -275,7 +278,8 @@ class MultiRealization(IR):
         n = self.num_wires
         if self.placement is not None:
             if n < len(self.qubits) or any(
-                sorted(m) != list(range(n)) for m in self.placement
+                sorted(m) != list(range(n))
+                for m in (self.placement.initial, self.placement.final)
             ):
                 _fail(f"placement is not a pair of permutations of {n} physical qubits")
         clbits = set(self.clbits)
@@ -294,9 +298,19 @@ class MultiRealization(IR):
                 _fail(f"{where}: clbits outside the program")
             if not isinstance(op, MultiRealizationOp):
                 _check_routable(op, len(ins.qubits), where)
+                if len(ins.qubits) == 2:
+                    self._check_on_edge(ins.qubits, where)
                 continue
             if op.choice is not None and not 0 <= op.choice < len(op.candidates):
                 _fail(f"{where}: choice {op.choice} out of range")
+            if op.choice is not None:
+                real = op.candidates[op.choice]
+                for ci in real.data:
+                    if len(ci.qubits) == 2:
+                        pair = tuple(
+                            ins.qubits[real.find_bit(q).index] for q in ci.qubits
+                        )
+                        self._check_on_edge(pair, f"{where} choice {op.choice}")
             for r, real in enumerate(op.candidates):
                 for ci in real.data:
                     _check_routable(
@@ -308,6 +322,13 @@ class MultiRealization(IR):
                         _fail(
                             f"{where}: marked diagonal, candidate {r} has {ci.operation.name!r}"
                         )
+
+    def _check_on_edge(self, pair: tuple[int, ...], where: str) -> None:
+        """Once placed, a two-qubit gate must be on a device edge."""
+        if self.placement is not None and pair not in self.placement.edges:
+            _fail(
+                f"{where}: two-qubit gate on physical {pair}, which is not a device edge"
+            )
 
 
 def _check_routable(op: Operation, width: int, where: str) -> None:

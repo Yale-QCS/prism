@@ -172,7 +172,7 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
             )
         ir.verify()
         dag = circuit_to_dag(ir.to_circuit())
-        initial, final = ir.placement
+        initial, final = ir.placement.initial, ir.placement.final
         # The virtual circuit is the rail circuit: rail w of logical qubit i is
         # virtual index wpl * i + w; free physical qubits become ancillas.
         ancillas = QuantumRegister(len(initial) - len(ir.qubits), "ancilla")
