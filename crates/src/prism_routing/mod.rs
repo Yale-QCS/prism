@@ -6,4 +6,3 @@
 pub mod ext;
 pub mod input;
 pub mod layout;
-pub mod routing;

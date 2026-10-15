@@ -146,17 +146,17 @@ def test_available_crz_commits_atomically_and_emits_complete_candidate():
     dag.add_qreg(qreg)
     dag.apply_operation_back(DualRail.crz(CRZGate(0.3)), list(qreg))
 
-    policy = PrismRouting(
-        CouplingMap.from_line(4),
-        enc=DualRail,
-        seed=0,
-        num_trials=1,
-        max_iterations=1,
-    )
+    cmap = CouplingMap.from_line(4)
+    policy = PrismRouting(cmap, enc=DualRail)
     ctx = policy._precompute(dag)
-    router = policy._make_router(ctx)
-    trace = router(policy._flatten_ctx(ctx), [0, 1, 2, 3], 0, 1)
-    events, final_v2p, n_swaps = trace
+    flat = policy._flatten_ctx(ctx)
+    target = prism_module.RoutingTarget.from_coupling_list(
+        list(cmap.get_edges()), ctx.n_phys
+    )
+    [(events, final_v2p, n_swaps, _refined)] = prism_module.prism_layout_and_routing(
+        flat, flat, target, policy._make_heuristic(4), [(0, [0, 1, 2, 3])], 0, 1
+    )
+    trace = (events, final_v2p, n_swaps)
 
     # Candidate 2 is the encoding default and uses the adjacent pair (1, 2).
     assert events == [(policy._EVENT_COMMIT, 0, 2)]

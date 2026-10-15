@@ -25,9 +25,6 @@ use pyo3::wrap_pyfunction;
 pub fn sabre(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(route::sabre_routing))?;
     m.add_wrapped(wrap_pyfunction!(
-        crate::prism_routing::routing::prism_routing
-    ))?;
-    m.add_wrapped(wrap_pyfunction!(
         crate::prism_routing::layout::prism_layout_and_routing
     ))?;
     m.add_class::<route::PyRoutingTarget>()?;

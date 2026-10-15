@@ -4,7 +4,7 @@ The outer loop follows Qiskit's O3 ``SabreLayout``: random and standard starting
 layouts undergo alternating forward/backward refinement, then one multi-trial
 forward route is retained per start. The best final route supplies the layout,
 the routed circuit, and the output permutation. The kernel is
-``crates/src/prism_routing/routing.rs``.
+``crates/src/prism_routing/layout.rs``.
 """
 
 from __future__ import annotations
@@ -32,7 +32,6 @@ from prism._accelerate import (
     RoutingTarget,
     SetScaling,
     prism_layout_and_routing,
-    prism_routing,
 )
 from prism.lowering.commit import (
     OBJECTIVES,
@@ -45,8 +44,6 @@ from prism.lowering.ir import LoweredOp
 from prism.utils.metrics import active_gate_count, physical_depth
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from prism.encodings.base import QubitEncoding
 
 
@@ -105,10 +102,9 @@ class PrismRouting(CommitPolicy):
         max_iterations: int = SABRE_ITERATIONS,
         num_trials: int = SABRE_TRIALS,
         swap_trials: int = SABRE_TRIALS,
-        heuristic: Heuristic | None = None,
         objective: str = "swaps",
     ) -> None:
-        """Bind connectivity, search effort, the route-selection ``objective``, and an optional ``Heuristic``."""
+        """Bind connectivity, search effort, and the route-selection ``objective``."""
         if coupling_map is None:
             raise ValueError("PrismRouting requires coupling_map")
         if objective not in OBJECTIVES:
@@ -121,7 +117,6 @@ class PrismRouting(CommitPolicy):
         self.max_iterations = max(1, max_iterations)
         self.num_trials = max(1, num_trials)
         self.swap_trials = max(1, swap_trials)
-        self.heuristic = heuristic
         self.objective = objective
 
     @property
@@ -163,8 +158,6 @@ class PrismRouting(CommitPolicy):
 
     def _make_heuristic(self, n_phys: int) -> Heuristic:
         """Qiskit's O3 ``"decay"`` heuristic, plus prism's load-balanced realization tie-break."""
-        if self.heuristic is not None:
-            return self.heuristic
         return Heuristic(
             basic=BasicHeuristic(1.0, SetScaling.Constant),
             lookahead=LookaheadHeuristic(0.5, 20, SetScaling.Size),
@@ -176,36 +169,9 @@ class PrismRouting(CommitPolicy):
             multi_sticky_witness=False,
         )
 
-    def _make_router(
-        self, ctx: "_Ctx"
-    ) -> Callable[[tuple, list[int], int, int], tuple]:
-        """Build the shared SABRE routing closure."""
-        heuristic = self._make_heuristic(ctx.n_phys)
-        target = RoutingTarget.from_coupling_list(
-            list(self.coupling_map.get_edges()), ctx.n_phys
-        )
-
-        def _route(
-            flat_args: tuple, v2p: list[int], seed: int, swap_trials: int
-        ) -> tuple:
-            virt_pairs, succ, pred_count, local_default = flat_args
-            return prism_routing(
-                virt_pairs,
-                succ,
-                pred_count,
-                local_default,
-                target,
-                heuristic,
-                v2p,
-                swap_trials,
-                seed,
-            )
-
-        return _route
-
     @staticmethod
     def _flatten_ctx(ctx: "_Ctx") -> tuple:
-        """Convert ``ctx`` to the flat precompute arrays passed to ``prism_routing``."""
+        """Convert ``ctx`` to the flat precompute arrays passed to ``prism_layout_and_routing``."""
         virt_pairs = [
             [[[int(p[0]), int(p[1])] for p in real] for real in op_pairs]
             for op_pairs in ctx.virt_pairs
