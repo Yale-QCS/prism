@@ -17,6 +17,7 @@ from typing import ClassVar
 from qiskit.circuit import (
     Clbit,
     Instruction,
+    Measure,
     QuantumCircuit,
     QuantumRegister,
 )
@@ -158,6 +159,12 @@ class QubitEncoding:
 
         block_q_to_logical = {q: i for i, q in enumerate(block.qubits)}
         for instr in block.data:
+            if isinstance(instr.operation, Measure):
+                raise TranspilerError(
+                    f"{cls.__name__} cannot lower a measurement inside a control-flow "
+                    "block: herald bits are allocated for top-level measurements only. "
+                    "Move the measurement out of the block."
+                )
             logical_qubits = tuple(block_q_to_logical[q] for q in instr.qubits)
             lowered = cls.lower(instr.operation, tuple(instr.clbits))
             if len(lowered.candidates) > 1:

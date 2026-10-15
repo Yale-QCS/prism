@@ -83,6 +83,17 @@ def test_if_else_with_multi_qubit_body_raises():
         build_pm(CouplingMap.from_grid(2, 3), enc=DualRail, seed=0).run(qc)
 
 
+def test_measure_inside_if_else_raises():
+    qc = QuantumCircuit(2, 2)
+    qc.measure(0, 0)
+    with qc.if_test((qc.clbits[0], True)):
+        qc.measure(1, 1)
+    with pytest.raises(
+        TranspilerError, match="measurement inside a control-flow block"
+    ):
+        build_pm(CouplingMap.from_grid(2, 3), enc=DualRail, seed=0).run(qc)
+
+
 @pytest.mark.parametrize("seed", [0, 1, 42, 2**32 - 1, 2**64 - 1])
 def test_prism_seed_boundaries(seed):
     """Every Python-to-Rust seed derivation stays in u64 range."""
