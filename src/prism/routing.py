@@ -38,7 +38,7 @@ from prism.ir import (
     MultiRealizationOp,
     Placement,
 )
-from prism.utils.metrics import active_gate_count, physical_depth
+from prism.metrics import active_gate_count, physical_depth
 
 __all__ = ["PrismRouting", "SearchBudget"]
 

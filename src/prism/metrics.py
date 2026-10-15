@@ -12,6 +12,13 @@ from qiskit.transpiler import AnalysisPass
 
 from prism.synthesis.preparation import SYNTHETIC_PREPARATION_LABEL
 
+__all__ = [
+    "CircuitMetrics",
+    "RecordCircuitMetrics",
+    "active_gate_count",
+    "physical_depth",
+]
+
 FREE_GATES: frozenset[str] = frozenset({"rz", "u1", "p", "z"})
 
 

@@ -34,6 +34,13 @@ from qiskit.transpiler import TranspilerError
 if TYPE_CHECKING:
     from prism.encodings.base import QubitEncoding
 
+__all__ = [
+    "MultiRealization",
+    "MultiRealizationInstruction",
+    "MultiRealizationOp",
+    "Placement",
+]
+
 #: Gate names a ``diagonal`` realization may contain.
 DIAGONAL_GATES = frozenset(
     {"rz", "crz", "z", "s", "sdg", "t", "tdg", "p", "cp", "cz", "rzz"}

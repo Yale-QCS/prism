@@ -30,10 +30,10 @@ from qiskit.transpiler import (
 from qiskit.transpiler.passes.layout.vf2_utils import ErrorMap
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
-from prism.synthesis.reschedule import RescheduleCommutingDiagonals
-from prism.utils.metrics import (
+from prism.metrics import (
     RecordCircuitMetrics,
 )
+from prism.synthesis.reschedule import RescheduleCommutingDiagonals
 
 if TYPE_CHECKING:
     from qiskit.circuit import Qubit

@@ -9,7 +9,7 @@ commutation-relaxed dependency graph, which only shortens the circuit.
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import TransformationPass
 
-from prism.utils.metrics import is_free
+from prism.metrics import is_free
 
 DIAGONAL = frozenset({"rz", "crz"})
 

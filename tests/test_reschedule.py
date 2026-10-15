@@ -5,8 +5,8 @@ from qiskit import QuantumCircuit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.quantum_info import Operator
 
+from prism.metrics import physical_depth
 from prism.synthesis.reschedule import RescheduleCommutingDiagonals
-from prism.utils.metrics import physical_depth
 
 
 def _circuit(seed: int) -> QuantumCircuit:
