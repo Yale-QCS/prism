@@ -70,10 +70,10 @@ class DAGToCircuit(GenericPass[DAGCircuit, QuantumCircuit]):
             out._layout = layout
             layout.write_into_property_set(self.property_set)
         # Private fields Qiskit's own PassManager backend sets the same way.
-        out._clbit_write_latency = self.property_set["clbit_write_latency"]  # pyright: ignore[reportAttributeAccessIssue]
-        out._conditional_latency = self.property_set["conditional_latency"]  # pyright: ignore[reportAttributeAccessIssue]
+        out._clbit_write_latency = self.property_set["clbit_write_latency"]
+        out._conditional_latency = self.property_set["conditional_latency"]
         if start_times := self.property_set["node_start_time"]:
-            out._op_start_times = [  # pyright: ignore[reportAttributeAccessIssue]
+            out._op_start_times = [
                 start_times[node] for node in passmanager_ir.topological_op_nodes()
             ]
         return out

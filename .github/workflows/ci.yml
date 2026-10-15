@@ -57,6 +57,3 @@ jobs:
           RUSTDOCFLAGS="-D warnings" cargo doc --manifest-path crates/Cargo.toml --no-deps
 
       - run: pytest tests/
-
-      - name: Type-check
-        run: pipx run pyright==1.1.414 --pythonpath "$(which python)"

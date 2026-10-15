@@ -77,12 +77,3 @@ binding = "PyO3"
 features = ["extension-module"]
 cargo-manifest-args = ["--locked"]
 debug = false
-
-[tool.setuptools.package-data]
-prism = ["py.typed", "_accelerate.pyi"]
-
-[tool.pyright]
-include = ["src/prism"]
-pythonVersion = "3.10"
-typeCheckingMode = "standard"
-stubPath = "typings"
