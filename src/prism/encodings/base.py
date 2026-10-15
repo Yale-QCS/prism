@@ -24,7 +24,7 @@ from qiskit.circuit.controlflow import ControlFlowOp, IfElseOp
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary
 from qiskit.transpiler import CouplingMap, PassManager, TranspilerError
 
-from prism.logical import basic_logical_pm
+from prism.logical import CONTROL_FLOW_OPS, basic_logical_pm
 from prism.lowering.ir import LoweredOp
 from prism.physical import physical_pm as _physical_pm
 
@@ -64,8 +64,14 @@ class QubitEncoding:
     def lower(cls, op: Instruction, clbits: tuple[Clbit, ...] = ()) -> LoweredOp:
         """Dispatch to ``cls.<op.name>``. ``clbits`` is forwarded only for ``ControlFlowOp``."""
         name = op.name
+        if isinstance(op, ControlFlowOp) and name not in cls.LOGICAL_ISA:
+            supported = sorted(cls.LOGICAL_ISA & CONTROL_FLOW_OPS) or "none"
+            raise TranspilerError(
+                f"{cls.__name__} does not support {name!r}; supported control "
+                f"flow: {supported}. Unroll or remove the {name!r} first."
+            )
         if name not in cls.LOGICAL_ISA:
-            raise ValueError(
+            raise TranspilerError(
                 f"Op {name!r} not in {cls.__name__}'s LOGICAL_ISA "
                 f"{sorted(cls.LOGICAL_ISA)}; transpile to the logical basis first."
             )
@@ -155,7 +161,7 @@ class QubitEncoding:
             logical_qubits = tuple(block_q_to_logical[q] for q in instr.qubits)
             lowered = cls.lower(instr.operation, tuple(instr.clbits))
             if not lowered.is_fixed:
-                raise ValueError(
+                raise TranspilerError(
                     f"Op {instr.operation.name!r} inside a control-flow block "
                     f"lowered to a multi-realization. Conditional 2Q gates aren't "
                     f"supported by the default if_else rule; move the op out of "

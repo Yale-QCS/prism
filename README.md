@@ -29,6 +29,10 @@ routed = pm.run(qc)
 print(pm.property_set["circuit_metrics"])
 ```
 
+The coupling map must be connected and symmetric, with at least two physical qubits per logical qubit.
+The only supported control flow is `if_else`. Its blocks may contain only single-qubit gates; an `if_else` over several qubits is lowered as one `if_else` per qubit, so its blocks must not write classical bits.
+Other inputs raise a `ValueError` (bad `build_pm` arguments) or a `TranspilerError` (an unsupported circuit).
+
 Citation: TODO, once the paper is out.
 
 > [!IMPORTANT]

@@ -60,11 +60,6 @@ def test_outer_search_hands_every_start_to_the_kernel(monkeypatch):
         ("identity", 8, [0, 1]),
         ("reverse", 9, [1, 0]),
     ]
-    monkeypatch.setattr(
-        prism_module.disjoint_utils,
-        "require_layout_isolated_to_component",
-        lambda *_: None,
-    )
     monkeypatch.setattr(policy, "_precompute", lambda _dag: ctx)
     monkeypatch.setattr(policy, "_reversed_ctx", lambda c: c)
     monkeypatch.setattr(policy, "_flatten_ctx", lambda c: ("flat", c))

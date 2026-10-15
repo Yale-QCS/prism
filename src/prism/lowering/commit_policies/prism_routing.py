@@ -21,8 +21,7 @@ from qiskit._accelerate.dense_layout import best_subset
 from qiskit.circuit.library import SwapGate
 from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
-from qiskit.transpiler import CouplingMap, Layout
-from qiskit.transpiler.passes.layout import disjoint_utils
+from qiskit.transpiler import CouplingMap, Layout, TranspilerError
 
 from prism._accelerate import (
     BasicHeuristic,
@@ -106,6 +105,17 @@ class PrismRouting(CommitPolicy):
         """Bind connectivity, search effort, and the route-selection ``objective``."""
         if coupling_map is None:
             raise ValueError("PrismRouting requires coupling_map")
+        if not coupling_map.is_connected():
+            raise ValueError(
+                "coupling_map is disconnected; prism routes on one connected "
+                "component. Pass the component to use, e.g. "
+                "coupling_map.connected_components()[0]."
+            )
+        if not coupling_map.is_symmetric:
+            raise ValueError(
+                "coupling_map is directed; prism needs every edge in both "
+                "directions. Call coupling_map.make_symmetric() first."
+            )
         if objective not in OBJECTIVES:
             raise ValueError(
                 f"objective must be one of {sorted(OBJECTIVES)}, got {objective!r}"
@@ -125,7 +135,6 @@ class PrismRouting(CommitPolicy):
 
     def commit(self, dag: DAGCircuit) -> CommitResult:
         """Refine every start in the kernel, then keep the best final route by objective."""
-        disjoint_utils.require_layout_isolated_to_component(dag, self.coupling_map)
         self.property_set["prism_objective"] = self.objective
         ctx = self._precompute(dag)
         base_seed = (
@@ -382,8 +391,10 @@ class PrismRouting(CommitPolicy):
         n_phys = self.coupling_map.size()
         n_virt = sum(reg.size for reg in regs)
         if n_virt > n_phys:
-            raise ValueError(
-                f"Coupling map has {n_phys} qubits, lowered circuit needs {n_virt}"
+            raise TranspilerError(
+                f"the circuit needs {n_virt} physical qubits ({len(regs)} logical "
+                f"x {self.enc.WIRES_PER_LOGICAL} wires) but the coupling map has "
+                f"{n_phys}. Use a larger coupling map or fewer qubits."
             )
         virt_pairs, virts_used = self._precompute_op_data(op_nodes, q_to_virt)
         real_idx_map = [tuple(range(len(n.op.realizations))) for n in op_nodes]

@@ -100,3 +100,32 @@ def test_prism_same_seed_repeats():
         pm.run(qc)
         metrics.append(pm.property_set["circuit_metrics"])
     assert metrics[0] == metrics[1]
+
+
+def test_disconnected_coupling_map_is_rejected():
+    cmap = CouplingMap([[0, 1], [1, 0], [2, 3], [3, 2]])
+    with pytest.raises(ValueError, match="disconnected"):
+        build_pm(cmap, enc=DualRail)
+
+
+def test_directed_coupling_map_is_rejected():
+    with pytest.raises(ValueError, match="make_symmetric"):
+        build_pm(CouplingMap.from_line(6, bidirectional=False), enc=DualRail)
+
+
+def test_too_many_qubits_raises():
+    qc = QuantumCircuit(4)
+    qc.crz(0.3, 0, 3)
+    pm = build_pm(CouplingMap.from_grid(2, 3), enc=DualRail)
+    with pytest.raises(TranspilerError, match="needs 8 physical qubits"):
+        pm.run(qc)
+
+
+def test_unsupported_control_flow_raises():
+    qc = QuantumCircuit(2, 1)
+    qc.measure(0, 0)
+    with qc.while_loop((qc.clbits[0], True)):
+        qc.x(1)
+    pm = build_pm(CouplingMap.from_grid(2, 3), enc=DualRail)
+    with pytest.raises(TranspilerError, match="does not support 'while_loop'"):
+        pm.run(qc)
