@@ -28,9 +28,37 @@ New items in the patch carry a `PRISM:` comment. The patch:
   `State.multi` at every point where `TwoQ` nodes enter or leave `Layers`; adds their candidate
   swaps and scores in `choose_best_swap`; and calls the multi-realization release valve and load
   decay from the main loop.
+- `route.rs`: fixes the delta update of the lookahead layers (below).
 
-With no `MultiTwoQ` node in the input, the patched router is the stock router. The stock-parity
-test checks this against the installed Qiskit wheel.
+### Local bug fix: lookahead layers
+
+One hunk of the patch is a bug fix, not a hook, and is a deliberate deviation from upstream:
+`State::update_route`'s delta update of the lookahead layers (`route.rs`, the `for num_layer`
+loop). Upstream (2.5 to 2.6.0rc1) loses gates from lookahead layers 1 and deeper in two ways:
+
+- **Dropped successor.** A gate is lost from layer k when its last predecessor to be satisfied
+  was routed in the same update while another of its predecessors is still in layer k-1.
+  Upstream tests `prev_predecessors[node]` (the routed predecessor) where it needs
+  `prev_predecessors[satisfied]` (the successor).
+- **Multi-layer jump.** A node that moves up more than one layer in one update satisfies its
+  successors only in the next tracker, so they stay blocked in the deeper layers for the rest of
+  the route.
+
+The fix tests the successor and carries such a node to the next level while its edges in the
+next tracker are still unsatisfied. Stock routing of random CX circuits barely notices the
+defect, because few gates route at once; prism's commits route many gates in cascades, so with
+the defect most routing steps score a wrong lookahead layer (+8% router SWAPs at one layer, and
+deeper lookahead stops helping). `Synchronize` and `ControlFlow` nodes have the same
+multi-layer jump; prism emits neither, so the hunk leaves them alone.
+
+The Rust tests `lookahead_keeps_successor_of_routed_gate` (the minimal 4-gate case) and
+`lookahead_layers_match_rebuild_while_routing` (layers rebuilt from scratch at every step,
+1, 2 and 4 layers) fail without it. Drop the hunk when upstream fixes the defect, then rerun
+those tests.
+
+With no `MultiTwoQ` node in the input and no lookahead, the patched router is the stock router.
+The stock-parity test checks this against the installed Qiskit wheel. With lookahead the two
+differ by the bug fix above.
 
 `mod.rs` is local: it replaces upstream `mod.rs`, which registers upstream's Python functions,
 and omits upstream `layout.rs`, which imports the private `passes::disjoint_layout`. prism's

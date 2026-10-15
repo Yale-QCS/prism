@@ -820,22 +820,26 @@ impl State {
             if self.reached_previous_layer.is_empty() {
                 break;
             }
-            let [prev_predecessors, predecessors] =
-                &mut self.predecessors[num_layer as usize - 1..num_layer as usize + 1]
-            else {
+            let (shallower, deeper) = self.predecessors.split_at_mut(num_layer as usize + 1);
+            let [.., prev_predecessors, predecessors] = shallower else {
                 panic!("not enough predecessor trackers in self");
             };
-            for node in self.reached_previous_layer.drain(..) {
+            // PRISM: a node can move up several layers in one update, when the predecessors that
+            // held it back are routed in the same update.  Its edges are then also unsatisfied
+            // in the deeper trackers, so it stays in `reached_previous_layer` for the next level.
+            for node in std::mem::take(&mut self.reached_previous_layer) {
                 satisfy_successor_edges(node, problem.sabre, predecessors, |satisfied| {
-                    // We only want to visit the `satisfied` node at our own level if its
-                    // predecessor is actually in the layer structure of the previous level.  If
-                    // it passed completely through the previous level, then we're going to see the
-                    // successor later in `reached_previous_layer`, so it's not eligible for
-                    // visiting to add to our own layer.
-                    if prev_predecessors[node] != u32::MAX {
+                    // PRISM: visit `satisfied` at our own level unless the previous level reached
+                    // it too (it is in that layer or passed through it), in which case it is in
+                    // `reached_previous_layer`.  Upstream tests `node` instead, which loses a
+                    // successor that still waits on a predecessor in the previous layer.
+                    if !matches!(prev_predecessors[satisfied], 0 | u32::MAX) {
                         self.visit.push_back(satisfied);
                     }
-                })
+                });
+                if deeper.first().is_some_and(|next| next[node] != u32::MAX) {
+                    self.reached_previous_layer.push(node);
+                }
             }
             while let Some(node) = self.visit.pop_front() {
                 match &sabre_dag[node].kind {

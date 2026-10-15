@@ -170,9 +170,11 @@ impl MultiLayers {
         self.layers[usize::from(layer)].iter().copied()
     }
 
-    /// Put `node` in lookahead `layer`.  Front-layer insertion goes through [`Self::defer`].
+    /// Put `node` in lookahead `layer`, moving it out of any deeper layer that holds it, as
+    /// `Layers::insert` does.  Front-layer insertion goes through [`Self::defer`].
     pub(super) fn insert(&mut self, layer: u16, node: NodeIndex) {
-        debug_assert!(layer > 0 && self.location[node].is_none());
+        debug_assert!(layer > 0);
+        self.unlink(node);
         self.layers[usize::from(layer)].push(node);
         self.location[node] = Some(layer);
     }
@@ -189,6 +191,17 @@ impl MultiLayers {
 
     /// Remove `node` from whichever layer holds it, and return that layer.
     pub(super) fn remove(&mut self, node: NodeIndex, sabre: &SabreDAG) -> Option<u16> {
+        let layer = self.unlink(node)?;
+        if layer == 0 {
+            for q in qubits(realizations(sabre, node)) {
+                self.front_active[q] -= 1;
+            }
+        }
+        Some(layer)
+    }
+
+    /// Take `node` out of the layer holding it, if any, and return that layer.
+    fn unlink(&mut self, node: NodeIndex) -> Option<u16> {
         let layer = self.location[node].take()?;
         let nodes = &mut self.layers[usize::from(layer)];
         let pos = nodes
@@ -197,11 +210,6 @@ impl MultiLayers {
             .expect("`location` and `layers` agree");
         // Order-preserving: the scoring sum and the routable-node order follow insertion order.
         nodes.remove(pos);
-        if layer == 0 {
-            for q in qubits(realizations(sabre, node)) {
-                self.front_active[q] -= 1;
-            }
-        }
         Some(layer)
     }
 
@@ -481,8 +489,10 @@ mod tests {
     use ndarray::array;
     use qiskit_circuit::dag_circuit::DAGCircuit;
 
-    use super::super::super::heuristic::{BasicHeuristic, Heuristic, SetScaling};
-    use super::super::{PyRoutingTarget, swap_map};
+    use super::super::super::heuristic::{
+        BasicHeuristic, Heuristic, LookaheadHeuristic, SetScaling,
+    };
+    use super::super::{PyRoutingTarget, State, satisfy_successor_edges, swap_map};
     use super::{
         DiGraph, InteractionKind, MultiLayers, NLayout, NodeIndex, PhysicalQubit, RoutingProblem,
         SabreDAG, SabreNode, VirtRealizations, VirtualQubit, chain_dag, min_cost,
@@ -622,6 +632,153 @@ mod tests {
             default_realization: 0,
         });
         assert_eq!(route(&sabre, &target), (0, vec![1]));
+    }
+
+    fn lookahead(num_layers: usize) -> Heuristic {
+        let weights = vec![0.1; num_layers];
+        let lookahead = LookaheadHeuristic::new(weights, SetScaling::Constant);
+        Heuristic::new(
+            Some(BasicHeuristic::new(1.0, SetScaling::Constant)),
+            Some(lookahead.expect("few layers")),
+            None,
+            Some(100),
+            1e-10,
+        )
+    }
+
+    /// A DAG of `ops`, each depending on the latest earlier op on each of its qubits.
+    fn dag_of(ops: Vec<InteractionKind>) -> SabreDAG {
+        let mut dag = DiGraph::new();
+        let mut last = std::collections::HashMap::new();
+        let mut first_layer = Vec::new();
+        for (k, kind) in ops.into_iter().enumerate() {
+            let wires: Vec<VirtualQubit> = match &kind {
+                InteractionKind::TwoQ(pair) => pair.to_vec(),
+                InteractionKind::MultiTwoQ { realizations, .. } => {
+                    super::qubits(realizations).collect()
+                }
+                _ => unreachable!("tests build two-qubit nodes only"),
+            };
+            let node = dag.add_node(SabreNode {
+                indices: vec![NodeIndex::new(k)],
+                kind,
+            });
+            let mut preds: Vec<NodeIndex> =
+                wires.iter().filter_map(|q| last.get(q)).copied().collect();
+            preds.sort();
+            preds.dedup();
+            if preds.is_empty() {
+                first_layer.push(node);
+            }
+            for pred in preds {
+                dag.add_edge(pred, node, ());
+            }
+            for q in wires {
+                last.insert(q, node);
+            }
+        }
+        SabreDAG {
+            initial: Vec::new(),
+            dag,
+            first_layer,
+        }
+    }
+
+    /// Every lookahead layer's nodes (stock and multi), sorted.
+    fn held_layers(state: &State) -> Vec<Vec<NodeIndex>> {
+        (1..state.layers.num_layers().get())
+            .map(|k| {
+                let stock = state.layers.layers()[usize::from(k)].iter_gates();
+                let mut nodes: Vec<_> = stock.map(|(n, _)| n).chain(state.multi.nodes(k)).collect();
+                nodes.sort();
+                nodes
+            })
+            .collect()
+    }
+
+    /// The lookahead layers rebuilt from the front layer, as `State::begin` builds them.
+    fn rebuilt_layers(state: &State, sabre: &SabreDAG) -> Vec<Vec<NodeIndex>> {
+        let mut predecessors = state.predecessors[0].clone();
+        let front = state.layers.front().iter_gates().map(|(n, _)| n);
+        let mut previous: Vec<NodeIndex> = front.chain(state.multi.nodes(0)).collect();
+        let mut layers = Vec::new();
+        for _ in 1..state.layers.num_layers().get() {
+            let mut layer = Vec::new();
+            for &node in &previous {
+                satisfy_successor_edges(node, sabre, &mut predecessors, |s| layer.push(s));
+            }
+            layer.sort();
+            previous = layer.clone();
+            layers.push(layer);
+        }
+        layers
+    }
+
+    #[test]
+    fn lookahead_keeps_successor_of_routed_gate() {
+        // On the line 0-..-5: `u` and `f` wait in the front layer, `s` follows `f`, and `t`
+        // follows both `s` and `u`.  Once `f` is routable, `s` routes at once, so `t` waits only
+        // on `u` and belongs in the first lookahead layer.
+        let pair = |a, b| InteractionKind::TwoQ([v(a), v(b)]);
+        let sabre = dag_of(vec![pair(0, 5), pair(1, 3), pair(3, 4), pair(4, 5)]);
+        let target = line(6);
+        let dag = DAGCircuit::new();
+        let heuristic = lookahead(1);
+        let problem = RoutingProblem {
+            target: target.0.as_ref().expect("explicit target"),
+            sabre: &sabre,
+            dag: &dag,
+            heuristic: &heuristic,
+        };
+        let (mut state, mut order) = State::begin(problem, NLayout::generate_trivial_layout(6), 0);
+        assert_eq!(held_layers(&state), vec![vec![NodeIndex::new(2)]]);
+        state.apply_swap([PhysicalQubit::new(1), PhysicalQubit::new(2)]);
+        state.update_route(problem, &mut order, &[NodeIndex::new(1)], None);
+        assert_eq!(held_layers(&state), vec![vec![NodeIndex::new(3)]]);
+    }
+
+    #[test]
+    fn lookahead_layers_match_rebuild_while_routing() {
+        let n = 7;
+        let ops = (0..60u32)
+            .map(|k| {
+                let a = (k * 3) % n;
+                let b = (a + 1 + (k * 5) % (n - 1)) % n;
+                let c = (b + 1 + k % (n - 2)) % n;
+                if k % 3 == 0 && c != a {
+                    InteractionKind::MultiTwoQ {
+                        realizations: reals(&[&[[a, b]], &[[a, c], [c, b]]]),
+                        default_realization: 0,
+                    }
+                } else {
+                    InteractionKind::TwoQ([v(a), v(b)])
+                }
+            })
+            .collect();
+        let sabre = dag_of(ops);
+        let target = line(n);
+        let dag = DAGCircuit::new();
+        for num_layers in [1, 2, 4] {
+            let heuristic = lookahead(num_layers);
+            let problem = RoutingProblem {
+                target: target.0.as_ref().expect("explicit target"),
+                sabre: &sabre,
+                dag: &dag,
+                heuristic: &heuristic,
+            };
+            let (mut state, mut order) =
+                State::begin(problem, NLayout::generate_trivial_layout(n), 0);
+            // Route with the release valve alone: deterministic, and every step routes a node.
+            while !(state.layers.front().is_empty() && state.multi.is_empty(0)) {
+                assert_eq!(held_layers(&state), rebuilt_layers(&state, &sabre));
+                let mut swaps = Vec::new();
+                let nodes = state.force_enable_or_subroute(problem, &mut order, &mut swaps);
+                if !nodes.is_empty() {
+                    state.update_route(problem, &mut order, &nodes, Some(swaps));
+                }
+            }
+            assert_eq!(order.order.len(), sabre.dag.node_count());
+        }
     }
 
     #[test]

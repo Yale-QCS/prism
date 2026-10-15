@@ -75,7 +75,7 @@ index 31d5544..4391e68 100644
  pub struct Heuristic {
      pub basic: Option<BasicHeuristic>,
 diff --git a/src/sabre/route.rs b/src/sabre/route.rs
-index 90847d4..bb9a387 100644
+index 90847d4..9aff32a 100644
 --- a/src/sabre/route.rs
 +++ b/src/sabre/route.rs
 @@ -38,6 +38,9 @@ use super::dag::{InteractionKind, SabreDAG};
@@ -282,7 +282,45 @@ index 90847d4..bb9a387 100644
              }
          }
  
-@@ -817,6 +850,12 @@ impl State {
+@@ -787,22 +820,26 @@ impl State {
+             if self.reached_previous_layer.is_empty() {
+                 break;
+             }
+-            let [prev_predecessors, predecessors] =
+-                &mut self.predecessors[num_layer as usize - 1..num_layer as usize + 1]
+-            else {
++            let (shallower, deeper) = self.predecessors.split_at_mut(num_layer as usize + 1);
++            let [.., prev_predecessors, predecessors] = shallower else {
+                 panic!("not enough predecessor trackers in self");
+             };
+-            for node in self.reached_previous_layer.drain(..) {
++            // PRISM: a node can move up several layers in one update, when the predecessors that
++            // held it back are routed in the same update.  Its edges are then also unsatisfied
++            // in the deeper trackers, so it stays in `reached_previous_layer` for the next level.
++            for node in std::mem::take(&mut self.reached_previous_layer) {
+                 satisfy_successor_edges(node, problem.sabre, predecessors, |satisfied| {
+-                    // We only want to visit the `satisfied` node at our own level if its
+-                    // predecessor is actually in the layer structure of the previous level.  If
+-                    // it passed completely through the previous level, then we're going to see the
+-                    // successor later in `reached_previous_layer`, so it's not eligible for
+-                    // visiting to add to our own layer.
+-                    if prev_predecessors[node] != u32::MAX {
++                    // PRISM: visit `satisfied` at our own level unless the previous level reached
++                    // it too (it is in that layer or passed through it), in which case it is in
++                    // `reached_previous_layer`.  Upstream tests `node` instead, which loses a
++                    // successor that still waits on a predecessor in the previous layer.
++                    if !matches!(prev_predecessors[satisfied], 0 | u32::MAX) {
+                         self.visit.push_back(satisfied);
+                     }
+-                })
++                });
++                if deeper.first().is_some_and(|next| next[node] != u32::MAX) {
++                    self.reached_previous_layer.push(node);
++                }
+             }
+             while let Some(node) = self.visit.pop_front() {
+                 match &sabre_dag[node].kind {
+@@ -817,6 +854,12 @@ impl State {
                              self.reached_previous_layer.push(node);
                          }
                      }
@@ -295,7 +333,7 @@ index 90847d4..bb9a387 100644
                  }
              }
          }
-@@ -901,19 +940,21 @@ impl State {
+@@ -901,19 +944,21 @@ impl State {
                  }
              }
          }
@@ -319,7 +357,7 @@ index 90847d4..bb9a387 100644
                      }
                  }
              };
-@@ -921,17 +962,22 @@ impl State {
+@@ -921,17 +966,22 @@ impl State {
              for (swap, score) in self.swap_scores.iter_mut() {
                  *score += weight * front.score(*swap, dist);
              }
@@ -345,7 +383,7 @@ index 90847d4..bb9a387 100644
                          }
                      }
                  };
-@@ -939,6 +985,9 @@ impl State {
+@@ -939,6 +989,9 @@ impl State {
                  for (swap, score) in self.swap_scores.iter_mut() {
                      *score += weight * layer.score(*swap, dist);
                  }
@@ -355,7 +393,7 @@ index 90847d4..bb9a387 100644
              }
          }
  
-@@ -1067,7 +1116,7 @@ pub fn swap_map_trial<'a>(
+@@ -1067,7 +1120,7 @@ pub fn swap_map_trial<'a>(
      let mut num_search_steps = 0;
      // The front layer only becomes empty when all nodes have been routed.  At each iteration of
      // this loop, we route either one or two gates.
@@ -364,7 +402,7 @@ index 90847d4..bb9a387 100644
          let mut current_swaps: Vec<[PhysicalQubit; 2]> = Vec::new();
          // Swap-mapping loop.  This is the main part of the algorithm, which we repeat until we
          // either successfully route a node, or exceed the maximum number of attempts.
-@@ -1084,6 +1133,7 @@ pub fn swap_map_trial<'a>(
+@@ -1084,6 +1137,7 @@ pub fn swap_map_trial<'a>(
              if let Some(node) = state.routable_node_on_qubit(problem, best_swap[0]) {
                  routable_nodes.push(node);
              }
@@ -372,7 +410,7 @@ index 90847d4..bb9a387 100644
              if let Some(DecayHeuristic { increment, reset }) = problem.heuristic.decay {
                  num_search_steps += 1;
                  if num_search_steps >= reset {
-@@ -1103,10 +1153,13 @@ pub fn swap_map_trial<'a>(
+@@ -1103,10 +1157,13 @@ pub fn swap_map_trial<'a>(
                  .drain(..)
                  .rev()
                  .for_each(|swap| state.apply_swap(swap));
