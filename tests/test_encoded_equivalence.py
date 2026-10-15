@@ -131,3 +131,43 @@ def test_routed_rails_match_encoded_logical_state(make, seed):
         expected[phys] += amp
     overlap = abs(np.vdot(expected, sv_out))
     assert overlap == pytest.approx(1.0, abs=1e-6), f"overlap {overlap}"
+
+
+def _clbit_probabilities(qc: QuantumCircuit, clbits) -> dict[int, float]:
+    """Exact distribution of ``clbits`` (bit k of the key = ``clbits[k]``) for final measurements."""
+    meas = {
+        qc.find_bit(ins.clbits[0]).index: qc.find_bit(ins.qubits[0]).index
+        for ins in qc.data
+        if ins.operation.name == "measure"
+    }
+    targets = [meas[qc.find_bit(c).index] for c in clbits]
+    probs = Statevector(qc.remove_final_measurements(inplace=False)).probabilities()
+    out: dict[int, float] = {}
+    for idx, p in enumerate(probs):
+        if p > 1e-12:
+            key = sum(((idx >> q) & 1) << k for k, q in enumerate(targets))
+            out[key] = out.get(key, 0.0) + p
+    return out
+
+
+@pytest.mark.parametrize("seed", [0, 1, 2])
+def test_measured_output_matches_logical_distribution(seed):
+    """Final measurements keep the logical distribution when SWAPs before them become re-targets."""
+    qc = random_circuit(3, 4, max_operands=2, seed=seed)
+    qc.x(0)
+    qc.swap(1, 2)
+    qc.crz(0.6, 0, 2)
+    qc.x(2)
+    qc.add_register(ClassicalRegister(3))
+    qc.measure(range(3), range(3))
+    pm = build_pm(
+        CouplingMap.from_grid(2, 4),
+        enc=DualRail,
+        seed=seed,
+        budget=SearchBudget(layout_starts=4, refinement_iterations=2, swap_trials=4),
+    )
+    out = pm.run(qc)
+    want = _clbit_probabilities(qc, qc.clbits)
+    got = _clbit_probabilities(out, qc.clbits)  # logical clbits read rail 0
+    assert got.keys() == want.keys()
+    assert all(got[k] == pytest.approx(want[k], abs=1e-9) for k in want)
