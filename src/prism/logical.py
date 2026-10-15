@@ -11,6 +11,7 @@ from qiskit.circuit.library import (
     MCXGate,
 )
 from qiskit.dagcircuit import DAGCircuit
+from qiskit.passmanager import DoWhileController
 from qiskit.transpiler import (
     PassManager,
     Target,
@@ -19,10 +20,13 @@ from qiskit.transpiler.passes import (
     BasisTranslator,
     Decompose,
     ElidePermutations,
+    FixedPoint,
     HighLevelSynthesis,
     HLSConfig,
     Optimize1qGatesDecomposition,
     RemoveBarriers,
+    RemoveDiagonalGatesBeforeMeasure,
+    Size,
     Unroll3qOrMore,
 )
 
@@ -63,7 +67,7 @@ def basic_logical_pm(
     eq_library: EquivalenceLibrary,
     reshape_passes: tuple = (),
 ) -> PassManager:
-    """Standard cleanup → translate to ``enc.LOGICAL_ISA``."""
+    """Standard cleanup, translate to ``enc.LOGICAL_ISA``, elide SWAPs, drop diagonals before measures."""
     isa_basis = sorted(enc.LOGICAL_ISA - NON_GATE_ISA_NAMES)
     return PassManager(
         [
@@ -77,6 +81,19 @@ def basic_logical_pm(
             *reshape_passes,
             BasisTranslator(eq_library, sorted(enc.LOGICAL_ISA | CONTROL_FLOW_OPS)),
             Optimize1qGatesDecomposition(basis=isa_basis),
+            # Before layout a SWAP only relabels logical qubits.
+            ElideLogicalPermutations(),
+            # A diagonal gate right before a final measurement does not change its
+            # outcome; removing it here keeps routing from spending SWAPs on it. One
+            # sweep can expose another (rz after crz), hence the fixed point.
+            DoWhileController(
+                [
+                    RemoveDiagonalGatesBeforeMeasure(),
+                    Size(recurse=True),
+                    FixedPoint("size"),
+                ],
+                do_while=lambda property_set: not property_set["size_fixed_point"],
+            ),
         ]
     )
 

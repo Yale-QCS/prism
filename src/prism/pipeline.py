@@ -3,9 +3,7 @@
 Stages and their IRs::
 
     input                     QuantumCircuit -> DAGCircuit        CircuitToDAG
-    logical                   DAGCircuit -> DAGCircuit            enc.logical_pm(), then
-                                                                  RemoveDiagonalGatesBeforeMeasure
-                                                                  to a fixed point
+    logical                   DAGCircuit -> DAGCircuit            enc.logical_pm(): stock passes
     dag_to_multi_realization  DAGCircuit -> MultiRealization      DAGToMultiRealization
     routing                   MultiRealization -> MultiRealization PrismRouting
     multi_realization_to_dag  MultiRealization -> DAGCircuit      MultiRealizationToDAG
@@ -27,10 +25,9 @@ from qiskit.circuit import (
 )
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.dagcircuit import DAGCircuit
-from qiskit.passmanager import DoWhileController, GenericPass, MultiStagePassManager
+from qiskit.passmanager import GenericPass, MultiStagePassManager
 from qiskit.passmanager.compilation_status import PassManagerState, RunState
 from qiskit.transpiler import CouplingMap, Layout, TranspileLayout, TranspilerError
-from qiskit.transpiler.passes import FixedPoint, RemoveDiagonalGatesBeforeMeasure, Size
 
 from prism.ir import MultiRealization, MultiRealizationInstruction
 from prism.routing import PrismRouting, SearchBudget
@@ -242,23 +239,9 @@ def build_pm(
     Raises:
         ValueError: if ``coupling_map`` is disconnected or directed.
     """
-    logical = enc.logical_pm()
-    # A diagonal gate right before a final measurement does not change its outcome. Stock O3
-    # deletes it in the physical stage, after routing has spent SWAPs on it, so delete it first.
-    # One sweep can expose another diagonal gate (rz after crz), hence the fixed point.
-    logical.append(
-        DoWhileController(
-            [
-                RemoveDiagonalGatesBeforeMeasure(),
-                Size(recurse=True),
-                FixedPoint("size"),
-            ],
-            do_while=lambda property_set: not property_set["size_fixed_point"],
-        )
-    )
     return MultiStagePassManager(
         input=CircuitToDAG(),
-        logical=logical,
+        logical=enc.logical_pm(),
         dag_to_multi_realization=DAGToMultiRealization(enc),
         routing=PrismRouting(coupling_map, seed=seed, budget=budget),
         multi_realization_to_dag=MultiRealizationToDAG(),

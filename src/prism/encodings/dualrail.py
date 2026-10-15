@@ -10,7 +10,7 @@ from qiskit.transpiler import PassManager
 
 from prism.encodings.base import QubitEncoding
 from prism.ir import MultiRealizationOp
-from prism.logical import ElideLogicalPermutations, basic_logical_pm
+from prism.logical import basic_logical_pm
 from prism.synthesis.delocal_decomp import build_equivalence_library
 from prism.synthesis.h_reduction import HadamardReduction
 from prism.synthesis.margolus import MargolusPairOptimizer
@@ -51,7 +51,7 @@ class DualRail(QubitEncoding):
     @classmethod
     def logical_pm(cls) -> PassManager:
         """DR rich pre-lowering: basic cleanup + DR-specific reshape + DR equivalence library."""
-        pm = basic_logical_pm(
+        return basic_logical_pm(
             cls,
             eq_library=build_equivalence_library(),
             reshape_passes=(
@@ -64,11 +64,6 @@ class DualRail(QubitEncoding):
                 HadamardReduction(),
             ),
         )
-        # Input SWAPs express a permutation of logical identities.  Remove
-        # them before code expansion; routing SWAPs inserted in later stages
-        # remain physical operations.
-        pm.append(ElideLogicalPermutations())
-        return pm
 
     @classmethod
     def custom_name_mapping(cls) -> dict:
