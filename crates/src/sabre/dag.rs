@@ -4,7 +4,7 @@
 //
 // This code is licensed under the Apache License, Version 2.0. You may
 // obtain a copy of this license in the LICENSE.txt file in the root directory
-// of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+// of this source tree or at https://www.apache.org/licenses/LICENSE-2.0.
 //
 // Any modifications or derivative works of this code must retain this
 // copyright notice, and modified files need to carry a notice indicating
@@ -21,8 +21,6 @@ use qiskit_circuit::operations::Operation;
 use qiskit_circuit::packed_instruction::PackedOperation;
 use qiskit_circuit::{Qubit, VirtualQubit};
 
-use crate::prism_routing::ext::VirtRealizations;
-
 /// The type of a node in the Sabre interactions graph.
 #[derive(Clone, Debug)]
 pub enum InteractionKind {
@@ -34,9 +32,9 @@ pub enum InteractionKind {
     Synchronize,
     /// A two-qubit interaction.  This is the principal component that we're concerned with.
     TwoQ([VirtualQubit; 2]),
-    /// A node whose 2Q content has multiple alternative realizations.
+    /// PRISM: a two-qubit interaction with alternative realizations, each a list of pairs.
     MultiTwoQ {
-        realizations: VirtRealizations,
+        realizations: crate::prism_routing::VirtRealizations,
         default_realization: u32,
     },
     /// A control-flow operation on more than two qubits.  If it's only on a single qubit, it'll be
@@ -161,10 +159,7 @@ impl SabreDAG {
                 single.map_or(Predecessors::AllUnmapped, Predecessors::Single)
             };
 
-        for dag_node in dag
-            .topological_op_nodes(false)
-            .expect("infallible if DAG is in a valid state")
-        {
+        for dag_node in dag.topological_op_nodes(false) {
             let NodeType::Operation(inst) = &dag[dag_node] else {
                 panic!("op nodes should always be of type `Operation`");
             };

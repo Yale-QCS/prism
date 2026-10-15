@@ -1,37 +1,29 @@
-// This code is part of Qiskit.
-//
-// (C) Copyright IBM 2022
-//
-// This code is licensed under the Apache License, Version 2.0. You may
-// obtain a copy of this license in the LICENSE.txt file in the root directory
-// of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
-//
-// Any modifications or derivative works of this code must retain this
-// copyright notice, and modified files need to carry a notice indicating
-// that they have been altered from the originals.
+//! Qiskit's Sabre router, vendored from `crates/transpiler/src/passes/sabre/` at Qiskit
+//! 2.6.0rc1 with `local.patch` applied.  See `README.md`.
+//!
+//! This file is local: it replaces upstream `mod.rs`, omits upstream `layout.rs`, and registers
+//! prism's Python API instead of upstream's.
 
-// PRISM: vendored from Qiskit 2.3.1; dropped `layout` submodule;
-// multi-realization extensions live in `crate::prism_routing`.
-#![allow(dead_code)]
-
-pub(crate) mod dag;
+mod dag;
 pub mod heuristic;
-pub(crate) mod layer;
-pub(crate) mod route;
+mod layer;
+pub mod route;
+mod vec_map;
+
+pub use dag::{InteractionKind, SabreDAG, SabreNode};
 
 use pyo3::prelude::*;
-use pyo3::wrap_pyfunction;
 
-pub fn sabre(m: &Bound<PyModule>) -> PyResult<()> {
-    m.add_wrapped(wrap_pyfunction!(route::sabre_routing))?;
-    m.add_wrapped(wrap_pyfunction!(
-        crate::prism_routing::layout::prism_layout_and_routing
-    ))?;
+use crate::prism_routing::layout;
+
+/// Add the Sabre classes and prism's routing function to the extension module `m`.
+pub fn register(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<route::PyRoutingTarget>()?;
     m.add_class::<heuristic::SetScaling>()?;
     m.add_class::<heuristic::Heuristic>()?;
     m.add_class::<heuristic::BasicHeuristic>()?;
     m.add_class::<heuristic::LookaheadHeuristic>()?;
     m.add_class::<heuristic::DecayHeuristic>()?;
+    m.add_function(wrap_pyfunction!(layout::prism_layout_and_routing, m)?)?;
     Ok(())
 }

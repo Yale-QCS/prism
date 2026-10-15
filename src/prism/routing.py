@@ -200,10 +200,10 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         return state
 
     def _make_heuristic(self, n_phys: int) -> Heuristic:
-        """Qiskit's O3 ``"decay"`` heuristic, plus prism's load-balanced realization tie-break."""
+        """Qiskit 2.6 ``SabreLayout``'s heuristic for ``n_phys`` physical qubits."""
         return Heuristic(
             basic=BasicHeuristic(1.0, SetScaling.Constant),
-            lookahead=LookaheadHeuristic(0.5, 20, SetScaling.Size),
+            lookahead=LookaheadHeuristic([0.5 / n_phys], SetScaling.Constant),
             decay=DecayHeuristic(0.001, 5),
             attempt_limit=10 * n_phys,
             best_epsilon=self.BEST_EPSILON,

@@ -1,0 +1,390 @@
+diff --git a/src/sabre/dag.rs b/src/sabre/dag.rs
+index 0343e98..2bb5552 100644
+--- a/src/sabre/dag.rs
++++ b/src/sabre/dag.rs
+@@ -32,6 +32,11 @@ pub enum InteractionKind {
+     Synchronize,
+     /// A two-qubit interaction.  This is the principal component that we're concerned with.
+     TwoQ([VirtualQubit; 2]),
++    /// PRISM: a two-qubit interaction with alternative realizations, each a list of pairs.
++    MultiTwoQ {
++        realizations: crate::prism_routing::VirtRealizations,
++        default_realization: u32,
++    },
+     /// A control-flow operation on more than two qubits.  If it's only on a single qubit, it'll be
+     /// handled by `Synchronize`.  If it's on 2q, it'll be handled by `TwoQ`.  We need to store both
+     /// the Sabre version and the DAG representation of the block, so we can reconstruct things
+@@ -233,7 +238,9 @@ impl SabreDAG {
+         let mut dag = DiGraph::with_capacity(self.dag.node_count(), self.dag.edge_count());
+         for node in self.dag.node_weights() {
+             let kind = match &node.kind {
+-                InteractionKind::Synchronize | InteractionKind::TwoQ(_) => node.kind.clone(),
++                InteractionKind::Synchronize
++                | InteractionKind::TwoQ(_)
++                | InteractionKind::MultiTwoQ { .. } => node.kind.clone(),
+                 InteractionKind::ControlFlow(_) => InteractionKind::Synchronize,
+             };
+             // `NodeWeights` guarantees that the weights come out in index order, so the new indexes
+diff --git a/src/sabre/heuristic.rs b/src/sabre/heuristic.rs
+index 31d5544..4391e68 100644
+--- a/src/sabre/heuristic.rs
++++ b/src/sabre/heuristic.rs
+@@ -19,7 +19,7 @@ use pyo3::types::PyString;
+ use qiskit_circuit::impl_intopyobject_for_copy_pyclass;
+ 
+ /// Affect the dynamic scaling of the weight of node-set-based heuristics (basic and lookahead).
+-#[pyclass(module = "qiskit._accelerate.sabre", frozen, eq, from_py_object)]
++#[pyclass(module = "prism._accelerate", frozen, eq, from_py_object)]
+ #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+ pub enum SetScaling {
+     /// No dynamic scaling of the weight.
+@@ -46,7 +46,7 @@ impl SetScaling {
+ 
+ /// Define the characteristics of the basic heuristic.  This is a simple sum of the physical
+ /// distances of every gate in the front layer.
+-#[pyclass(module = "qiskit._accelerate.sabre", frozen, from_py_object)]
++#[pyclass(module = "prism._accelerate", frozen, from_py_object)]
+ #[derive(Clone, Copy, PartialEq, Debug)]
+ pub struct BasicHeuristic {
+     /// The relative weighting of this heuristic to others.  Typically you should just set this to
+@@ -80,7 +80,7 @@ impl BasicHeuristic {
+ }
+ 
+ /// Define the characteristics of the lookahead heuristic.
+-#[pyclass(module = "qiskit._accelerate.sabre", frozen, from_py_object)]
++#[pyclass(module = "prism._accelerate", frozen, from_py_object)]
+ #[derive(Clone, PartialEq, Debug)]
+ pub struct LookaheadHeuristic {
+     /// The relative weights of each sequential layer in this heuristic.  Typically each of these is
+@@ -142,7 +142,7 @@ impl LookaheadHeuristic {
+ /// the qubit is involved in a swap.  The final heuristic is calculated by multiplying all other
+ /// components by the maximum multiplier involved in a given swap.
+ #[pyclass(from_py_object)]
+-#[pyo3(module = "qiskit._accelerate.sabre", frozen)]
++#[pyo3(module = "prism._accelerate", frozen)]
+ #[derive(Clone, Copy, PartialEq, Debug)]
+ pub struct DecayHeuristic {
+     /// The amount to add onto the multiplier of a physical qubit when it is used.
+@@ -184,7 +184,7 @@ impl DecayHeuristic {
+ ///     available options and configuration of it may change without warning in minor versions of
+ ///     Qiskit.  If you are doing research using this, be sure to pin the version of Qiskit in your
+ ///     requirements.
+-#[pyclass(module = "qiskit._accelerate.sabre", frozen, eq, skip_from_py_object)]
++#[pyclass(module = "prism._accelerate", frozen, eq, skip_from_py_object)]
+ #[derive(Clone, Debug, PartialEq)]
+ pub struct Heuristic {
+     pub basic: Option<BasicHeuristic>,
+diff --git a/src/sabre/route.rs b/src/sabre/route.rs
+index 90847d4..bb9a387 100644
+--- a/src/sabre/route.rs
++++ b/src/sabre/route.rs
+@@ -38,6 +38,9 @@ use super::dag::{InteractionKind, SabreDAG};
+ use super::heuristic::{BasicHeuristic, DecayHeuristic, Heuristic, SetScaling};
+ use super::layer::Layers;
+ use super::vec_map::VecMap;
++// PRISM: multi-realization routing hooks; see `crate::prism_routing::route_ext`.
++#[path = "../prism_routing/route_ext.rs"]
++mod route_ext;
+ use crate::TranspilerError;
+ use crate::neighbors::Neighbors;
+ use crate::target::{Target, TargetCouplingError};
+@@ -47,6 +50,8 @@ use qiskit_circuit::operations::{ControlFlow, StandardGate};
+ use qiskit_circuit::packed_instruction::PackedInstruction;
+ use qiskit_circuit::{BlocksMode, PhysicalQubit, Qubit, VirtualQubit};
+ use qiskit_util::getenv_use_multiple_threads;
++pub use route_ext::flatten_routing_result;
++use route_ext::{MultiLayers, SubGate};
+ 
+ /// Number of trials for control flow block swap epilogues.
+ const SWAP_EPILOGUE_TRIALS: usize = 4;
+@@ -83,6 +88,13 @@ enum RoutedItemKind {
+     /// of the item kind because control-flow is expected to be very uncommon, and we don't want to
+     /// needless increase the size of the enum.
+     ControlFlow(ControlFlowBlockCount),
++    /// PRISM: a multi-realization node committed whole, using this realization.
++    MultiTwoQ(u32),
++    /// PRISM: a multi-realization node routed one sub-gate at a time.
++    SubRoutedMultiTwoQ {
++        real_idx: u32,
++        schedule: Box<[SubGate]>,
++    },
+ }
+ /// A node in the routing order.
+ struct RoutedItem {
+@@ -135,10 +147,7 @@ impl<'a> Order<'a> {
+     /// control-flow operations).
+     #[inline]
+     pub fn swap_count(&self) -> usize {
+-        self.order
+-            .iter()
+-            .map(|item| item.initial_swaps().len())
+-            .sum()
++        self.order.iter().map(RoutedItem::swap_count).sum()
+     }
+ }
+ 
+@@ -313,6 +322,9 @@ impl RoutingResult<'_> {
+                     );
+                     dag.push_back(new_inst)?
+                 }
++                RoutedItemKind::MultiTwoQ(_) | RoutedItemKind::SubRoutedMultiTwoQ { .. } => {
++                    unreachable!("PRISM emits multi-realization nodes from its own event stream")
++                }
+             };
+             for node in rest {
+                 let NodeType::Operation(inst) = &self.problem.dag[*node] else {
+@@ -354,7 +366,7 @@ impl RoutingTarget {
+ /// Contains `None` when the target had all-to-all connectivity (in which case the two property
+ /// methods [coupling_list] and [distance_matrix] also return `None`).
+ #[pyclass]
+-#[pyo3(name = "RoutingTarget", module = "qiskit._accelerate.sabre")]
++#[pyo3(name = "RoutingTarget", module = "prism._accelerate")]
+ pub struct PyRoutingTarget(pub Option<RoutingTarget>);
+ #[pymethods]
+ impl PyRoutingTarget {
+@@ -453,9 +465,10 @@ fn try_route<'a>(
+     initial_swaps: &mut Option<Vec<[PhysicalQubit; 2]>>,
+     problem: RoutingProblem<'a>,
+     order: &mut Order<'a>,
++    multi: &mut MultiLayers,
+     layout: &NLayout,
+     seed: u64,
+-) -> Result<(), [VirtualQubit; 2]> {
++) -> Result<(), Option<[VirtualQubit; 2]>> {
+     let node = &problem.sabre.dag[node_id];
+     let kind = match &node.kind {
+         InteractionKind::Synchronize => RoutedItemKind::Simple,
+@@ -464,7 +477,10 @@ fn try_route<'a>(
+             .neighbors
+             .contains_edge(layout[*a], layout[*b])
+             .then_some(RoutedItemKind::Simple)
+-            .ok_or([*a, *b])?,
++            .ok_or(Some([*a, *b]))?,
++        InteractionKind::MultiTwoQ { .. } => {
++            RoutedItemKind::MultiTwoQ(multi.try_commit(node_id, problem, layout).ok_or(None)?)
++        }
+         InteractionKind::ControlFlow(blocks) => {
+             let dag_node_id = *node
+                 .indices
+@@ -570,6 +586,8 @@ fn satisfy_successor_edges(
+ struct State {
+     layout: NLayout,
+     layers: Layers,
++    /// PRISM: multi-realization nodes in each layer, alongside `layers`.
++    multi: MultiLayers,
+     /// How many predecessors still need to be satisfied for each node index before it can enter the
+     /// layer at the same index.
+     ///
+@@ -611,6 +629,7 @@ impl State {
+             num_qubits,
+             problem.sabre.dag.node_count() as u32,
+         );
++        let mut multi = MultiLayers::new(num_layers, num_qubits, problem.sabre);
+ 
+         // Initialise the layer structures.  This has slightly different logic to subsequent delta
+         // updates, because in this first step, we need to set the entire frontiers at every level,
+@@ -629,14 +648,17 @@ impl State {
+         // Route any available initial gates, to populate the front layer.
+         visit.extend(problem.sabre.first_layer.iter().copied());
+         while let Some(node) = visit.pop_front() {
+-            match try_route(node, &mut None, problem, &mut order, &layout, seed) {
++            match try_route(
++                node, &mut None, problem, &mut order, &mut multi, &layout, seed,
++            ) {
+                 Ok(()) => satisfy_successor_edges(
+                     node,
+                     problem.sabre,
+                     &mut predecessors[0],
+                     |satisfied| visit.push_back(satisfied),
+                 ),
+-                Err(qubits) => layers.insert(0, node, qubits, &layout),
++                Err(Some(qubits)) => layers.insert(0, node, qubits, &layout),
++                Err(None) => (),
+             }
+         }
+ 
+@@ -648,7 +670,9 @@ impl State {
+                 .last()
+                 .expect("we always have at least the front layer")
+                 .clone();
+-            for (node, _) in layers.layers()[num_layer as usize - 1].iter_gates() {
++            let multi_nodes = multi.nodes(num_layer - 1);
++            let gates = layers.layers()[num_layer as usize - 1].iter_gates();
++            for node in gates.map(|(node, _)| node).chain(multi_nodes) {
+                 satisfy_successor_edges(
+                     node,
+                     problem.sabre,
+@@ -669,6 +693,7 @@ impl State {
+                     InteractionKind::TwoQ(qubits) => {
+                         layers.insert(num_layer, node, *qubits, &layout)
+                     }
++                    InteractionKind::MultiTwoQ { .. } => multi.insert(num_layer, node),
+                 }
+             }
+             predecessors.push(these_predecessors);
+@@ -678,6 +703,7 @@ impl State {
+             predecessors: predecessors.into(),
+             decay: vec![1.; num_qubits as usize].into(),
+             layers,
++            multi,
+             layout,
+             visit,
+             reached_previous_layer: Vec::new(),
+@@ -735,7 +761,9 @@ impl State {
+         // fully initialised.
+         for &node in nodes {
+             assert_eq!(
+-                self.layers.remove(node, &self.layout),
++                self.layers
++                    .remove(node, &self.layout)
++                    .or_else(|| self.multi.remove(node, problem.sabre)),
+                 Some(0),
+                 "only nodes in the front layer can begin a routing update",
+             );
+@@ -744,6 +772,7 @@ impl State {
+                 &mut initial_swaps,
+                 problem,
+                 order,
++                &mut self.multi,
+                 &self.layout,
+                 self.seed,
+             )
+@@ -758,9 +787,11 @@ impl State {
+         let sabre_dag = &problem.sabre.dag;
+         while let Some(node) = self.visit.pop_front() {
+             if self.layers.num_layers().get() > 1
+-                && let InteractionKind::TwoQ(_) = &sabre_dag[node].kind
++                && let InteractionKind::TwoQ(_) | InteractionKind::MultiTwoQ { .. } =
++                    &sabre_dag[node].kind
+             {
+                 self.layers.remove(node, &self.layout);
++                self.multi.remove(node, problem.sabre);
+                 self.reached_previous_layer.push(node);
+             }
+             match try_route(
+@@ -768,6 +799,7 @@ impl State {
+                 &mut initial_swaps,
+                 problem,
+                 order,
++                &mut self.multi,
+                 &self.layout,
+                 self.seed,
+             ) {
+@@ -777,9 +809,10 @@ impl State {
+                     &mut self.predecessors[0],
+                     |satisfied| self.visit.push_back(satisfied),
+                 ),
+-                Err(qubits) => {
++                Err(Some(qubits)) => {
+                     self.layers.insert(0, node, qubits, &self.layout);
+                 }
++                Err(None) => (),
+             }
+         }
+ 
+@@ -817,6 +850,12 @@ impl State {
+                             self.reached_previous_layer.push(node);
+                         }
+                     }
++                    InteractionKind::MultiTwoQ { .. } => {
++                        self.multi.insert(num_layer, node);
++                        if num_layer < self.layers.num_layers().get() - 1 {
++                            self.reached_previous_layer.push(node);
++                        }
++                    }
+                 }
+             }
+         }
+@@ -901,19 +940,21 @@ impl State {
+                 }
+             }
+         }
++        self.push_multi_candidates(problem);
+ 
+         let dist = &problem.target.distance.view();
+         let mut absolute_score = 0.0;
+ 
+         if let Some(BasicHeuristic { weight, scale }) = problem.heuristic.basic {
+             let front = self.layers.front();
++            let len = front.len() + self.multi.len(0);
+             let weight = match scale {
+                 SetScaling::Constant => weight,
+                 SetScaling::Size => {
+-                    if front.is_empty() {
++                    if len == 0 {
+                         0.0
+                     } else {
+-                        weight / (front.len() as f64)
++                        weight / (len as f64)
+                     }
+                 }
+             };
+@@ -921,17 +962,22 @@ impl State {
+             for (swap, score) in self.swap_scores.iter_mut() {
+                 *score += weight * front.score(*swap, dist);
+             }
++            absolute_score +=
++                self.multi
++                    .add_scores(0, weight, &mut self.swap_scores, problem, &self.layout);
+         }
+ 
+         if let Some(lookahead) = &problem.heuristic.lookahead {
+-            for (layer, weight) in self.layers.layers()[1..].iter().zip(lookahead.weights()) {
++            let layers = self.layers.layers()[1..].iter().zip(1..);
++            for ((layer, k), weight) in layers.zip(lookahead.weights()) {
++                let len = layer.len() + self.multi.len(k);
+                 let weight = match lookahead.scale {
+                     SetScaling::Constant => *weight,
+                     SetScaling::Size => {
+-                        if layer.is_empty() {
++                        if len == 0 {
+                             0.0
+                         } else {
+-                            *weight / (layer.len() as f64)
++                            *weight / (len as f64)
+                         }
+                     }
+                 };
+@@ -939,6 +985,9 @@ impl State {
+                 for (swap, score) in self.swap_scores.iter_mut() {
+                     *score += weight * layer.score(*swap, dist);
+                 }
++                absolute_score +=
++                    self.multi
++                        .add_scores(k, weight, &mut self.swap_scores, problem, &self.layout);
+             }
+         }
+ 
+@@ -1067,7 +1116,7 @@ pub fn swap_map_trial<'a>(
+     let mut num_search_steps = 0;
+     // The front layer only becomes empty when all nodes have been routed.  At each iteration of
+     // this loop, we route either one or two gates.
+-    while !state.layers.front().is_empty() {
++    while !(state.layers.front().is_empty() && state.multi.is_empty(0)) {
+         let mut current_swaps: Vec<[PhysicalQubit; 2]> = Vec::new();
+         // Swap-mapping loop.  This is the main part of the algorithm, which we repeat until we
+         // either successfully route a node, or exceed the maximum number of attempts.
+@@ -1084,6 +1133,7 @@ pub fn swap_map_trial<'a>(
+             if let Some(node) = state.routable_node_on_qubit(problem, best_swap[0]) {
+                 routable_nodes.push(node);
+             }
++            state.push_multi_routable(problem, best_swap, &mut routable_nodes);
+             if let Some(DecayHeuristic { increment, reset }) = problem.heuristic.decay {
+                 num_search_steps += 1;
+                 if num_search_steps >= reset {
+@@ -1103,10 +1153,13 @@ pub fn swap_map_trial<'a>(
+                 .drain(..)
+                 .rev()
+                 .for_each(|swap| state.apply_swap(swap));
+-            let force_routed = state.force_enable_closest_node(problem, &mut current_swaps);
++            let force_routed =
++                state.force_enable_or_subroute(problem, &mut order, &mut current_swaps);
+             routable_nodes.extend(force_routed);
+         }
+-        state.update_route(problem, &mut order, &routable_nodes, Some(current_swaps));
++        let initial_swaps = (!routable_nodes.is_empty()).then_some(current_swaps);
++        state.update_route(problem, &mut order, &routable_nodes, initial_swaps);
++        state.multi.decay_load();
+ 
+         if problem.heuristic.decay.is_some() {
+             state.decay.fill(1.);

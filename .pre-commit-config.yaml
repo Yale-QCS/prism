@@ -20,7 +20,9 @@ repos:
     hooks:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
+        exclude: ^crates/src/sabre/local\.patch$  # blank patch context lines
       - id: end-of-file-fixer
+        exclude: ^crates/src/sabre/local\.patch$
       - id: check-merge-conflict
       - id: detect-private-key
       - id: check-added-large-files

@@ -1,48 +1,42 @@
 # `prism_accelerate`
 
-Rust extension module backing prism's PRISM routing. Exposed to Python
-as `prism._accelerate`.
+Rust extension module backing prism's routing, exposed to Python as `prism._accelerate`.
 
-## Provenance
+## Layout
 
-Files under [`src/sabre/`](src/sabre/) are vendored from Qiskit 2.3.1
-(`crates/transpiler/src/passes/sabre/`, Apache 2.0, Copyright IBM 2022-2025).
-Vendored because they are `pub(crate)` or `mod`-private upstream and cannot be
-imported as a library dependency. Public supporting types (`NLayout`, qubit
-newtypes, `Neighbors`, `Target`, etc.) come from the `qiskit-circuit` and
-`qiskit-transpiler` git deps unmodified.
-
-The algorithmic extension (multi-realization scoring during routing) requires
-adding a variant to the closed `InteractionKind` enum and extending the
-concrete `FrontLayer::score` method. Neither is reachable from outside Qiskit's
-crate; forking the four affected files is the minimum-surface way to host it.
-
-`src/prism_routing/layout.rs` is prism's own outer search (the refinement and
-final-route loop `SabreLayout` runs upstream in `layout.rs`), driving the
-vendored kernel; Python keeps starting layouts, emission, and scoring.
+- [`src/sabre/`](src/sabre/): Qiskit's Sabre router, vendored from Qiskit 2.6.0rc1 with a small
+  local patch. Its [README](src/sabre/README.md) lists the upstream files, the patch, and how to
+  reproduce, update and remove the copy.
+- [`src/prism_routing/`](src/prism_routing/): prism's code. `route_ext.rs` holds the
+  multi-realization routing hooks and is compiled inside the vendored `route` module; `input.rs`
+  converts Python's flat routing problem; `routing.rs` and `layout.rs` are the Python entry points
+  (one route, and prism's layout search, the outer loop that upstream `SabreLayout` runs).
 
 ## Build
 
 ```
-PYO3_PYTHON=$(which python3) cargo build
+PYO3_PYTHON=$(which python3) cargo build --locked
 ```
 
-setuptools-rust sets `PYO3_PYTHON` to the building interpreter.
+setuptools-rust sets `PYO3_PYTHON` to the building interpreter and passes `--locked`.
 
 ## Dependency pinning
 
-Qiskit 2.3.1 predates `hashbrown 0.16`, `nalgebra 0.34`, and `ndarray 0.17`.
-Its workspace deps allow those newer ranges, so a fresh resolver in any
-downstream context upgrades them and duplicates types against qiskit-circuit's
-pinned versions. The errors surface as `FromPyObject` and pyarray-impl
-mismatches deep inside qiskit-circuit.
+The `qiskit-circuit`, `qiskit-transpiler` and `qiskit-util` git dependencies must resolve their
+own dependencies to the versions Qiskit builds with. A fresh resolution does not: it takes newer
+releases (for example a second `hashbrown` through pyo3, or `ndarray`/`nalgebra` through numpy)
+that duplicate types against qiskit-circuit's, and the build fails deep inside qiskit-circuit.
 
-Direct-dep pins only constrain our crate's slot. Transitive picks by numpy,
-pyo3, and indexmap stay free to pick the latest in-range. `[patch.crates-io]`
-is the only knob that replaces a registry entry globally and forces one
-version in every slot. The patches in `Cargo.toml` pin hashbrown, nalgebra,
-and ndarray; `indexmap` is capped below 2.12 because 2.12+ hard-requires
-`hashbrown ^0.16`.
+So `Cargo.lock` is seeded from Qiskit's own `Cargo.lock` at the same tag, and every build uses
+`--locked`. `Cargo.toml` states the same version requirements as Qiskit's
+`[workspace.dependencies]` for the crates prism uses directly. To move to a new Qiskit tag:
 
-If hashbrown publishes 0.15.6 or nalgebra publishes 0.33.4, the tag-pinned
-patches stay frozen at the older patch level. Bump tags when needed.
+```sh
+git -C /path/to/qiskit show <tag>:Cargo.lock > Cargo.lock
+# update the three git tags (and any changed requirements) in Cargo.toml
+cargo build            # without --locked once: drops Qiskit-only packages, adds prism's
+cargo build --locked   # must now pass unchanged
+```
+
+After the first build, every package version in `Cargo.lock` must still equal Qiskit's; only
+packages Qiskit does not use (today `inventory`, for pyo3's `multiple-pymethods`) may be added.
