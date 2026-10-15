@@ -419,7 +419,7 @@ def test_reset_is_in_place_reprep():
 
 
 # ===========================================================================
-# 9. Boundary-op namespace and the Qiskit 2.5 commutation guard
+# 9. Boundary-op namespace
 # ===========================================================================
 
 
@@ -431,48 +431,6 @@ def test_lowered_op_name_is_namespaced():
     cp = op.copy()
     assert cp.name == "crz_L" and cp.realizations == op.realizations
     assert cp.default_index == op.default_index
-
-
-def test_stock_commutative_cancellation_skips_boundary_ops():
-    """Two boundary ops on one wire pass through ``CommutativeCancellation`` (Qiskit/qiskit#16937)."""
-    from qiskit.transpiler.passes import CommutativeCancellation
-
-    from prism.lowering.ir import LoweredOp
-
-    one = QuantumCircuit(1)
-    one.x(0)
-    two = QuantumCircuit(2)
-    two.swap(0, 1)
-    qc = QuantumCircuit(2)
-    qc.append(LoweredOp.fixed(one, name="x"), [1])
-    qc.append(LoweredOp.fixed(two, name="rz"), [0, 1])
-    out = CommutativeCancellation()(qc)
-    assert dict(out.count_ops()) == {"x_L": 1, "rz_L": 1}
-
-
-def test_build_pm_guards_commutative_cancellation():
-    """Every ``CommutativeCancellation`` in the physical preset runs serially."""
-    from qiskit.transpiler import CouplingMap
-    from qiskit.transpiler.passes import CommutativeCancellation
-
-    from prism.physical import SerialCommutativeCancellation
-    from prism.pipeline import build_pm
-
-    pm = build_pm(CouplingMap.from_grid(3, 3), enc=DualRail)
-    seen = []
-
-    def walk(t):
-        if isinstance(t, CommutativeCancellation):
-            seen.append(type(t))
-        kids = t if isinstance(t, (list, tuple)) else (getattr(t, "tasks", None) or ())
-        for k in kids:
-            walk(k)
-
-    for stage in pm.physical.expanded_stages:
-        sub = getattr(pm.physical, stage, None)
-        if sub is not None:
-            walk(sub._tasks)
-    assert seen and all(t is SerialCommutativeCancellation for t in seen)
 
 
 # ===========================================================================

@@ -1,5 +1,9 @@
 """End-to-end checks on small circuits."""
 
+import os
+import subprocess
+import sys
+
 import numpy as np
 import pytest
 from qiskit.circuit import QuantumCircuit
@@ -139,3 +143,29 @@ def test_swap_before_measure_is_retargeted_only_on_measured_wires():
     qc.measure(0, 0)
     out = build_pm(CouplingMap.from_grid(2, 3), enc=DualRail, seed=0).run(qc)
     assert out.count_ops().get("swap", 0) == 1
+
+
+_NO_HANG = """
+from qiskit import QuantumCircuit
+from qiskit.transpiler import CouplingMap
+from prism.encodings import DualRail
+from prism.pipeline import build_pm
+qc = QuantumCircuit(4, 1)
+for q in range(4):
+    qc.rx(0.3 + q, q)
+for a, b in [(0, 1), (1, 2), (2, 3), (0, 2), (1, 3)]:
+    qc.crz(0.7, a, b)
+    qc.rz(0.2, b)
+qc.measure(0, 0)
+with qc.if_test((qc.clbits[0], True)):
+    qc.x(1)
+qc.reset(2)
+qc.crz(0.4, 2, 3)
+build_pm(CouplingMap.from_grid(3, 4), DualRail, seed=1).run(qc)
+"""
+
+
+def test_physical_stage_commutation_does_not_hang():
+    """Stock commutation passes on rswap/joint_herald/if_else and diagonal runs finish (Qiskit/qiskit#16937)."""
+    env = {**os.environ, "QISKIT_IN_PARALLEL": "FALSE", "RAYON_NUM_THREADS": "4"}
+    subprocess.run([sys.executable, "-c", _NO_HANG], env=env, check=True, timeout=120)

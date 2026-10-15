@@ -24,7 +24,6 @@ from prism.lowering.commit import CommitStage, SearchBudget
 from prism.lowering.commit_policies import PrismRouting
 from prism.lowering.expansion import ExpandStage
 from prism.lowering.ir import LoweredProgram
-from prism.physical import guard_commutation_passes
 from prism.utils.metrics import RecordCircuitMetrics
 
 if TYPE_CHECKING:
@@ -143,5 +142,4 @@ def build_pm(
         physical=enc.physical_pm(coupling_map, seed=seed),
         output=DAGToCircuit(),
     )
-    guard_commutation_passes(pm)
     return pm
