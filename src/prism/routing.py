@@ -125,6 +125,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
     """
 
     BEST_EPSILON = 1e-10
+    LOOKAHEAD_LAYERS = 4
 
     def __init__(
         self,
@@ -200,10 +201,17 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         return state
 
     def _make_heuristic(self, n_phys: int) -> Heuristic:
-        """Qiskit 2.6 ``SabreLayout``'s heuristic for ``n_phys`` physical qubits."""
+        """Qiskit 2.6 ``SabreLayout``'s heuristic, with ``LOOKAHEAD_LAYERS`` lookahead layers.
+
+        Stock looks one layer ahead at weight ``0.5 / n_phys``. That is too
+        shallow for prism, whose commits route gates in cascades; four layers at
+        the stock weight route about as well as Qiskit 2.3's 20-gate extended set.
+        """
         return Heuristic(
             basic=BasicHeuristic(1.0, SetScaling.Constant),
-            lookahead=LookaheadHeuristic([0.5 / n_phys], SetScaling.Constant),
+            lookahead=LookaheadHeuristic(
+                [0.5 / n_phys] * self.LOOKAHEAD_LAYERS, SetScaling.Constant
+            ),
             decay=DecayHeuristic(0.001, 5),
             attempt_limit=10 * n_phys,
             best_epsilon=self.BEST_EPSILON,
