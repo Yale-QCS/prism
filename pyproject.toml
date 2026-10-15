@@ -22,7 +22,7 @@ classifiers = [
     "Programming Language :: Rust",
     "Topic :: Scientific/Engineering :: Physics",
 ]
-dependencies = ["qiskit>=2.5,<2.6", "numpy", "rustworkx>=0.15"]
+dependencies = ["qiskit>=2.6.0rc1,<2.7", "numpy", "rustworkx>=0.15"]
 
 [tool.setuptools]
 include-package-data = false
