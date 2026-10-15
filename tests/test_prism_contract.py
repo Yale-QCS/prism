@@ -25,7 +25,6 @@ def test_default_search_budget_is_explicit():
     assert policy.num_starts == 23
     assert policy.max_iterations == 4
     assert policy.swap_trials == 20
-    assert policy.PHYS_LOAD_DECAY == 0.9
     assert repr(policy._make_heuristic(4)) == repr(policy._make_heuristic(4))
 
 

@@ -171,8 +171,6 @@ pub struct Heuristic {
     pub decay: Option<DecayHeuristic>,
     pub best_epsilon: f64,
     pub attempt_limit: usize,
-    /// Per-drain decay factor for the multi-realization `phys_load` tiebreak.
-    pub phys_load_decay: f64,
 }
 
 #[pymethods]
@@ -191,14 +189,13 @@ impl Heuristic {
     ///     best_epsilon (float): the floating-point epsilon to use when comparing scores to find
     ///         the best value.
     #[new]
-    #[pyo3(signature = (basic=None, lookahead=None, decay=None, attempt_limit=1000, best_epsilon=1e-10, phys_load_decay=1.0))]
+    #[pyo3(signature = (basic=None, lookahead=None, decay=None, attempt_limit=1000, best_epsilon=1e-10))]
     pub fn new(
         basic: Option<BasicHeuristic>,
         lookahead: Option<LookaheadHeuristic>,
         decay: Option<DecayHeuristic>,
         attempt_limit: Option<usize>,
         best_epsilon: f64,
-        phys_load_decay: f64,
     ) -> Self {
         Self {
             basic,
@@ -206,7 +203,6 @@ impl Heuristic {
             decay,
             best_epsilon,
             attempt_limit: attempt_limit.unwrap_or(usize::MAX),
-            phys_load_decay,
         }
     }
 
@@ -217,7 +213,6 @@ impl Heuristic {
             self.decay,
             self.attempt_limit,
             self.best_epsilon,
-            self.phys_load_decay,
         )
             .into_py_any(py)
     }

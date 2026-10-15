@@ -947,9 +947,7 @@ pub fn swap_map_trial<'a>(
             &routable_nodes,
             (!routable_nodes.is_empty()).then_some(current_swaps),
         );
-        state
-            .front_layer
-            .decay_phys_load(state.heuristic.phys_load_decay);
+        state.front_layer.decay_phys_load();
         // Ideally we'd know how to mutate the extended set directly, but since its limited size
         // easy to do better than just emptying it and rebuilding.
         state.extended_set.clear();

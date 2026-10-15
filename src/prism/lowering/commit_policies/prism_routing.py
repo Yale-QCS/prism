@@ -89,7 +89,6 @@ class PrismRouting(CommitPolicy):
     """PRISM commit policy. Score: ``(basic_avg + 0.5 * ext_avg) * max(decay)`` with ``min``-over-candidates per op."""
 
     BEST_EPSILON = 1e-10
-    PHYS_LOAD_DECAY = 0.9
     # Diagonal ops commute with each other: route them as independent (per-rail) work.
     DIAGONAL_OPS = frozenset({"crz", "rz"})
 
@@ -164,7 +163,6 @@ class PrismRouting(CommitPolicy):
             decay=DecayHeuristic(0.001, 5),
             attempt_limit=10 * n_phys,
             best_epsilon=self.BEST_EPSILON,
-            phys_load_decay=self.PHYS_LOAD_DECAY,
         )
 
     @staticmethod

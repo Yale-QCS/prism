@@ -22,6 +22,9 @@ use crate::sabre::dag::{InteractionKind, SabreDAG, SabreNode};
 use crate::sabre::layer::{ExtendedSet, FrontLayer};
 use crate::sabre::route::{PyRoutingTarget, RoutingTarget};
 
+/// Per-drain decay factor for the multi-realization `phys_load` tie-break.
+pub const PHYS_LOAD_DECAY: f64 = 0.9;
+
 /// Multi-realization 2Q candidates in virtual-qubit coordinates.
 /// Outer list: per realization. Inner list: 2Q sub-gates of that realization.
 pub type VirtRealizations = Box<[Box<[[VirtualQubit; 2]]>]>;
@@ -289,9 +292,11 @@ impl RealizationFrontLayer {
         self.phys_load[b.index()] += 1.0;
     }
 
-    /// Decay `phys_load` by a multiplicative factor.
-    pub fn decay_phys_load(&mut self, rate: f64) {
-        self.phys_load.iter_mut().for_each(|x| *x *= rate);
+    /// Decay `phys_load` by `PHYS_LOAD_DECAY`.
+    pub fn decay_phys_load(&mut self) {
+        self.phys_load
+            .iter_mut()
+            .for_each(|x| *x *= PHYS_LOAD_DECAY);
     }
 
     // --- overrides that fold multi state into stock semantics ---
