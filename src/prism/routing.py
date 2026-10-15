@@ -33,6 +33,7 @@ from prism.ir import (
     MultiRealizationInstruction,
     MultiRealizationOp,
     Placement,
+    commuting_predecessors,
 )
 from prism.metrics import active_gate_count, physical_depth
 
@@ -346,31 +347,12 @@ def _dependencies(
     diagonal: list[bool],
     cl_used: list[frozenset[Clbit]],
 ) -> tuple[list[list[int]], list[int]]:
-    """Successor lists and predecessor counts under wire order and diagonal commutation.
-
-    Diagonal ops commute with each other: a diagonal op depends only on the last
-    non-diagonal op on each of its wires, and a non-diagonal op on everything
-    since. Classical bits are extra wires.
-    """
-    succ: list[list[int]] = [[] for _ in virts_used]
-    pred_count = [0] * len(virts_used)
-    last_nondiag: dict[int | Clbit, int] = {}
-    diags_since: dict[int | Clbit, list[int]] = {}
-    for k, qs in enumerate(virts_used):
-        wires: set[int | Clbit] = set(qs) | cl_used[k]
-        deps: set[int] = set()
-        for w in wires:
-            if w in last_nondiag:
-                deps.add(last_nondiag[w])
-            if not diagonal[k]:
-                deps.update(diags_since.get(w, ()))
+    """Successor lists and predecessor counts; classical bits are extra wires."""
+    preds = commuting_predecessors(
+        [qs | cl for qs, cl in zip(virts_used, cl_used, strict=True)], diagonal
+    )
+    succ: list[list[int]] = [[] for _ in preds]
+    for k, deps in enumerate(preds):
         for j in sorted(deps):
             succ[j].append(k)
-            pred_count[k] += 1
-        for w in wires:
-            if diagonal[k]:
-                diags_since.setdefault(w, []).append(k)
-            else:
-                last_nondiag[w] = k
-                diags_since[w] = []
-    return succ, pred_count
+    return succ, [len(deps) for deps in preds]

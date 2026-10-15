@@ -32,19 +32,53 @@ from qiskit.passmanager import IR
 from qiskit.transpiler import TranspilerError
 
 if TYPE_CHECKING:
+    from collections.abc import Collection, Hashable, Sequence
+
     from prism.encodings.base import QubitEncoding
 
 __all__ = [
+    "DIAGONAL_GATES",
     "MultiRealization",
     "MultiRealizationInstruction",
     "MultiRealizationOp",
     "Placement",
+    "commuting_predecessors",
 ]
 
 #: Gate names a ``diagonal`` realization may contain.
 DIAGONAL_GATES = frozenset(
     {"rz", "crz", "z", "s", "sdg", "t", "tdg", "p", "cp", "cz", "rzz"}
 )
+
+
+def commuting_predecessors(
+    wires: Sequence[Collection[Hashable]], diagonal: Sequence[bool]
+) -> list[set[int]]:
+    """The ops each op must follow, given the wires each op touches.
+
+    Diagonal ops commute with each other: a diagonal op follows only the last
+    non-diagonal op on each of its wires, and a non-diagonal op follows
+    everything on its wires since then. The one dependency rule of prism's IR,
+    used by routing and by the physical rescheduling.
+    """
+    preds: list[set[int]] = []
+    last_nondiag: dict[Hashable, int] = {}
+    diags_since: dict[Hashable, list[int]] = {}
+    for k, ws in enumerate(wires):
+        deps: set[int] = set()
+        for w in ws:
+            if w in last_nondiag:
+                deps.add(last_nondiag[w])
+            if not diagonal[k]:
+                deps.update(diags_since.get(w, ()))
+        for w in ws:
+            if diagonal[k]:
+                diags_since.setdefault(w, []).append(k)
+            else:
+                last_nondiag[w] = k
+                diags_since[w] = []
+        preds.append(deps)
+    return preds
 
 
 @dataclass(frozen=True, eq=False)
