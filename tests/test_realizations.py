@@ -354,7 +354,7 @@ def test_xonrail_absent_swap():
 
 
 # ===========================================================================
-# 7. Initialization: entangling init (local_init=False, the default)
+# 7. Initialization: entangling init (joint herald)
 # ===========================================================================
 
 

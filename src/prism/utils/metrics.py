@@ -10,8 +10,9 @@ from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import AnalysisPass
 
+from prism.synthesis.preparation import SYNTHETIC_PREPARATION_LABEL
+
 FREE_GATES: frozenset[str] = frozenset({"rz", "u1", "p", "z"})
-SYNTHETIC_PREPARATION_LABEL = "dualrail_synthetic_preparation"
 
 # Gate durations (ns) from Liu et al.'s hardware model. We use the reported
 # 200 ns beamsplitter-SWAP duration for every beamsplitter rotation because

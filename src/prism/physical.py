@@ -217,9 +217,8 @@ def physical_pm(
     enc: type[QubitEncoding],
     *,
     seed: int = 42,
-    resynthesize: bool = True,
 ) -> StagedPassManager:
-    """Preset O3 (or level 0 for restricted-Clifford codes) over the retained route.
+    """Preset O3 over the retained route.
 
     Built with ``routing_method="none"``: the lowering search already placed
     and routed, so the layout stage is empty and Qiskit's ``CheckMap`` certifies
@@ -228,7 +227,7 @@ def physical_pm(
     virtual permutation.
     """
     preset = generate_preset_pass_manager(
-        optimization_level=3 if resynthesize else 0,
+        optimization_level=3,
         target=_physical_target(enc, coupling_map),
         seed_transpiler=seed,
         routing_method="none",
@@ -237,11 +236,7 @@ def physical_pm(
     preset.pre_routing = PassManager([SeedVF2ErrorMap(coupling_map)])
     preset.post_routing = PassManager([SafeOptimizeSwapBeforeMeasure()])
     # ``CancelRailX`` strips the X-on-rail that O3's 2Q resynthesis leaves behind.
-    tail = [RescheduleCommutingDiagonals()] if enc.reschedule else []
-    if resynthesize:
-        preset.post_optimization = PassManager(
-            [CancelRailX(), *tail, RecordCircuitMetrics()]
-        )
-    else:
-        preset.post_translation = PassManager([*tail, RecordCircuitMetrics()])
+    preset.post_optimization = PassManager(
+        [CancelRailX(), RescheduleCommutingDiagonals(), RecordCircuitMetrics()]
+    )
     return preset

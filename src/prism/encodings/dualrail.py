@@ -15,7 +15,10 @@ from prism.synthesis.delocal_decomp import build_equivalence_library
 from prism.synthesis.h_reduction import HadamardReduction
 from prism.synthesis.margolus import MargolusPairOptimizer
 from prism.synthesis.pauli_frame import PauliFramePropagation
-from prism.synthesis.preparation import JointHeraldGate
+from prism.synthesis.preparation import (
+    SYNTHETIC_PREPARATION_LABEL,
+    JointHeraldGate,
+)
 from prism.synthesis.rswap import RSwapGate
 
 
@@ -30,13 +33,6 @@ class DualRail(QubitEncoding):
     PHYSICAL_ISA: ClassVar[frozenset[str]] = frozenset(
         {"x", "rx", "rz", "crz", "swap", "rswap", "joint_herald"}
     )
-    # Initialization model. Default is a heralded prep whose joint erasure check
-    # (a QND occupation measurement on the rail pair) requires the two rails
-    # co-located at t=0. A routing-only joint-herald operation supplies this 2Q
-    # constraint without assigning a hardware implementation. Set ``local_init
-    # = True`` for a single-wire prep that imposes no co-location.
-    local_init: ClassVar[bool] = False
-    SYNTHETIC_PREPARATION_LABEL: ClassVar[str] = "dualrail_synthetic_preparation"
 
     @classmethod
     def initialize(cls) -> QuantumCircuit:
@@ -45,13 +41,11 @@ class DualRail(QubitEncoding):
         The labeled X and joint-herald operation expose the preparation
         connectivity to the boundary router. Hardware-facing program metrics
         exclude both labeled operations because prism does not model the
-        preparation circuit or erasure-check implementation. ``local_init =
-        True`` removes the joint-herald constraint.
+        preparation circuit or erasure-check implementation.
         """
         qc = QuantumCircuit(2)
-        qc.append(XGate(label=cls.SYNTHETIC_PREPARATION_LABEL), [1])
-        if not cls.local_init:
-            qc.append(JointHeraldGate(), [0, 1])
+        qc.append(XGate(label=SYNTHETIC_PREPARATION_LABEL), [1])
+        qc.append(JointHeraldGate(), [0, 1])
         return qc
 
     @classmethod

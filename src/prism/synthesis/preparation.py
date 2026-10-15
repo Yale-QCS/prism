@@ -6,6 +6,8 @@ import math
 
 from qiskit.circuit import Gate, QuantumCircuit
 
+SYNTHETIC_PREPARATION_LABEL = "dualrail_synthetic_preparation"
+
 
 class JointHeraldGate(Gate):
     """Two-rail connectivity placeholder excluded from program-body metrics."""

@@ -33,20 +33,12 @@ class QubitEncoding:
     """Per-logical-qubit encoding into a block of physical wires."""
 
     WIRES_PER_LOGICAL: ClassVar[int]
-    # Re-emit the routed circuit with commuting diagonal gates ordered by critical path.
-    reschedule: ClassVar[bool] = True
     LOGICAL_ISA: ClassVar[frozenset[str]]
     # Gates the lowering stage can emit on physical wires. Subclasses set
     # this; usually equals ``LOGICAL_ISA`` filtered of measure/barrier/reset/
     # control-flow, plus any non-standard primitives the encoding's lowering
     # introduces (e.g. DR's ``rswap``).
     PHYSICAL_ISA: ClassVar[frozenset[str]]
-    # Whether the physical stage may resynthesize 2Q blocks (preset O3). True
-    # for universal-ISA codes (DualRail). Restricted-Clifford codes set False:
-    # their non-universal PHYSICAL_ISA breaks O3's UnitarySynthesis, and
-    # resynthesis would collapse the transversal structure
-    # (see ``physical.physical_pm``). False ⇒ layout + route only.
-    PHYSICAL_RESYNTHESIS: ClassVar[bool] = True
 
     @classmethod
     def initialize(cls) -> QuantumCircuit:
@@ -66,9 +58,7 @@ class QubitEncoding:
     @classmethod
     def physical_pm(cls, coupling_map: CouplingMap, *, seed: int = 42) -> PassManager:
         """Compile the retained route over ``cls.PHYSICAL_ISA``."""
-        return _physical_pm(
-            coupling_map, cls, seed=seed, resynthesize=cls.PHYSICAL_RESYNTHESIS
-        )
+        return _physical_pm(coupling_map, cls, seed=seed)
 
     @classmethod
     def lower(cls, op: Instruction, clbits: tuple[Clbit, ...] = ()) -> LoweredOp:
