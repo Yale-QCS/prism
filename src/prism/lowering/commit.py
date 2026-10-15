@@ -21,6 +21,9 @@ SABRE_TRIALS = 20
 SABRE_ITERATIONS = 4
 
 
+OBJECTIVES: frozenset[str] = frozenset({"swaps", "depth"})
+
+
 @dataclass(frozen=True)
 class SearchBudget:
     """Search effort and route-selection objective; the defaults are the paper configuration."""
@@ -31,7 +34,7 @@ class SearchBudget:
     objective: str = "swaps"
 
     def __post_init__(self) -> None:
-        if self.objective not in {"swaps", "depth", "gates", "duration"}:
+        if self.objective not in OBJECTIVES:
             raise ValueError(f"unknown objective {self.objective!r}")
         for field in ("layout_starts", "refinement_iterations", "swap_trials"):
             if getattr(self, field) < 1:

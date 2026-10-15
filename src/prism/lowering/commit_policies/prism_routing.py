@@ -35,17 +35,14 @@ from prism._accelerate import (
     prism_routing,
 )
 from prism.lowering.commit import (
+    OBJECTIVES,
     SABRE_ITERATIONS,
     SABRE_TRIALS,
     CommitPolicy,
     CommitResult,
 )
 from prism.lowering.ir import LoweredOp
-from prism.utils.metrics import (
-    active_gate_count,
-    physical_depth,
-    physical_duration,
-)
+from prism.utils.metrics import active_gate_count, physical_depth
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -75,29 +72,19 @@ class _Ctx:
 Score = tuple[float, int, int]
 """Lexicographic post-selection score; lower is better. ``< Score`` compares as
 expected. The field order depends on the objective (see ``score``): ``"swaps"``
-sorts (swaps, depth, gates), ``"depth"`` sorts (depth, gates, size), ``"gates"``
-sorts (gates, depth, size), ``"duration"`` sorts (duration_ns, gates, size)."""
-
-OBJECTIVES: frozenset[str] = frozenset({"swaps", "depth", "gates", "duration"})
+sorts (swaps, depth, gates), ``"depth"`` sorts (depth, gates, size)."""
 
 
 def score(qc: QuantumCircuit, objective: str = "swaps") -> Score:
     """Post-selection score for ``qc`` under ``objective``; lower is better.
 
     ``"swaps"`` minimizes the inserted SWAP count (the SABRE objective and the
-    default), depth then gates as tiebreaks; ``"depth"`` minimizes physical depth
-    (parallelism), gates as tiebreak; ``"gates"`` minimizes active (non-free) gate
-    count, depth as tiebreak; ``"duration"`` minimizes the Liu-model critical
-    path (500 ns SWS and 200 ns beamsplitter operations), then gates. All keep
-    a final size tiebreak.
+    default), depth then gates as tiebreaks; ``"depth"`` minimizes the
+    critical-path depth in non-free operations, then gates, then size.
     """
     d, g, sz = physical_depth(qc), active_gate_count(qc), qc.size()
     if objective == "swaps":
         return (qc.count_ops().get("swap", 0), d, g)
-    if objective == "gates":
-        return (g, d, sz)
-    if objective == "duration":
-        return (physical_duration(qc), g, sz)
     return (d, g, sz)
 
 

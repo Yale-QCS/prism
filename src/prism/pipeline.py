@@ -119,7 +119,7 @@ def build_pm(
     """Pipeline compiling ``enc``-encoded circuits onto ``coupling_map``.
 
     ``budget`` sets the search effort and the route-selection objective
-    (``swaps``, ``depth``, ``duration``); ``None`` is the paper configuration.
+    (``swaps`` or ``depth``); ``None`` uses the ``SearchBudget`` defaults.
     """
     b = budget or SearchBudget()
     policy = PrismRouting(
