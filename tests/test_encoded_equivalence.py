@@ -149,7 +149,7 @@ def _clbit_probabilities(qc: QuantumCircuit, clbits) -> dict[int, float]:
 
 @pytest.mark.parametrize("seed", [0, 1, 2])
 def test_measured_output_matches_logical_distribution(seed):
-    """Final measurements keep the logical distribution when SWAPs before them become re-targets."""
+    """Final measurements keep the logical distribution, logical SWAPs included."""
     qc = random_circuit(3, 4, max_operands=2, seed=seed)
     qc.x(0)
     qc.swap(1, 2)

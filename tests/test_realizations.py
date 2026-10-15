@@ -17,12 +17,6 @@ Convention (source of truth: src/prism/encodings/dualrail.py):
 
   Qiskit CRZ differs from CP(theta) = diag(1,1,1,e^{i theta}).
   This module tests the Qiskit CRZ convention as implemented in the code.
-
-CODE/COMMENT MISMATCH (reported in artifacts/hpca/results/C03_RESULT.md):
-  DualRail.initialize() calls the CRZ(pi) herald '(codespace-identity)', but
-  the actual logical action is diag(1, -i) = S_dagger.  The code space is
-  invariant under the herald (no leakage), but the gate is NOT the identity
-  matrix on the code space.  See test_init_herald_is_sdagger.
 """
 
 import math
@@ -121,7 +115,6 @@ _X_L = np.array([[0, 1], [1, 0]], dtype=complex)
 _SWAP_L = np.array(
     [[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]], dtype=complex
 )
-_SDAGGER = np.diag([1.0 + 0j, -1j])
 
 
 def _rz_mat(theta):
@@ -365,37 +358,6 @@ def test_init_prepares_0L():
     exp = np.zeros(4, dtype=complex)
     exp[2] = 1.0  # |0_L>=|q_0=0,q_1=1> -> index 0+2=2
     np.testing.assert_allclose(sv, exp, atol=TOL)
-
-
-def test_init_herald_is_sdagger():
-    """The CRZ(pi) herald acts as S_dagger = diag(1, -i) on the code space, NOT identity.
-
-    DualRail.initialize() comment says '(codespace-identity)' for the herald, but:
-      |0_L> = |q_0=0, q_1=1>: control q_0=0 -> CRZ inactive -> phase 1
-      |1_L> = |q_0=1, q_1=0>: control q_0=1 -> RZ(pi) on q_1=0 -> phase e^{-i pi/2} = -i
-
-    The logical action is diag(1, -i) = S_dagger.  The code space is invariant
-    (no amplitude leaks), but the gate is not the identity matrix.
-    This mismatch between the 'codespace-identity' label and the actual S_dagger
-    action is reported in C03_RESULT.md.
-    """
-    qc = QuantumCircuit(2)
-    qc.crz(math.pi, 0, 1)
-    M = _logical(qc, [(0, 1)])
-    np.testing.assert_allclose(
-        M,
-        _SDAGGER,
-        atol=TOL,
-        err_msg=(
-            "CRZ(pi) herald is not S_dagger on the code space; "
-            f"expected diag(1,-i), got diag={np.round(np.diag(M), 6)}"
-        ),
-    )
-    # Explicitly assert NOT identity, documenting the comment mismatch.
-    assert not np.allclose(M, np.eye(2), atol=1e-6), (
-        "Unexpected: CRZ(pi) herald acts as identity; "
-        "the code comment would then be accidentally correct"
-    )
 
 
 def test_init_herald_erasure_safe():

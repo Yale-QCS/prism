@@ -23,7 +23,12 @@ from qiskit.circuit import (
 )
 from qiskit.circuit.controlflow import ControlFlowOp, IfElseOp
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary
-from qiskit.transpiler import CouplingMap, PassManager, TranspilerError
+from qiskit.transpiler import (
+    CouplingMap,
+    PassManager,
+    StagedPassManager,
+    TranspilerError,
+)
 
 from prism.ir import MultiRealizationOp
 from prism.logical import CONTROL_FLOW_OPS, basic_logical_pm
@@ -57,7 +62,9 @@ class QubitEncoding:
         return {}
 
     @classmethod
-    def physical_pm(cls, coupling_map: CouplingMap, *, seed: int = 42) -> PassManager:
+    def physical_pm(
+        cls, coupling_map: CouplingMap, *, seed: int = 42
+    ) -> StagedPassManager:
         """Compile the retained route over ``cls.PHYSICAL_ISA``."""
         return _physical_pm(coupling_map, cls, seed=seed)
 
