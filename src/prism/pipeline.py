@@ -46,16 +46,14 @@ __all__ = [
 
 
 class CircuitToDAG(GenericPass[QuantumCircuit, DAGCircuit]):
-    """``QuantumCircuit -> DAGCircuit``, as ``qiskit.transpiler.PassManager`` enters."""
+    """``QuantumCircuit -> DAGCircuit``.
+
+    Writes no layout keys: the layout is rail-level, so ``MultiRealizationToDAG``
+    writes all of them.
+    """
 
     def run(self, passmanager_ir: QuantumCircuit) -> DAGCircuit:
-        """Convert, recording the input qubit indices unless the caller seeded them."""
-        if self.property_set["original_qubit_indices"] is None:
-            self.property_set["original_qubit_indices"] = {
-                bit: i for i, bit in enumerate(passmanager_ir.qubits)
-            }
-        if self.property_set["num_input_qubits"] is None:
-            self.property_set["num_input_qubits"] = passmanager_ir.num_qubits
+        """Convert, copying operations so later passes may mutate them."""
         return circuit_to_dag(passmanager_ir, copy_operations=True)
 
 
