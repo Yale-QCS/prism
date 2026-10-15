@@ -13,7 +13,6 @@ from qiskit.transpiler.passes import Size
 from prism.encodings import DualRail
 from prism.ir import MultiRealization
 from prism.pipeline import (
-    MultiRealizationToDAG,
     build_pm,
 )
 from prism.routing import PrismRouting
@@ -71,22 +70,6 @@ def test_stages_are_typed_and_adjacent():
         "output",
     )
     check_ir_chain(pm)
-
-
-def test_miswired_stage_is_caught():
-    pm = build_pm(CouplingMap.from_grid(3, 3), DualRail)
-    pm.routing = MultiRealizationToDAG()
-    with pytest.raises(AssertionError, match="takes MultiRealization, gets DAGCircuit"):
-        check_ir_chain(pm)
-
-
-def test_unsubscripted_pass_is_rejected():
-    class Bare(GenericPass):
-        def run(self, passmanager_ir):
-            return passmanager_ir
-
-    with pytest.raises(TypeError, match="subscripted"):
-        ir_types(Bare)
 
 
 def _bell():

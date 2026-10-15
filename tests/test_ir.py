@@ -4,14 +4,19 @@ from dataclasses import replace
 
 import pytest
 from qiskit import QuantumCircuit
-from qiskit.circuit import Clbit
+from qiskit.circuit import Clbit, Measure
 from qiskit.circuit.library import CXGate
 from qiskit.converters import circuit_to_dag
 from qiskit.passmanager import GenericPass, PropertySet
 from qiskit.transpiler import CouplingMap, TranspilerError
 
 from prism.encodings import DualRail
-from prism.ir import MultiRealization, MultiRealizationInstruction, MultiRealizationOp
+from prism.ir import (
+    MultiRealization,
+    MultiRealizationInstruction,
+    MultiRealizationOp,
+    Placement,
+)
 from prism.pipeline import DAGToMultiRealization, build_pm
 from prism.routing import PrismRouting
 
@@ -106,6 +111,18 @@ def test_to_circuit_materializes_choices_on_rails():
                 MultiRealizationInstruction(CXGate(), (0, 2), (Clbit(),))
             ),
             "bound to 2 qubits, 1 clbits",
+        ),
+        (
+            lambda ir: ir.data.append(
+                MultiRealizationInstruction(Measure(), (0,), (Clbit(),))
+            ),
+            "clbits outside the program",
+        ),
+        (
+            lambda ir: setattr(
+                ir, "placement", Placement((0, 0, 1, 2), (0, 1, 2, 3), frozenset())
+            ),
+            "not a pair of permutations",
         ),
     ],
 )
@@ -213,3 +230,24 @@ def test_verify_rejects_a_choice_off_the_device_edges():
                     placed.verify()
                 return
     pytest.fail("every candidate is on an edge; pick a sparser coupling map")
+
+
+def test_routing_rejects_a_placed_program():
+    placed = PrismRouting(CouplingMap.from_line(4), seed=0).run(_program(_bell()))
+    with pytest.raises(TranspilerError):
+        PrismRouting(CouplingMap.from_line(4), seed=0).run(placed)
+
+
+def test_narrowing_candidates_after_routing_keeps_the_choice():
+    """A constraint pass after routing may drop candidates if it remaps ``choice``."""
+    placed = PrismRouting(CouplingMap.from_line(4), seed=0).run(_program(_bell()))
+    before = placed.to_circuit()
+    for k, ins in enumerate(placed.data):
+        op = ins.operation
+        if isinstance(op, MultiRealizationOp) and len(op.candidates) > 1:
+            kept = (op.candidates[op.choice],)
+            placed.data[k] = ins._replace(
+                operation=replace(op, candidates=kept, default_index=0, choice=0)
+            )
+    placed.verify()
+    assert placed.to_circuit() == before
