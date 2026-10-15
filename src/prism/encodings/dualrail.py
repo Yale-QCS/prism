@@ -12,7 +12,6 @@ from prism.encodings.base import QubitEncoding
 from prism.logical import ElideLogicalPermutations, basic_logical_pm
 from prism.lowering.ir import LoweredOp
 from prism.synthesis.delocal_decomp import build_equivalence_library
-from prism.synthesis.early_measure import EarlyMeasurement
 from prism.synthesis.h_reduction import HadamardReduction
 from prism.synthesis.margolus import MargolusPairOptimizer
 from prism.synthesis.pauli_frame import PauliFramePropagation
@@ -37,9 +36,6 @@ class DualRail(QubitEncoding):
     # constraint without assigning a hardware implementation. Set ``local_init
     # = True`` for a single-wire prep that imposes no co-location.
     local_init: ClassVar[bool] = False
-    # Measure a qubit at its last non-diagonal gate and turn the diagonal tail
-    # into feedforward RZs (see ``synthesis.early_measure``).
-    early_measure: ClassVar[bool] = False
     SYNTHETIC_PREPARATION_LABEL: ClassVar[str] = "dualrail_synthetic_preparation"
 
     @classmethod
@@ -78,8 +74,6 @@ class DualRail(QubitEncoding):
         # them before code expansion; routing SWAPs inserted in later stages
         # remain physical operations.
         pm.append(ElideLogicalPermutations())
-        if cls.early_measure:
-            pm.append(EarlyMeasurement())
         return pm
 
     @classmethod
