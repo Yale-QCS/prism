@@ -20,7 +20,6 @@ impl<'a> RoutingState<'a> {
             &self.layout,
             &self.target.distance.view(),
             self.heuristic.multi_tie_break_load,
-            self.heuristic.multi_front_commit,
         )?;
         Some(RoutedItemKind::MultiTwoQ(r_idx))
     }
@@ -59,11 +58,7 @@ impl<'a> RoutingState<'a> {
                         real.iter()
                             .all(|p| self.target.neighbors.contains_edge(p[0], p[1]))
                     };
-                    let routable = match self.front_layer.frozen_idx(&node) {
-                        Some(fidx) => adjacent(&reals[fidx]),
-                        None => reals.iter().any(adjacent),
-                    };
-                    if routable {
+                    if reals.iter().any(adjacent) {
                         out.push(node);
                     }
                 }

@@ -182,11 +182,6 @@ pub struct Heuristic {
     /// remains in a SABRE layer.  Candidate SWAPs are scored against that
     /// witness instead of independently minimizing over realizations.
     pub multi_sticky_witness: bool,
-    /// Front-layer-commit baseline mode: when a multi-realization node first
-    /// defers into the front layer, freeze it to its closest realization under
-    /// that layout and hold the choice fixed (scoring, executability, and the
-    /// final commit all target only the frozen realization).
-    pub multi_front_commit: bool,
 }
 
 #[pymethods]
@@ -205,7 +200,7 @@ impl Heuristic {
     ///     best_epsilon (float): the floating-point epsilon to use when comparing scores to find
     ///         the best value.
     #[new]
-    #[pyo3(signature = (basic=None, lookahead=None, decay=None, attempt_limit=1000, best_epsilon=1e-10, phys_load_decay=1.0, multi_tie_break_load=true, multi_sticky_witness=false, multi_front_commit=false))]
+    #[pyo3(signature = (basic=None, lookahead=None, decay=None, attempt_limit=1000, best_epsilon=1e-10, phys_load_decay=1.0, multi_tie_break_load=true, multi_sticky_witness=false))]
     pub fn new(
         basic: Option<BasicHeuristic>,
         lookahead: Option<LookaheadHeuristic>,
@@ -215,7 +210,6 @@ impl Heuristic {
         phys_load_decay: f64,
         multi_tie_break_load: bool,
         multi_sticky_witness: bool,
-        multi_front_commit: bool,
     ) -> Self {
         Self {
             basic,
@@ -226,7 +220,6 @@ impl Heuristic {
             phys_load_decay,
             multi_tie_break_load,
             multi_sticky_witness,
-            multi_front_commit,
         }
     }
 
@@ -240,7 +233,6 @@ impl Heuristic {
             self.phys_load_decay,
             self.multi_tie_break_load,
             self.multi_sticky_witness,
-            self.multi_front_commit,
         )
             .into_py_any(py)
     }

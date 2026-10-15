@@ -302,10 +302,6 @@ pub struct RealizationFrontLayer {
     /// Per-physical-qubit cumulative load accumulator for the MultiTwoQ
     /// adjacent-realization tiebreak.
     phys_load: Vec<f64>,
-    /// Front-layer-commit mode: realization index frozen at each node's first
-    /// deferral. Persists across `remove`/re-insert so the commit after the
-    /// enabling SWAPs targets the frozen choice.
-    frozen: IndexMap<NodeIndex, usize, ::ahash::RandomState>,
 }
 
 impl Deref for RealizationFrontLayer {
@@ -329,7 +325,6 @@ impl RealizationFrontLayer {
             phys_to_nodes: (0..num_qubits as usize).map(|_| HashSet::new()).collect(),
             sticky_witness,
             phys_load: vec![0.0; num_qubits as usize],
-            frozen: IndexMap::with_hasher(::ahash::RandomState::default()),
         }
     }
 
@@ -347,39 +342,9 @@ impl RealizationFrontLayer {
         layout: &NLayout,
         dist: &ArrayView2<f64>,
         tie_break_load: bool,
-        front_commit: bool,
     ) -> Option<u32> {
         let phys_reals = materialize_phys_reals(realizations, layout);
-        let adjacent = |real: &Box<[[PhysicalQubit; 2]]>| {
-            real.iter()
-                .all(|p| dist[[p[0].index(), p[1].index()]] == 1.0)
-        };
-        let choice = if front_commit {
-            match self.frozen.get(&node_id) {
-                // Previously frozen: only the frozen realization may commit.
-                Some(&idx) => adjacent(&phys_reals[idx]).then_some(idx),
-                // First encounter: commit if executable now, else freeze to
-                // the closest realization under the entry layout.
-                None => {
-                    let exec = if tie_break_load {
-                        executable_choice_balanced(
-                            &phys_reals,
-                            dist,
-                            &self.phys_load,
-                            default_realization as usize,
-                        )
-                    } else {
-                        executable_choice_default(&phys_reals, dist, default_realization as usize)
-                    };
-                    if exec.is_none() {
-                        let idx =
-                            closest_realization(&phys_reals, dist, default_realization as usize);
-                        self.frozen.insert(node_id, idx);
-                    }
-                    exec
-                }
-            }
-        } else if tie_break_load {
+        let choice = if tie_break_load {
             executable_choice_balanced(
                 &phys_reals,
                 dist,
@@ -432,7 +397,7 @@ impl RealizationFrontLayer {
     pub fn score(&self, swap: [PhysicalQubit; 2], dist: &ArrayView2<f64>) -> f64 {
         let mut total = self.inner.score(swap, dist);
         for (node, reals) in self.multi.iter() {
-            if self.sticky_witness || self.frozen.contains_key(node) {
+            if self.sticky_witness {
                 let witness = self.multi_witness[node];
                 total += realization_cost_post_swap(&reals[witness], swap, dist)
                     - realization_cost(&reals[witness], dist);
@@ -449,7 +414,7 @@ impl RealizationFrontLayer {
                 .multi
                 .iter()
                 .map(|(node, reals)| {
-                    if self.sticky_witness || self.frozen.contains_key(node) {
+                    if self.sticky_witness {
                         realization_cost(&reals[self.multi_witness[node]], dist)
                     } else {
                         op_cost_min(reals, dist)
@@ -523,11 +488,7 @@ impl RealizationFrontLayer {
                 self.phys_to_nodes[p[1].index()].insert(index);
             }
         }
-        let witness = self
-            .frozen
-            .get(&index)
-            .copied()
-            .unwrap_or_else(|| closest_realization(&realizations, dist, default_realization));
+        let witness = closest_realization(&realizations, dist, default_realization);
         self.multi.insert(index, realizations);
         self.multi_witness.insert(index, witness);
     }
@@ -544,14 +505,9 @@ impl RealizationFrontLayer {
 
     /// Sticky realization witness for `node`, when witness scoring is active.
     pub fn multi_witness(&self, node: &NodeIndex) -> Option<usize> {
-        (self.sticky_witness || self.frozen.contains_key(node))
+        self.sticky_witness
             .then(|| self.multi_witness.get(node).copied())
             .flatten()
-    }
-
-    /// Frozen realization index for `node` in front-layer-commit mode.
-    pub fn frozen_idx(&self, node: &NodeIndex) -> Option<usize> {
-        self.frozen.get(node).copied()
     }
 
     /// Multi nodes with any pair touching `qubit`.
