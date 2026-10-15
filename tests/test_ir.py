@@ -35,9 +35,11 @@ def test_entrance_binds_rails_and_heralds():
     assert [reg.name for reg in ir.qregs] == ["q0", "q1"]
     assert ir.logical_output_permutation == (0, 1)
     assert ir.placement is None
-    assert all(isinstance(ins.operation, MultiRealizationOp) for ins in ir.data)
-    # preparation first: (x, joint_herald) per logical qubit
-    assert [ins.operation.name for ins in ir.data[:4]] == ["x", "joint_herald"] * 2
+    # preparation first, as plain ops: (x, joint_herald) per logical qubit
+    prep, lowered = ir.data[:4], ir.data[4:]
+    assert [ins.operation.name for ins in prep] == ["x", "joint_herald"] * 2
+    assert not any(isinstance(ins.operation, MultiRealizationOp) for ins in prep)
+    assert all(isinstance(ins.operation, MultiRealizationOp) for ins in lowered)
     crz = [ins for ins in ir.data if ins.operation.name == "crz"]
     assert crz and all(
         ins.operation.diagonal and len(ins.operation.candidates) == 4 for ins in crz
@@ -55,9 +57,10 @@ def test_to_circuit_materializes_choices_on_rails():
     with pytest.raises(TranspilerError, match="has no realization choice"):
         ir.to_circuit()
     for k, ins in enumerate(ir.data):
-        ir.data[k] = ins._replace(
-            operation=replace(ins.operation, choice=ins.operation.default_index)
-        )
+        if isinstance(ins.operation, MultiRealizationOp):
+            ir.data[k] = ins._replace(
+                operation=replace(ins.operation, choice=ins.operation.default_index)
+            )
     qc = ir.to_circuit()
     assert qc.num_qubits == 4 and [r.name for r in qc.qregs] == ["q0", "q1"]
     assert qc.count_ops()["measure"] == 4 and qc.count_ops()["crz"] >= 1

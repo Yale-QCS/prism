@@ -17,7 +17,6 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import Clbit
 from qiskit.circuit.library import SwapGate
 from qiskit.passmanager import GenericPass
-from qiskit.passmanager.compilation_status import PassManagerState, RunState
 from qiskit.transpiler import CouplingMap, TranspilerError
 
 from prism._accelerate import (
@@ -188,15 +187,6 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         )
         self.property_set["online_n_swaps"] = int(n_swaps)
         return placed
-
-    def update_status(
-        self, state: PassManagerState, run_state: RunState
-    ) -> PassManagerState:
-        """A new program: no earlier analysis holds (as ``TransformationPass`` does)."""
-        state = super().update_status(state, run_state)
-        if run_state == RunState.SUCCESS:
-            state.workflow_status.completed_passes.clear()
-        return state
 
     def _make_heuristic(self, n_phys: int) -> Heuristic:
         """Qiskit 2.6 ``SabreLayout``'s heuristic, with ``LOOKAHEAD_LAYERS`` lookahead layers.

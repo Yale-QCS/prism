@@ -32,7 +32,7 @@ from qiskit.passmanager.compilation_status import PassManagerState, RunState
 from qiskit.transpiler import CouplingMap, Layout, TranspileLayout, TranspilerError
 from qiskit.transpiler.passes import FixedPoint, RemoveDiagonalGatesBeforeMeasure, Size
 
-from prism.ir import MultiRealization, MultiRealizationInstruction, MultiRealizationOp
+from prism.ir import MultiRealization, MultiRealizationInstruction
 from prism.routing import PrismRouting, SearchBudget
 
 if TYPE_CHECKING:
@@ -123,13 +123,8 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
         prep = enc.initialize()
         for i in range(n):
             for ci in prep.data:
-                local = [prep.find_bit(q).index for q in ci.qubits]
-                sub = QuantumCircuit(len(local))
-                sub.append(ci.operation, range(len(local)))
-                op = MultiRealizationOp(ci.operation.name, (sub,))
-                data.append(
-                    MultiRealizationInstruction(op, tuple(wpl * i + w for w in local))
-                )
+                rails = tuple(wpl * i + prep.find_bit(q).index for q in ci.qubits)
+                data.append(MultiRealizationInstruction(ci.operation, rails))
         for node in dag.topological_op_nodes():
             op = enc.lower(node.op, tuple(node.cargs))
             rails = tuple(wpl * logical[q] + w for q in node.qargs for w in range(wpl))
@@ -154,15 +149,6 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
         )
         ir.verify()
         return ir
-
-    def update_status(
-        self, state: PassManagerState, run_state: RunState
-    ) -> PassManagerState:
-        """A new IR: no earlier analysis holds (as ``TransformationPass`` does)."""
-        state = super().update_status(state, run_state)
-        if run_state == RunState.SUCCESS:
-            state.workflow_status.completed_passes.clear()
-        return state
 
 
 class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
@@ -222,7 +208,11 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
     def update_status(
         self, state: PassManagerState, run_state: RunState
     ) -> PassManagerState:
-        """A new IR: no earlier analysis holds (as ``TransformationPass`` does)."""
+        """Forget completed passes, as ``TransformationPass`` does.
+
+        The physical stage's stock passes must rerun on the new DAG even if the
+        logical stage already ran them.
+        """
         state = super().update_status(state, run_state)
         if run_state == RunState.SUCCESS:
             state.workflow_status.completed_passes.clear()
