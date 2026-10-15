@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from qiskit.circuit import Measure
+from qiskit.circuit import IfElseOp, Measure, QuantumCircuit
 from qiskit.circuit.library import (
     MCPhaseGate,
     MCXGate,
@@ -15,6 +15,7 @@ from qiskit.passmanager import DoWhileController
 from qiskit.transpiler import (
     PassManager,
     Target,
+    TransformationPass,
 )
 from qiskit.transpiler.passes import (
     BasisTranslator,
@@ -67,7 +68,7 @@ def basic_logical_pm(
     eq_library: EquivalenceLibrary,
     reshape_passes: tuple = (),
 ) -> PassManager:
-    """Standard cleanup, translate to ``enc.LOGICAL_ISA``, elide SWAPs, drop diagonals before measures."""
+    """Standard cleanup, translate to ``enc.LOGICAL_ISA``, split ``if_else`` per qubit, elide SWAPs, drop diagonals before measures."""
     isa_basis = sorted(enc.LOGICAL_ISA - NON_GATE_ISA_NAMES)
     return PassManager(
         [
@@ -81,6 +82,7 @@ def basic_logical_pm(
             *reshape_passes,
             BasisTranslator(eq_library, sorted(enc.LOGICAL_ISA | CONTROL_FLOW_OPS)),
             Optimize1qGatesDecomposition(basis=isa_basis),
+            SplitIfElse(),
             # Before layout a SWAP only relabels logical qubits.
             ElideLogicalPermutations(),
             # A diagonal gate right before a final measurement does not change its
@@ -111,3 +113,48 @@ class ElideLogicalPermutations(ElidePermutations):
             else tuple(virtual_layout[q] for q in out_dag.qubits)
         )
         return out_dag
+
+
+class SplitIfElse(TransformationPass):
+    """Replace an ``if_else`` over several qubits by one ``if_else`` per qubit.
+
+    Exact when every block instruction acts on one qubit and writes no classical
+    bit: the per-qubit branches then commute and read the same condition. Other
+    ``if_else`` operations are left alone.
+    """
+
+    def run(self, dag: DAGCircuit) -> DAGCircuit:
+        """Split every splittable multi-qubit ``if_else`` in ``dag``."""
+        for node in dag.op_nodes(IfElseOp):
+            op = node.op
+            if op.num_qubits < 2 or not _splittable(op):
+                continue
+            split = DAGCircuit()
+            split.add_qubits(node.qargs)
+            split.add_clbits(node.cargs)
+            for i, qubit in enumerate(node.qargs):
+                blocks = [_restrict(block, i) for block in op.blocks]
+                split.apply_operation_back(
+                    IfElseOp(op.condition, *blocks), (qubit,), node.cargs, check=False
+                )
+            dag.substitute_node_with_dag(node, split)
+        return dag
+
+
+def _splittable(op: IfElseOp) -> bool:
+    """Every block instruction of ``op`` acts on one qubit and writes no classical bit."""
+    return all(
+        instr.operation.num_qubits == 1 and not instr.clbits
+        for block in op.blocks
+        for instr in block.data
+    )
+
+
+def _restrict(block: QuantumCircuit, i: int) -> QuantumCircuit:
+    """``block`` with only qubit ``i`` and the instructions on it; classical bits kept."""
+    sub = QuantumCircuit([block.qubits[i]], *block.cregs)
+    sub.add_bits([c for c in block.clbits if not block.find_bit(c).registers])
+    for instr in block.data:
+        if instr.qubits == (block.qubits[i],):
+            sub.append(instr)
+    return sub

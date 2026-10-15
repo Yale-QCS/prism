@@ -14,7 +14,8 @@ from qiskit.passmanager import PropertySet
 from qiskit.transpiler import CouplingMap, TranspilerError
 
 from prism.encodings import DualRail
-from prism.pipeline import build_pm
+from prism.ir import MultiRealizationOp
+from prism.pipeline import DAGToMultiRealization, build_pm
 
 
 def test_build_pm_runs():
@@ -74,6 +75,35 @@ def test_multi_qubit_if_else_is_routed():
     ]
     assert len(pairs) == 5
     assert all(cmap.graph.has_edge(*p) or cmap.graph.has_edge(*p[::-1]) for p in pairs)
+
+
+def _five_qubit_if_else() -> QuantumCircuit:
+    qc = QuantumCircuit(6, 1)
+    for a, b in [(0, 3), (1, 4), (2, 5), (0, 5)]:
+        qc.crz(0.4, a, b)
+    qc.h(0)
+    qc.measure(0, 0)
+    with qc.if_test((qc.clbits[0], True)) as else_:
+        for q in range(1, 6):
+            qc.rx(0.3 * q, q)
+    with else_:
+        qc.x(2)
+    qc.crz(0.5, 1, 3)
+    return qc
+
+
+def test_multi_qubit_if_else_enters_as_one_single_edge_op_per_qubit():
+    """The logical stage splits the if_else; each piece is an op on one logical qubit's rails."""
+    ir = DAGToMultiRealization(DualRail).run(
+        circuit_to_dag(DualRail.logical_pm().run(_five_qubit_if_else()))
+    )
+    pieces = [ins for ins in ir.data if ins.operation.name == "if_else"]
+    assert [ins.qubits for ins in pieces] == [(2 * q, 2 * q + 1) for q in range(1, 6)]
+    assert all(isinstance(ins.operation, MultiRealizationOp) for ins in pieces)
+    assert all(
+        dict(ins.operation.candidates[0].count_ops()) == {"if_else": 1}
+        for ins in pieces
+    )
 
 
 def test_if_else_with_multi_qubit_body_raises():

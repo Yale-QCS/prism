@@ -108,35 +108,25 @@ class QubitEncoding:
 
     @classmethod
     def if_else(cls, op: IfElseOp, clbits: tuple[Clbit, ...]) -> MultiRealizationOp:
-        """One wire-level ``IfElseOp`` per logical qubit, over recursively-lowered blocks.
+        """A wire-level ``IfElseOp`` on one logical qubit's rails, over recursively-lowered blocks.
 
-        Blocks must lower to fixed ops. Splitting by qubit lets the router see
-        each qubit's wire pairs; it needs every block instruction to act on one
-        qubit and leave the classical bits alone.
+        Blocks must lower to fixed ops. The logical stage's ``SplitIfElse`` turns
+        an ``if_else`` over several qubits into one per qubit, so that each is
+        routed on its own rails.
         """
         if op.num_qubits > 1:
-            for block in op.blocks:
-                for instr in block.data:
-                    if instr.operation.num_qubits > 1 or instr.clbits:
-                        raise TranspilerError(
-                            f"{cls.__name__} cannot lower an if_else over "
-                            f"{op.num_qubits} qubits whose body holds "
-                            f"{instr.operation.name!r} on {len(instr.qubits)} "
-                            f"qubit(s) and {len(instr.clbits)} clbit(s): it is "
-                            "lowered as one if_else per qubit. Write one if_test "
-                            "per qubit, or move the instruction out of the block."
-                        )
-
-        n_wires = op.num_qubits * cls.WIRES_PER_LOGICAL
-        qc = QuantumCircuit(n_wires)
+            raise TranspilerError(
+                f"{cls.__name__} cannot lower an if_else over {op.num_qubits} "
+                "qubits: it lowers one if_else per qubit, which needs every block "
+                "instruction to act on one qubit and write no classical bit. Write "
+                "one if_test per qubit, or move the instruction out of the block."
+            )
+        qc = QuantumCircuit(cls.WIRES_PER_LOGICAL)
         # The exact clbits the op references, as loose bits: candidate clbits
         # bind positionally to the instruction's clbits, so the widths match.
         qc.add_bits(clbits)
-        for i in range(op.num_qubits):
-            blocks = [cls._lower_block(_restrict(b, i)) for b in op.blocks]
-            false_body = blocks[1] if len(blocks) > 1 else None
-            wires = range(i * cls.WIRES_PER_LOGICAL, (i + 1) * cls.WIRES_PER_LOGICAL)
-            qc.append(IfElseOp(op.condition, blocks[0], false_body), wires, clbits)
+        blocks = [cls._lower_block(b) for b in op.blocks]
+        qc.append(IfElseOp(op.condition, *blocks), qc.qubits, clbits)
         return MultiRealizationOp("if_else", (qc,))
 
     @classmethod
@@ -182,15 +172,3 @@ class QubitEncoding:
                 new_qubits = [wire_map[idx] for idx in local_indices]
                 new_block.append(sub_ci.operation, new_qubits, sub_ci.clbits)
         return new_block
-
-
-def _restrict(block: QuantumCircuit, i: int) -> QuantumCircuit:
-    """``block`` with only qubit ``i`` and the instructions on it; classical bits kept."""
-    if block.num_qubits == 1:
-        return block
-    sub = QuantumCircuit([block.qubits[i]], *block.cregs)
-    sub.add_bits([c for c in block.clbits if not block.find_bit(c).registers])
-    for instr in block.data:
-        if instr.qubits == (block.qubits[i],):
-            sub.append(instr)
-    return sub
