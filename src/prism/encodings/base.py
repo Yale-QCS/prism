@@ -108,7 +108,7 @@ class QubitEncoding:
         return MultiRealizationOp("measure", (qc,))
 
     @classmethod
-    def if_else(cls, op: Instruction, clbits: tuple[Clbit, ...]) -> MultiRealizationOp:
+    def if_else(cls, op: IfElseOp, clbits: tuple[Clbit, ...]) -> MultiRealizationOp:
         """One wire-level ``IfElseOp`` per logical qubit, over recursively-lowered blocks.
 
         Blocks must lower to fixed ops. Splitting by qubit lets the router see
@@ -117,7 +117,7 @@ class QubitEncoding:
         """
         if op.num_qubits > 1:
             for block in op.blocks:
-                for instr in block.data if block is not None else ():
+                for instr in block.data:
                     if instr.operation.num_qubits > 1 or instr.clbits:
                         raise TranspilerError(
                             f"{cls.__name__} cannot lower an if_else over "
@@ -134,12 +134,10 @@ class QubitEncoding:
         # bind positionally to the instruction's clbits, so the widths match.
         qc.add_bits(clbits)
         for i in range(op.num_qubits):
-            new_blocks = [
-                None if block is None else cls._lower_block(_restrict(block, i))
-                for block in op.blocks
-            ]
+            blocks = [cls._lower_block(_restrict(b, i)) for b in op.blocks]
+            false_body = blocks[1] if len(blocks) > 1 else None
             wires = range(i * cls.WIRES_PER_LOGICAL, (i + 1) * cls.WIRES_PER_LOGICAL)
-            qc.append(IfElseOp(op.condition, *new_blocks), wires, clbits)
+            qc.append(IfElseOp(op.condition, blocks[0], false_body), wires, clbits)
         return MultiRealizationOp("if_else", (qc,))
 
     @classmethod
@@ -167,7 +165,7 @@ class QubitEncoding:
                 )
             logical_qubits = tuple(block_q_to_logical[q] for q in instr.qubits)
             lowered = cls.lower(instr.operation, tuple(instr.clbits))
-            if len(lowered.candidates) > 1:
+            if len(lowered.candidates) != 1:
                 raise TranspilerError(
                     f"Op {instr.operation.name!r} inside a control-flow block "
                     f"lowered to a multi-realization. Conditional 2Q gates aren't "

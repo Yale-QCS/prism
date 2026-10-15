@@ -69,10 +69,11 @@ class DAGToCircuit(GenericPass[DAGCircuit, QuantumCircuit]):
         if layout is not None:
             out._layout = layout
             layout.write_into_property_set(self.property_set)
-        out._clbit_write_latency = self.property_set["clbit_write_latency"]
-        out._conditional_latency = self.property_set["conditional_latency"]
+        # Private fields Qiskit's own PassManager backend sets the same way.
+        out._clbit_write_latency = self.property_set["clbit_write_latency"]  # pyright: ignore[reportAttributeAccessIssue]
+        out._conditional_latency = self.property_set["conditional_latency"]  # pyright: ignore[reportAttributeAccessIssue]
         if start_times := self.property_set["node_start_time"]:
-            out._op_start_times = [
+            out._op_start_times = [  # pyright: ignore[reportAttributeAccessIssue]
                 start_times[node] for node in passmanager_ir.topological_op_nodes()
             ]
         return out
@@ -218,7 +219,9 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
             {dag.qubits[initial[v]]: final[v] for v in range(len(initial))}
         )
         # Canonical form (the elided permutation folded into final_layout) for the stock passes.
-        TranspileLayout.from_property_set(dag, ps).write_into_property_set(ps)
+        canonical = TranspileLayout.from_property_set(dag, ps)
+        assert canonical is not None  # "layout" is set
+        canonical.write_into_property_set(ps)
         return dag
 
     def update_status(

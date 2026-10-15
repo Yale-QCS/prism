@@ -376,10 +376,10 @@ def _dependencies(
     """
     succ: list[list[int]] = [[] for _ in virts_used]
     pred_count = [0] * len(virts_used)
-    last_nondiag: dict[object, int] = {}
-    diags_since: dict[object, list[int]] = {}
+    last_nondiag: dict[int | Clbit, int] = {}
+    diags_since: dict[int | Clbit, list[int]] = {}
     for k, qs in enumerate(virts_used):
-        wires: set[object] = set(qs) | cl_used[k]
+        wires: set[int | Clbit] = set(qs) | cl_used[k]
         deps: set[int] = set()
         for w in wires:
             if w in last_nondiag:

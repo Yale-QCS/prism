@@ -49,7 +49,7 @@ class SeedVF2ErrorMap(AnalysisPass):
         super().__init__()
         self._coupling_map = coupling_map
 
-    def run(self, _dag: DAGCircuit) -> None:
+    def run(self, dag: DAGCircuit) -> None:
         """Publish the deterministic degree-proxy ``vf2_avg_error_map``."""
         n = self._coupling_map.size()
         edges = sorted({tuple(sorted(e)) for e in self._coupling_map.get_edges()})

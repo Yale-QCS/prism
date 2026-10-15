@@ -1,6 +1,7 @@
 PYTHON_VERSION = python3.12
 VENV           = .venv
 RUST_BIN      ?= $(HOME)/.cargo/bin
+PYRIGHT        = uvx pyright@1.1.414
 export PATH   := $(RUST_BIN):$(PATH)
 
 UV := $(shell command -v uv 2>/dev/null)
@@ -11,7 +12,7 @@ else
 endif
 
 .DEFAULT_GOAL := help
-.PHONY: help init update-hooks reset-venv rebuild test format lint clean
+.PHONY: help init update-hooks reset-venv rebuild test format lint typecheck clean
 
 help:  ## List targets
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*?##/ {printf "  %-24s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -41,11 +42,14 @@ format:  ## Format Rust and Python in place
 	cargo fmt --manifest-path crates/Cargo.toml
 	$(VENV)/bin/pre-commit run --all-files
 
-lint:  ## Check formatting, clippy, and ruff without changing anything
+lint: typecheck  ## Check formatting, clippy, ruff and types without changing anything
 	cargo fmt --manifest-path crates/Cargo.toml --check
 	cargo clippy --manifest-path crates/Cargo.toml --all-targets --all-features -- -D warnings
 	$(VENV)/bin/ruff check src tests
 	$(VENV)/bin/ruff format --check src tests
+
+typecheck:  ## Type-check src/prism with pinned pyright (standard mode)
+	$(PYRIGHT) --pythonpath $(VENV)/bin/python
 
 clean:  ## Remove build artifacts and caches
 	rm -rf build dist src/*.egg-info .pytest_cache .ruff_cache crates/target \

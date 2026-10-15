@@ -46,12 +46,12 @@ class RescheduleCommutingDiagonals(TransformationPass):
         cp = [0] * n
         for k in range(n - 1, -1, -1):
             cp[k] = weight[k] + max((cp[s] for s in succs[k]), default=0)
-        done: list[int | None] = [None] * n
+        done: dict[int, int] = {}
         wire_free: dict = {}
         remaining = set(range(n))
         out = dag.copy_empty_like()
         while remaining:
-            ready = [k for k in remaining if all(done[p] is not None for p in preds[k])]
+            ready = [k for k in remaining if all(p in done for p in preds[k])]
             ready.sort(key=lambda k: (-cp[k], k))
             for k in ready:
                 node = nodes[k]
