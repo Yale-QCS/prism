@@ -104,7 +104,7 @@ class CancelRailX(TransformationPass):
                 a, b = qa
                 frame[a], frame[b] = frame.get(b, False), frame.get(a, False)
                 new.apply_operation_back(SwapGate(), (a, b))
-            else:  # prep x, rswap, measure, barrier: materialize then emit
+            else:  # prep x, rswap, measure: materialize then emit
                 for w in qa:
                     materialize(w)
                 new.apply_operation_back(op, qa, node.cargs)

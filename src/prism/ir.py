@@ -320,7 +320,7 @@ class MultiRealization(IR):
 
 def _check_routable(op: Operation, width: int, where: str) -> None:
     """The router sees 2-qubit gates only: wider operations must hold none."""
-    if width <= 2 or op.name == "barrier":
+    if width <= 2:
         return
     if not isinstance(op, ControlFlowOp):
         _fail(
@@ -328,9 +328,7 @@ def _check_routable(op: Operation, width: int, where: str) -> None:
         )
     for block in op.blocks:
         for ci in block.data:
-            if (len(ci.qubits) >= 2 and ci.operation.name != "barrier") or isinstance(
-                ci.operation, ControlFlowOp
-            ):
+            if len(ci.qubits) >= 2 or isinstance(ci.operation, ControlFlowOp):
                 _fail(
                     f"{where}: {op.name!r} over {width} wires holds gates the router cannot see"
                 )

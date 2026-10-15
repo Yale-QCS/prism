@@ -43,7 +43,7 @@ CONTROL_FLOW_OPS: frozenset[str] = frozenset(
 )
 
 
-NON_GATE_ISA_NAMES: frozenset[str] = CONTROL_FLOW_OPS | {"measure", "barrier", "reset"}
+NON_GATE_ISA_NAMES: frozenset[str] = CONTROL_FLOW_OPS | {"measure", "reset"}
 
 
 def _unroll_target(enc: type[QubitEncoding], *, keep_mc: bool) -> Target:

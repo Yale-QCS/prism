@@ -41,7 +41,7 @@ class QubitEncoding:
     WIRES_PER_LOGICAL: ClassVar[int]
     LOGICAL_ISA: ClassVar[frozenset[str]]
     # Gates the lowering stage can emit on physical wires. Subclasses set
-    # this; usually equals ``LOGICAL_ISA`` filtered of measure/barrier/reset/
+    # this; usually equals ``LOGICAL_ISA`` filtered of measure/reset/
     # control-flow, plus any non-standard primitives the encoding's lowering
     # introduces (e.g. DR's ``rswap``).
     PHYSICAL_ISA: ClassVar[frozenset[str]]
@@ -96,14 +96,6 @@ class QubitEncoding:
         return rule(op)
 
     # ---- Generic plumbing rules (defaults; subclasses override if needed) -----
-
-    @classmethod
-    def barrier(cls, op: Instruction) -> MultiRealizationOp:
-        """Logical barrier → physical barrier covering all rails of the spanned qubits."""
-        n_wires = op.num_qubits * cls.WIRES_PER_LOGICAL
-        qc = QuantumCircuit(n_wires)
-        qc.barrier(range(n_wires))
-        return MultiRealizationOp("barrier", (qc,))
 
     @classmethod
     def measure(cls, op: Instruction) -> MultiRealizationOp:

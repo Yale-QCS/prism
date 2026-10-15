@@ -27,7 +27,7 @@ class DualRail(QubitEncoding):
 
     WIRES_PER_LOGICAL: ClassVar[int] = 2
     LOGICAL_ISA: ClassVar[frozenset[str]] = frozenset(
-        {"x", "rx", "rz", "crz", "swap", "measure", "barrier", "reset", "if_else"}
+        {"x", "rx", "rz", "crz", "swap", "measure", "reset", "if_else"}
     )
     # Adds ``rswap`` (post-lowering RX(theta) → RSwapGate on a rail pair).
     PHYSICAL_ISA: ClassVar[frozenset[str]] = frozenset(
