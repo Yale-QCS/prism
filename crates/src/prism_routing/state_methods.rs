@@ -19,7 +19,6 @@ impl<'a> RoutingState<'a> {
             default_realization,
             &self.layout,
             &self.target.distance.view(),
-            self.heuristic.multi_tie_break_load,
         )?;
         Some(RoutedItemKind::MultiTwoQ(r_idx))
     }

@@ -79,25 +79,6 @@ pub fn op_cost_min_post_swap(
         .fold(f64::INFINITY, f64::min)
 }
 
-/// Neutral executable choice: the default realization when all its pairs are
-/// adjacent, otherwise the lowest-index realization with all pairs adjacent.
-/// `None` if none are adjacent. No load term; the stable-index preference
-/// makes the controlled live arms independent of routing-history state.
-pub fn executable_choice_default(
-    realizations: &[Box<[[PhysicalQubit; 2]]>],
-    dist: &ArrayView2<f64>,
-    default_idx: usize,
-) -> Option<usize> {
-    let adjacent = |real: &Box<[[PhysicalQubit; 2]]>| {
-        real.iter()
-            .all(|p| dist[[p[0].index(), p[1].index()]] == 1.0)
-    };
-    if realizations.get(default_idx).is_some_and(&adjacent) {
-        return Some(default_idx);
-    }
-    realizations.iter().position(adjacent)
-}
-
 /// Realization with all pairs adjacent and lowest summed `phys_load`,
 /// breaking load ties toward `default_idx`. `None` if none are adjacent.
 pub fn executable_choice_balanced(
@@ -269,11 +250,9 @@ impl RealizationFrontLayer {
     }
 
     /// Try to commit a `MultiTwoQ` node atomically (return realization index)
-    /// or defer it into the front layer (return `None`). `tie_break_load`
-    /// selects the load-balanced choice (`true`) or the neutral
-    /// default-then-index choice (`false`); `phys_load` is accumulated on the
-    /// committed realization's pairs in both modes (consulted only in the
-    /// load mode).
+    /// or defer it into the front layer (return `None`). Among executable
+    /// realizations the lowest cumulative `phys_load` wins (ties to the
+    /// default); the committed realization's pairs then add to `phys_load`.
     pub fn commit_or_defer_multi(
         &mut self,
         node_id: NodeIndex,
@@ -281,19 +260,14 @@ impl RealizationFrontLayer {
         default_realization: u32,
         layout: &NLayout,
         dist: &ArrayView2<f64>,
-        tie_break_load: bool,
     ) -> Option<u32> {
         let phys_reals = materialize_phys_reals(realizations, layout);
-        let choice = if tie_break_load {
-            executable_choice_balanced(
-                &phys_reals,
-                dist,
-                &self.phys_load,
-                default_realization as usize,
-            )
-        } else {
-            executable_choice_default(&phys_reals, dist, default_realization as usize)
-        };
+        let choice = executable_choice_balanced(
+            &phys_reals,
+            dist,
+            &self.phys_load,
+            default_realization as usize,
+        );
         match choice {
             Some(r_idx) => {
                 for pair in &phys_reals[r_idx][..] {
@@ -543,40 +517,6 @@ mod tests {
             1.0
         );
         assert_eq!(op_cost_min(&reals, &dist.view()), 2.0);
-    }
-
-    #[test]
-    fn executable_choice_default_prefers_default_then_lowest_index() {
-        let dist = array![[0.0, 1.0, 1.0], [1.0, 0.0, 2.0], [1.0, 2.0, 0.0]];
-        let reals: Vec<Box<[[PhysicalQubit; 2]]>> = vec![
-            vec![[pq(1), pq(2)]].into_boxed_slice(), // dist 2: not executable
-            vec![[pq(0), pq(1)]].into_boxed_slice(), // executable
-            vec![[pq(0), pq(2)]].into_boxed_slice(), // executable
-        ];
-        // default executable: default wins regardless of index position.
-        assert_eq!(executable_choice_default(&reals, &dist.view(), 2), Some(2));
-        // default not executable: lowest executable index wins.
-        assert_eq!(executable_choice_default(&reals, &dist.view(), 0), Some(1));
-        // nothing adjacent: None.
-        let far = array![[0.0, 3.0, 3.0], [3.0, 0.0, 3.0], [3.0, 3.0, 0.0]];
-        assert_eq!(executable_choice_default(&reals, &far.view(), 0), None);
-    }
-
-    #[test]
-    fn executable_choice_default_ignores_load_state() {
-        let dist = array![[0.0, 1.0, 1.0], [1.0, 0.0, 2.0], [1.0, 2.0, 0.0]];
-        let reals: Vec<Box<[[PhysicalQubit; 2]]>> = vec![
-            vec![[pq(0), pq(1)]].into_boxed_slice(),
-            vec![[pq(0), pq(2)]].into_boxed_slice(),
-        ];
-        // Load-balanced choice moves off the default under load; the neutral
-        // choice must not.
-        let load = [0.0, 5.0, 0.0];
-        assert_eq!(
-            executable_choice_balanced(&reals, &dist.view(), &load, 0),
-            Some(1)
-        );
-        assert_eq!(executable_choice_default(&reals, &dist.view(), 0), Some(0));
     }
 
     #[test]
