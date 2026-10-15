@@ -6,27 +6,13 @@ from dataclasses import dataclass
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import Instruction
-from qiskit.converters import circuit_to_dag, dag_to_circuit
+from qiskit.converters import dag_to_circuit
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import AnalysisPass
 
 from prism.synthesis.preparation import SYNTHETIC_PREPARATION_LABEL
 
 FREE_GATES: frozenset[str] = frozenset({"rz", "u1", "p", "z"})
-
-# Gate durations (ns) from Liu et al.'s hardware model. We use the reported
-# 200 ns beamsplitter-SWAP duration for every beamsplitter rotation because
-# Liu et al. do not specify a shorter duration for fractional rotations.
-# Free diagonal-Z operations and synthetic preparation placeholders cost zero.
-GATE_DURATIONS: dict[str, float] = {
-    "joint_herald": 0.0,
-    "crz": 500.0,
-    "rswap": 200.0,
-    "swap": 200.0,
-    "x": 200.0,
-    "rx": 200.0,
-    "sx": 200.0,
-}
 
 
 def is_synthetic_preparation(operation: Instruction) -> bool:
@@ -57,21 +43,6 @@ def physical_depth(qc: QuantumCircuit) -> int:
     )
 
 
-def physical_duration(qc: QuantumCircuit) -> float:
-    """Return the Liu-model critical-path duration in nanoseconds."""
-    finish: dict = {}
-    for node in circuit_to_dag(qc).topological_op_nodes():
-        start = max((finish.get(q, 0.0) for q in node.qargs), default=0.0)
-        duration = (
-            0.0
-            if is_synthetic_preparation(node.op)
-            else GATE_DURATIONS.get(node.op.name, 0.0)
-        )
-        for q in node.qargs:
-            finish[q] = start + duration
-    return max(finish.values(), default=0.0)
-
-
 def active_gate_count(qc: QuantumCircuit) -> int:
     """Return the number of non-free program-body operations."""
     return sum(1 for instruction in qc.data if not is_free(instruction.operation))
@@ -85,7 +56,6 @@ class CircuitMetrics:
     depth: int
     active_gates: int
     size: int
-    duration: float = 0.0
 
 
 class RecordCircuitMetrics(AnalysisPass):
@@ -109,5 +79,4 @@ class RecordCircuitMetrics(AnalysisPass):
             depth=int(physical_depth(qc)),
             active_gates=int(active_gate_count(qc)),
             size=int(qc.size()),
-            duration=physical_duration(qc),
         )
