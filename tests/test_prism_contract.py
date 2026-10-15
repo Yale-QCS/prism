@@ -8,8 +8,10 @@ from types import SimpleNamespace
 
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit.library import CRZGate
+from qiskit.converters import circuit_to_dag
 from qiskit.passmanager import PropertySet
 from qiskit.transpiler import CouplingMap
+from qiskit.transpiler.passes import DenseLayout
 
 from prism import routing as prism_module
 from prism.encodings import DualRail
@@ -67,7 +69,9 @@ def test_outer_search_hands_every_start_to_the_kernel(monkeypatch):
     monkeypatch.setattr(policy, "_precompute", lambda _ir: ctx)
     monkeypatch.setattr(policy, "_reversed_ctx", lambda c: c)
     monkeypatch.setattr(policy, "_flatten_ctx", lambda c: ("flat", c))
-    monkeypatch.setattr(policy, "_starting_layouts", lambda _ctx, _seed: starts)
+    monkeypatch.setattr(
+        policy, "_starting_layouts", lambda _ctx, _seed, _target: starts
+    )
 
     def fake_kernel(
         fwd, rev, _target, _heuristic, kernel_starts, max_iterations, swap_trials
@@ -147,3 +151,20 @@ def test_available_crz_commits_atomically_and_emits_complete_candidate():
     data, chosen = policy._replay(events, ctx, [0, 1, 2, 3])
     assert chosen == {0: 2} and data[0].operation.choice == 2
     assert _program(2, data).to_circuit().count_ops() == {"crz": 1, "rz": 1}
+
+
+def test_dense_start_is_qiskits_dense_layout():
+    """The dense start occupies the subgraph Qiskit's ``DenseLayout`` picks (in BFS order)."""
+    for cmap in (CouplingMap.from_heavy_hex(3), CouplingMap.from_grid(3, 4)):
+        target = prism_module.RoutingTarget.from_coupling_list(
+            list(cmap.get_edges()), cmap.size()
+        )
+        for k in (1, 5, cmap.size()):
+            qc = QuantumCircuit(k)
+            dense = DenseLayout(cmap)
+            dense.run(circuit_to_dag(qc))
+            layout = dense.property_set["layout"]
+            v2p = target.dense_layout(k)
+            assert sorted(v2p[:k]) == sorted(layout[q] for q in qc.qubits)
+            assert sorted(v2p) == list(range(cmap.size()))
+        assert target.dense_layout(0) == list(range(cmap.size()))

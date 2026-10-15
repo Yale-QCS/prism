@@ -9,11 +9,13 @@
 pub mod input;
 pub mod layout;
 
+use ndarray::Array2;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use qiskit_circuit::nlayout::NLayout;
 use qiskit_circuit::{PhysicalQubit, VirtualQubit};
 use qiskit_transpiler::neighbors::Neighbors;
+use qiskit_transpiler::passes::best_subset;
 
 use crate::sabre::route::{PyRoutingTarget, RoutingTarget};
 
@@ -48,6 +50,52 @@ impl PyRoutingTarget {
         let neighbors = Neighbors::from_parts(neighbors, partition)
             .map_err(|e| PyValueError::new_err(e.to_string()))?;
         Ok(Self(Some(RoutingTarget::from_neighbors(neighbors))))
+    }
+
+    /// The densely connected subgraph that Qiskit's `DenseLayout` picks for `num_virtual` qubits
+    /// (`best_subset`, without error rates), in its breadth-first order, followed by the remaining
+    /// physical qubits in index order: a virtual-to-physical list over every physical qubit.
+    ///
+    /// # Errors
+    ///
+    /// If the target is all-to-all, or `num_virtual` exceeds its number of qubits.
+    pub fn dense_layout(&self, num_virtual: usize) -> PyResult<Vec<u32>> {
+        let neighbors = &explicit_target(self)?.neighbors;
+        let num_qubits = u32::try_from(neighbors.num_qubits())?;
+        let physical = || (0..num_qubits).map(PhysicalQubit::new);
+        if num_virtual > neighbors.num_qubits() {
+            return Err(PyValueError::new_err(format!(
+                "{num_virtual} virtual qubits do not fit on {num_qubits} physical qubits"
+            )));
+        }
+        // `best_subset` would place one qubit for an empty circuit.
+        let dense = if num_virtual == 0 {
+            Vec::new()
+        } else {
+            let mut adjacency = Array2::zeros((num_qubits as usize, num_qubits as usize));
+            for p in physical() {
+                for q in &neighbors[p] {
+                    adjacency[[p.index(), q.index()]] = 1.0;
+                }
+            }
+            // No error rates: `use_error` is false, so the error matrix and counts are unused.
+            let [_rows, _cols, dense] = best_subset(
+                num_virtual,
+                adjacency.view(),
+                0,
+                0,
+                false,
+                true,
+                Array2::zeros((1, 1)).view(),
+            );
+            dense
+        };
+        let dense: Vec<PhysicalQubit> = dense
+            .into_iter()
+            .map(|p| u32::try_from(p).map(PhysicalQubit::new))
+            .collect::<Result<_, _>>()?;
+        let rest = physical().filter(|p| !dense.contains(p));
+        Ok(dense.iter().copied().chain(rest).map(|p| p.0).collect())
     }
 }
 

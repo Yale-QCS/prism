@@ -13,10 +13,7 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass, replace
 
-import numpy as np
-import rustworkx
 from qiskit import QuantumCircuit
-from qiskit._accelerate.dense_layout import best_subset
 from qiskit.circuit import Clbit
 from qiskit.circuit.library import SwapGate
 from qiskit.passmanager import GenericPass
@@ -162,13 +159,14 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             if self.seed is not None
             else random.SystemRandom().getrandbits(64)
         )
-        starts = self._starting_layouts(ctx, base_seed)
+        target = RoutingTarget.from_coupling_list(
+            list(self.coupling_map.get_edges()), ctx.n_phys
+        )
+        starts = self._starting_layouts(ctx, base_seed, target)
         results = prism_layout_and_routing(
             self._flatten_ctx(ctx),
             self._flatten_ctx(self._reversed_ctx(ctx)),
-            RoutingTarget.from_coupling_list(
-                list(self.coupling_map.get_edges()), ctx.n_phys
-            ),
+            target,
             self._make_heuristic(ctx.n_phys),
             [(int(seed) % (1 << 64), list(v2p)) for seed, v2p in starts],
             self.budget.refinement_iterations,
@@ -272,7 +270,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         return data, chosen
 
     def _starting_layouts(
-        self, ctx: _Ctx, base_seed: int
+        self, ctx: _Ctx, base_seed: int, target: RoutingTarget
     ) -> list[tuple[int, list[int]]]:
         """``layout_starts`` seeded random layouts, then Qiskit's dense, identity and reverse layouts."""
         starts = []
@@ -282,28 +280,10 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             starts.append((base_seed + trial, v2p))
         seed = base_seed + self.budget.layout_starts
         return starts + [
-            (seed, self._dense_v2p(ctx)),
+            (seed, target.dense_layout(ctx.n_virt)),
             (seed + 1, list(range(ctx.n_phys))),
             (seed + 2, list(reversed(range(ctx.n_phys)))),
         ]
-
-    def _dense_v2p(self, ctx: _Ctx) -> list[int]:
-        """Qiskit's dense-subgraph placement, completed with ancillas."""
-        if ctx.n_virt == 0:
-            return list(range(ctx.n_phys))
-        adjacency = rustworkx.adjacency_matrix(self.coupling_map.graph)
-        _rows, _cols, best_map = best_subset(
-            ctx.n_virt,
-            adjacency,
-            0,
-            0,
-            False,
-            self.coupling_map.is_symmetric,
-            np.asarray([[0.0]]),
-        )
-        assigned = [int(p) for p in best_map]
-        used = set(assigned)
-        return assigned + [p for p in range(ctx.n_phys) if p not in used]
 
     def _reversed_ctx(self, ctx: _Ctx) -> _Ctx:
         """The context of the reversed program, for backward refinement."""
