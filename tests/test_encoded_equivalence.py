@@ -9,7 +9,6 @@ from qiskit.transpiler import CouplingMap
 
 from prism.encodings import DualRail
 from prism.lowering.commit import SearchBudget
-from prism.lowering.commit_policies.prism_routing import PrismRouting
 from prism.pipeline import build_pm
 
 
@@ -39,51 +38,44 @@ def _encode(logical_state: np.ndarray, n: int) -> np.ndarray:
     return out
 
 
-@pytest.mark.parametrize("commute", [False, True])
 @pytest.mark.parametrize("seed", [0, 1, 2])
-def test_routed_rails_match_encoded_logical_state(commute, seed):
-    PrismRouting.COMMUTE_DIAGONAL = commute
-    try:
-        n = 3
-        qc = _logical(seed, n)
-        cmap = CouplingMap.from_grid(2, 4)  # 8 rails: 3 logical pairs + one spare
-        pm = build_pm(
-            cmap,
-            enc=DualRail,
-            seed=seed,
-            budget=SearchBudget(
-                layout_starts=4, refinement_iterations=2, swap_trials=4
-            ),
-        )
-        out = pm.run(qc)
-        ps = pm.property_set
-        # virtual rail v starts at initial[v] and ends at final[initial[v]]
-        initial = ps["layout"]
-        final = ps["final_layout"]
-        virt_qubits = list(initial.get_virtual_bits())
-        end_pos = {}
-        for v_qubit in virt_qubits:
-            p0 = initial[v_qubit]
-            end_pos[v_qubit] = final[out.qubits[p0]]
-        # lowering registers q0..q{n-1}, wires (0, 1) -> virtual index 2i + w
-        by_index = {}
-        for v_qubit, pos in end_pos.items():
-            reg = v_qubit._register
-            by_index[2 * int(reg.name[1:]) + v_qubit._index] = pos
-        sv_out = Statevector(out).data
-        expected_rails = _encode(Statevector(qc).data, n)
-        # place expected rail state at the final physical positions, spare rails |0>
-        n_phys = out.num_qubits
-        expected = np.zeros(2**n_phys, dtype=complex)
-        for rail_idx, amp in enumerate(expected_rails):
-            if abs(amp) < 1e-14:
-                continue
-            phys = 0
-            for v in range(2 * n):
-                if (rail_idx >> v) & 1:
-                    phys |= 1 << by_index[v]
-            expected[phys] += amp
-        overlap = abs(np.vdot(expected, sv_out))
-        assert overlap == pytest.approx(1.0, abs=1e-6), f"overlap {overlap}"
-    finally:
-        PrismRouting.COMMUTE_DIAGONAL = True
+def test_routed_rails_match_encoded_logical_state(seed):
+    n = 3
+    qc = _logical(seed, n)
+    cmap = CouplingMap.from_grid(2, 4)  # 8 rails: 3 logical pairs + one spare
+    pm = build_pm(
+        cmap,
+        enc=DualRail,
+        seed=seed,
+        budget=SearchBudget(layout_starts=4, refinement_iterations=2, swap_trials=4),
+    )
+    out = pm.run(qc)
+    ps = pm.property_set
+    # virtual rail v starts at initial[v] and ends at final[initial[v]]
+    initial = ps["layout"]
+    final = ps["final_layout"]
+    virt_qubits = list(initial.get_virtual_bits())
+    end_pos = {}
+    for v_qubit in virt_qubits:
+        p0 = initial[v_qubit]
+        end_pos[v_qubit] = final[out.qubits[p0]]
+    # lowering registers q0..q{n-1}, wires (0, 1) -> virtual index 2i + w
+    by_index = {}
+    for v_qubit, pos in end_pos.items():
+        reg = v_qubit._register
+        by_index[2 * int(reg.name[1:]) + v_qubit._index] = pos
+    sv_out = Statevector(out).data
+    expected_rails = _encode(Statevector(qc).data, n)
+    # place expected rail state at the final physical positions, spare rails |0>
+    n_phys = out.num_qubits
+    expected = np.zeros(2**n_phys, dtype=complex)
+    for rail_idx, amp in enumerate(expected_rails):
+        if abs(amp) < 1e-14:
+            continue
+        phys = 0
+        for v in range(2 * n):
+            if (rail_idx >> v) & 1:
+                phys |= 1 << by_index[v]
+        expected[phys] += amp
+    overlap = abs(np.vdot(expected, sv_out))
+    assert overlap == pytest.approx(1.0, abs=1e-6), f"overlap {overlap}"

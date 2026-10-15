@@ -94,7 +94,6 @@ class PrismRouting(CommitPolicy):
     BEST_EPSILON = 1e-10
     PHYS_LOAD_DECAY = 0.9
     # Diagonal ops commute with each other: route them as independent (per-rail) work.
-    COMMUTE_DIAGONAL = True
     DIAGONAL_OPS = frozenset({"crz", "rz"})
 
     def __init__(
@@ -426,10 +425,7 @@ class PrismRouting(CommitPolicy):
             )
         virt_pairs, virts_used = self._precompute_op_data(op_nodes, q_to_virt)
         real_idx_map = [tuple(range(len(n.op.realizations))) for n in op_nodes]
-        diagonal = [
-            self.COMMUTE_DIAGONAL and n.op.logical_name in self.DIAGONAL_OPS
-            for n in op_nodes
-        ]
+        diagonal = [n.op.logical_name in self.DIAGONAL_OPS for n in op_nodes]
         c_to_idx = {c: i for i, c in enumerate(dag.clbits)}
         cl_used = [frozenset(c_to_idx[c] for c in n.cargs) for n in op_nodes]
         succ, pred_count = self._build_deps(virts_used, diagonal, cl_used)
@@ -483,20 +479,18 @@ class PrismRouting(CommitPolicy):
     @staticmethod
     def _build_deps(
         virts_used: list[frozenset[int]],
-        diagonal: list[bool] | None = None,
-        cl_used: list[frozenset[int]] | None = None,
+        diagonal: list[bool],
+        cl_used: list[frozenset[int]],
     ) -> tuple[list[list[int]], list[int]]:
         """Successor list + initial pred counts from per-op virt-usage sets.
 
-        With ``diagonal``, ops that are diagonal on every wire they touch (CRZ, RZ)
+        Ops flagged in ``diagonal`` (diagonal on every wire they touch: CRZ, RZ)
         commute with each other, so a diagonal op depends only on the last
         non-diagonal op per wire, and a non-diagonal op on everything since.
         ``cl_used`` adds classical bits as extra wires (measure writes, control
         flow reads), which only non-diagonal ops touch.
         """
         n_ops = len(virts_used)
-        diagonal = diagonal or [False] * n_ops
-        cl_used = cl_used or [frozenset()] * n_ops
         succ: list[list[int]] = [[] for _ in range(n_ops)]
         pred_count = [0] * n_ops
         last_nondiag: dict = {}
