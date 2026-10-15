@@ -57,7 +57,7 @@ def _encode(logical_state: np.ndarray, n: int, perm: tuple[int, ...]) -> np.ndar
     return out
 
 
-@pytest.mark.parametrize("make", [_logical, _trailing_swap])
+@pytest.mark.parametrize("make", [_logical, _trailing_swap, _trailing_x])
 @pytest.mark.parametrize("seed", [0, 1, 2])
 def test_routed_rails_match_encoded_logical_state(make, seed):
     n = 3

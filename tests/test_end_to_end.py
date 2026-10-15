@@ -42,7 +42,6 @@ def test_conditional_logical_x_survives_physical_optimization():
 
     assert blocks
     assert sum(block.count_ops().get("swap", 0) for block in blocks) == 1
-    assert pm.property_set["swap_before_measure_skipped_for_control_flow"] is True
 
 
 @pytest.mark.parametrize("seed", [0, 1, 42, 2**32 - 1, 2**64 - 1])

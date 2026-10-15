@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 from qiskit.circuit import Measure
 from qiskit.circuit.controlflow import (
-    ControlFlowOp,
     ForLoopOp,
     IfElseOp,
     SwitchCaseOp,
@@ -31,10 +30,7 @@ from qiskit.transpiler import (
     Target,
     TransformationPass,
 )
-from qiskit.transpiler.passes import (
-    CommutativeCancellation,
-    OptimizeSwapBeforeMeasure,
-)
+from qiskit.transpiler.passes import CommutativeCancellation
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
 from prism.synthesis.reschedule import RescheduleCommutingDiagonals
@@ -108,19 +104,6 @@ def _guard_task(task: object) -> int:
         return sum(_guard_task(t) for t in task)
     tasks = getattr(task, "tasks", None)  # flow controllers
     return 0 if tasks is None else sum(_guard_task(t) for t in tasks)
-
-
-class SafeOptimizeSwapBeforeMeasure(TransformationPass):
-    """Run terminal-SWAP cleanup only when the circuit has no control flow."""
-
-    def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Apply ``OptimizeSwapBeforeMeasure`` unless the DAG has control flow."""
-        if any(isinstance(node.op, ControlFlowOp) for node in dag.op_nodes()):
-            self.property_set["swap_before_measure_skipped_for_control_flow"] = True
-            return dag
-        cleanup = OptimizeSwapBeforeMeasure()
-        cleanup.property_set = self.property_set
-        return cleanup.run(dag)
 
 
 class SeedVF2ErrorMap(AnalysisPass):
@@ -234,7 +217,6 @@ def physical_pm(
     )
     preset.layout = PassManager()
     preset.pre_routing = PassManager([SeedVF2ErrorMap(coupling_map)])
-    preset.post_routing = PassManager([SafeOptimizeSwapBeforeMeasure()])
     # ``CancelRailX`` strips the X-on-rail that O3's 2Q resynthesis leaves behind.
     preset.post_optimization = PassManager(
         [CancelRailX(), RescheduleCommutingDiagonals(), RecordCircuitMetrics()]
