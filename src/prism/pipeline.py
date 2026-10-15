@@ -194,10 +194,8 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
         ps["final_layout"] = Layout(
             {dag.qubits[initial[v]]: final[v] for v in range(len(initial))}
         )
-        # Canonical form (the elided permutation folded into final_layout) for the stock passes.
-        canonical = TranspileLayout.from_property_set(dag, ps)
-        assert canonical is not None  # "layout" is set
-        canonical.write_into_property_set(ps)
+        # Qiskit's canonical form (the elided permutation folded into final_layout) for the stock passes.
+        TranspileLayout.from_property_set(dag, ps).write_into_property_set(ps)
         return dag
 
     def update_status(
