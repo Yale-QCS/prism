@@ -175,8 +175,8 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
         initial, final = ir.placement.initial, ir.placement.final
         # The virtual circuit is the rail circuit: rail w of logical qubit i is
         # virtual index wpl * i + w; free physical qubits become ancillas.
-        ancillas = QuantumRegister(len(initial) - len(ir.qubits), "ancilla")
-        virtuals = ir.qubits + list(ancillas)
+        ancillas = QuantumRegister(len(initial) - len(ir.rails), "ancilla")
+        virtuals = ir.rails + list(ancillas)
         layout = Layout({q: initial[v] for v, q in enumerate(virtuals)})
         for reg in [*ir.qregs, ancillas]:
             layout.add_register(reg)
@@ -184,7 +184,7 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
         ps = self.property_set
         ps["layout"] = layout
         ps["original_qubit_indices"] = {q: v for v, q in enumerate(virtuals)}
-        ps["num_input_qubits"] = len(ir.qubits)
+        ps["num_input_qubits"] = len(ir.rails)
         # ElidePermutations' convention: qubit at the end -> its index at the start.
         ps["virtual_permutation_layout"] = Layout(
             {

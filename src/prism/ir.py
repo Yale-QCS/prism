@@ -182,15 +182,15 @@ class MultiRealization(IR):
     placement: Placement | None = None
 
     @property
-    def qubits(self) -> list[Qubit]:
-        """The rails; rail index ``v`` is ``qubits[v]``."""
+    def rails(self) -> list[Qubit]:
+        """The rails; rail index ``v`` is ``rails[v]``."""
         return [q for reg in self.qregs for q in reg]
 
     @property
     def num_wires(self) -> int:
         """Rails before placement, physical qubits after."""
         return (
-            len(self.qubits) if self.placement is None else len(self.placement.initial)
+            len(self.rails) if self.placement is None else len(self.placement.initial)
         )
 
     def __repr__(self) -> str:
@@ -277,7 +277,7 @@ class MultiRealization(IR):
             )
         n = self.num_wires
         if self.placement is not None:
-            if n < len(self.qubits) or any(
+            if n < len(self.rails) or any(
                 sorted(m) != list(range(n))
                 for m in (self.placement.initial, self.placement.final)
             ):

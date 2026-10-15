@@ -299,7 +299,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
     def _precompute(self, ir: MultiRealization) -> _Ctx:
         """Candidate 2-qubit pairs, touched wires and dependencies per instruction."""
         n_phys = self.coupling_map.size()
-        n_virt = len(ir.qubits)
+        n_virt = len(ir.rails)
         if n_virt > n_phys:
             raise TranspilerError(
                 f"the circuit needs {n_virt} physical qubits ({len(ir.qregs)} logical "
