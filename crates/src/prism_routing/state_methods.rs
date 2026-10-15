@@ -28,18 +28,10 @@ impl<'a> RoutingState<'a> {
     /// if the successor is a `MultiTwoQ` node. No-op otherwise. Called right
     /// after `populate_extended_set`'s stock `if let InteractionKind::TwoQ`.
     fn maybe_push_multi_extended(&mut self, successor_node: NodeIndex) {
-        if let InteractionKind::MultiTwoQ {
-            realizations,
-            default_realization,
-        } =
-            &self.sabre.dag[successor_node].kind
+        if let InteractionKind::MultiTwoQ { realizations, .. } = &self.sabre.dag[successor_node].kind
         {
             let phys = ext::materialize_phys_reals(realizations, &self.layout);
-            self.extended_set.push_multi(
-                phys,
-                *default_realization as usize,
-                &self.target.distance.view(),
-            );
+            self.extended_set.push_multi(phys);
         }
     }
 

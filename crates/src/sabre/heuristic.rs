@@ -178,10 +178,6 @@ pub struct Heuristic {
     /// `false` is the neutral mode, preferring the default realization when
     /// executable and otherwise the lowest candidate index.
     pub multi_tie_break_load: bool,
-    /// Keep one realization witness fixed while a multi-realization node
-    /// remains in a SABRE layer.  Candidate SWAPs are scored against that
-    /// witness instead of independently minimizing over realizations.
-    pub multi_sticky_witness: bool,
 }
 
 #[pymethods]
@@ -200,7 +196,7 @@ impl Heuristic {
     ///     best_epsilon (float): the floating-point epsilon to use when comparing scores to find
     ///         the best value.
     #[new]
-    #[pyo3(signature = (basic=None, lookahead=None, decay=None, attempt_limit=1000, best_epsilon=1e-10, phys_load_decay=1.0, multi_tie_break_load=true, multi_sticky_witness=false))]
+    #[pyo3(signature = (basic=None, lookahead=None, decay=None, attempt_limit=1000, best_epsilon=1e-10, phys_load_decay=1.0, multi_tie_break_load=true))]
     pub fn new(
         basic: Option<BasicHeuristic>,
         lookahead: Option<LookaheadHeuristic>,
@@ -209,7 +205,6 @@ impl Heuristic {
         best_epsilon: f64,
         phys_load_decay: f64,
         multi_tie_break_load: bool,
-        multi_sticky_witness: bool,
     ) -> Self {
         Self {
             basic,
@@ -219,7 +214,6 @@ impl Heuristic {
             attempt_limit: attempt_limit.unwrap_or(usize::MAX),
             phys_load_decay,
             multi_tie_break_load,
-            multi_sticky_witness,
         }
     }
 
@@ -232,7 +226,6 @@ impl Heuristic {
             self.best_epsilon,
             self.phys_load_decay,
             self.multi_tie_break_load,
-            self.multi_sticky_witness,
         )
             .into_py_any(py)
     }

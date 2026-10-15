@@ -79,57 +79,6 @@ pub fn op_cost_min_post_swap(
         .fold(f64::INFINITY, f64::min)
 }
 
-/// Sum-of-pair-distances for one selected realization.
-pub fn realization_cost(realization: &[[PhysicalQubit; 2]], dist: &ArrayView2<f64>) -> f64 {
-    realization
-        .iter()
-        .map(|p| dist[[p[0].index(), p[1].index()]])
-        .sum()
-}
-
-/// `realization_cost` under a virtual SWAP application.
-pub fn realization_cost_post_swap(
-    realization: &[[PhysicalQubit; 2]],
-    swap: [PhysicalQubit; 2],
-    dist: &ArrayView2<f64>,
-) -> f64 {
-    let [a, b] = swap;
-    let permute = |p: PhysicalQubit| {
-        if p == a {
-            b
-        } else if p == b {
-            a
-        } else {
-            p
-        }
-    };
-    realization
-        .iter()
-        .map(|p| dist[[permute(p[0]).index(), permute(p[1]).index()]])
-        .sum()
-}
-
-/// Closest realization, breaking equal-cost ties toward `preferred` and then
-/// the lowest candidate index.
-pub fn closest_realization(
-    realizations: &[Box<[[PhysicalQubit; 2]]>],
-    dist: &ArrayView2<f64>,
-    preferred: usize,
-) -> usize {
-    assert!(!realizations.is_empty());
-    let preferred = preferred.min(realizations.len() - 1);
-    let mut best = preferred;
-    let mut best_cost = realization_cost(&realizations[preferred], dist);
-    for (index, realization) in realizations.iter().enumerate() {
-        let cost = realization_cost(realization, dist);
-        if cost < best_cost || (cost == best_cost && best != preferred && index < best) {
-            best = index;
-            best_cost = cost;
-        }
-    }
-    best
-}
-
 /// Neutral executable choice: the default realization when all its pairs are
 /// adjacent, otherwise the lowest-index realization with all pairs adjacent.
 /// `None` if none are adjacent. No load term; the stable-index preference
@@ -207,12 +156,7 @@ pub fn pick_multi_force_target(
         .fold(f64::INFINITY, f64::min);
     let mut multi_best: Option<(NodeIndex, usize, f64)> = None;
     for (&node, reals) in front.multi_iter() {
-        let candidates: Box<dyn Iterator<Item = (usize, &Box<[[PhysicalQubit; 2]]>)> + '_> =
-            match front.multi_witness(&node) {
-                Some(witness) => Box::new(std::iter::once((witness, &reals[witness]))),
-                None => Box::new(reals.iter().enumerate()),
-            };
-        for (r_idx, real) in candidates {
+        for (r_idx, real) in reals.iter().enumerate() {
             let d: f64 = real
                 .iter()
                 .map(|p| dist[[p[0].index(), p[1].index()]])
@@ -296,9 +240,7 @@ impl PyRoutingTarget {
 pub struct RealizationFrontLayer {
     inner: FrontLayer,
     multi: IndexMap<NodeIndex, Realizations, ::ahash::RandomState>,
-    multi_witness: IndexMap<NodeIndex, usize, ::ahash::RandomState>,
     phys_to_nodes: Vec<HashSet<NodeIndex>>,
-    sticky_witness: bool,
     /// Per-physical-qubit cumulative load accumulator for the MultiTwoQ
     /// adjacent-realization tiebreak.
     phys_load: Vec<f64>,
@@ -317,13 +259,11 @@ impl DerefMut for RealizationFrontLayer {
 }
 
 impl RealizationFrontLayer {
-    pub fn new(num_qubits: u32, sticky_witness: bool) -> Self {
+    pub fn new(num_qubits: u32) -> Self {
         Self {
             inner: FrontLayer::new(num_qubits),
             multi: IndexMap::with_hasher(::ahash::RandomState::default()),
-            multi_witness: IndexMap::with_hasher(::ahash::RandomState::default()),
             phys_to_nodes: (0..num_qubits as usize).map(|_| HashSet::new()).collect(),
-            sticky_witness,
             phys_load: vec![0.0; num_qubits as usize],
         }
     }
@@ -363,7 +303,7 @@ impl RealizationFrontLayer {
                 Some(r_idx as u32)
             }
             None => {
-                self.insert_multi(node_id, phys_reals, default_realization as usize, dist);
+                self.insert_multi(node_id, phys_reals);
                 None
             }
         }
@@ -396,14 +336,8 @@ impl RealizationFrontLayer {
 
     pub fn score(&self, swap: [PhysicalQubit; 2], dist: &ArrayView2<f64>) -> f64 {
         let mut total = self.inner.score(swap, dist);
-        for (node, reals) in self.multi.iter() {
-            if self.sticky_witness {
-                let witness = self.multi_witness[node];
-                total += realization_cost_post_swap(&reals[witness], swap, dist)
-                    - realization_cost(&reals[witness], dist);
-            } else {
-                total += op_cost_min_post_swap(reals, swap, dist) - op_cost_min(reals, dist);
-            }
+        for reals in self.multi.values() {
+            total += op_cost_min_post_swap(reals, swap, dist) - op_cost_min(reals, dist);
         }
         total
     }
@@ -412,14 +346,8 @@ impl RealizationFrontLayer {
         self.inner.total_score(dist)
             + self
                 .multi
-                .iter()
-                .map(|(node, reals)| {
-                    if self.sticky_witness {
-                        realization_cost(&reals[self.multi_witness[node]], dist)
-                    } else {
-                        op_cost_min(reals, dist)
-                    }
-                })
+                .values()
+                .map(|reals| op_cost_min(reals, dist))
                 .sum::<f64>()
     }
 
@@ -447,7 +375,6 @@ impl RealizationFrontLayer {
 
     pub fn remove(&mut self, index: &NodeIndex) {
         if let Some(reals) = self.multi.swap_remove(index) {
-            self.multi_witness.swap_remove(index);
             for real in reals.iter() {
                 for p in real.iter() {
                     self.phys_to_nodes[p[0].index()].remove(index);
@@ -475,22 +402,14 @@ impl RealizationFrontLayer {
     // --- multi-only API ---
 
     /// Add a multi-realization node (physical-qubit coords).
-    pub fn insert_multi(
-        &mut self,
-        index: NodeIndex,
-        realizations: Realizations,
-        default_realization: usize,
-        dist: &ArrayView2<f64>,
-    ) {
+    pub fn insert_multi(&mut self, index: NodeIndex, realizations: Realizations) {
         for real in realizations.iter() {
             for p in real.iter() {
                 self.phys_to_nodes[p[0].index()].insert(index);
                 self.phys_to_nodes[p[1].index()].insert(index);
             }
         }
-        let witness = closest_realization(&realizations, dist, default_realization);
         self.multi.insert(index, realizations);
-        self.multi_witness.insert(index, witness);
     }
 
     /// Multi-realization entries (node index, &realizations).
@@ -501,13 +420,6 @@ impl RealizationFrontLayer {
     /// Borrow the realizations for a multi-realization node.
     pub fn multi_get(&self, node: &NodeIndex) -> Option<&Realizations> {
         self.multi.get(node)
-    }
-
-    /// Sticky realization witness for `node`, when witness scoring is active.
-    pub fn multi_witness(&self, node: &NodeIndex) -> Option<usize> {
-        self.sticky_witness
-            .then(|| self.multi_witness.get(node).copied())
-            .flatten()
     }
 
     /// Multi nodes with any pair touching `qubit`.
@@ -521,8 +433,6 @@ impl RealizationFrontLayer {
 pub struct RealizationExtendedSet {
     inner: ExtendedSet,
     multi: Vec<Realizations>,
-    multi_witness: Vec<usize>,
-    sticky_witness: bool,
 }
 
 impl Deref for RealizationExtendedSet {
@@ -538,12 +448,10 @@ impl DerefMut for RealizationExtendedSet {
 }
 
 impl RealizationExtendedSet {
-    pub fn new(num_qubits: u32, sticky_witness: bool) -> Self {
+    pub fn new(num_qubits: u32) -> Self {
         Self {
             inner: ExtendedSet::new(num_qubits),
             multi: Vec::new(),
-            multi_witness: Vec::new(),
-            sticky_witness,
         }
     }
 
@@ -557,14 +465,8 @@ impl RealizationExtendedSet {
 
     pub fn score(&self, swap: [PhysicalQubit; 2], dist: &ArrayView2<f64>) -> f64 {
         let mut total = self.inner.score(swap, dist);
-        for (index, reals) in self.multi.iter().enumerate() {
-            if self.sticky_witness {
-                let witness = self.multi_witness[index];
-                total += realization_cost_post_swap(&reals[witness], swap, dist)
-                    - realization_cost(&reals[witness], dist);
-            } else {
-                total += op_cost_min_post_swap(reals, swap, dist) - op_cost_min(reals, dist);
-            }
+        for reals in self.multi.iter() {
+            total += op_cost_min_post_swap(reals, swap, dist) - op_cost_min(reals, dist);
         }
         total
     }
@@ -574,21 +476,13 @@ impl RealizationExtendedSet {
             + self
                 .multi
                 .iter()
-                .enumerate()
-                .map(|(index, reals)| {
-                    if self.sticky_witness {
-                        realization_cost(&reals[self.multi_witness[index]], dist)
-                    } else {
-                        op_cost_min(reals, dist)
-                    }
-                })
+                .map(|reals| op_cost_min(reals, dist))
                 .sum::<f64>()
     }
 
     pub fn clear(&mut self) {
         self.inner.clear();
         self.multi.clear();
-        self.multi_witness.clear();
     }
 
     pub fn apply_swap(&mut self, swap: [PhysicalQubit; 2]) {
@@ -613,17 +507,7 @@ impl RealizationExtendedSet {
     }
 
     /// Add a multi-realization entry (already in physical-qubit coords).
-    pub fn push_multi(
-        &mut self,
-        realizations: Realizations,
-        default_realization: usize,
-        dist: &ArrayView2<f64>,
-    ) {
-        self.multi_witness.push(closest_realization(
-            &realizations,
-            dist,
-            default_realization,
-        ));
+    pub fn push_multi(&mut self, realizations: Realizations) {
         self.multi.push(realizations);
     }
 }
@@ -659,45 +543,6 @@ mod tests {
             1.0
         );
         assert_eq!(op_cost_min(&reals, &dist.view()), 2.0);
-    }
-
-    #[test]
-    fn sticky_witness_distinguishes_swaps_that_switch_realizations() {
-        let dist = array![
-            [0.0, 1.0, 2.0, 3.0],
-            [1.0, 0.0, 1.0, 2.0],
-            [2.0, 1.0, 0.0, 1.0],
-            [3.0, 2.0, 1.0, 0.0],
-        ];
-        let reals: Vec<Box<[[PhysicalQubit; 2]]>> = vec![
-            vec![[pq(0), pq(2)]].into_boxed_slice(),
-            vec![[pq(1), pq(3)]].into_boxed_slice(),
-        ];
-        let witness = closest_realization(&reals, &dist.view(), 0);
-        assert_eq!(witness, 0);
-
-        // The lower-envelope score treats both swaps as an improvement by
-        // changing which realization supplies the minimum.
-        for swap in [[pq(0), pq(1)], [pq(2), pq(3)]] {
-            assert_eq!(
-                op_cost_min_post_swap(&reals, swap, &dist.view())
-                    - op_cost_min(&reals, &dist.view()),
-                -1.0,
-            );
-        }
-
-        // A fixed witness instead distinguishes progress toward realization 0
-        // from movement away from it.
-        assert_eq!(
-            realization_cost_post_swap(&reals[witness], [pq(0), pq(1)], &dist.view())
-                - realization_cost(&reals[witness], &dist.view()),
-            -1.0,
-        );
-        assert_eq!(
-            realization_cost_post_swap(&reals[witness], [pq(2), pq(3)], &dist.view())
-                - realization_cost(&reals[witness], &dist.view()),
-            1.0,
-        );
     }
 
     #[test]

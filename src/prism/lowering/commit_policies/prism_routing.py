@@ -166,7 +166,6 @@ class PrismRouting(CommitPolicy):
             best_epsilon=self.BEST_EPSILON,
             phys_load_decay=self.PHYS_LOAD_DECAY,
             multi_tie_break_load=True,
-            multi_sticky_witness=False,
         )
 
     @staticmethod
