@@ -1,11 +1,10 @@
-from types import SimpleNamespace
+"""Executable contract for the CRZ routing path.
 
-"""Executable contract for the CRZ path described by the PRISM paper.
-
-These tests deliberately separate the outer Python search from the Rust
-single-pass router.  They lock the details needed to describe the evaluated
-algorithm without relying on comments or paper pseudocode.
+These tests separate the outer Python search from the Rust router and lock
+the details the search depends on.
 """
+
+from types import SimpleNamespace
 
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit.library import CRZGate

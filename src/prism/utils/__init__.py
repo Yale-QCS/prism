@@ -1,1 +1,1 @@
-"""Shared utilities: circuit metrics and quotient-graph placement."""
+"""Shared utilities: circuit metrics."""

@@ -1,4 +1,4 @@
-"""Dual-rail encoding rules. Convention ``|0_L⟩ = |01⟩, |1_L⟩ = |10⟩`` (paper §1 Eq. 3)."""
+"""Dual-rail encoding rules. Convention ``|0_L⟩ = |01⟩, |1_L⟩ = |10⟩``."""
 
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ class DualRail(QubitEncoding):
 
         The labeled X and joint-herald operation expose the preparation
         connectivity to the boundary router. Hardware-facing program metrics
-        exclude both labeled operations because the paper does not model the
+        exclude both labeled operations because prism does not model the
         preparation circuit or erasure-check implementation. ``local_init =
         True`` removes the joint-herald constraint.
         """

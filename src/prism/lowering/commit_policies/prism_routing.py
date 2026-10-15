@@ -176,7 +176,7 @@ class PrismRouting(CommitPolicy):
         return self._build_result(dag, ctx, best[1], payload, best[3])
 
     def _make_heuristic(self, n_phys: int) -> Heuristic:
-        """The stock Qiskit 2.4.1 ``"decay"`` build, plus prism's load-balanced realization tie-break."""
+        """Qiskit's O3 ``"decay"`` heuristic, plus prism's load-balanced realization tie-break."""
         if self.heuristic is not None:
             return self.heuristic
         return Heuristic(
@@ -303,9 +303,8 @@ class PrismRouting(CommitPolicy):
     ) -> list[tuple[str, int, list[int]]]:
         """Build the deterministic layout pool for one compilation.
 
-        Qiskit 2.4.1 O3 uses 20 random layouts plus dense, identity, and
-        reverse layouts on targets other than the special 127/133/156-site
-        devices.  The target families in this study never use those sizes.
+        ``num_trials`` seeded random layouts, then Qiskit's dense, identity,
+        and reverse layouts.
         """
         starts: list[tuple[str, int, list[int]]] = []
         for trial in range(self.num_trials):
@@ -403,8 +402,7 @@ class PrismRouting(CommitPolicy):
             picks[k] for k, n in enumerate(ctx.op_nodes) if n.op.is_decision
         )
 
-        # Map every virtual wire (data rails + any Bell-ancilla pool) to its
-        # physical qubit; ancilla make n_virt no longer a clean multiple of wpl.
+        # Map every virtual wire to its physical qubit.
         layout_dict = {dag.qubits[v]: v2p[v] for v in range(ctx.n_virt)}
         # The routed circuit is in physical coordinates. Its wire at the
         # winning initial position v2p[v] carries virtual state v, which ends
@@ -425,7 +423,7 @@ class PrismRouting(CommitPolicy):
     # ---- Precompute --------------------------------------------------------
 
     def _precompute(self, dag: DAGCircuit) -> _Ctx:
-        """Per-DAG precomputation: op caches, dep graph, freeze collapse."""
+        """Per-DAG precomputation: op caches and the dependency graph."""
         regs = list(dag.qregs.values())
         # Lowering emits an all-LoweredOp DAG (init wrapped like every op), so
         # this captures every node.
@@ -535,7 +533,7 @@ class PrismRouting(CommitPolicy):
                     diags_since[v] = []
         return succ, pred_count
 
-    # ---- Trial helpers (unchanged) -----------------------------------------
+    # ---- Emission ----------------------------------------------------------
 
     @staticmethod
     def _emit_realization(

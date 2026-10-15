@@ -16,9 +16,7 @@ Convention (source of truth: src/prism/encodings/dualrail.py):
       in the (|00_L>, |01_L>, |10_L>, |11_L>) ordering.
 
   Qiskit CRZ differs from CP(theta) = diag(1,1,1,e^{i theta}).
-  The paper writes CR_z as diag(1,1,1,e^{i theta}), i.e. a CP; reconciling
-  these notations is a separate task.  This module tests the Qiskit CRZ
-  convention as implemented in the code.
+  This module tests the Qiskit CRZ convention as implemented in the code.
 
 CODE/COMMENT MISMATCH (reported in artifacts/hpca/results/C03_RESULT.md):
   DualRail.initialize() calls the CRZ(pi) herald '(codespace-identity)', but
@@ -167,7 +165,6 @@ def test_isometry_convention():
 def test_crz_candidates_equivalent_and_correct(theta):
     """All 4 CRZ candidates implement the same logical CRZ(theta) up to global phase.
 
-    STOP-THE-LINE: a failure here breaks the multi-realization claim for the paper.
     Each of the 4 candidates uses a different (ra, rb) physical rail pairing with
     the open-control identity CRZ(-α)·RZ(α)_t applied when ra=1 (hi-rail control).
     """
@@ -181,12 +178,12 @@ def test_crz_candidates_equivalent_and_correct(theta):
     anchor = np.unravel_index(np.argmax(np.abs(mats[0])), mats[0].shape)
     anchor_val = mats[0][anchor]
     assert abs(anchor_val) > 1e-12, (
-        f"STOP-THE-LINE: CRZ candidate 0 has no non-zero anchor for theta={theta:.5f}"
+        f"CRZ candidate 0 has no non-zero anchor for theta={theta:.5f}"
     )
 
     for k, M in enumerate(mats):
         assert abs(M[anchor]) > 1e-12, (
-            f"STOP-THE-LINE: CRZ candidate {k} has zero at phase anchor for theta={theta:.5f}"
+            f"CRZ candidate {k} has zero at phase anchor for theta={theta:.5f}"
         )
         phase = anchor_val / M[anchor]
         np.testing.assert_allclose(
@@ -194,13 +191,13 @@ def test_crz_candidates_equivalent_and_correct(theta):
             mats[0],
             atol=TOL,
             err_msg=(
-                f"STOP-THE-LINE: CRZ candidate {k} diverges from candidate 0"
+                f"CRZ candidate {k} diverges from candidate 0"
                 f" at theta={theta:.5f}; logical diag={np.round(np.diag(M), 5)}"
             ),
         )
 
     assert _phase_eq(mats[0], ref, tol=TOL), (
-        f"STOP-THE-LINE: CRZ logical matrix does not match CRZ(theta={theta:.5f});"
+        f"CRZ logical matrix does not match CRZ(theta={theta:.5f});"
         f" got diag={np.round(np.diag(mats[0]), 5)}"
     )
 
