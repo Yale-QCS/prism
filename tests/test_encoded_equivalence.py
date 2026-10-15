@@ -10,8 +10,7 @@ from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap
 
 from prism.encodings import DualRail
-from prism.lowering.commit import SearchBudget
-from prism.pipeline import build_pm
+from prism.pipeline import SearchBudget, build_pm
 
 
 def _logical(seed: int, n: int = 3) -> QuantumCircuit:

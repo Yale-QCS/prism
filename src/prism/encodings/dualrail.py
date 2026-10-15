@@ -9,8 +9,8 @@ from qiskit.circuit.library import XGate
 from qiskit.transpiler import PassManager
 
 from prism.encodings.base import QubitEncoding
+from prism.ir import MultiRealizationOp
 from prism.logical import ElideLogicalPermutations, basic_logical_pm
-from prism.lowering.ir import LoweredOp
 from prism.synthesis.delocal_decomp import build_equivalence_library
 from prism.synthesis.h_reduction import HadamardReduction
 from prism.synthesis.margolus import MargolusPairOptimizer
@@ -80,29 +80,29 @@ class DualRail(QubitEncoding):
 
     # ---- Encoding-specific lowering rules --------------------------------
     @classmethod
-    def x(cls, op: Instruction) -> LoweredOp:
+    def x(cls, op: Instruction) -> MultiRealizationOp:
         """Logical X → physical SWAP(0,1). Single realization."""
         qc = QuantumCircuit(2)
         qc.swap(0, 1)
-        return LoweredOp.fixed(qc, name="x")
+        return MultiRealizationOp("x", (qc,))
 
     @classmethod
-    def rx(cls, op: Instruction) -> LoweredOp:
+    def rx(cls, op: Instruction) -> MultiRealizationOp:
         """Logical RX(θ) → rejoin (RSwap on the rails)."""
         (theta,) = op.params
         qc = QuantumCircuit(2)
         qc.append(RSwapGate(theta), [0, 1])
-        return LoweredOp.fixed(qc, name="rx")
+        return MultiRealizationOp("rx", (qc,))
 
     @classmethod
-    def rz(cls, op: Instruction) -> LoweredOp:
+    def rz(cls, op: Instruction) -> MultiRealizationOp:
         """Logical RZ(θ) → physical RZ(θ) on wire 0. Single realization (either rail works; convention is wire 0)."""
         qc = QuantumCircuit(2)
         qc.append(op, [0])
-        return LoweredOp.fixed(qc, name="rz")
+        return MultiRealizationOp("rz", (qc,), diagonal=True)
 
     @classmethod
-    def crz(cls, op: Instruction) -> LoweredOp:
+    def crz(cls, op: Instruction) -> MultiRealizationOp:
         """Logical CRZ(θ) → 4 candidates over wire pairs ``(ra, rb)`` of (control, target).
 
         ``Z_L = Z_a = -Z_b``, so b-rail target flips the sign. b-rail control is
@@ -121,10 +121,12 @@ class DualRail(QubitEncoding):
                 if ra == 1:
                     qc.rz(target_sign * theta, 2 + rb)
                 candidates.append(qc)
-        return LoweredOp.decision(tuple(candidates), default_index=2, name="crz")
+        return MultiRealizationOp(
+            "crz", tuple(candidates), default_index=2, diagonal=True
+        )
 
     @classmethod
-    def swap(cls, _op: Instruction) -> LoweredOp:
+    def swap(cls, _op: Instruction) -> MultiRealizationOp:
         """Logical SWAP → 2 partition options over wire-pair edges.
 
         A (2 SWAPs): bare ``swap(0,2)+swap(1,3)``.
@@ -142,14 +144,14 @@ class DualRail(QubitEncoding):
         qc1.swap(0, 1)
         qc1.swap(2, 3)
 
-        return LoweredOp.decision((qc0, qc1), name="swap")
+        return MultiRealizationOp("swap", (qc0, qc1))
 
     @classmethod
-    def reset(cls, _op: Instruction) -> LoweredOp:
+    def reset(cls, _op: Instruction) -> MultiRealizationOp:
         """Logical reset → in-place re-preparation on the same rails (the ``initialize`` template).
 
         Models pump-to-vacuum plus a fresh ``|0_L⟩`` prep; the joint herald is
         the only routing constraint (rails co-located at reset time). Re-hosting
         the reset qubit on other free rails is not expressed here.
         """
-        return LoweredOp.fixed(cls.initialize(), name="reset")
+        return MultiRealizationOp("reset", (cls.initialize(),))

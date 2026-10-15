@@ -61,9 +61,7 @@ class CircuitMetrics:
 class RecordCircuitMetrics(AnalysisPass):
     """Publish/refresh ``property_set[key]`` metrics from the current DAG.
 
-    Run at the end of the lowering stage (``key="lowering_circuit_metrics"``:
-    semantic content, pre-routing) and at the end of the physical stage (the
-    default key, final).
+    Runs at the end of the physical stage.
     """
 
     def __init__(self, key: str = "circuit_metrics") -> None:

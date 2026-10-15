@@ -169,9 +169,9 @@ def test_crz_candidates_equivalent_and_correct(theta):
     the open-control identity CRZ(-α)·RZ(α)_t applied when ra=1 (hi-rail control).
     """
     op = DualRail.crz(CRZGate(theta))
-    assert len(op.realizations) == 4, "Expected exactly 4 CRZ rail-pairing candidates"
+    assert len(op.candidates) == 4, "Expected exactly 4 CRZ rail-pairing candidates"
     pairs2 = [(0, 1), (2, 3)]
-    mats = [_logical(c, pairs2) for c in op.realizations]
+    mats = [_logical(c, pairs2) for c in op.candidates]
     ref = _crz_mat(theta)
 
     # Find a stable phase anchor from candidate 0.
@@ -210,9 +210,9 @@ def test_crz_candidates_equivalent_and_correct(theta):
 def test_swap_realizations():
     """Both SWAP candidates (straight and crossed) implement logical SWAP."""
     op = DualRail.swap(SwapGate())
-    assert len(op.realizations) == 2
+    assert len(op.candidates) == 2
     pairs2 = [(0, 1), (2, 3)]
-    for k, qc in enumerate(op.realizations):
+    for k, qc in enumerate(op.candidates):
         M = _logical(qc, pairs2)
         assert _phase_eq(M, _SWAP_L, tol=TOL), (
             f"SWAP candidate {k} does not implement logical SWAP; got\n{np.round(M, 4)}"
@@ -227,7 +227,7 @@ def test_swap_realizations():
 def test_x_realization():
     """Logical X -> physical SWAP(0,1) implements logical X on the code space."""
     op = DualRail.x(XGate())
-    M = _logical(op.realizations[0], [(0, 1)])
+    M = _logical(op.candidates[0], [(0, 1)])
     assert _phase_eq(M, _X_L, tol=TOL), (
         f"X realization not logical X; got\n{np.round(M, 4)}"
     )
@@ -241,7 +241,7 @@ def test_rx_realization(theta):
     which is RX(theta) up to logical global phase in the (|0_L>, |1_L>) basis.
     """
     op = DualRail.rx(RXGate(theta))
-    M = _logical(op.realizations[0], [(0, 1)])
+    M = _logical(op.candidates[0], [(0, 1)])
     assert _phase_eq(M, _rx_mat(theta), tol=TOL), (
         f"RX({theta:.5f}) realization not logical RX; got\n{np.round(M, 4)}"
     )
@@ -256,7 +256,7 @@ def test_rz_realization(theta):
     and e^{+i theta/2} to |1_L> (lo=1), matching the logical RZ matrix.
     """
     op = DualRail.rz(RZGate(theta))
-    M = _logical(op.realizations[0], [(0, 1)])
+    M = _logical(op.candidates[0], [(0, 1)])
     assert _phase_eq(M, _rz_mat(theta), tol=TOL), (
         f"RZ({theta:.5f}) realization not logical RZ; got\n{np.round(M, 4)}"
     )
@@ -270,14 +270,14 @@ def test_rz_realization(theta):
 def test_erasure_safety_x():
     """X realization (SWAP) is block-diagonal w.r.t. photon-number sectors."""
     op = DualRail.x(XGate())
-    assert _erasure_safe(op.realizations[0], [(0, 1)])
+    assert _erasure_safe(op.candidates[0], [(0, 1)])
 
 
 @pytest.mark.parametrize("theta", ANGLES)
 def test_erasure_safety_rx(theta):
     """RX(theta) realization (RSwap) preserves photon-number sector of the rail pair."""
     op = DualRail.rx(RXGate(theta))
-    assert _erasure_safe(op.realizations[0], [(0, 1)]), (
+    assert _erasure_safe(op.candidates[0], [(0, 1)]), (
         f"RX({theta:.5f}) realization leaks outside code space"
     )
 
@@ -286,7 +286,7 @@ def test_erasure_safety_rx(theta):
 def test_erasure_safety_rz(theta):
     """RZ(theta) realization is diagonal; never maps code space to leakage sector."""
     op = DualRail.rz(RZGate(theta))
-    assert _erasure_safe(op.realizations[0], [(0, 1)]), (
+    assert _erasure_safe(op.candidates[0], [(0, 1)]), (
         f"RZ({theta:.5f}) realization leaks outside code space"
     )
 
@@ -296,7 +296,7 @@ def test_erasure_safety_crz_candidates(theta):
     """All 4 CRZ candidates are erasure-safe: block-diagonal per-pair photon sectors."""
     op = DualRail.crz(CRZGate(theta))
     pairs2 = [(0, 1), (2, 3)]
-    for k, qc in enumerate(op.realizations):
+    for k, qc in enumerate(op.candidates):
         assert _erasure_safe(qc, pairs2), (
             f"CRZ candidate {k} at theta={theta:.5f} leaks outside code space"
         )
@@ -306,7 +306,7 @@ def test_erasure_safety_swap_candidates():
     """Both SWAP candidates are erasure-safe (preserve excitation per pair)."""
     op = DualRail.swap(SwapGate())
     pairs2 = [(0, 1), (2, 3)]
-    for k, qc in enumerate(op.realizations):
+    for k, qc in enumerate(op.candidates):
         assert _erasure_safe(qc, pairs2), f"SWAP candidate {k} leaks outside code space"
 
 
@@ -318,14 +318,14 @@ def test_erasure_safety_swap_candidates():
 def test_xonrail_absent_x_realization():
     """Logical X is implemented as SWAP, not a bare X gate on one rail."""
     op = DualRail.x(XGate())
-    assert not _has_xonrail(op.realizations[0])
+    assert not _has_xonrail(op.candidates[0])
 
 
 @pytest.mark.parametrize("theta", ANGLES)
 def test_xonrail_absent_rx(theta):
     """RX candidate uses RSwapGate; no bare X or RX(pi) on a single rail."""
     op = DualRail.rx(RXGate(theta))
-    assert not _has_xonrail(op.realizations[0]), (
+    assert not _has_xonrail(op.candidates[0]), (
         f"RX({theta:.5f}) candidate contains X-on-rail"
     )
 
@@ -333,14 +333,14 @@ def test_xonrail_absent_rx(theta):
 def test_xonrail_absent_rz():
     """RZ candidate uses a phase gate only; no X-on-rail."""
     op = DualRail.rz(RZGate(math.pi / 4))
-    assert not _has_xonrail(op.realizations[0])
+    assert not _has_xonrail(op.candidates[0])
 
 
 @pytest.mark.parametrize("theta", ANGLES)
 def test_xonrail_absent_crz(theta):
     """No CRZ candidate contains a bare X or RX(pi) on a single rail."""
     op = DualRail.crz(CRZGate(theta))
-    for k, qc in enumerate(op.realizations):
+    for k, qc in enumerate(op.candidates):
         assert not _has_xonrail(qc), (
             f"CRZ candidate {k} at theta={theta:.5f} contains X-on-rail"
         )
@@ -349,7 +349,7 @@ def test_xonrail_absent_crz(theta):
 def test_xonrail_absent_swap():
     """Neither SWAP candidate contains a bare X or RX(pi) on a single rail."""
     op = DualRail.swap(SwapGate())
-    for k, qc in enumerate(op.realizations):
+    for k, qc in enumerate(op.candidates):
         assert not _has_xonrail(qc), f"SWAP candidate {k} contains X-on-rail"
 
 
@@ -413,111 +413,6 @@ def test_init_herald_erasure_safe():
 def test_reset_is_in_place_reprep():
     """DualRail.reset lowers to the ``initialize`` template on the same two rails."""
     op = DualRail.reset(None)  # _op is intentionally unused (prefixed _)
-    assert op.is_fixed and op.num_qubits == 2
-    names = [ins.operation.name for ins in op.realizations[0].data]
+    assert len(op.candidates) == 1 and op.num_qubits == 2
+    names = [ins.operation.name for ins in op.candidates[0].data]
     assert names == ["x", "joint_herald"]
-
-
-# ===========================================================================
-# 9. Boundary-op namespace
-# ===========================================================================
-
-
-def test_lowered_op_name_is_namespaced():
-    """``LoweredOp`` names carry an ``_L`` suffix; ``logical_name`` keeps the gate name."""
-    op = DualRail.crz(CRZGate(0.3))
-    assert op.name == "crz_L"
-    assert op.logical_name == "crz"
-    cp = op.copy()
-    assert cp.name == "crz_L" and cp.realizations == op.realizations
-    assert cp.default_index == op.default_index
-
-
-# ===========================================================================
-# 10. Boundary IR: LoweredProgram and the typed stages
-# ===========================================================================
-
-
-def _bell_program():
-    from qiskit.converters import circuit_to_dag
-
-    from prism.lowering.expansion import expand
-
-    qc = QuantumCircuit(2)
-    qc.h(0)
-    qc.cx(0, 1)
-    logical = DualRail.logical_pm().run(qc)
-    return expand(circuit_to_dag(logical), DualRail), logical
-
-
-def test_expand_binds_rails_per_logical_qubit():
-    """``expand`` returns a ``LoweredProgram`` whose wire binding matches the DAG registers."""
-    from prism.lowering.ir import LoweredOp
-
-    prog, _ = _bell_program()
-    assert prog.n_logical == 2
-    assert not prog.is_committed
-    assert [len(w) for w in prog.wires] == [DualRail.WIRES_PER_LOGICAL] * 2
-    assert set(q for w in prog.wires for q in w) == set(prog.dag.qubits)
-    assert prog.logical_output_permutation == (0, 1)
-    assert any(isinstance(n.op, LoweredOp) for n in prog.dag.op_nodes())
-
-
-def test_committed_dag_matches_legacy_apply_commits():
-    """``LoweredProgram.committed_dag`` equals ``apply_commits`` and leaves ``dag`` intact."""
-    from qiskit.converters import circuit_to_dag, dag_to_circuit
-
-    from prism.lowering.commit import CommitResult
-    from prism.lowering.expansion import expand
-    from prism.lowering.ir import LoweredOp, apply_commits
-
-    prog, logical = _bell_program()
-    n_decisions = sum(
-        isinstance(n.op, LoweredOp) and n.op.is_decision for n in prog.dag.op_nodes()
-    )
-    choices = (0,) * n_decisions
-    prog2 = prog.with_commit(CommitResult(choices=choices))
-    assert prog2.is_committed and not prog.is_committed
-    committed = dag_to_circuit(prog2.committed_dag())
-    # the program's own DAG is untouched
-    assert any(isinstance(n.op, LoweredOp) for n in prog2.dag.op_nodes())
-    legacy = dag_to_circuit(
-        apply_commits(expand(circuit_to_dag(logical), DualRail).dag, choices)
-    )
-    assert committed.count_ops() == legacy.count_ops()
-    with pytest.raises(ValueError):
-        prog.committed_dag()
-    with pytest.raises(ValueError):
-        prog.with_commit(CommitResult(choices=(), routed_dag=prog.dag))
-
-
-def test_build_pm_exposes_typed_stages():
-    """``build_pm`` is a ``MultiStagePassManager`` with the documented stage order."""
-    from qiskit.passmanager import PropertySet
-    from qiskit.transpiler import CouplingMap
-
-    from prism.lowering.commit import CommitStage
-    from prism.lowering.commit_policies import PrismRouting
-    from prism.pipeline import build_pm
-
-    cmap = CouplingMap.from_grid(3, 3)
-    pm = build_pm(cmap, enc=DualRail)
-    assert pm.stages == (
-        "input",
-        "logical",
-        "expand",
-        "commit",
-        "lower",
-        "physical",
-        "output",
-    )
-    qc = QuantumCircuit(2)
-    qc.h(0)
-    qc.cx(0, 1)
-    ps = PropertySet()
-    out = pm.run(qc, property_set=ps)
-    assert out.layout is not None and "circuit_metrics" in ps
-    # The commit stage is swappable.
-    pm.commit = CommitStage(PrismRouting(cmap, enc=DualRail, seed=1))
-    out2 = pm.run(qc)
-    assert out2.num_qubits == cmap.size()

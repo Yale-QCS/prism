@@ -136,7 +136,7 @@ def physical_pm(
 ) -> StagedPassManager:
     """Preset O3 over the retained route.
 
-    Built with ``routing_method="none"``: the lowering search already placed
+    Built with ``routing_method="none"``: the routing stage already placed
     and routed, so the layout stage is empty and Qiskit's ``CheckMap`` certifies
     the route. The init stage of that preset omits ``ElidePermutations``, which
     would turn a committed rail exchange (a real beamsplitter SWAP) into a free

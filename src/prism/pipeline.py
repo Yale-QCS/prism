@@ -1,72 +1,213 @@
-"""``build_pm``: the end-to-end ``MultiStagePassManager``.
+"""``build_pm``: prism's ``MultiStagePassManager``, and the passes that change IR.
 
 Stages and their IRs::
 
-    input     QuantumCircuit -> DAGCircuit
-    logical   DAGCircuit -> DAGCircuit         enc.logical_pm()
-    expand    DAGCircuit -> LoweredProgram     ExpandStage
-    commit    LoweredProgram -> LoweredProgram PrismRouting: place, route, pick realizations
-    lower     LoweredProgram -> DAGCircuit     the retained route
-    physical  DAGCircuit -> DAGCircuit         enc.physical_pm(): stock O3 on the routed circuit
-    output    DAGCircuit -> QuantumCircuit     attaches TranspileLayout
+    input                     QuantumCircuit -> DAGCircuit        CircuitToDAG
+    logical                   DAGCircuit -> DAGCircuit            enc.logical_pm(): stock passes
+    dag_to_multi_realization  DAGCircuit -> MultiRealization      DAGToMultiRealization
+    routing                   MultiRealization -> MultiRealization PrismRouting
+    multi_realization_to_dag  MultiRealization -> DAGCircuit      MultiRealizationToDAG
+    physical                  DAGCircuit -> DAGCircuit            enc.physical_pm(): stock O3
+    output                    DAGCircuit -> QuantumCircuit        DAGToCircuit
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from qiskit.circuit import (
+    ClassicalRegister,
+    Clbit,
+    ControlFlowOp,
+    Measure,
+    QuantumCircuit,
+    QuantumRegister,
+)
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import GenericPass, MultiStagePassManager
-from qiskit.transpiler import CouplingMap, TranspileLayout
+from qiskit.passmanager.compilation_status import PassManagerState, RunState
+from qiskit.transpiler import CouplingMap, Layout, TranspileLayout, TranspilerError
 
-from prism.lowering.commit import CommitStage, SearchBudget
-from prism.lowering.commit_policies import PrismRouting
-from prism.lowering.expansion import ExpandStage
-from prism.lowering.ir import LoweredProgram
+from prism.ir import MultiRealization, MultiRealizationInstruction, MultiRealizationOp
+from prism.routing import PrismRouting, SearchBudget
 
 if TYPE_CHECKING:
-    from qiskit.circuit import QuantumCircuit
-
     from prism.encodings.base import QubitEncoding
 
-
-class InstallLoweringRoute(GenericPass):
-    """``LoweredProgram -> DAGCircuit``: the physical DAG is the route the search retained."""
-
-    def run(self, passmanager_ir: LoweredProgram) -> DAGCircuit:
-        """Install the retained route and its output permutation."""
-        prog = passmanager_ir
-        if prog.routed_dag is None:
-            raise RuntimeError("combined layout-and-routing produced no routed DAG")
-        if prog.layout is not None:
-            self.property_set["layout"] = prog.layout
-        self.property_set["final_layout"] = prog.routed_final_layout
-        return prog.routed_dag
+__all__ = [
+    "CircuitToDAG",
+    "DAGToCircuit",
+    "DAGToMultiRealization",
+    "MultiRealizationToDAG",
+    "SearchBudget",
+    "build_pm",
+]
 
 
-class CircuitToDAG(GenericPass):
-    """``QuantumCircuit -> DAGCircuit``; records what ``TranspileLayout`` needs at the end."""
+class CircuitToDAG(GenericPass[QuantumCircuit, DAGCircuit]):
+    """``QuantumCircuit -> DAGCircuit``, as ``qiskit.transpiler.PassManager`` enters."""
 
     def run(self, passmanager_ir: QuantumCircuit) -> DAGCircuit:
-        """Convert the input circuit and remember its qubit identities."""
-        self.property_set["original_qubit_indices"] = {
-            bit: i for i, bit in enumerate(passmanager_ir.qubits)
-        }
-        self.property_set["num_input_qubits"] = passmanager_ir.num_qubits
+        """Convert, recording the input qubit indices unless the caller seeded them."""
+        if self.property_set["original_qubit_indices"] is None:
+            self.property_set["original_qubit_indices"] = {
+                bit: i for i, bit in enumerate(passmanager_ir.qubits)
+            }
+        if self.property_set["num_input_qubits"] is None:
+            self.property_set["num_input_qubits"] = passmanager_ir.num_qubits
         return circuit_to_dag(passmanager_ir, copy_operations=True)
 
 
-class DAGToCircuit(GenericPass):
-    """``DAGCircuit -> QuantumCircuit`` with the ``TranspileLayout`` attached."""
+class DAGToCircuit(GenericPass[DAGCircuit, QuantumCircuit]):
+    """``DAGCircuit -> QuantumCircuit``, as ``qiskit.transpiler.PassManager`` exits."""
 
     def run(self, passmanager_ir: DAGCircuit) -> QuantumCircuit:
-        """Convert the final DAG and attach the layout the physical stage produced."""
-        qc = dag_to_circuit(passmanager_ir, copy_operations=False)
-        qc._layout = TranspileLayout.from_property_set(
-            passmanager_ir, self.property_set
+        """Convert, attaching the ``TranspileLayout`` and writing its canonical form back."""
+        out = dag_to_circuit(passmanager_ir, copy_operations=False)
+        layout = TranspileLayout.from_property_set(passmanager_ir, self.property_set)
+        if layout is not None:
+            out._layout = layout
+            layout.write_into_property_set(self.property_set)
+        out._clbit_write_latency = self.property_set["clbit_write_latency"]
+        out._conditional_latency = self.property_set["conditional_latency"]
+        if start_times := self.property_set["node_start_time"]:
+            out._op_start_times = [
+                start_times[node] for node in passmanager_ir.topological_op_nodes()
+            ]
+        return out
+
+
+class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
+    """``DAGCircuit -> MultiRealization``: each logical operation becomes its encoding rule.
+
+    Every logical qubit gets ``WIRES_PER_LOGICAL`` rails and the encoding's
+    preparation. A measurement writes the logical clbit from rail 0 and the
+    other rails to a ``herald`` register. ``logical_output_permutation`` comes
+    from the DAG metadata (set by ``ElideLogicalPermutations``).
+    """
+
+    def __init__(self, enc: type[QubitEncoding]) -> None:
+        """Bind the encoding whose rules expand each operation."""
+        super().__init__()
+        self.enc = enc
+
+    def run(self, passmanager_ir: DAGCircuit) -> MultiRealization:
+        """Expand the logical DAG; the result passes ``verify``."""
+        if not isinstance(passmanager_ir, DAGCircuit):
+            raise TypeError(
+                f"{type(self).__name__} takes a DAGCircuit, got {type(passmanager_ir).__name__}"
+            )
+        dag, enc = passmanager_ir, self.enc
+        wpl = enc.WIRES_PER_LOGICAL
+        n = len(dag.qubits)
+        logical = {q: i for i, q in enumerate(dag.qubits)}
+        cregs = list(dag.cregs.values())
+        clbits = list(dag.clbits)
+        n_herald = sum(
+            node.op.num_qubits * (wpl - 1)
+            for node in dag.op_nodes()
+            if isinstance(node.op, Measure)
         )
-        return qc
+        herald: list[Clbit] = []
+        if n_herald:
+            name, k = "herald", 0
+            while name in dag.cregs:
+                k += 1
+                name = f"herald{k}"
+            cregs.append(ClassicalRegister(n_herald, name))
+            herald = list(cregs[-1])
+            clbits += herald
+
+        data = []
+        prep = enc.initialize()
+        for i in range(n):
+            for ci in prep.data:
+                local = [prep.find_bit(q).index for q in ci.qubits]
+                sub = QuantumCircuit(len(local))
+                sub.append(ci.operation, range(len(local)))
+                op = MultiRealizationOp(ci.operation.name, (sub,))
+                data.append(
+                    MultiRealizationInstruction(op, tuple(wpl * i + w for w in local))
+                )
+        for node in dag.topological_op_nodes():
+            op = enc.lower(node.op, tuple(node.cargs))
+            rails = tuple(wpl * logical[q] + w for q in node.qargs for w in range(wpl))
+            if isinstance(node.op, Measure):
+                cl = (node.cargs[0], *herald[: op.num_clbits - 1])
+                herald = herald[op.num_clbits - 1 :]
+            elif isinstance(node.op, ControlFlowOp):
+                cl = tuple(node.cargs)
+            else:
+                cl = ()
+            data.append(MultiRealizationInstruction(op, rails, cl))
+
+        perm = (dag.metadata or {}).get("logical_output_permutation")
+        ir = MultiRealization(
+            enc=enc,
+            qregs=[QuantumRegister(wpl, f"q{i}") for i in range(n)],
+            cregs=cregs,
+            clbits=clbits,
+            data=data,
+            logical_output_permutation=tuple(range(n) if perm is None else perm),
+            metadata=dict(dag.metadata or {}),
+        )
+        ir.verify()
+        return ir
+
+    def update_status(
+        self, state: PassManagerState, run_state: RunState
+    ) -> PassManagerState:
+        """A new IR: no earlier analysis holds (as ``TransformationPass`` does)."""
+        state = super().update_status(state, run_state)
+        if run_state == RunState.SUCCESS:
+            state.workflow_status.completed_passes.clear()
+        return state
+
+
+class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
+    """``MultiRealization -> DAGCircuit``: materialize every choice on the physical qubits.
+
+    The only step that drops the candidate sets. Needs a placement and a
+    choice on every ``MultiRealizationOp``. Writes the layout keys the output's
+    ``TranspileLayout`` is built from.
+    """
+
+    def run(self, passmanager_ir: MultiRealization) -> DAGCircuit:
+        """Verify, materialize, and publish ``layout`` and ``final_layout``.
+
+        Raises:
+            TranspilerError: if the program is unplaced, has an undecided op, or
+                fails ``verify``.
+        """
+        if not isinstance(passmanager_ir, MultiRealization):
+            raise TypeError(
+                f"{type(self).__name__} takes a MultiRealization, got {type(passmanager_ir).__name__}"
+            )
+        ir = passmanager_ir
+        if ir.placement is None:
+            raise TranspilerError(
+                "MultiRealizationToDAG needs a placed program; run a routing pass (PrismRouting) first"
+            )
+        ir.verify()
+        qc = ir.to_circuit()
+        initial, final = ir.placement
+        self.property_set["layout"] = Layout(
+            {q: initial[v] for v, q in enumerate(ir.qubits)}
+        )
+        self.property_set["final_layout"] = Layout(
+            {qc.qubits[initial[v]]: final[v] for v in range(len(initial))}
+        )
+        return circuit_to_dag(qc)
+
+    def update_status(
+        self, state: PassManagerState, run_state: RunState
+    ) -> PassManagerState:
+        """A new IR: no earlier analysis holds (as ``TransformationPass`` does)."""
+        state = super().update_status(state, run_state)
+        if run_state == RunState.SUCCESS:
+            state.workflow_status.completed_passes.clear()
+        return state
 
 
 def build_pm(
@@ -75,29 +216,29 @@ def build_pm(
     *,
     seed: int = 42,
     budget: SearchBudget | None = None,
-) -> MultiStagePassManager:
-    """Pipeline compiling ``enc``-encoded circuits onto ``coupling_map``.
+) -> MultiStagePassManager[QuantumCircuit, QuantumCircuit]:
+    """Pass manager compiling ``enc``-encoded circuits onto ``coupling_map``.
 
-    ``budget`` sets the search effort and the route-selection objective
-    (``swaps`` or ``depth``); ``None`` uses the ``SearchBudget`` defaults.
+    Run it as ``pm.run(qc, property_set=ps)`` to read the property set
+    afterwards (``circuit_metrics``, ``realization_choices``, ``online_n_swaps``,
+    ``logical_output_permutation``). A callback receives ``passmanager_ir`` as a
+    ``QuantumCircuit``, ``DAGCircuit`` or ``MultiRealization``.
+
+    Args:
+        coupling_map: Connected, symmetric device graph.
+        enc: The qubit encoding class, e.g. ``DualRail``.
+        seed: Seed of the layout search and the physical stage.
+        budget: Search effort and objective; ``None`` uses ``SearchBudget()``.
+
+    Raises:
+        ValueError: if ``coupling_map`` is disconnected or directed.
     """
-    b = budget or SearchBudget()
-    policy = PrismRouting(
-        coupling_map,
-        enc=enc,
-        seed=seed,
-        objective=b.objective,
-        num_trials=b.layout_starts,
-        max_iterations=b.refinement_iterations,
-        swap_trials=b.swap_trials,
-    )
-    pm = MultiStagePassManager(
+    return MultiStagePassManager(
         input=CircuitToDAG(),
         logical=enc.logical_pm(),
-        expand=ExpandStage(enc=enc),
-        commit=CommitStage(policy),
-        lower=InstallLoweringRoute(),
+        dag_to_multi_realization=DAGToMultiRealization(enc),
+        routing=PrismRouting(coupling_map, seed=seed, budget=budget),
+        multi_realization_to_dag=MultiRealizationToDAG(),
         physical=enc.physical_pm(coupling_map, seed=seed),
         output=DAGToCircuit(),
     )
-    return pm

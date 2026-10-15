@@ -1,7 +1,7 @@
 """``QubitEncoding`` contract: per-logical-qubit map to a block of physical wires.
 
 Each subclass declares ``WIRES_PER_LOGICAL`` + ``LOGICAL_ISA`` and provides one
-classmethod per logical op, each returning a ``LoweredOp``. The mathematical
+classmethod per logical op, each returning a ``MultiRealizationOp``. The mathematical
 content is an isometry ``V: H_logical → H_physical`` (one logical qubit per
 ``WIRES_PER_LOGICAL``-qubit block), with logical operations admitting one or
 more physical realizations.
@@ -24,8 +24,8 @@ from qiskit.circuit.controlflow import ControlFlowOp, IfElseOp
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary
 from qiskit.transpiler import CouplingMap, PassManager, TranspilerError
 
+from prism.ir import MultiRealizationOp
 from prism.logical import CONTROL_FLOW_OPS, basic_logical_pm
-from prism.lowering.ir import LoweredOp
 from prism.physical import physical_pm as _physical_pm
 
 
@@ -61,7 +61,9 @@ class QubitEncoding:
         return _physical_pm(coupling_map, cls, seed=seed)
 
     @classmethod
-    def lower(cls, op: Instruction, clbits: tuple[Clbit, ...] = ()) -> LoweredOp:
+    def lower(
+        cls, op: Instruction, clbits: tuple[Clbit, ...] = ()
+    ) -> MultiRealizationOp:
         """Dispatch to ``cls.<op.name>``. ``clbits`` is forwarded only for ``ControlFlowOp``."""
         name = op.name
         if isinstance(op, ControlFlowOp) and name not in cls.LOGICAL_ISA:
@@ -88,24 +90,24 @@ class QubitEncoding:
     # ---- Generic plumbing rules (defaults; subclasses override if needed) -----
 
     @classmethod
-    def barrier(cls, op: Instruction) -> LoweredOp:
+    def barrier(cls, op: Instruction) -> MultiRealizationOp:
         """Logical barrier → physical barrier covering all rails of the spanned qubits."""
         n_wires = op.num_qubits * cls.WIRES_PER_LOGICAL
         qc = QuantumCircuit(n_wires)
         qc.barrier(range(n_wires))
-        return LoweredOp.fixed(qc, name="barrier")
+        return MultiRealizationOp("barrier", (qc,))
 
     @classmethod
-    def measure(cls, op: Instruction) -> LoweredOp:
+    def measure(cls, op: Instruction) -> MultiRealizationOp:
         """Per-wire Z-basis measurement; ``num_clbits = num_qubits`` (bound at apply)."""
         n_wires = op.num_qubits * cls.WIRES_PER_LOGICAL
         qc = QuantumCircuit(n_wires, n_wires)
         for w in range(n_wires):
             qc.measure(w, w)
-        return LoweredOp.fixed(qc, name="measure")
+        return MultiRealizationOp("measure", (qc,))
 
     @classmethod
-    def if_else(cls, op: Instruction, clbits: tuple[Clbit, ...]) -> LoweredOp:
+    def if_else(cls, op: Instruction, clbits: tuple[Clbit, ...]) -> MultiRealizationOp:
         """One wire-level ``IfElseOp`` per logical qubit, over recursively-lowered blocks.
 
         Blocks must lower to fixed ops. Splitting by qubit lets the router see
@@ -127,10 +129,8 @@ class QubitEncoding:
 
         n_wires = op.num_qubits * cls.WIRES_PER_LOGICAL
         qc = QuantumCircuit(n_wires)
-        # Add the exact clbits the op references as loose bits — adding the
-        # parent register would inflate ``qc.num_clbits`` past ``len(clbits)``
-        # and break ``substitute_node_with_dag``'s positional bit mapping
-        # (the node has ``len(clbits)`` cargs, not the full register).
+        # The exact clbits the op references, as loose bits: candidate clbits
+        # bind positionally to the instruction's clbits, so the widths match.
         qc.add_bits(clbits)
         for i in range(op.num_qubits):
             new_blocks = [
@@ -139,7 +139,7 @@ class QubitEncoding:
             ]
             wires = range(i * cls.WIRES_PER_LOGICAL, (i + 1) * cls.WIRES_PER_LOGICAL)
             qc.append(IfElseOp(op.condition, *new_blocks), wires, clbits)
-        return LoweredOp.fixed(qc, name="if_else")
+        return MultiRealizationOp("if_else", (qc,))
 
     @classmethod
     def _lower_block(cls, block: QuantumCircuit) -> QuantumCircuit:
@@ -160,14 +160,14 @@ class QubitEncoding:
         for instr in block.data:
             logical_qubits = tuple(block_q_to_logical[q] for q in instr.qubits)
             lowered = cls.lower(instr.operation, tuple(instr.clbits))
-            if not lowered.is_fixed:
+            if len(lowered.candidates) > 1:
                 raise TranspilerError(
                     f"Op {instr.operation.name!r} inside a control-flow block "
                     f"lowered to a multi-realization. Conditional 2Q gates aren't "
                     f"supported by the default if_else rule; move the op out of "
                     f"the block or override if_else in your encoding."
                 )
-            sub_qc = lowered.realizations[0]
+            sub_qc = lowered.candidates[0]
             wire_map = [
                 block_regs[logical_qubits[k]][w]
                 for k in range(len(logical_qubits))
