@@ -14,20 +14,12 @@ from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit import ClassicalRegister, Clbit, Measure
 from qiskit.circuit.controlflow import ControlFlowOp
 from qiskit.dagcircuit import DAGCircuit
-from qiskit.passmanager import GenericPass, PropertySet
+from qiskit.passmanager import GenericPass
 
 from prism.lowering.ir import LoweredOp, LoweredProgram
 
 if TYPE_CHECKING:
     from prism.encodings.base import QubitEncoding
-
-
-def _clear_quotient_layouts(property_set: PropertySet) -> None:
-    # Upstream SabreLayout/SabreSwap on the chip quotient (logical_pm) leaves
-    # layout / final_layout sized to the quotient. Clear so they don't leak
-    # into the physical stage; CommitPolicy may write rail-sized replacements.
-    property_set["layout"] = None
-    property_set["final_layout"] = None
 
 
 class ExpandStage(GenericPass):
@@ -40,7 +32,6 @@ class ExpandStage(GenericPass):
 
     def run(self, passmanager_ir: DAGCircuit) -> LoweredProgram:
         """Expand the logical DAG into the boundary IR."""
-        _clear_quotient_layouts(self.property_set)
         return expand(passmanager_ir, self.enc)
 
 

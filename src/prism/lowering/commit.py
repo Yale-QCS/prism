@@ -4,13 +4,11 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from dataclasses import replace as _dc_replace
 from typing import TYPE_CHECKING
 
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import GenericPass, PropertySet
 from qiskit.transpiler import Layout
-from qiskit.transpiler.basepasses import BasePass
 
 from prism.lowering.ir import LoweredProgram
 
@@ -72,21 +70,6 @@ def _publish_instrumentation(property_set: PropertySet, result: CommitResult) ->
     property_set["realization_choices"] = tuple(result.choices)
     if result.n_swaps is not None:
         property_set["online_n_swaps"] = result.n_swaps
-
-
-class OverDag(GenericPass):
-    """``LoweredProgram -> LoweredProgram``: run one DAG pass over the program's DAG."""
-
-    def __init__(self, dag_pass: BasePass) -> None:
-        """Wrap a transpiler pass (transformation or analysis)."""
-        super().__init__()
-        self.dag_pass = dag_pass
-
-    def run(self, passmanager_ir: LoweredProgram) -> LoweredProgram:
-        """Apply the pass; an analysis pass leaves the DAG as is."""
-        self.dag_pass.property_set = self.property_set
-        out = self.dag_pass.run(passmanager_ir.dag)
-        return passmanager_ir if out is None else _dc_replace(passmanager_ir, dag=out)
 
 
 class CommitStage(GenericPass):

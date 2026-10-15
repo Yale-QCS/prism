@@ -85,17 +85,14 @@ class CircuitMetrics:
     active_gates: int
     size: int
     duration: float = 0.0
-    n_evaluated: int = 1
 
 
 class RecordCircuitMetrics(AnalysisPass):
     """Publish/refresh ``property_set[key]`` metrics from the current DAG.
 
     Run at the end of the lowering stage (``key="lowering_circuit_metrics"``:
-    semantic content, pre-routing), after the physical routing stage
-    (``key="postrouting_circuit_metrics"``: pre-optimization, so the
-    routing-inserted delta is exact), and the end of the physical stage (the
-    default key, final). Preserves ``n_evaluated`` across refresh if it was set.
+    semantic content, pre-routing) and at the end of the physical stage (the
+    default key, final).
     """
 
     def __init__(self, key: str = "circuit_metrics") -> None:
@@ -106,12 +103,10 @@ class RecordCircuitMetrics(AnalysisPass):
     def run(self, dag: DAGCircuit) -> None:
         """Compute ``CircuitMetrics`` for ``dag`` and publish them under ``self.key``."""
         qc = dag_to_circuit(dag)
-        existing = self.property_set.get(self.key)
         self.property_set[self.key] = CircuitMetrics(
             swaps=int(qc.count_ops().get("swap", 0)),
             depth=int(physical_depth(qc)),
             active_gates=int(active_gate_count(qc)),
             size=int(qc.size()),
             duration=physical_duration(qc),
-            n_evaluated=existing.n_evaluated if existing else 1,
         )
