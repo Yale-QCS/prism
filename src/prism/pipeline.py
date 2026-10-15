@@ -98,10 +98,6 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
 
     def run(self, passmanager_ir: DAGCircuit) -> MultiRealization:
         """Expand the logical DAG; the result passes ``verify``."""
-        if not isinstance(passmanager_ir, DAGCircuit):
-            raise TypeError(
-                f"{type(self).__name__} takes a DAGCircuit, got {type(passmanager_ir).__name__}"
-            )
         dag, enc = passmanager_ir, self.enc
         wpl = enc.WIRES_PER_LOGICAL
         n = len(dag.qubits)
@@ -186,10 +182,6 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
             TranspilerError: if the program is unplaced, has an undecided op, or
                 fails ``verify``.
         """
-        if not isinstance(passmanager_ir, MultiRealization):
-            raise TypeError(
-                f"{type(self).__name__} takes a MultiRealization, got {type(passmanager_ir).__name__}"
-            )
         ir = passmanager_ir
         if ir.placement is None:
             raise TranspilerError(

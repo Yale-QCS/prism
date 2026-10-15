@@ -13,7 +13,6 @@ from qiskit.transpiler.passes import Size
 from prism.encodings import DualRail
 from prism.ir import MultiRealization
 from prism.pipeline import (
-    DAGToMultiRealization,
     MultiRealizationToDAG,
     build_pm,
 )
@@ -88,13 +87,6 @@ def test_unsubscripted_pass_is_rejected():
 
     with pytest.raises(TypeError, match="subscripted"):
         ir_types(Bare)
-
-
-def test_boundary_passes_guard_their_input_type():
-    with pytest.raises(TypeError, match="takes a DAGCircuit, got QuantumCircuit"):
-        DAGToMultiRealization(DualRail).run(QuantumCircuit(1))
-    with pytest.raises(TypeError, match="takes a MultiRealization, got DAGCircuit"):
-        MultiRealizationToDAG().run(DAGCircuit())
 
 
 def _bell():
