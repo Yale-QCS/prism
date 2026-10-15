@@ -25,14 +25,13 @@ type StartResult = (Vec<Event>, Vec<u32>, u32, Vec<u32>);
 ///
 /// Route seeds follow prism's schedule: for start seed `s`, forward refinement `it` uses
 /// `s*1000 + 2*it`, backward `s*1000 + 2*it + 1`, and the final route `s*1000 + 2*max_iterations`,
-/// all mod 2^64.
+/// all mod 2^64.  Starts run in parallel unless Qiskit's settings ask for one thread
+/// (`getenv_use_multiple_threads`); the result does not depend on it.
 ///
 /// # Errors
 ///
 /// If the target is all-to-all, a start is not a permutation, or a problem is invalid.
 #[pyfunction]
-#[pyo3(signature=(forward, reverse, target, heuristic, starts, max_iterations, swap_trials, run_in_parallel=None))]
-#[allow(clippy::too_many_arguments, clippy::needless_pass_by_value)]
 pub fn prism_layout_and_routing(
     forward: Flat,
     reverse: Flat,
@@ -41,7 +40,6 @@ pub fn prism_layout_and_routing(
     starts: Vec<(u64, Vec<u32>)>,
     max_iterations: u64,
     swap_trials: usize,
-    run_in_parallel: Option<bool>,
 ) -> PyResult<Vec<StartResult>> {
     let target = explicit_target(target)?;
     let starts = starts
@@ -70,7 +68,7 @@ pub fn prism_layout_and_routing(
         heuristic,
     };
     let reverse = forward.with_sabre(&sabre_rev);
-    let parallel = starts.len() > 1 && run_in_parallel.unwrap_or_else(getenv_use_multiple_threads);
+    let parallel = starts.len() > 1 && getenv_use_multiple_threads();
 
     let run_start = |(seed, mut layout): (u64, NLayout)| {
         let base = seed.wrapping_mul(1000);
