@@ -169,12 +169,14 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
     """``MultiRealization -> DAGCircuit``: materialize every choice on the physical qubits.
 
     The only step that drops the candidate sets. Needs a placement and a
-    choice on every ``MultiRealizationOp``. Writes the layout keys the output's
-    ``TranspileLayout`` is built from.
+    choice on every ``MultiRealizationOp``. Writes a rail-level layout: the
+    output's ``TranspileLayout`` has virtual qubit ``WIRES_PER_LOGICAL * i + w``
+    for rail ``w`` of logical qubit ``i``, ancillas after them, and the elided
+    logical permutation in its final layout.
     """
 
     def run(self, passmanager_ir: MultiRealization) -> DAGCircuit:
-        """Verify, materialize, and publish ``layout`` and ``final_layout``.
+        """Verify, materialize, and publish the rail-level layout.
 
         Raises:
             TranspilerError: if the program is unplaced, has an undecided op, or
@@ -190,15 +192,34 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
                 "MultiRealizationToDAG needs a placed program; run a routing pass (PrismRouting) first"
             )
         ir.verify()
-        qc = ir.to_circuit()
+        dag = circuit_to_dag(ir.to_circuit())
         initial, final = ir.placement
-        self.property_set["layout"] = Layout(
-            {q: initial[v] for v, q in enumerate(ir.qubits)}
+        # The virtual circuit is the rail circuit: rail w of logical qubit i is
+        # virtual index wpl * i + w; free physical qubits become ancillas.
+        ancillas = QuantumRegister(len(initial) - len(ir.qubits), "ancilla")
+        virtuals = ir.qubits + list(ancillas)
+        layout = Layout({q: initial[v] for v, q in enumerate(virtuals)})
+        for reg in [*ir.qregs, ancillas]:
+            layout.add_register(reg)
+        wpl = ir.enc.WIRES_PER_LOGICAL
+        ps = self.property_set
+        ps["layout"] = layout
+        ps["original_qubit_indices"] = {q: v for v, q in enumerate(virtuals)}
+        ps["num_input_qubits"] = len(ir.qubits)
+        # ElidePermutations' convention: qubit at the end -> its index at the start.
+        ps["virtual_permutation_layout"] = Layout(
+            {
+                reg[w]: wpl * ir.logical_output_permutation[i] + w
+                for i, reg in enumerate(ir.qregs)
+                for w in range(wpl)
+            }
         )
-        self.property_set["final_layout"] = Layout(
-            {qc.qubits[initial[v]]: final[v] for v in range(len(initial))}
+        ps["final_layout"] = Layout(
+            {dag.qubits[initial[v]]: final[v] for v in range(len(initial))}
         )
-        return circuit_to_dag(qc)
+        # Canonical form (the elided permutation folded into final_layout) for the stock passes.
+        TranspileLayout.from_property_set(dag, ps).write_into_property_set(ps)
+        return dag
 
     def update_status(
         self, state: PassManagerState, run_state: RunState

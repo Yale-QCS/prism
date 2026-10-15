@@ -84,7 +84,7 @@ def basic_logical_pm(
 
 
 class ElideLogicalPermutations(ElidePermutations):
-    """Elide semantic permutations without leaking a logical-width layout."""
+    """``ElidePermutations`` that also records ``logical_output_permutation`` in the property set and DAG metadata."""
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
         """Remove logical permutation operations and preserve their net effect."""
@@ -103,10 +103,4 @@ class ElideLogicalPermutations(ElidePermutations):
         self.property_set["logical_permutation_ops_elided"] = permutation_ops
         out_dag.metadata = dict(out_dag.metadata or {})
         out_dag.metadata["logical_output_permutation"] = list(permutation)
-
-        # These layouts are keyed by logical qubit objects.  Leaving them in
-        # the property set makes the physical ApplyLayout pass try to compose
-        # them with the expanded rail-level DAG.
-        self.property_set["virtual_permutation_layout"] = None
-        self.property_set["original_layout"] = None
         return out_dag

@@ -5,11 +5,11 @@ import pytest
 from qiskit import QuantumCircuit
 from qiskit.circuit import ClassicalRegister
 from qiskit.circuit.random import random_circuit
-from qiskit.passmanager import PropertySet
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap
 
 from prism.encodings import DualRail
+from prism.ir import MultiRealization
 from prism.pipeline import SearchBudget, build_pm
 
 
@@ -69,27 +69,42 @@ def _take(qc: QuantumCircuit, branch: int) -> QuantumCircuit:
     return out
 
 
-def _encode(logical_state: np.ndarray, n: int, perm: tuple[int, ...]) -> np.ndarray:
-    """|b_1..b_n> -> rails (wire0, wire1) = |01> for 0, |10> for 1; wire order follows the lowering registers.
+def _mid_swaps(seed: int) -> QuantumCircuit:
+    """Logical SWAPs between entangling gates: the elided permutation must reach the layout."""
+    qc = random_circuit(3, 3, max_operands=2, seed=seed)
+    qc.swap(0, 1)
+    qc.crz(0.7, 1, 2)
+    qc.swap(1, 2)
+    qc.rx(0.3, 0)
+    return qc
 
-    Output logical position ``i`` holds input qubit ``perm[i]`` (the elided logical permutation).
-    """
+
+def _encode(logical_state: np.ndarray, n: int) -> np.ndarray:
+    """|b_1..b_n> -> rails: virtual qubit ``2i + w`` is rail ``w`` of logical ``i``; |0_L> = |01>, |1_L> = |10>."""
     out = np.zeros(2 ** (2 * n), dtype=complex)
     for idx, amp in enumerate(logical_state):
         if abs(amp) < 1e-14:
             continue
         rails = 0
         for i in range(n):
-            bit = (idx >> perm[i]) & 1  # qiskit little-endian: qubit i is bit i
-            w0, w1 = 2 * i, 2 * i + 1
-            rails |= ((bit) << w0) | ((1 - bit) << w1)
+            bit = (idx >> i) & 1  # qiskit little-endian: qubit i is bit i
+            rails |= (bit << 2 * i) | ((1 - bit) << (2 * i + 1))
         out[rails] += amp
     return out
 
 
-@pytest.mark.parametrize("make", [_logical, _trailing_swap, _trailing_x, _conditional])
+def verify_ir(*, passmanager_ir, **_):
+    """Callback: full ``verify`` after every pass that returns a ``MultiRealization``."""
+    if isinstance(passmanager_ir, MultiRealization):
+        passmanager_ir.verify()
+
+
+@pytest.mark.parametrize(
+    "make", [_logical, _trailing_swap, _trailing_x, _conditional, _mid_swaps]
+)
 @pytest.mark.parametrize("seed", [0, 1, 2])
 def test_routed_rails_match_encoded_logical_state(make, seed):
+    """The output state is the encoded logical state, rail ``v`` on ``final_index_layout()[v]``."""
     n = 3
     qc = make(seed)
     cmap = CouplingMap.from_grid(2, 4)  # 8 rails: 3 logical pairs + one spare
@@ -100,36 +115,18 @@ def test_routed_rails_match_encoded_logical_state(make, seed):
         budget=SearchBudget(layout_starts=4, refinement_iterations=2, swap_trials=4),
     )
     branch = seed % 2  # the branch an if_else takes, in both circuits
-    ps = PropertySet()
-    out = _take(pm.run(qc, property_set=ps), branch)
-    qc = _take(qc, branch)
-    # virtual rail v starts at initial[v] and ends at final[initial[v]]
-    initial = ps["layout"]
-    final = ps["final_layout"]
-    virt_qubits = list(initial.get_virtual_bits())
-    end_pos = {}
-    for v_qubit in virt_qubits:
-        p0 = initial[v_qubit]
-        end_pos[v_qubit] = final[out.qubits[p0]]
-    # lowering registers q0..q{n-1}, wires (0, 1) -> virtual index 2i + w
-    by_index = {}
-    for v_qubit, pos in end_pos.items():
-        reg = v_qubit._register
-        by_index[2 * int(reg.name[1:]) + v_qubit._index] = pos
-    sv_out = Statevector(out).data
-    expected_rails = _encode(Statevector(qc).data, n, ps["logical_output_permutation"])
+    compiled = pm.run(qc, callback=verify_ir)
+    final = compiled.layout.final_index_layout()
+    out = _take(compiled, branch)
+    expected_rails = _encode(Statevector(_take(qc, branch)).data, n)
     # place expected rail state at the final physical positions, spare rails |0>
-    n_phys = out.num_qubits
-    expected = np.zeros(2**n_phys, dtype=complex)
+    expected = np.zeros(2**out.num_qubits, dtype=complex)
     for rail_idx, amp in enumerate(expected_rails):
         if abs(amp) < 1e-14:
             continue
-        phys = 0
-        for v in range(2 * n):
-            if (rail_idx >> v) & 1:
-                phys |= 1 << by_index[v]
+        phys = sum(1 << final[v] for v in range(2 * n) if (rail_idx >> v) & 1)
         expected[phys] += amp
-    overlap = abs(np.vdot(expected, sv_out))
+    overlap = abs(np.vdot(expected, Statevector(out).data))
     assert overlap == pytest.approx(1.0, abs=1e-6), f"overlap {overlap}"
 
 
