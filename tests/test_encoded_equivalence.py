@@ -5,6 +5,7 @@ import pytest
 from qiskit import QuantumCircuit
 from qiskit.circuit import ClassicalRegister
 from qiskit.circuit.random import random_circuit
+from qiskit.passmanager import PropertySet
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap
 
@@ -100,9 +101,9 @@ def test_routed_rails_match_encoded_logical_state(make, seed):
         budget=SearchBudget(layout_starts=4, refinement_iterations=2, swap_trials=4),
     )
     branch = seed % 2  # the branch an if_else takes, in both circuits
-    out = _take(pm.run(qc), branch)
+    ps = PropertySet()
+    out = _take(pm.run(qc, property_set=ps), branch)
     qc = _take(qc, branch)
-    ps = pm.property_set
     # virtual rail v starts at initial[v] and ends at final[initial[v]]
     initial = ps["layout"]
     final = ps["final_layout"]

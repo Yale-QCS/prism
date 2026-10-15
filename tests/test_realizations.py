@@ -493,6 +493,7 @@ def test_committed_dag_matches_legacy_apply_commits():
 
 def test_build_pm_exposes_typed_stages():
     """``build_pm`` is a ``MultiStagePassManager`` with the documented stage order."""
+    from qiskit.passmanager import PropertySet
     from qiskit.transpiler import CouplingMap
 
     from prism.lowering.commit import CommitStage
@@ -513,8 +514,9 @@ def test_build_pm_exposes_typed_stages():
     qc = QuantumCircuit(2)
     qc.h(0)
     qc.cx(0, 1)
-    out = pm.run(qc)
-    assert out.layout is not None and "circuit_metrics" in pm.property_set
+    ps = PropertySet()
+    out = pm.run(qc, property_set=ps)
+    assert out.layout is not None and "circuit_metrics" in ps
     # The commit stage is swappable.
     pm.commit = CommitStage(PrismRouting(cmap, enc=DualRail, seed=1))
     out2 = pm.run(qc)

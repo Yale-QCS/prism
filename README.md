@@ -16,6 +16,7 @@ Building from source needs a Rust toolchain.
 ```python
 from qiskit import QuantumCircuit
 from qiskit.transpiler import CouplingMap
+from qiskit.passmanager import PropertySet
 from prism.encodings import DualRail
 from prism.pipeline import build_pm
 
@@ -25,8 +26,9 @@ for i in range(3):
     qc.cx(i, i + 1)
 
 pm = build_pm(CouplingMap.from_grid(2, 4), enc=DualRail, seed=42)
-routed = pm.run(qc)
-print(pm.property_set["circuit_metrics"])
+ps = PropertySet()
+routed = pm.run(qc, property_set=ps)
+print(ps["circuit_metrics"])
 ```
 
 The coupling map must be connected and symmetric, with at least two physical qubits per logical qubit.

@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from qiskit import QuantumCircuit
+from qiskit.passmanager import PropertySet
 from qiskit.transpiler import CouplingMap
 
 from prism.encodings import DualRail
@@ -39,8 +40,9 @@ def _bv8():
 
 def _compile_canon(qc, seed=42):
     pm = build_pm(CouplingMap.from_grid(5, 4), enc=DualRail, seed=seed)
-    out = pm.run(qc)
-    m = pm.property_set["circuit_metrics"]
+    ps = PropertySet()
+    out = pm.run(qc, property_set=ps)
+    m = ps["circuit_metrics"]
     return canonical_hash(out), (m.swaps, m.depth, m.active_gates)
 
 

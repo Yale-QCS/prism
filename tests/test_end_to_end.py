@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import QFTGate
+from qiskit.passmanager import PropertySet
 from qiskit.transpiler import CouplingMap, TranspilerError
 
 from prism.encodings import DualRail
@@ -20,9 +21,10 @@ def test_build_pm_runs():
     qc.append(QFTGate(n), range(n))
     cm = CouplingMap.from_grid(2, n)
     pm = build_pm(cm, enc=DualRail, seed=0)
-    out = pm.run(qc)
+    ps = PropertySet()
+    out = pm.run(qc, property_set=ps)
     assert out is not None
-    assert "circuit_metrics" in pm.property_set
+    assert "circuit_metrics" in ps
 
 
 def test_conditional_logical_x_survives_physical_optimization():
@@ -89,8 +91,9 @@ def test_prism_seed_boundaries(seed):
     qc.append(QFTGate(n), range(n))
     cm = CouplingMap.from_grid(2, n)
     pm = build_pm(cm, enc=DualRail, seed=seed)
-    pm.run(qc)
-    assert "circuit_metrics" in pm.property_set
+    ps = PropertySet()
+    pm.run(qc, property_set=ps)
+    assert "circuit_metrics" in ps
 
 
 def test_prism_same_seed_repeats():
@@ -101,8 +104,9 @@ def test_prism_same_seed_repeats():
     metrics = []
     for _ in range(2):
         pm = build_pm(cm, enc=DualRail, seed=7)
-        pm.run(qc)
-        metrics.append(pm.property_set["circuit_metrics"])
+        ps = PropertySet()
+        pm.run(qc, property_set=ps)
+        metrics.append(ps["circuit_metrics"])
     assert metrics[0] == metrics[1]
 
 
