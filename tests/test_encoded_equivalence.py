@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 from qiskit import QuantumCircuit
+from qiskit.circuit import ClassicalRegister
 from qiskit.circuit.random import random_circuit
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap
@@ -39,6 +40,35 @@ def _trailing_x(seed: int) -> QuantumCircuit:
     return qc
 
 
+def _conditional(seed: int) -> QuantumCircuit:
+    """``if_else`` over all three qubits between entangling gates; ``_take`` picks a branch."""
+    qc = random_circuit(3, 3, max_operands=2, seed=seed)
+    qc.add_register(ClassicalRegister(1))
+    with qc.if_test((qc.clbits[0], False)) as else_:
+        qc.rx(0.3, 0)
+        qc.x(1)
+        qc.rz(0.7, 2)
+    with else_:
+        qc.x(0)
+        qc.rx(1.1, 2)
+    qc.crz(0.5, 0, 2)
+    qc.crz(0.9, 1, 0)
+    return qc
+
+
+def _take(qc: QuantumCircuit, branch: int) -> QuantumCircuit:
+    """``qc`` with every ``if_else`` replaced by its block ``branch`` (Statevector has no control flow)."""
+    out = qc.copy_empty_like()
+    for ins in qc.data:
+        if ins.operation.name == "if_else":
+            out.compose(
+                ins.operation.blocks[branch], ins.qubits, ins.clbits, inplace=True
+            )
+        else:
+            out.append(ins)
+    return out
+
+
 def _encode(logical_state: np.ndarray, n: int, perm: tuple[int, ...]) -> np.ndarray:
     """|b_1..b_n> -> rails (wire0, wire1) = |01> for 0, |10> for 1; wire order follows the lowering registers.
 
@@ -57,7 +87,7 @@ def _encode(logical_state: np.ndarray, n: int, perm: tuple[int, ...]) -> np.ndar
     return out
 
 
-@pytest.mark.parametrize("make", [_logical, _trailing_swap, _trailing_x])
+@pytest.mark.parametrize("make", [_logical, _trailing_swap, _trailing_x, _conditional])
 @pytest.mark.parametrize("seed", [0, 1, 2])
 def test_routed_rails_match_encoded_logical_state(make, seed):
     n = 3
@@ -69,7 +99,9 @@ def test_routed_rails_match_encoded_logical_state(make, seed):
         seed=seed,
         budget=SearchBudget(layout_starts=4, refinement_iterations=2, swap_trials=4),
     )
-    out = pm.run(qc)
+    branch = seed % 2  # the branch an if_else takes, in both circuits
+    out = _take(pm.run(qc), branch)
+    qc = _take(qc, branch)
     ps = pm.property_set
     # virtual rail v starts at initial[v] and ends at final[initial[v]]
     initial = ps["layout"]

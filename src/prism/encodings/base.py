@@ -22,7 +22,7 @@ from qiskit.circuit import (
 )
 from qiskit.circuit.controlflow import ControlFlowOp, IfElseOp
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary
-from qiskit.transpiler import CouplingMap, PassManager
+from qiskit.transpiler import CouplingMap, PassManager, TranspilerError
 
 from prism.logical import basic_logical_pm
 from prism.lowering.ir import LoweredOp
@@ -100,17 +100,24 @@ class QubitEncoding:
 
     @classmethod
     def if_else(cls, op: Instruction, clbits: tuple[Clbit, ...]) -> LoweredOp:
-        """Wire-level ``IfElseOp`` over recursively-lowered blocks. Blocks must lower to fixed ops."""
-        new_blocks: list[QuantumCircuit | None] = []
-        for block in op.blocks:
-            if block is None:
-                new_blocks.append(None)
-                continue
-            new_blocks.append(cls._lower_block(block))
-        if len(new_blocks) == 1:
-            new_op = IfElseOp(op.condition, new_blocks[0], None)
-        else:
-            new_op = IfElseOp(op.condition, new_blocks[0], new_blocks[1])
+        """One wire-level ``IfElseOp`` per logical qubit, over recursively-lowered blocks.
+
+        Blocks must lower to fixed ops. Splitting by qubit lets the router see
+        each qubit's wire pairs; it needs every block instruction to act on one
+        qubit and leave the classical bits alone.
+        """
+        if op.num_qubits > 1:
+            for block in op.blocks:
+                for instr in block.data if block is not None else ():
+                    if instr.operation.num_qubits > 1 or instr.clbits:
+                        raise TranspilerError(
+                            f"{cls.__name__} cannot lower an if_else over "
+                            f"{op.num_qubits} qubits whose body holds "
+                            f"{instr.operation.name!r} on {len(instr.qubits)} "
+                            f"qubit(s) and {len(instr.clbits)} clbit(s): it is "
+                            "lowered as one if_else per qubit. Write one if_test "
+                            "per qubit, or move the instruction out of the block."
+                        )
 
         n_wires = op.num_qubits * cls.WIRES_PER_LOGICAL
         qc = QuantumCircuit(n_wires)
@@ -119,7 +126,13 @@ class QubitEncoding:
         # and break ``substitute_node_with_dag``'s positional bit mapping
         # (the node has ``len(clbits)`` cargs, not the full register).
         qc.add_bits(clbits)
-        qc.append(new_op, range(n_wires), clbits)
+        for i in range(op.num_qubits):
+            new_blocks = [
+                None if block is None else cls._lower_block(_restrict(block, i))
+                for block in op.blocks
+            ]
+            wires = range(i * cls.WIRES_PER_LOGICAL, (i + 1) * cls.WIRES_PER_LOGICAL)
+            qc.append(IfElseOp(op.condition, *new_blocks), wires, clbits)
         return LoweredOp.fixed(qc, name="if_else")
 
     @classmethod
@@ -159,3 +172,15 @@ class QubitEncoding:
                 new_qubits = [wire_map[idx] for idx in local_indices]
                 new_block.append(sub_ci.operation, new_qubits, sub_ci.clbits)
         return new_block
+
+
+def _restrict(block: QuantumCircuit, i: int) -> QuantumCircuit:
+    """``block`` with only qubit ``i`` and the instructions on it; classical bits kept."""
+    if block.num_qubits == 1:
+        return block
+    sub = QuantumCircuit([block.qubits[i]], *block.cregs)
+    sub.add_bits([c for c in block.clbits if not block.find_bit(c).registers])
+    for instr in block.data:
+        if instr.qubits == (block.qubits[i],):
+            sub.append(instr)
+    return sub
