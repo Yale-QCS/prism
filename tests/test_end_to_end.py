@@ -6,8 +6,10 @@ import sys
 
 import numpy as np
 import pytest
-from qiskit.circuit import QuantumCircuit
-from qiskit.circuit.library import QFTGate
+from qiskit.circuit import Measure, QuantumCircuit
+from qiskit.circuit.library import QFTGate, SwapGate
+from qiskit.converters import circuit_to_dag
+from qiskit.dagcircuit import DAGOpNode, DAGOutNode
 from qiskit.passmanager import PropertySet
 from qiskit.transpiler import CouplingMap, TranspilerError
 
@@ -174,3 +176,41 @@ def test_physical_stage_commutation_does_not_hang():
     """Stock commutation passes on rswap/joint_herald/if_else and diagonal runs finish (Qiskit/qiskit#16937)."""
     env = {**os.environ, "QISKIT_IN_PARALLEL": "FALSE", "RAYON_NUM_THREADS": "4"}
     subprocess.run([sys.executable, "-c", _NO_HANG], env=env, check=True, timeout=120)
+
+
+def _dead_swaps(qc: QuantumCircuit) -> int:
+    """SWAPs whose wires next reach only final measurements: no later gate uses them."""
+    dag = circuit_to_dag(qc)
+
+    def final_measure(node) -> bool:
+        return isinstance(node.op, Measure) and all(
+            isinstance(s, DAGOutNode) for s in dag.successors(node)
+        )
+
+    dead = 0
+    for swap in dag.op_nodes(SwapGate):
+        succ = [s for s in dag.quantum_successors(swap) if isinstance(s, DAGOpNode)]
+        dead += bool(succ) and all(final_measure(s) for s in succ)
+    return dead
+
+
+@pytest.mark.parametrize("seed", range(4))
+def test_no_routing_swap_feeds_only_measurements(seed):
+    """Every routing SWAP has a later consumer, also when diagonal gates end the circuit.
+
+    The last CZ layer and the RZs do not change the measured outcomes; they must
+    not cost SWAPs that end up feeding only measurements.
+    """
+    rng = np.random.default_rng(seed)
+    n = 8
+    qc = QuantumCircuit(n, n)
+    for _ in range(3):
+        qc.h(range(n))
+        for _ in range(8):
+            a, b = rng.choice(n, 2, replace=False)
+            qc.cz(int(a), int(b))
+    qc.rz(0.3, range(n))
+    qc.measure(range(n), range(n))
+    out = build_pm(CouplingMap.from_heavy_hex(3), enc=DualRail, seed=seed).run(qc)
+    assert out.count_ops().get("swap", 0) > 0
+    assert _dead_swaps(out) == 0
