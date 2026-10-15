@@ -116,6 +116,8 @@ class MultiRealizationOp:
             raise ValueError(
                 f"{self.name}: default_index {self.default_index} out of range"
             )
+        if self.choice is not None and not 0 <= self.choice < len(self.candidates):
+            raise ValueError(f"{self.name}: choice {self.choice} out of range")
 
     @property
     def num_qubits(self) -> int:
@@ -191,19 +193,6 @@ class MultiRealization(IR):
         """Rails before placement, physical qubits after."""
         return (
             len(self.rails) if self.placement is None else len(self.placement.initial)
-        )
-
-    def __repr__(self) -> str:
-        decided = sum(
-            isinstance(ins.operation, MultiRealizationOp)
-            and ins.operation.choice is not None
-            for ins in self.data
-        )
-        multi = sum(isinstance(ins.operation, MultiRealizationOp) for ins in self.data)
-        return (
-            f"<MultiRealization {self.enc.__name__} logical={len(self.qregs)} "
-            f"instructions={len(self.data)} decided={decided}/{multi} "
-            f"placed={self.placement is not None}>"
         )
 
     def to_circuit(self) -> QuantumCircuit:
@@ -301,8 +290,6 @@ class MultiRealization(IR):
                 if len(ins.qubits) == 2:
                     self._check_on_edge(ins.qubits, where)
                 continue
-            if op.choice is not None and not 0 <= op.choice < len(op.candidates):
-                _fail(f"{where}: choice {op.choice} out of range")
             if op.choice is not None:
                 real = op.candidates[op.choice]
                 for ci in real.data:
@@ -341,10 +328,8 @@ def _check_routable(op: Operation, width: int, where: str) -> None:
         )
     for block in op.blocks:
         for ci in block.data:
-            if (
-                len(ci.qubits) >= 2
-                and ci.operation.name != "barrier"
-                or isinstance(ci.operation, ControlFlowOp)
+            if (len(ci.qubits) >= 2 and ci.operation.name != "barrier") or isinstance(
+                ci.operation, ControlFlowOp
             ):
                 _fail(
                     f"{where}: {op.name!r} over {width} wires holds gates the router cannot see"

@@ -100,14 +100,6 @@ def test_to_circuit_materializes_choices_on_rails():
         ),
         (
             lambda ir: ir.data.append(
-                MultiRealizationInstruction(
-                    MultiRealizationOp("cx", (_cx(),), choice=3), (0, 2)
-                )
-            ),
-            "choice 3 out of range",
-        ),
-        (
-            lambda ir: ir.data.append(
                 MultiRealizationInstruction(CXGate(), (0, 2), (Clbit(),))
             ),
             "bound to 2 qubits, 1 clbits",
@@ -251,3 +243,8 @@ def test_narrowing_candidates_after_routing_keeps_the_choice():
             )
     placed.verify()
     assert placed.to_circuit() == before
+
+
+def test_an_op_rejects_an_out_of_range_choice():
+    with pytest.raises(ValueError, match="choice 3 out of range"):
+        MultiRealizationOp("cx", (_cx(),), choice=3)
