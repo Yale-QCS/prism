@@ -88,7 +88,7 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
     Every logical qubit gets ``WIRES_PER_LOGICAL`` rails and the encoding's
     preparation. A measurement writes the logical clbit from rail 0 and the
     other rails to a ``herald`` register. ``logical_output_permutation`` comes
-    from the DAG metadata (set by ``ElideLogicalPermutations``).
+    from the property set (set by ``ElideLogicalPermutations``).
     """
 
     def __init__(self, enc: type[QubitEncoding]) -> None:
@@ -142,7 +142,7 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
                 cl = ()
             data.append(MultiRealizationInstruction(op, rails, cl))
 
-        perm = (dag.metadata or {}).get("logical_output_permutation")
+        perm = self.property_set["logical_output_permutation"]
         ir = MultiRealization(
             enc=enc,
             qregs=[QuantumRegister(wpl, f"q{i}") for i in range(n)],

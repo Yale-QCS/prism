@@ -9,8 +9,6 @@ from qiskit.circuit import Measure
 from qiskit.circuit.library import (
     MCPhaseGate,
     MCXGate,
-    PermutationGate,
-    SwapGate,
 )
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import (
@@ -84,23 +82,15 @@ def basic_logical_pm(
 
 
 class ElideLogicalPermutations(ElidePermutations):
-    """``ElidePermutations`` that also records ``logical_output_permutation`` in the property set and DAG metadata."""
+    """``ElidePermutations`` that also records ``logical_output_permutation`` in the property set."""
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Remove logical permutation operations and preserve their net effect."""
-        permutation_ops = sum(
-            isinstance(node.op, (SwapGate, PermutationGate)) for node in dag.op_nodes()
-        )
+        """Remove logical permutation operations and record their net effect."""
         out_dag = super().run(dag)
-
-        virtual_layout = self.property_set.get("virtual_permutation_layout")
-        if virtual_layout is None:
-            permutation = tuple(range(len(out_dag.qubits)))
-        else:
-            permutation = tuple(virtual_layout[q] for q in out_dag.qubits)
-
-        self.property_set["logical_output_permutation"] = permutation
-        self.property_set["logical_permutation_ops_elided"] = permutation_ops
-        out_dag.metadata = dict(out_dag.metadata or {})
-        out_dag.metadata["logical_output_permutation"] = list(permutation)
+        virtual_layout = self.property_set["virtual_permutation_layout"]
+        self.property_set["logical_output_permutation"] = (
+            tuple(range(len(out_dag.qubits)))
+            if virtual_layout is None
+            else tuple(virtual_layout[q] for q in out_dag.qubits)
+        )
         return out_dag
