@@ -20,14 +20,12 @@ from qiskit.circuit.library import (
 )
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import (
-    AnalysisPass,
     CouplingMap,
     PassManager,
     StagedPassManager,
     Target,
     TransformationPass,
 )
-from qiskit.transpiler.passes.layout.vf2_utils import ErrorMap
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
 from prism.metrics import (
@@ -39,32 +37,6 @@ if TYPE_CHECKING:
     from qiskit.circuit import Qubit
 
     from prism.encodings.base import QubitEncoding
-
-
-class SeedVF2ErrorMap(AnalysisPass):
-    """Publish a deterministic ``vf2_avg_error_map`` so VF2PostLayout replays."""
-
-    def __init__(self, coupling_map: CouplingMap) -> None:
-        """Store the coupling map whose degrees seed the error map."""
-        super().__init__()
-        self._coupling_map = coupling_map
-
-    def run(self, dag: DAGCircuit) -> None:
-        """Publish the deterministic degree-proxy ``vf2_avg_error_map``."""
-        n = self._coupling_map.size()
-        edges = sorted({tuple(sorted(e)) for e in self._coupling_map.get_edges()})
-        degree = dict.fromkeys(range(n), 0)
-        for a, b in edges:
-            degree[a] += 1
-            degree[b] += 1
-        error_map = ErrorMap(n + 2 * len(edges))
-        for q in range(n):
-            error_map.add_error((q, q), degree[q] / n * 1e-3 + q * 1e-9)
-        for a, b in edges:
-            err = (degree[a] + degree[b]) / (2 * n) * 1e-2 + (a * n + b) * 1e-9
-            error_map.add_error((a, b), err)
-            error_map.add_error((b, a), err)
-        self.property_set["vf2_avg_error_map"] = error_map
 
 
 class CancelRailX(TransformationPass):
@@ -149,7 +121,6 @@ def physical_pm(
         routing_method="none",
     )
     preset.layout = PassManager()
-    preset.pre_routing = PassManager([SeedVF2ErrorMap(coupling_map)])
     # ``CancelRailX`` strips the X-on-rail that O3's 2Q resynthesis leaves behind.
     preset.post_optimization = PassManager(
         [CancelRailX(), RescheduleCommutingDiagonals(), RecordCircuitMetrics()]
