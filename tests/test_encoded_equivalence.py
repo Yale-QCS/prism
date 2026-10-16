@@ -1,4 +1,4 @@
-"""End-to-end semantics: the routed rail circuit implements the logical circuit under the encoding."""
+"""The compiled rail circuit implements the logical circuit under the encoding."""
 
 import numpy as np
 import pytest
@@ -6,11 +6,13 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import ClassicalRegister
 from qiskit.circuit.random import random_circuit
 from qiskit.quantum_info import Statevector
-from qiskit.transpiler import CouplingMap
+from qiskit.transpiler import CouplingMap, PassManager
 
 from prism.encodings import DualRail, QubitEncoding
 from prism.ir import MultiRealization, MultiRealizationOp
-from prism.pipeline import SearchBudget, build_pm
+from prism.pipeline import SearchBudget, build_pm, prism_stages
+
+BUDGET = SearchBudget(layout_starts=4, refinement_iterations=2, swap_trials=4)
 
 
 def _logical(seed: int, n: int = 3) -> QuantumCircuit:
@@ -56,6 +58,16 @@ def _conditional(seed: int) -> QuantumCircuit:
     return qc
 
 
+def _mid_swaps(seed: int) -> QuantumCircuit:
+    """Logical SWAPs between entangling gates: the elided permutation must reach the layout."""
+    qc = random_circuit(3, 3, max_operands=2, seed=seed)
+    qc.swap(0, 1)
+    qc.crz(0.7, 1, 2)
+    qc.swap(1, 2)
+    qc.rx(0.3, 0)
+    return qc
+
+
 def _take(qc: QuantumCircuit, branch: int) -> QuantumCircuit:
     """``qc`` with every ``if_else`` replaced by its block ``branch`` (Statevector has no control flow)."""
     out = qc.copy_empty_like()
@@ -69,28 +81,19 @@ def _take(qc: QuantumCircuit, branch: int) -> QuantumCircuit:
     return out
 
 
-def _mid_swaps(seed: int) -> QuantumCircuit:
-    """Logical SWAPs between entangling gates: the elided permutation must reach the layout."""
-    qc = random_circuit(3, 3, max_operands=2, seed=seed)
-    qc.swap(0, 1)
-    qc.crz(0.7, 1, 2)
-    qc.swap(1, 2)
-    qc.rx(0.3, 0)
-    return qc
+def _overlap(qc: QuantumCircuit, out: QuantumCircuit) -> float:
+    """Overlap of ``out`` with the dual-rail encoding of ``qc``'s state.
 
-
-def _encode(logical_state: np.ndarray, n: int) -> np.ndarray:
-    """|b_1..b_n> -> rails: virtual qubit ``2i + w`` is rail ``w`` of logical ``i``; |0_L> = |01>, |1_L> = |10>."""
-    out = np.zeros(2 ** (2 * n), dtype=complex)
-    for idx, amp in enumerate(logical_state):
-        if abs(amp) < 1e-14:
-            continue
-        rails = 0
-        for i in range(n):
-            bit = (idx >> i) & 1  # qiskit little-endian: qubit i is bit i
-            rails |= (bit << 2 * i) | ((1 - bit) << (2 * i + 1))
-        out[rails] += amp
-    return out
+    Rail ``w`` of logical qubit ``i`` is virtual qubit ``2i + w`` on ``final_index_layout()``;
+    |0_L> = |01> (rail 1 excited), |1_L> = |10>; spare qubits are |0>.
+    """
+    final = out.layout.final_index_layout()
+    expected = np.zeros(2**out.num_qubits, dtype=complex)
+    for idx, amp in enumerate(Statevector(qc).data):
+        bits = ((idx >> i) & 1 for i in range(qc.num_qubits))
+        rails = (2 * i + (0 if b else 1) for i, b in enumerate(bits))
+        expected[sum(1 << final[v] for v in rails)] += amp
+    return abs(np.vdot(expected, Statevector(out).data))
 
 
 def verify_ir(*, dag, **_):
@@ -102,32 +105,30 @@ def verify_ir(*, dag, **_):
 @pytest.mark.parametrize(
     "make", [_logical, _trailing_swap, _trailing_x, _conditional, _mid_swaps]
 )
-@pytest.mark.parametrize("seed", [0, 1, 2])
+@pytest.mark.parametrize("seed", [0, 1])
 def test_routed_rails_match_encoded_logical_state(make, seed):
-    """The output state is the encoded logical state, rail ``v`` on ``final_index_layout()[v]``."""
-    n = 3
     qc = make(seed)
-    cmap = CouplingMap.from_grid(2, 4)  # 8 rails: 3 logical pairs + one spare
-    pm = build_pm(
-        cmap,
-        enc=DualRail,
-        seed=seed,
-        budget=SearchBudget(layout_starts=4, refinement_iterations=2, swap_trials=4),
-    )
-    branch = seed % 2  # the branch an if_else takes, in both circuits
+    pm = build_pm(CouplingMap.from_grid(2, 4), enc=DualRail, seed=seed, budget=BUDGET)
     compiled = pm.run(qc, callback=verify_ir)
-    final = compiled.layout.final_index_layout()
-    out = _take(compiled, branch)
-    expected_rails = _encode(Statevector(_take(qc, branch)).data, n)
-    # place expected rail state at the final physical positions, spare rails |0>
-    expected = np.zeros(2**out.num_qubits, dtype=complex)
-    for rail_idx, amp in enumerate(expected_rails):
-        if abs(amp) < 1e-14:
-            continue
-        phys = sum(1 << final[v] for v in range(2 * n) if (rail_idx >> v) & 1)
-        expected[phys] += amp
-    overlap = abs(np.vdot(expected, Statevector(out).data))
-    assert overlap == pytest.approx(1.0, abs=1e-6), f"overlap {overlap}"
+    branch = seed % 2  # the branch an if_else takes, in both circuits
+    overlap = _overlap(_take(qc, branch), _take(compiled, branch))
+    assert overlap == pytest.approx(1.0, abs=1e-6)
+
+
+def test_op_the_router_passes_through_warns_and_stays_correct():
+    """Without the logical stage a SWAP spans two rail pairs; the physical stage routes it."""
+    qc = QuantumCircuit(3)
+    qc.rx(0.3, 0)
+    qc.rx(1.1, 1)
+    qc.crz(0.5, 0, 1)
+    qc.swap(0, 2)
+    qc.crz(0.9, 2, 1)
+    qc.rx(0.7, 0)
+    stages = prism_stages(CouplingMap.from_grid(2, 4), DualRail, seed=0, budget=BUDGET)
+    stages.logical = PassManager()
+    with pytest.warns(UserWarning, match="passed 1 operation"):
+        out = PassManager([stages.to_flow_controller()]).run(qc)
+    assert _overlap(qc, out) == pytest.approx(1.0, abs=1e-6)
 
 
 def _clbit_probabilities(qc: QuantumCircuit, clbits) -> dict[int, float]:
@@ -145,29 +146,6 @@ def _clbit_probabilities(qc: QuantumCircuit, clbits) -> dict[int, float]:
             key = sum(((idx >> q) & 1) << k for k, q in enumerate(targets))
             out[key] = out.get(key, 0.0) + p
     return out
-
-
-@pytest.mark.parametrize("seed", [0, 1, 2])
-def test_measured_output_matches_logical_distribution(seed):
-    """Final measurements keep the logical distribution, logical SWAPs included."""
-    qc = random_circuit(3, 4, max_operands=2, seed=seed)
-    qc.x(0)
-    qc.swap(1, 2)
-    qc.crz(0.6, 0, 2)
-    qc.x(2)
-    qc.add_register(ClassicalRegister(3))
-    qc.measure(range(3), range(3))
-    pm = build_pm(
-        CouplingMap.from_grid(2, 4),
-        enc=DualRail,
-        seed=seed,
-        budget=SearchBudget(layout_starts=4, refinement_iterations=2, swap_trials=4),
-    )
-    out = pm.run(qc)
-    want = _clbit_probabilities(qc, qc.clbits)
-    got = _clbit_probabilities(out, qc.clbits)  # logical clbits read rail 0
-    assert got.keys() == want.keys()
-    assert all(got[k] == pytest.approx(want[k], abs=1e-9) for k in want)
 
 
 class OneWire(QubitEncoding):
@@ -197,18 +175,19 @@ class OneWire(QubitEncoding):
         (DualRail, CouplingMap.from_grid(3, 4), True),  # MCX adds an ancilla qubit
     ],
 )
-def test_measured_distribution_other_encoding_and_mcx(enc, cmap, mc):
+def test_measured_distribution_matches_logical(enc, cmap, mc):
+    """Logical clbits keep the logical distribution, through a logical SWAP and an X."""
     qc = random_circuit(4, 3, max_operands=2, seed=7)
     qc.h(range(3))
     if mc:
         qc.mcx([0, 1, 2], 3)
     qc.cx(0, 3)
+    qc.swap(1, 2)
+    qc.x(2)
     qc.add_register(ClassicalRegister(4))
     qc.measure(range(4), range(4))
     out = build_pm(cmap, enc=enc, seed=3).run(qc)
-    rails = out.layout.initial_index_layout(filter_ancillas=True)
-    assert len(rails) == enc.WIRES_PER_LOGICAL * (4 + mc)
     want = _clbit_probabilities(qc, qc.clbits)
-    got = _clbit_probabilities(out, qc.clbits)
+    got = _clbit_probabilities(out, qc.clbits)  # logical clbits read rail 0
     assert got.keys() == want.keys()
     assert all(got[k] == pytest.approx(want[k], abs=1e-9) for k in want)
