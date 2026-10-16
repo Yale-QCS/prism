@@ -24,23 +24,75 @@ from prism.pipeline import SearchBudget, build_pm
 qc = QuantumCircuit(3, 4)
 qc.h(0)
 qc.cx(0, 1)
-qc.append(
-    ErasureCheck(), [1], [3]
-)  # mid-circuit: clbit 3 is 1 unless the photon was lost
-qc.cp(0.5, 1, 2)
+qc.append(ErasureCheck(), [1], [3])  # clbit 3 reads 1 unless the photon was lost
+qc.cx(1, 2)
 qc.measure(range(3), range(3))
 
 pm = build_pm(
-    CouplingMap.from_heavy_hex(3),
-    DualRail,
-    seed=7,
-    budget=SearchBudget(objective="depth"),
+    CouplingMap.from_line(6), DualRail, seed=7, budget=SearchBudget(objective="depth")
 )
 out = pm.run(qc)
 
-print(pm.property_set["circuit_metrics"])  # swaps, depth, active_gates, size
-print(out.count_ops())  # only dual-rail operations
-print(out.layout.final_index_layout()[:2])  # where the rails of logical qubit 0 end
+print(pm.property_set["circuit_metrics"])
+print(qc.draw(cregbundle=False))
+print(out.draw(idle_wires=False, fold=-1, cregbundle=False))
+```
+
+The input:
+
+```text
+     ┌───┐                       ┌─┐  
+q_0: ┤ H ├──■────────────────────┤M├───────────
+     └───┘┌─┴─┐┌────────────────┐└╥┘     ┌─┐  
+q_1: ─────┤ X ├┤0               ├─╫───■──┤M├───
+          └───┘│                │ ║ ┌─┴─┐└╥┘┌─┐
+q_2: ──────────┤                ├─╫─┤ X ├─╫─┤M├
+               │                │ ║ └───┘ ║ └╥┘
+c_0: ══════════╡                ╞═╩═══════╬══╬═
+               │  Erasure_check │         ║  ║
+c_1: ══════════╡                ╞═════════╩══╬═
+               │                │            ║
+c_2: ══════════╡                ╞════════════╩═
+               │                │  
+c_3: ══════════╡0               ╞══════════════
+               └────────────────┘  
+```
+
+The output, on rails `q<i>_0` and `q<i>_1` of logical qubit `i` (`CircuitMetrics(swaps=0, depth=7, active_gates=14, size=22)`):
+
+- each logical qubit starts with `Initialize` on its two rails;
+- `h` and `cx` become `rz`, `rswap` and one `crz`, and each `crz` uses the pair of rails the router chose for it;
+- the erasure check is a ZZ measurement on the qubit's two rails;
+- each measurement reads both rails, the second into `herald`.
+
+```text
+          ┌──────────────────┐┌──────────┐┌──────────────┐                                                        ┌─────────────┐┌─┐  
+q2_0 -> 0 ┤0                 ├┤ Rz(-π/2) ├┤0             ├────────────────────────────────────────────────────────┤0            ├┤M├───
+          │  Initialize(1,0) │└──────────┘│  Rswap(-π/2) │                                               ┌───────┐│  Rswap(π/2) │└╥┘┌─┐
+q2_1 -> 1 ┤1                 ├────────────┤1             ├───────────────────────────────────────────────┤ Rz(π) ├┤1            ├─╫─┤M├
+          ├──────────────────┤┌──────────┐├──────────────┤         ┌─────────────┐┌─────────┐┌──────────┐└───┬───┘└─────┬─┬─────┘ ║ └╥┘
+q1_0 -> 2 ┤0                 ├┤ Rz(-π/2) ├┤0             ├─────────┤0            ├┤ Rz(π/2) ├┤0         ├────■──────────┤M├───────╫──╫─
+          │  Initialize(1,0) │└──────────┘│  Rswap(-π/2) │┌───────┐│  Rswap(π/2) │└─────────┘│          │   ┌─┐         └╥┘       ║  ║
+q1_1 -> 3 ┤1                 ├────────────┤1             ├┤ Rz(π) ├┤1            ├───────────┤1         ├───┤M├──────────╫────────╫──╫─
+          ├──────────────────┤┌──────────┐├──────────────┤└───┬───┘└─┬──────────┬┘    ┌─┐    │          │   └╥┘          ║        ║  ║
+q0_0 -> 4 ┤0                 ├┤ Rz(-π/2) ├┤0             ├────■──────┤ Rz(-π/2) ├─────┤M├────┤          ├────╫───────────╫────────╫──╫─
+          │  Initialize(1,0) │└──────────┘│  Rswap(-π/2) │   ┌─┐     └──────────┘     └╥┘    │          │    ║           ║        ║  ║
+q0_1 -> 5 ┤1                 ├────────────┤1             ├───┤M├───────────────────────╫─────┤          ├────╫───────────╫────────╫──╫─
+          └──────────────────┘            └──────────────┘   └╥┘                       ║     │  PPM(ZZ) │    ║           ║        ║  ║
+     c_0: ════════════════════════════════════════════════════╬════════════════════════╩═════╡          ╞════╬═══════════╬════════╬══╬═
+                                                              ║                              │          │    ║           ║        ║  ║
+     c_1: ════════════════════════════════════════════════════╬══════════════════════════════╡          ╞════╬═══════════╩════════╬══╬═
+                                                              ║                              │          │    ║                    ║  ║
+     c_2: ════════════════════════════════════════════════════╬══════════════════════════════╡          ╞════╬════════════════════╩══╬═
+                                                              ║                              │          │    ║                       ║
+     c_3: ════════════════════════════════════════════════════╬══════════════════════════════╡0         ╞════╬═══════════════════════╬═
+                                                              ║                              └──────────┘    ║                       ║
+herald_0: ════════════════════════════════════════════════════╩══════════════════════════════════════════════╬═══════════════════════╬═
+                                                                                                             ║                       ║
+herald_1: ═══════════════════════════════════════════════════════════════════════════════════════════════════╩═══════════════════════╬═
+                                                                                                                                     ║
+herald_2: ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╩═
+
 ```
 
 `build_pm` returns a Qiskit `PassManager`. After a run, `pm.property_set` holds `circuit_metrics`, `online_n_swaps` (routing SWAPs) and `logical_output_permutation`.
