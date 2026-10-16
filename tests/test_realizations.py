@@ -347,7 +347,7 @@ def test_xonrail_absent_swap():
 
 
 # ===========================================================================
-# 7. Initialization: one prep on the rail pair
+# 7. Initialization: one initialize on the rail pair
 # ===========================================================================
 
 
@@ -370,4 +370,4 @@ def test_reset_is_in_place_reprep():
     op = DualRail.reset(None)  # _op is intentionally unused (prefixed _)
     assert len(op.candidates) == 1 and op.num_qubits == 2
     names = [ins.operation.name for ins in op.candidates[0].data]
-    assert names == ["prep"]
+    assert names == ["initialize"]

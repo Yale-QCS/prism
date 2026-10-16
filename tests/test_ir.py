@@ -40,9 +40,9 @@ def test_entrance_binds_rails_and_heralds():
     assert [reg.name for reg in ir.qregs] == ["q0", "q1"]
     assert ir.logical_output_permutation == (0, 1)
     assert ir.placement is None
-    # preparation first, as plain ops: one prep per logical qubit
+    # preparation first, as plain ops: one initialize per logical qubit
     prep, lowered = ir.data[:2], ir.data[2:]
-    assert [ins.operation.name for ins in prep] == ["prep"] * 2
+    assert [ins.operation.name for ins in prep] == ["initialize"] * 2
     assert not any(isinstance(ins.operation, MultiRealizationOp) for ins in prep)
     assert all(isinstance(ins.operation, MultiRealizationOp) for ins in lowered)
     crz = [ins for ins in ir.data if ins.operation.name == "crz"]

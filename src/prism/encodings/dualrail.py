@@ -1,4 +1,4 @@
-"""Dual-rail encoding: its rules, ``RSwapGate`` and ``PrepareGate``. Convention ``|0_L⟩ = |01⟩, |1_L⟩ = |10⟩``."""
+"""Dual-rail encoding: its rules, and ``RSwapGate``. Convention ``|0_L⟩ = |01⟩, |1_L⟩ = |10⟩``."""
 
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ from qiskit.circuit import (
     ParameterExpression,
     QuantumCircuit,
 )
+from qiskit.circuit.library import Initialize
 from qiskit.transpiler import PassManager
 
 from prism.encodings.base import QubitEncoding
@@ -56,24 +57,6 @@ class RSwapGate(Gate):
         self.definition = qc
 
 
-class PrepareGate(Instruction):
-    """Prepare ``|0_L⟩`` on a rail pair: pump both rails to vacuum, load rail 1, check jointly.
-
-    Not unitary, so stock passes leave it in place. Two-rail because the joint
-    erasure check needs the rails adjacent.
-    """
-
-    def __init__(self) -> None:
-        """Create the two-rail preparation."""
-        super().__init__("prep", 2, 0, [])
-
-    def _define(self) -> None:
-        qc = QuantumCircuit(2)
-        qc.reset([0, 1])
-        qc.x(1)
-        self.definition = qc
-
-
 class DualRail(QubitEncoding):
     """Dual-rail encoding. Stateless — pass the class itself, not an instance."""
 
@@ -82,18 +65,23 @@ class DualRail(QubitEncoding):
         {"x", "rx", "rz", "crz", "swap", "measure", "reset", "if_else"}
     )
     PHYSICAL_ISA: ClassVar[frozenset[str]] = frozenset(
-        {"rz", "crz", "swap", "rswap", "prep"}
+        {"rz", "crz", "swap", "rswap", "initialize"}
     )
     CUSTOM_GATES: ClassVar[dict[str, Instruction]] = {
         "rswap": RSwapGate(Parameter("theta")),
-        "prep": PrepareGate(),
+        # |0_L> = |01>: rail 1 holds the photon (label is little-endian).
+        "initialize": Initialize("10"),
     }
 
     @classmethod
     def initialize(cls) -> QuantumCircuit:
-        """``PrepareGate`` on the rail pair; metrics count it as free."""
+        """Stock ``Initialize`` of ``|0_L⟩`` on the rail pair; metrics count it as free.
+
+        Non-unitary, so stock passes leave it in place. Two-rail because the
+        joint erasure check needs the rails adjacent.
+        """
         qc = QuantumCircuit(2)
-        qc.append(PrepareGate(), [0, 1])
+        qc.append(Initialize("10"), [0, 1])
         return qc
 
     @classmethod
@@ -178,8 +166,8 @@ class DualRail(QubitEncoding):
     def reset(cls, _op: Instruction) -> MultiRealizationOp:
         """Logical reset → in-place re-preparation on the same rails (the ``initialize`` template).
 
-        ``PrepareGate`` pumps to vacuum and prepares ``|0_L⟩``; its joint check is
-        the only routing constraint (rails co-located at reset time). Re-hosting
+        ``Initialize`` resets and prepares ``|0_L⟩`` on both rails, so the only
+        routing constraint is the rails being adjacent at reset time. Re-hosting
         the reset qubit on other free rails is not expressed here.
         """
         return MultiRealizationOp("reset", (cls.initialize(),))

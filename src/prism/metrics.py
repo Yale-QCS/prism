@@ -12,7 +12,7 @@ from qiskit.transpiler import AnalysisPass
 
 __all__ = ["CircuitMetrics", "RecordCircuitMetrics"]
 
-_FREE_GATES = frozenset({"rz", "u1", "p", "z", "prep"})
+_FREE_GATES = frozenset({"rz", "u1", "p", "z", "initialize"})
 
 
 def is_free(operation: Instruction) -> bool:
