@@ -93,8 +93,25 @@ def test_unsupported_coupling_map_raises(cmap, message):
         build_pm(cmap, enc=DualRail)
 
 
-def _shot(qc: QuantumCircuit, seed: int) -> dict[Clbit, int]:
-    """One shot of ``qc`` by statevector, with mid-circuit measurements: clbit -> outcome."""
+def _shot(qc: QuantumCircuit, seed: int, lost: int | None = None) -> dict[Clbit, int]:
+    """One shot of ``qc`` by statevector, with mid-circuit measurements: clbit -> outcome.
+
+    Logical qubit ``lost`` never gets its photon: its rails are not prepared and stay |00>.
+    """
+    if lost is not None:
+        # Follow routing SWAPs to find the rails of ``lost`` where they are prepared.
+        holds = {p: v for v, p in enumerate(qc.layout.initial_index_layout())}
+        prepared = qc.copy_empty_like()
+        for ci in qc.data:
+            phys = [qc.find_bit(q).index for q in ci.qubits]
+            if ci.name == "swap":
+                a, b = phys
+                holds[a], holds[b] = holds[b], holds[a]
+            if not (
+                ci.name == "initialize" and {holds[p] // 2 for p in phys} == {lost}
+            ):
+                prepared.append(ci)
+        qc = prepared
     sv, bits = Statevector.from_int(0, 2**qc.num_qubits), {}
     sv.seed(seed)
     for ci in qc.decompose(["pauli_product_measurement", "initialize"]).data:
@@ -107,8 +124,11 @@ def _shot(qc: QuantumCircuit, seed: int) -> dict[Clbit, int]:
     return bits
 
 
-def test_erasure_check_is_local_reads_no_loss_and_keeps_the_state():
-    """Each check is on a device edge, reads 1 (photon present), and leaves a superposition intact."""
+def test_erasure_check_is_local_flags_its_own_qubit_and_keeps_the_state():
+    """Each check is on a device edge, reads 1 (photon present), and leaves a superposition intact.
+
+    A qubit that lost its photon reads 0 on its own check and on no other.
+    """
     body = QuantumCircuit(3)
     body.h(range(3))
     body.crz(1.0, 0, 1)
@@ -134,3 +154,8 @@ def test_erasure_check_is_local_reads_no_loss_and_keeps_the_state():
     for seed in range(8):
         bits = _shot(out, seed)
         assert [bits[out.clbits[i]] for i in range(6)] == [0, 0, 0, 1, 1, 1]
+    for lost in range(3):
+        bits = _shot(out, 0, lost)
+        assert [bits[out.clbits[3 + q]] for q in range(3)] == [
+            int(q != lost) for q in range(3)
+        ]
