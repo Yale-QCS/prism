@@ -34,6 +34,7 @@ from qiskit.transpiler import (
     TranspilerError,
 )
 
+from prism.encodings import DualRail
 from prism.ir import MultiRealization, MultiRealizationInstruction
 from prism.physical import physical_pm
 from prism.routing import PrismRouting, SearchBudget
@@ -46,6 +47,7 @@ __all__ = [
     "MultiRealizationToDAG",
     "SearchBudget",
     "build_pm",
+    "dualrail_pm",
     "prism_stages",
 ]
 
@@ -230,3 +232,10 @@ def build_pm(
     return PassManager(
         [prism_stages(coupling_map, enc, seed=seed, budget=budget).to_flow_controller()]
     )
+
+
+def dualrail_pm(
+    coupling_map: CouplingMap, *, seed: int = 42, budget: SearchBudget | None = None
+) -> PassManager:
+    """``build_pm`` for the dual-rail encoding."""
+    return build_pm(coupling_map, DualRail, seed=seed, budget=budget)

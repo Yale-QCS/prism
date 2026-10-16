@@ -19,8 +19,7 @@ Building from source needs a Rust toolchain.
 import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.transpiler import CouplingMap
-from prism.encodings import DualRail, ErasureCheck
-from prism.pipeline import build_pm
+from prism import ErasureCheck, dualrail_pm
 
 qc = QuantumCircuit(3, 3)
 qc.rx(np.pi / 2, [0, 1, 2])
@@ -30,7 +29,7 @@ qc.crz(np.pi / 2, 1, 2)
 qc.rx(np.pi / 2, [1, 2])
 qc.measure(range(3), range(3))
 
-pm = build_pm(CouplingMap.from_line(6), DualRail, seed=7)
+pm = dualrail_pm(CouplingMap.from_line(6), seed=7)
 out = pm.run(qc)
 print(pm.property_set["circuit_metrics"])
 ```
@@ -47,7 +46,7 @@ The output, on rails `q<i>_0` and `q<i>_1` of logical qubit `i`:
 - The erasure check is a ZZ measurement on qubit 1's two rails; it writes the rail parity to `c[1]`, which the final measurement later overwrites, and leaves the logical state alone.
 - Each measurement reads both rails: rail 0, the logical bit, into `c` and rail 1 into `rail1`; the pair heralds a lost photon (both 0).
 
-`build_pm` returns a Qiskit `PassManager`. After a run, `pm.property_set` holds `circuit_metrics`, `online_n_swaps` (routing SWAPs) and `logical_output_permutation`.
+`dualrail_pm` returns a Qiskit `PassManager`; it is `prism.pipeline.build_pm(coupling_map, DualRail, ...)`, which takes any `QubitEncoding`. After a run, `pm.property_set` holds `circuit_metrics`, `online_n_swaps` (routing SWAPs) and `logical_output_permutation`.
 `out.layout` is a rail-level `TranspileLayout`: virtual qubit `2*i + w` is rail `w` of logical qubit `i`.
 `SearchBudget` sets the layout search effort and the objective, `"swaps"` (default) or `"depth"`.
 A measurement writes rail 0 (the logical bit) to the circuit's clbit and rail 1 to a `rail1` register; together they herald a lost photon.
@@ -111,6 +110,7 @@ This pass keeps only the encoding's default candidate of every `crz`:
 from dataclasses import replace
 from qiskit.passmanager import GenericPass
 from qiskit.transpiler import PassManager
+from prism.encodings import DualRail
 from prism.ir import MultiRealization, MultiRealizationOp
 from prism.pipeline import prism_stages
 from prism.routing import PrismRouting
