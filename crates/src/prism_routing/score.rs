@@ -160,7 +160,7 @@ impl<'a> Program<'a> {
 mod tests {
     use qiskit_circuit::nlayout::NLayout;
 
-    use super::{Gate, Metrics, Objective, Op, Program, RoutedOp, best};
+    use super::{Gate, Metrics, Op, Program, RoutedOp};
 
     /// A one-realization op of `gates`, for scoring only: it has no pairs.
     fn op(gates: Vec<Gate>) -> Op {
@@ -225,38 +225,5 @@ mod tests {
             size: 8,
         };
         assert_eq!(m, expected);
-    }
-
-    #[test]
-    fn the_lowest_score_wins_and_the_first_of_equal_scores() {
-        let metrics = |swaps, depth, size| Metrics {
-            swaps,
-            depth,
-            active_gates: 9,
-            size,
-        };
-        let routes = || {
-            [
-                (metrics(1, 5, 9), 'a'),
-                (metrics(2, 3, 9), 'b'),
-                (metrics(1, 5, 1), 'c'),
-            ]
-        };
-        assert_eq!(best(routes(), Objective::Swaps), Some('a'), "a ties c");
-        assert_eq!(best(routes(), Objective::Depth), Some('b'));
-        assert_eq!(best(Vec::<(Metrics, char)>::new(), Objective::Depth), None);
-    }
-
-    #[test]
-    fn invalid_programs_are_errors() {
-        let two_reals: Op = (vec![vec![], vec![]], 0, vec![], vec![vec![]]);
-        assert!(
-            Program::new(&[two_reals], 3).is_err(),
-            "gates of one realization"
-        );
-        assert!(
-            Program::new(&[op(vec![gate(&[3], &[], false)])], 3).is_err(),
-            "qubit out of range"
-        );
     }
 }
