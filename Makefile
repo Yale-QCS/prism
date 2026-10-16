@@ -21,7 +21,9 @@ $(VENV)/bin/python:
 
 init: $(VENV)/bin/python  ## Create the development environment and install git hooks
 	$(INSTALL) -e .[dev] --quiet
-	@$(VENV)/bin/pre-commit install --hook-type pre-commit --hook-type commit-msg
+	@if [ "$$(git rev-parse --git-dir)" = "$$(git rev-parse --git-common-dir)" ]; then \
+		$(VENV)/bin/pre-commit install --hook-type pre-commit --hook-type commit-msg; \
+	else echo "Linked worktree: git hooks are installed from the main checkout"; fi
 
 update-hooks:  ## Bump hook revisions in .pre-commit-config.yaml
 	@$(VENV)/bin/pre-commit autoupdate
