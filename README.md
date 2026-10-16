@@ -3,15 +3,12 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![CI](https://github.com/evmckinney9/prism/actions/workflows/ci.yml/badge.svg)](https://github.com/evmckinney9/prism/actions/workflows/ci.yml)
 
-PRISM is a Qiskit transpiler for dual-rail qubits.
-In the dual-rail encoding a logical qubit is carried by a pair of physical modes (rails), so one logical gate has several physical realizations that touch different rails.
-PRISM keeps every realization of each gate through lowering and picks one at routing time, against the live layout.
+PRISM is a Qiskit transpiler for dual-rail qubits, where each logical qubit is a pair of physical modes (rails).
+A logical gate then has several physical realizations on different rails; PRISM keeps all of them through lowering and picks one per gate while routing.
 
 ```bash
-pip install git+https://github.com/evmckinney9/prism
+pip install git+https://github.com/evmckinney9/prism  # needs a Rust toolchain
 ```
-
-Building from source needs a Rust toolchain.
 
 ## Quickstart
 
@@ -24,7 +21,7 @@ from prism import ErasureCheck, dualrail_pm
 qc = QuantumCircuit(3, 3)
 qc.rx(np.pi / 2, [0, 1, 2])
 qc.crz(np.pi / 2, 0, 1)
-qc.append(ErasureCheck(), [1], [1])  # 1 unless qubit 1 lost its photon
+qc.append(ErasureCheck(), [1], [1])
 qc.crz(np.pi / 2, 1, 2)
 qc.rx(np.pi / 2, [1, 2])
 qc.measure(range(3), range(3))
@@ -34,80 +31,56 @@ out = pm.run(qc)
 print(pm.property_set["circuit_metrics"])
 ```
 
-![The input circuit](docs/quickstart_input.png)
+```text
+CircuitMetrics(swaps=0, depth=6, active_gates=14, size=19)
+```
 
-The output, on rails `q<i>_0` and `q<i>_1` of logical qubit `i`:
+![The input circuit](docs/quickstart_input.png)
 
 ![The compiled circuit](docs/quickstart_output.png)
 
-- Each logical qubit starts with `Initialize` on its two rails.
-- `rx` is an `rswap` between the qubit's two rails.
-- Each `crz` runs between one rail of each qubit; the router picked a different rail pair for each, with an `rz` correcting an open control.
-- The erasure check is a ZZ measurement on qubit 1's two rails; it writes the rail parity to `c[1]`, which the final measurement later overwrites, and leaves the logical state alone.
-- Each measurement reads both rails: rail 0, the logical bit, into `c` and rail 1 into `c_rail1`; the pair heralds a lost photon (both 0).
+Rails `q<i>_0` and `q<i>_1` carry logical qubit `i`; the two `crz` use different rail pairs.
+A measurement writes rail 0, the logical bit, to `c[i]` and rail 1 to `c_rail1[i]`; both 0 means the photon was lost.
+`budget=SearchBudget(objective="depth")` keeps the shallowest route found instead of the one with the fewest SWAPs.
 
-`dualrail_pm` returns a Qiskit `PassManager`; it is `prism.pipeline.build_pm(coupling_map, DualRail, ...)`, which takes any `QubitEncoding`. After a run, `pm.property_set` holds `circuit_metrics`, `online_n_swaps` (routing SWAPs) and `logical_output_permutation`.
-`out.layout` is a rail-level `TranspileLayout`: virtual qubit `2*i + w` is rail `w` of logical qubit `i`.
-`SearchBudget` sets the layout search effort and the objective, `"swaps"` (default) or `"depth"`.
-A measurement into `c[i]` writes rail 0 (the logical bit) there and rail 1 to `c_rail1[i]`, a register prism adds for each measured register; together they herald a lost photon.
+## Gate set
 
-## Gate sets
-
-The logical stage translates the input to the logical gate set; each logical operation then lowers to one or more realizations on its rails.
-
-| Logical | Physical realization on the rails |
+| Logical | Physical, on the qubit's rails |
 | --- | --- |
 | `rz(θ)` | `rz(θ)` on rail 0 |
-| `rx(θ)` | `rswap(θ)`, the exponential SWAP between the qubit's two rails |
-| `x` | `swap` between the qubit's two rails |
-| `crz(θ)` | four candidates, one per rail pairing: `crz(±θ)` between a control rail and a target rail, with an `rz` on the target for an open control |
-| `swap` | elided in the logical stage (a relabelling of logical qubits) |
+| `rx(θ)` | `rswap(θ)`, the exponential SWAP of the two rails |
+| `x` | `swap` of the two rails |
+| `crz(θ)` | `crz(±θ)` between any rail of the control and any rail of the target, plus `rz` for an open control: four candidates |
+| `swap` | none: the logical stage relabels the qubits |
 | `measure` | `measure` on both rails |
-| `reset`, and preparation at the start | `Initialize("10")` on the rail pair |
-| `ErasureCheck` | `PauliProductMeasurement(Pauli("ZZ"))` on the rail pair: rail parity, which detects a lost photon without disturbing the logical state |
-| `if_else` | an `if_else` on one qubit's rails with its blocks lowered |
+| `reset`, and preparation | `Initialize("10")` on the two rails |
+| `ErasureCheck` | `PauliProductMeasurement(Pauli("ZZ"))` on the two rails: 1 if the photon is there, and the logical state is undisturbed |
+| `if_else` | `if_else` on the qubit's rails |
 
-The physical `Target` has `rz` on each rail and `crz`, `swap`, `rswap`, `initialize` and the ZZ measurement on each device edge, so preparation and erasure checks are physically local, and no stock pass can produce an operation that leaves the code space.
+The physical `Target` allows `crz`, `swap`, `rswap`, `initialize` and the ZZ check only on device edges, so preparation and erasure checks are local, and no Qiskit pass can produce an operation that leaves the code space.
 
-Input limits:
+Limits:
 
-- The coupling map must be connected and symmetric, with at least two physical qubits per logical qubit.
-- The only supported control flow is `if_else`. Its blocks may hold only single-qubit operations and no measurement. An `if_else` over several qubits is lowered as one `if_else` per qubit, so its blocks must not write classical bits.
-- Barriers are removed in the logical stage, as Qiskit's optimization passes would cross them anyway.
-- A multi-controlled X with three or more controls, or a multi-controlled phase of π with four or more, adds one clean ancilla logical qubit (register `mcd_anc`).
-- Other inputs raise a `ValueError` (bad arguments) or a `TranspilerError` (an unsupported circuit).
+- The coupling map must be connected, with at least two physical qubits per logical qubit.
+- `if_else` is the only control flow; its blocks hold single-qubit gates and no measurement.
+- A multi-controlled X with three or more controls borrows one extra logical qubit as a clean ancilla (register `mcd_anc`), which needs far fewer gates.
+- Barriers are dropped.
 
 ## Pipeline
 
-`prism_stages` returns a Qiskit `MultiStagePassManager[DAGCircuit, DAGCircuit]`; `build_pm` nests it in a `PassManager`, which converts the circuit to a DAG and back.
-Every prism pass is a `GenericPass[IN, OUT]`.
-
 | Stage | IR | Passes |
 | --- | --- | --- |
-| `logical` | `DAGCircuit` | stock passes to the logical gate set, the dual-rail equivalence library, SWAP elision |
-| `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | `DAGToMultiRealization`: each operation becomes its realizations |
-| `routing` | `MultiRealization` | `PrismRouting`: placement and a choice for every operation |
-| `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | `MultiRealizationToDAG`: binds the choices, writes the layout |
-| `physical` | `DAGCircuit` | the stock O3 preset over the dual-rail `Target` (layout kept; stock SABRE routes only operations `PrismRouting` passed through), stock `CommutativeOptimization`, diagonal rescheduling |
+| `logical` | `DAGCircuit` | stock passes to the logical gate set, with a dual-rail equivalence library |
+| `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | each operation becomes its candidates |
+| `routing` | `MultiRealization` | `PrismRouting`: placement and a choice per operation |
+| `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | the choices become gates; the layout is written |
+| `physical` | `DAGCircuit` | stock O3 over the dual-rail `Target` |
 
-A callback gets the IR as `dag`: a `DAGCircuit` or a `MultiRealization`.
-
-## The `MultiRealization` IR
-
-`prism.ir.MultiRealization` is an ordered list of `MultiRealizationInstruction(operation, qubits, clbits)`, like `QuantumCircuit.data`.
-An operation is a regular Qiskit operation or a `MultiRealizationOp`: one logical operation with its `candidates` (circuits on its rails), the encoding's `default_index`, a `diagonal` flag, and a `choice`.
-Constraint passes may shrink `candidates`; decision passes set `choice`, and a later pass may revise it.
-`MultiRealizationToDAG` is the only step that turns candidates into regular operations; it needs a placement and a choice on every `MultiRealizationOp`.
-`placement` (initial and final virtual-to-physical maps and the device edges) is `None` until routing.
-Before placement, instruction qubits are rail indices; after it, they are physical qubits and a routing SWAP is a regular `swap`.
-`ir.verify()` checks the invariants; it runs after the entrance and before the exit.
-
-A `MultiRealization` pass is a `GenericPass[MultiRealization, MultiRealization]`.
-To add one, replace a stage of `prism_stages` and nest the stages yourself.
-This pass keeps only the encoding's default candidate of every `crz`:
+`prism.pipeline.prism_stages(cmap, DualRail)` returns these stages as a `MultiStagePassManager`; `dualrail_pm` nests them in a `PassManager`.
+In a `MultiRealization`, each logical operation is a `MultiRealizationOp` with its `candidates` and a `choice`; only the `multi_realization_to_dag` stage turns them into gates.
+A pass can narrow the candidates before routing:
 
 ```python
-from dataclasses import replace
 from qiskit.passmanager import GenericPass
 from qiskit.transpiler import PassManager
 from prism.encodings import DualRail
@@ -118,28 +91,25 @@ from prism.routing import PrismRouting
 
 class PinDefaultCRZ(GenericPass[MultiRealization, MultiRealization]):
     def run(self, passmanager_ir: MultiRealization) -> MultiRealization:
-        for k, ins in enumerate(passmanager_ir.data):
+        for ins in passmanager_ir.data:
             op = ins.operation
             if isinstance(op, MultiRealizationOp) and op.name == "crz":
-                pinned = replace(
-                    op, candidates=(op.candidates[op.default_index],), default_index=0
-                )
-                passmanager_ir.data[k] = ins._replace(operation=pinned)
+                op.candidates = (op.candidates[op.default_index],)
+                op.default_index = 0
         return passmanager_ir
 
 
-cmap = CouplingMap.from_grid(2, 4)
+cmap = CouplingMap.from_line(6)
 stages = prism_stages(cmap, DualRail)
 stages.routing = [PinDefaultCRZ(), PrismRouting(cmap)]
-pm = PassManager([stages.to_flow_controller()])
-out = pm.run(qc)
+out = PassManager([stages.to_flow_controller()]).run(qc)
 ```
 
 ## Development
 
 ```bash
-make init  # .venv, the package in editable mode, git hooks
-make test  # Rust and Python tests
+make init  # .venv, editable install, git hooks
+make test
 ```
 
 Citation: TODO, once the paper is out.

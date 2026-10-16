@@ -206,20 +206,21 @@ def prism_stages(
     then run ``PassManager([stages.to_flow_controller()])`` (what ``build_pm`` returns).
 
     Args:
-        coupling_map: Connected, symmetric device graph.
+        coupling_map: Connected device graph; edges are undirected.
         enc: The qubit encoding class, e.g. ``DualRail``.
         seed: Seed of the layout search and the physical stage.
         budget: Search effort and objective; ``None`` uses ``SearchBudget()``.
 
     Raises:
-        ValueError: if ``coupling_map`` is disconnected or directed.
+        ValueError: if ``coupling_map`` is disconnected.
     """
+    routing = PrismRouting(coupling_map, seed=seed, budget=budget)
     return MultiStagePassManager(
         logical=enc.logical_pm(),
         dag_to_multi_realization=DAGToMultiRealization(enc),
-        routing=PrismRouting(coupling_map, seed=seed, budget=budget),
+        routing=routing,
         multi_realization_to_dag=MultiRealizationToDAG(),
-        physical=physical_pm(coupling_map, enc, seed=seed),
+        physical=physical_pm(routing.coupling_map, enc, seed=seed),
     )
 
 

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import random
 import warnings
+from copy import deepcopy
 from dataclasses import dataclass, replace
 from typing import Literal, get_args
 
@@ -90,12 +91,13 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
     input.
 
     Args:
-        coupling_map: Connected, symmetric device graph.
+        coupling_map: Connected device graph; edges are undirected, as dual-rail
+            interactions have no direction.
         seed: Seed of the layout search; ``None`` draws one.
         budget: Search effort and objective.
 
     Raises:
-        ValueError: if ``coupling_map`` is disconnected or directed.
+        ValueError: if ``coupling_map`` is disconnected.
     """
 
     LOOKAHEAD_LAYERS = 8
@@ -115,10 +117,8 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
                 "coupling_map.connected_components()[0]."
             )
         if not coupling_map.is_symmetric:
-            raise ValueError(
-                "coupling_map is directed; prism needs every edge in both "
-                "directions. Call coupling_map.make_symmetric() first."
-            )
+            coupling_map = deepcopy(coupling_map)
+            coupling_map.make_symmetric()
         super().__init__()
         self.coupling_map = coupling_map
         self.seed = seed

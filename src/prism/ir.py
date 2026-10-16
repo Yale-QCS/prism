@@ -79,7 +79,7 @@ def commuting_predecessors(
     return preds
 
 
-@dataclass(frozen=True, eq=False)
+@dataclass(eq=False)
 class MultiRealizationOp:
     """A logical operation with its candidate realizations.
 
@@ -89,7 +89,8 @@ class MultiRealizationOp:
         name: The logical operation's name.
         candidates: Circuits on block-local wires; local wire
             ``WIRES_PER_LOGICAL * k + w`` is rail ``w`` of the op's ``k``-th
-            logical qubit. All have the same width. Treat them as immutable.
+            logical qubit. All have the same width. A pass may replace the
+            tuple, e.g. to drop candidates, but not edit a circuit in place.
         default_index: The encoding's canonical candidate; the router's fallback.
         diagonal: Every candidate is diagonal, so the op commutes with every other
             diagonal op. The router reorders such ops.
@@ -103,6 +104,10 @@ class MultiRealizationOp:
     choice: int | None = None
 
     def __post_init__(self) -> None:
+        self.check()
+
+    def check(self) -> None:
+        """Raise ``ValueError`` unless the fields are consistent; ``verify`` calls it too."""
         if not self.candidates:
             raise ValueError(f"{self.name}: a MultiRealizationOp needs a candidate")
         widths = {(qc.num_qubits, qc.num_clbits) for qc in self.candidates}
@@ -303,6 +308,10 @@ class MultiRealization(IR):
                 if len(ins.qubits) == 2:
                     self._check_on_edge(ins.qubits, where)
                 continue
+            try:
+                op.check()
+            except ValueError as e:
+                _fail(f"{where}: {e}")
             if op.choice is not None and op.single_edge:
                 real = op.candidates[op.choice]
                 for ci in real.data:

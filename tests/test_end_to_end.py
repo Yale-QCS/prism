@@ -106,16 +106,9 @@ def test_unsupported_circuit_raises(make, message):
         pm.run(make())
 
 
-@pytest.mark.parametrize(
-    ("cmap", "message"),
-    [
-        (CouplingMap([[0, 1], [1, 0], [2, 3], [3, 2]]), "disconnected"),
-        (CouplingMap.from_line(6, bidirectional=False), "make_symmetric"),
-    ],
-)
-def test_unsupported_coupling_map_raises(cmap, message):
-    with pytest.raises(ValueError, match=message):
-        dualrail_pm(cmap)
+def test_disconnected_coupling_map_raises():
+    with pytest.raises(ValueError, match="disconnected"):
+        dualrail_pm(CouplingMap([[0, 1], [2, 3]]))
 
 
 def _shot(qc: QuantumCircuit, seed: int, lost: int | None = None) -> dict[Clbit, int]:
