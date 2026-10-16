@@ -73,7 +73,7 @@ Limits:
 | --- | --- | --- |
 | `logical` | `DAGCircuit` | stock passes to the logical gate set, with a dual-rail equivalence library |
 | `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | each operation becomes its candidates |
-| `multi_realization` | `MultiRealization` | prism's own passes (`prism.passes`): `ElideRailExchanges` drops logical X as a relabelling of its rails, then `PrismRouting` places the program and makes a choice per operation |
+| `multi_realization` | `MultiRealization` | prism's own passes (`prism.passes`): `ElideRailExchanges` drops logical X as a relabelling of its rails, then `PrismRouting` places the program and makes a choice per operation, then `RetimeDiagonals` moves diagonal operations off the critical path, across routing SWAPs |
 | `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | the choices become gates; the layout is written |
 | `physical` | `DAGCircuit` | stock O3 over the dual-rail `Target`, then `EarlyMeasurement`: each rail is measured before the `rz` and `crz` behind its measurement, which become `rz` conditioned on its bit |
 

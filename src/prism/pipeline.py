@@ -4,7 +4,7 @@
 
     logical                   DAGCircuit -> DAGCircuit             enc.logical_pm(): stock passes
     dag_to_multi_realization  DAGCircuit -> MultiRealization       DAGToMultiRealization
-    multi_realization         MultiRealization -> MultiRealization [ElideRailExchanges, PrismRouting]
+    multi_realization         MultiRealization -> MultiRealization [ElideRailExchanges, PrismRouting, RetimeDiagonals]
     multi_realization_to_dag  MultiRealization -> DAGCircuit       MultiRealizationToDAG
     physical                  DAGCircuit -> DAGCircuit             physical_pm: stock O3
 
@@ -35,7 +35,7 @@ from qiskit.transpiler import (
 
 from prism.encodings import DualRail
 from prism.ir import MultiRealization, MultiRealizationInstruction
-from prism.passes import ElideRailExchanges
+from prism.passes import ElideRailExchanges, RetimeDiagonals
 from prism.physical import physical_pm
 from prism.routing import PrismRouting, SearchBudget
 
@@ -215,7 +215,7 @@ def prism_stages(
     return MultiStagePassManager(
         logical=enc.logical_pm(),
         dag_to_multi_realization=DAGToMultiRealization(enc),
-        multi_realization=[ElideRailExchanges(), routing],
+        multi_realization=[ElideRailExchanges(), routing, RetimeDiagonals()],
         multi_realization_to_dag=MultiRealizationToDAG(),
         physical=physical_pm(routing.coupling_map, enc, seed=seed),
     )
