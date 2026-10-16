@@ -4,19 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import numpy as np
 from qiskit.circuit import Measure
 from qiskit.circuit.controlflow import (
     ForLoopOp,
     IfElseOp,
     SwitchCaseOp,
     WhileLoopOp,
-)
-from qiskit.circuit.library import (
-    CRZGate,
-    RZGate,
-    SwapGate,
-    XGate,
 )
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import (
@@ -26,7 +19,7 @@ from qiskit.transpiler import (
     Target,
     TransformationPass,
 )
-from qiskit.transpiler.passes import SabreSwap
+from qiskit.transpiler.passes import CommutativeOptimization, SabreSwap
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit.transpiler.preset_passmanagers.common import generate_routing_passmanager
 
@@ -34,55 +27,7 @@ from prism.ir import DIAGONAL_GATES, commuting_predecessors
 from prism.metrics import RecordCircuitMetrics, is_free
 
 if TYPE_CHECKING:
-    from qiskit.circuit import Qubit
-
     from prism.encodings.base import QubitEncoding
-
-
-class CancelRailX(TransformationPass):
-    """Cancel spurious ``rx(π)`` (X-on-rail) by propagating it as an X-frame."""
-
-    def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Propagate ``rx(π)`` frames rightward and cancel matching pairs."""
-        new = dag.copy_empty_like()
-        frame: dict = {}
-
-        def materialize(w: Qubit) -> None:
-            if frame.get(w):
-                new.apply_operation_back(XGate(), (w,))
-                frame[w] = False
-
-        for node in dag.topological_op_nodes():
-            op, qa, name = node.op, node.qargs, node.op.name
-            if name == "rx" and abs(float(op.params[0]) % (2 * np.pi) - np.pi) < 1e-9:
-                frame[qa[0]] = not frame.get(qa[0], False)
-                new.global_phase -= float(op.params[0]) / 2  # rx(θ≡π) = e^{-iθ/2} X
-            elif name == "rz":
-                th = float(op.params[0])
-                new.apply_operation_back(
-                    RZGate(-th if frame.get(qa[0]) else th), (qa[0],)
-                )
-            elif name == "crz":
-                c, t = qa
-                th, fc, ft = (
-                    float(op.params[0]),
-                    frame.get(c, False),
-                    frame.get(t, False),
-                )
-                new.apply_operation_back(CRZGate(-th if fc ^ ft else th), (c, t))
-                if fc:  # X on control leaves an Rz on the target
-                    new.apply_operation_back(RZGate(th if not ft else -th), (t,))
-            elif name == "swap":
-                a, b = qa
-                frame[a], frame[b] = frame.get(b, False), frame.get(a, False)
-                new.apply_operation_back(SwapGate(), (a, b))
-            else:  # prep x, rswap, measure: materialize then emit
-                for w in qa:
-                    materialize(w)
-                new.apply_operation_back(op, qa, node.cargs)
-        for w in list(frame):
-            materialize(w)
-        return new
 
 
 class RescheduleCommutingDiagonals(TransformationPass):
@@ -137,7 +82,12 @@ class RescheduleCommutingDiagonals(TransformationPass):
 
 
 def _physical_target(enc: type[QubitEncoding], coupling_map: CouplingMap) -> Target:
-    """Build the physical-stage Target with Measure + control-flow ops registered opaquely."""
+    """``enc.PHYSICAL_ISA`` on each qubit or edge, plus measure and control flow.
+
+    For dual rail that is ``rz`` on one rail and ``crz``, ``swap``, ``rswap``,
+    ``prep`` on an edge: no gate leaves the code space, so stock O3 cannot
+    produce one, and with no complete one-qubit basis it does not resynthesize.
+    """
     target = Target.from_configuration(
         basis_gates=sorted(enc.PHYSICAL_ISA),
         custom_name_mapping=enc.CUSTOM_GATES,
@@ -166,6 +116,8 @@ def physical_pm(
     ``SabreSwap`` stage without ``VF2PostLayout``, so it keeps the layout: it
     routes only if ``CheckMap`` finds a gate off the device edges, i.e. in an
     operation that ``PrismRouting`` passed through.
+    ``CommutativeOptimization`` merges the CRZ runs on an edge that O3 cannot
+    resynthesize without a one-qubit basis.
     """
     target = _physical_target(enc, coupling_map)
     preset = generate_preset_pass_manager(
@@ -178,8 +130,11 @@ def physical_pm(
     preset.routing = generate_routing_passmanager(
         SabreSwap(target, heuristic="decay", seed=seed, trials=20), target
     )
-    # ``CancelRailX`` strips the X-on-rail that O3's 2Q resynthesis leaves behind.
     preset.post_optimization = PassManager(
-        [CancelRailX(), RescheduleCommutingDiagonals(), RecordCircuitMetrics()]
+        [
+            CommutativeOptimization(),
+            RescheduleCommutingDiagonals(),
+            RecordCircuitMetrics(),
+        ]
     )
     return preset

@@ -35,8 +35,8 @@ class QubitEncoding:
     LOGICAL_ISA: ClassVar[frozenset[str]]
     # Names the rules and ``initialize`` emit on wires.
     PHYSICAL_ISA: ClassVar[frozenset[str]]
-    # The non-standard gates in ``PHYSICAL_ISA``, by name.
-    CUSTOM_GATES: ClassVar[dict[str, type]] = {}
+    # The non-standard gates in ``PHYSICAL_ISA``, by name (Target.from_configuration's mapping).
+    CUSTOM_GATES: ClassVar[dict[str, Instruction]] = {}
 
     @classmethod
     def logical_pm(cls) -> PassManager:

@@ -5,7 +5,13 @@ from __future__ import annotations
 from typing import ClassVar
 
 import numpy as np
-from qiskit.circuit import Gate, Instruction, ParameterExpression, QuantumCircuit
+from qiskit.circuit import (
+    Gate,
+    Instruction,
+    Parameter,
+    ParameterExpression,
+    QuantumCircuit,
+)
 from qiskit.transpiler import PassManager
 
 from prism.encodings.base import QubitEncoding
@@ -76,11 +82,11 @@ class DualRail(QubitEncoding):
         {"x", "rx", "rz", "crz", "swap", "measure", "reset", "if_else"}
     )
     PHYSICAL_ISA: ClassVar[frozenset[str]] = frozenset(
-        {"x", "rx", "rz", "crz", "swap", "rswap", "prep"}
+        {"rz", "crz", "swap", "rswap", "prep"}
     )
-    CUSTOM_GATES: ClassVar[dict[str, type]] = {
-        "rswap": RSwapGate,
-        "prep": PrepareGate,
+    CUSTOM_GATES: ClassVar[dict[str, Instruction]] = {
+        "rswap": RSwapGate(Parameter("theta")),
+        "prep": PrepareGate(),
     }
 
     @classmethod
