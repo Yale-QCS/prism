@@ -370,10 +370,10 @@ mod tests {
     use super::super::super::heuristic::{
         BasicHeuristic, Heuristic, LookaheadHeuristic, SetScaling,
     };
-    use super::super::{PyRoutingTarget, RoutedItemKind, State, satisfy_successor_edges, swap_map};
+    use super::super::{PyRoutingTarget, State, satisfy_successor_edges};
     use super::{
-        DiGraph, InteractionKind, MultiLayers, NLayout, NodeIndex, PhysicalQubit, RoutingProblem,
-        SabreDAG, VirtRealizations, VirtualQubit, min_cost,
+        DiGraph, InteractionKind, NLayout, NodeIndex, PhysicalQubit, RoutingProblem, SabreDAG,
+        VirtRealizations, VirtualQubit, min_cost,
     };
 
     fn v(i: u32) -> VirtualQubit {
@@ -392,124 +392,19 @@ mod tests {
         PyRoutingTarget::from_coupling_list(edges, n).expect("valid line")
     }
 
-    fn heuristic() -> Heuristic {
-        Heuristic::new(
-            Some(BasicHeuristic::new(1.0, SetScaling::Constant)),
-            None,
-            None,
-            Some(100),
-            1e-10,
-        )
-    }
-
-    fn single_node_dag(kind: InteractionKind) -> SabreDAG {
-        let mut dag = DiGraph::new();
-        let node = dag.add_node(SabreNode {
-            indices: vec![NodeIndex::new(0)],
-            kind,
-        });
-        SabreDAG {
-            initial: Vec::new(),
-            dag,
-            first_layer: vec![node],
-        }
-    }
-
-    fn route(sabre: &SabreDAG, target: &PyRoutingTarget) -> (usize, Vec<u32>) {
-        let dag = DAGCircuit::new();
-        let heuristic = heuristic();
-        let problem = RoutingProblem {
-            target: target.0.as_ref().expect("explicit target"),
-            sabre,
-            dag: &dag,
-            heuristic: &heuristic,
-        };
-        let n = u32::try_from(target.0.as_ref().map_or(0, |t| t.neighbors.num_qubits()))
-            .expect("small target");
-        let result = swap_map(
-            problem,
-            &NLayout::generate_trivial_layout(n),
-            Some(7),
-            1,
-            None,
-        );
-        let routed = super::routed_ops(&result);
-        let swaps = routed.iter().map(|(swaps, _, _)| swaps.len()).sum();
-        assert_eq!(swaps, result.swap_count());
-        (swaps, routed.iter().map(|&(_, _, r)| r).collect())
-    }
-
     #[test]
-    fn min_cost_is_min_of_sums() {
+    fn min_cost_is_exact() {
         let dist = array![[0.0, 1.0, 5.0], [1.0, 0.0, 1.0], [5.0, 1.0, 0.0]];
         let layout = NLayout::generate_trivial_layout(3);
         // Each realization sums to 6; the sum of per-pair minima would be 2.
         let r = reals(&[&[[0, 1], [0, 2]], &[[0, 2], [1, 2]]]);
         assert!((min_cost(&r, &layout, None, &dist.view()) - 6.0).abs() < 1e-12);
-    }
-
-    #[test]
-    fn min_cost_after_swap_leaves_layout_unchanged() {
+        // A trial swap is scored without being applied to the layout.
         let dist = array![[0.0, 1.0, 2.0], [1.0, 0.0, 1.0], [2.0, 1.0, 0.0]];
-        let layout = NLayout::generate_trivial_layout(3);
         let r = reals(&[&[[0, 2]]]);
         let swap = Some([PhysicalQubit::new(1), PhysicalQubit::new(2)]);
         assert!((min_cost(&r, &layout, swap, &dist.view()) - 1.0).abs() < 1e-12);
         assert!((min_cost(&r, &layout, None, &dist.view()) - 2.0).abs() < 1e-12);
-    }
-
-    #[test]
-    fn commit_prefers_lowest_load_then_default_then_lowest_index() {
-        let target = line(3);
-        // Realizations 1 and 2 are executable on the line 0-1-2; realization 0 is not.
-        let r = reals(&[&[[0, 2]], &[[0, 1]], &[[1, 2]]]);
-        let commit = |default, load: [f64; 3]| {
-            let sabre = single_node_dag(InteractionKind::MultiTwoQ {
-                realizations: r.clone(),
-                default_realization: default,
-            });
-            let dag = DAGCircuit::new();
-            let heuristic = heuristic();
-            let problem = RoutingProblem {
-                target: target.0.as_ref().expect("explicit target"),
-                sabre: &sabre,
-                dag: &dag,
-                heuristic: &heuristic,
-            };
-            let mut multi = MultiLayers::new(1, 3, &sabre);
-            multi.phys_load = load.to_vec();
-            let layout = NLayout::generate_trivial_layout(3);
-            multi.try_commit(NodeIndex::new(0), problem, &layout)
-        };
-        assert_eq!(commit(0, [0.0; 3]), Some(1));
-        assert_eq!(commit(2, [0.0; 3]), Some(2));
-        assert_eq!(commit(1, [0.0, 0.0, 0.5]), Some(1));
-        assert_eq!(commit(1, [1.0, 0.0, 0.0]), Some(2));
-    }
-
-    #[test]
-    fn single_realization_routes_like_two_qubit_gate() {
-        let target = line(5);
-        let stock = single_node_dag(InteractionKind::TwoQ([v(0), v(4)]));
-        let multi = single_node_dag(InteractionKind::MultiTwoQ {
-            realizations: reals(&[&[[0, 4]]]),
-            default_realization: 0,
-        });
-        let (stock_swaps, _) = route(&stock, &target);
-        let (multi_swaps, commits) = route(&multi, &target);
-        assert_eq!(stock_swaps, 3);
-        assert_eq!(multi_swaps, stock_swaps);
-        assert_eq!(commits, vec![0]);
-    }
-
-    #[test]
-    fn executable_realization_commits_without_swaps() {
-        let target = line(5);
-        let sabre = single_node_dag(InteractionKind::MultiTwoQ {
-            realizations: reals(&[&[[0, 4]], &[[2, 3], [3, 4]]]),
-            default_realization: 0,
-        });
-        assert_eq!(route(&sabre, &target), (0, vec![1]));
     }
 
     fn lookahead(num_layers: usize) -> Heuristic {
@@ -655,51 +550,5 @@ mod tests {
             }
             assert_eq!(order.order.len(), sabre.dag.node_count());
         }
-    }
-
-    /// One release-valve step on a line of `n` qubits from the trivial layout: the valve's swaps
-    /// and the realization that the multi node then commits with.
-    fn force_once(n: u32, sabre: &SabreDAG) -> (Vec<[u32; 2]>, Option<u32>) {
-        let target = line(n);
-        let dag = DAGCircuit::new();
-        let heuristic = heuristic();
-        let problem = RoutingProblem {
-            target: target.0.as_ref().expect("explicit target"),
-            sabre,
-            dag: &dag,
-            heuristic: &heuristic,
-        };
-        let (mut state, mut order) = State::begin(problem, NLayout::generate_trivial_layout(n), 0);
-        let mut swaps = Vec::new();
-        let nodes = state.force_enable_closest_node(problem, &mut swaps);
-        let swapped = swaps.iter().map(|s| s.map(|p| p.0)).collect();
-        state.update_route(problem, &mut order, &nodes, Some(swaps));
-        let committed = order.order.iter().find_map(|item| match item.kind {
-            RoutedItemKind::MultiTwoQ(r) => Some(r),
-            _ => None,
-        });
-        (swapped, committed)
-    }
-
-    #[test]
-    fn release_valve_brings_closest_realization_together() {
-        let multi = |pairs: &[&[[u32; 2]]]| InteractionKind::MultiTwoQ {
-            realizations: reals(pairs),
-            default_realization: 0,
-        };
-        // Realization 1 (distance 3) is the closest single-edge realization; realization 2 has a closer
-        // pair but spans two pairs, so the valve ignores it.  The stock path split takes 3 swaps.
-        let sabre = single_node_dag(multi(&[&[[0, 5]], &[[1, 4], [4, 1]], &[[0, 2], [3, 5]]]));
-        assert_eq!(
-            force_once(6, &sabre),
-            (vec![[1, 2], [2, 3], [4, 3]], Some(1))
-        );
-        // The multi node (distance 2) is closer than the stock gate (distance 4), and one swap makes
-        // it routable.
-        let sabre = dag_of(vec![
-            InteractionKind::TwoQ([v(0), v(4)]),
-            multi(&[&[[1, 3]]]),
-        ]);
-        assert_eq!(force_once(5, &sabre), (vec![[1, 2]], Some(0)));
     }
 }

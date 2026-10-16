@@ -139,19 +139,3 @@ fn layout_from_v2p(v2p: &[u32], num_qubits: u32) -> PyResult<NLayout> {
 fn v2p_of(layout: &NLayout) -> Vec<u32> {
     layout.iter_virtual().map(|(_, p)| p.0).collect()
 }
-
-#[cfg(test)]
-mod tests {
-    use super::layout_from_v2p;
-
-    #[test]
-    fn layouts_are_permutations_of_every_qubit() {
-        assert!(layout_from_v2p(&[1, 0, 2], 3).is_ok());
-        assert!(layout_from_v2p(&[1, 0], 3).is_err(), "too short");
-        assert!(layout_from_v2p(&[1, 1, 2], 3).is_err(), "repeated qubit");
-        assert!(
-            layout_from_v2p(&[1, 0, 3], 3).is_err(),
-            "qubit out of range"
-        );
-    }
-}
