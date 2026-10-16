@@ -4,7 +4,7 @@
 
     logical                   DAGCircuit -> DAGCircuit             enc.logical_pm(): stock passes
     dag_to_multi_realization  DAGCircuit -> MultiRealization       DAGToMultiRealization
-    routing                   MultiRealization -> MultiRealization PrismRouting
+    multi_realization         MultiRealization -> MultiRealization [PrismRouting]
     multi_realization_to_dag  MultiRealization -> DAGCircuit       MultiRealizationToDAG
     physical                  DAGCircuit -> DAGCircuit             physical_pm: stock O3
 
@@ -202,7 +202,7 @@ def prism_stages(
 ) -> MultiStagePassManager[DAGCircuit, DAGCircuit]:
     """Prism's stages, compiling an ``enc``-encoded DAG onto ``coupling_map``.
 
-    Replace a stage before nesting, e.g. ``stages.routing = [MyPass(), PrismRouting(...)]``,
+    Replace a stage before nesting, e.g. ``stages.multi_realization = [MyPass(), PrismRouting(...)]``,
     then run ``PassManager([stages.to_flow_controller()])`` (what ``build_pm`` returns).
 
     Args:
@@ -218,7 +218,7 @@ def prism_stages(
     return MultiStagePassManager(
         logical=enc.logical_pm(),
         dag_to_multi_realization=DAGToMultiRealization(enc),
-        routing=routing,
+        multi_realization=[routing],
         multi_realization_to_dag=MultiRealizationToDAG(),
         physical=physical_pm(routing.coupling_map, enc, seed=seed),
     )

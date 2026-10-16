@@ -72,7 +72,7 @@ Limits:
 | --- | --- | --- |
 | `logical` | `DAGCircuit` | stock passes to the logical gate set, with a dual-rail equivalence library |
 | `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | each operation becomes its candidates |
-| `routing` | `MultiRealization` | `PrismRouting`: placement and a choice per operation |
+| `multi_realization` | `MultiRealization` | prism's own passes; `PrismRouting` places the program and makes a choice per operation |
 | `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | the choices become gates; the layout is written |
 | `physical` | `DAGCircuit` | stock O3 over the dual-rail `Target` |
 
@@ -101,7 +101,7 @@ class PinDefaultCRZ(GenericPass[MultiRealization, MultiRealization]):
 
 cmap = CouplingMap.from_line(6)
 stages = prism_stages(cmap, DualRail)
-stages.routing = [PinDefaultCRZ(), PrismRouting(cmap)]
+stages.multi_realization = [PinDefaultCRZ(), PrismRouting(cmap)]
 out = PassManager([stages.to_flow_controller()]).run(qc)
 ```
 

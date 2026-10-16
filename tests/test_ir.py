@@ -76,10 +76,10 @@ class Undecide(GenericPass[MultiRealization, MultiRealization]):
 def test_exit_needs_placement_and_choices():
     cmap = CouplingMap.from_grid(2, 3)
     stages = prism_stages(cmap, DualRail)
-    stages.routing = []
+    stages.multi_realization = []
     with pytest.raises(TranspilerError, match="needs a placed program"):
         PassManager([stages.to_flow_controller()]).run(_bell())
-    stages.routing = [PrismRouting(cmap), Undecide()]
+    stages.multi_realization = [PrismRouting(cmap), Undecide()]
     with pytest.raises(TranspilerError, match="has no realization choice"):
         PassManager([stages.to_flow_controller()]).run(_bell())
 
