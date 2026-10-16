@@ -11,6 +11,7 @@ Identities used: ``cx(c,t) = H_t . S_c . CRz(pi) . H_t``, ``H = Rz.Rx.Rz``,
 from __future__ import annotations
 
 from collections import defaultdict
+from functools import partial
 
 import numpy as np
 from qiskit import QuantumCircuit
@@ -32,8 +33,19 @@ from qiskit.circuit.library import (
     RZZGate,
     iSwapGate,
 )
+from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
-from qiskit.transpiler import TransformationPass
+from qiskit.quantum_info import Clifford
+from qiskit.synthesis import synth_clifford_ag, synth_clifford_greedy
+from qiskit.transpiler import PassManager, TransformationPass
+from qiskit.transpiler.passes import (
+    BasisTranslator,
+    CollectCliffords,
+    Optimize1qGatesDecomposition,
+)
+from qiskit.transpiler.passes.optimization.collect_and_collapse import (
+    collapse_to_operation,
+)
 
 
 def _h(qc: QuantumCircuit, q: int) -> None:
@@ -245,4 +257,50 @@ class MargolusPairOptimizer(TransformationPass):
         rtof = RTOFGate()
         for k in paired:
             dag.substitute_node(nodes[k], rtof, inplace=True)
+        return dag
+
+
+class MinRXCliffords(CollectCliffords):
+    """Resynthesize each Clifford block by its fewest-``(rx, crz)`` form in ``isa``.
+
+    Candidates are the block as given and the stock greedy and Aaronson-Gottesman
+    syntheses. Each ``rx`` is a rail meeting, so the score counts ``rx`` first.
+    A candidate that interacts a logical pair the block does not, or holds a SWAP
+    (elided later, so it relabels every later gate), is dropped: new pairs cost
+    routing more than the saved gates. The chosen form is inlined.
+    """
+
+    def __init__(self, eq_library: EquivalenceLibrary, isa: list[str]) -> None:
+        """Collect blocks as stock ``CollectCliffords`` does; score them in ``isa``."""
+        super().__init__()
+        translate = PassManager(
+            [BasisTranslator(eq_library, isa), Optimize1qGatesDecomposition(basis=isa)]
+        )
+
+        def score(qc: QuantumCircuit) -> tuple[int, int]:
+            ops = translate.run(qc).count_ops()
+            return ops.get("rx", 0), ops.get("crz", 0)
+
+        def pairs(qc: QuantumCircuit) -> set[frozenset]:
+            # A SWAP is elided into a relabelling of every later gate: never a subset.
+            return {
+                frozenset(ci.qubits) if ci.operation.name != "swap" else ci.qubits
+                for ci in qc.data
+                if len(ci.qubits) == 2
+            }
+
+        def best(block: QuantumCircuit) -> Gate:
+            cliff = Clifford(block)
+            cands = (block, synth_clifford_greedy(cliff), synth_clifford_ag(cliff))
+            qc = min((c for c in cands if pairs(c) <= pairs(block)), key=score)
+            return qc.to_gate(label="min_rx_clifford")
+
+        self.collapse_function = partial(collapse_to_operation, collapse_function=best)
+
+    def run(self, dag: DAGCircuit) -> DAGCircuit:
+        """Collapse every block, then inline the chosen forms."""
+        dag = super().run(dag)
+        for node in dag.op_nodes():
+            if node.op.label == "min_rx_clifford":
+                dag.substitute_node_with_dag(node, circuit_to_dag(node.op.definition))
         return dag

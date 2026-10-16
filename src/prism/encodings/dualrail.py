@@ -19,10 +19,11 @@ from qiskit.transpiler import PassManager
 from prism.encodings.base import QubitEncoding
 from prism.encodings.dualrail_logical import (
     MargolusPairOptimizer,
+    MinRXCliffords,
     equivalence_library,
 )
 from prism.ir import MultiRealizationOp
-from prism.logical import basic_logical_pm
+from prism.logical import NON_GATE_ISA_NAMES, basic_logical_pm
 
 
 class RSwapGate(Gate):
@@ -110,12 +111,16 @@ class DualRail(QubitEncoding):
     @classmethod
     def logical_pm(cls) -> PassManager:
         """Basic cleanup with Margolus pairs and the dual-rail equivalence library."""
+        lib = equivalence_library()
         return basic_logical_pm(
             cls,
-            eq_library=equivalence_library(),
+            eq_library=lib,
             # CCX compute/uncompute pairs → RTOF (DR has a 4-RX CCX template
             # but RTOF is cheaper; phases cancel pairwise).
-            reshape_passes=(MargolusPairOptimizer(),),
+            reshape_passes=(
+                MargolusPairOptimizer(),
+                MinRXCliffords(lib, sorted(cls.LOGICAL_ISA - NON_GATE_ISA_NAMES)),
+            ),
         )
 
     @classmethod
