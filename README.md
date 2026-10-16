@@ -16,7 +16,6 @@ Building from source needs a Rust toolchain.
 ```python
 from qiskit import QuantumCircuit
 from qiskit.transpiler import CouplingMap
-from qiskit.passmanager import PropertySet
 from prism.encodings import DualRail
 from prism.pipeline import build_pm
 
@@ -26,12 +25,11 @@ for i in range(3):
     qc.cx(i, i + 1)
 
 pm = build_pm(CouplingMap.from_grid(2, 4), enc=DualRail, seed=42)
-ps = PropertySet()
-routed = pm.run(qc, property_set=ps)
-print(ps["circuit_metrics"])
+routed = pm.run(qc)
+print(pm.property_set["circuit_metrics"])
 ```
 
-`ps` holds `circuit_metrics`, `realization_choices`, `online_n_swaps` and `logical_output_permutation`.
+`pm.property_set` holds `circuit_metrics`, `realization_choices`, `online_n_swaps` and `logical_output_permutation`.
 `routed.layout` is a rail-level `TranspileLayout`: virtual qubit `2*i + w` is rail `w` of logical qubit `i`, so `routed.layout.final_index_layout()[2*i + w]` is where that rail ends, the elided logical permutation included.
 
 The coupling map must be connected and symmetric, with at least two physical qubits per logical qubit.
@@ -41,20 +39,19 @@ Other inputs raise a `ValueError` (bad `build_pm` arguments) or a `TranspilerErr
 
 ## Pipeline
 
-`build_pm` returns a Qiskit `MultiStagePassManager`. Every prism pass is a `GenericPass[IN, OUT]`.
+`prism_stages` returns a Qiskit `MultiStagePassManager[DAGCircuit, DAGCircuit]`, and `build_pm` nests it in a `PassManager`, which converts the circuit to a DAG and back.
+Every prism pass is a `GenericPass[IN, OUT]`.
 
 | Stage | IR | Passes |
 | --- | --- | --- |
-| `input` | `QuantumCircuit -> DAGCircuit` | `CircuitToDAG` |
 | `logical` | `DAGCircuit` | stock passes to the encoding's logical gate set; logical SWAPs are elided |
 | `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | `DAGToMultiRealization`: each gate becomes its encoding rule |
 | `routing` | `MultiRealization` | `PrismRouting`: placement and every realization choice |
 | `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | `MultiRealizationToDAG`: materializes the choices, writes the layout |
 | `physical` | `DAGCircuit` | the stock O3 preset (no layout or routing) and prism's rail passes |
-| `output` | `DAGCircuit -> QuantumCircuit` | `DAGToCircuit` |
 
-Replace a stage by assigning it, for example `pm.routing = [MyPass(), PrismRouting(cmap)]`.
-A callback gets `passmanager_ir` as a `QuantumCircuit`, `DAGCircuit` or `MultiRealization`.
+Replace a stage by assigning it, for example `stages.routing = [MyPass(), PrismRouting(cmap)]`, then run `PassManager([stages.to_flow_controller()])`.
+A callback gets `dag` as a `DAGCircuit` or a `MultiRealization`.
 
 ## The `MultiRealization` IR
 
@@ -72,7 +69,9 @@ This one keeps only the encoding's default candidate of every `crz`:
 ```python
 from dataclasses import replace
 from qiskit.passmanager import GenericPass
+from qiskit.transpiler import PassManager
 from prism.ir import MultiRealization, MultiRealizationOp
+from prism.pipeline import prism_stages
 from prism.routing import PrismRouting
 
 
@@ -89,8 +88,9 @@ class PinDefaultCRZ(GenericPass[MultiRealization, MultiRealization]):
 
 
 cmap = CouplingMap.from_grid(2, 4)
-pm = build_pm(cmap, enc=DualRail)
-pm.routing = [PinDefaultCRZ(), PrismRouting(cmap)]
+stages = prism_stages(cmap, enc=DualRail)
+stages.routing = [PinDefaultCRZ(), PrismRouting(cmap)]
+pm = PassManager([stages.to_flow_controller()])
 ```
 
 Citation: TODO, once the paper is out.

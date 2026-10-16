@@ -1,14 +1,15 @@
-"""``build_pm``: prism's ``MultiStagePassManager``, and the passes that change IR.
+"""prism's stages, the passes that change IR, and ``build_pm``.
 
-Stages and their IRs::
+``prism_stages`` is a ``MultiStagePassManager`` from ``DAGCircuit`` to ``DAGCircuit``::
 
-    input                     QuantumCircuit -> DAGCircuit        CircuitToDAG
-    logical                   DAGCircuit -> DAGCircuit            enc.logical_pm(): stock passes
-    dag_to_multi_realization  DAGCircuit -> MultiRealization      DAGToMultiRealization
+    logical                   DAGCircuit -> DAGCircuit             enc.logical_pm(): stock passes
+    dag_to_multi_realization  DAGCircuit -> MultiRealization       DAGToMultiRealization
     routing                   MultiRealization -> MultiRealization PrismRouting
-    multi_realization_to_dag  MultiRealization -> DAGCircuit      MultiRealizationToDAG
-    physical                  DAGCircuit -> DAGCircuit            enc.physical_pm(): stock O3
-    output                    DAGCircuit -> QuantumCircuit        DAGToCircuit
+    multi_realization_to_dag  MultiRealization -> DAGCircuit       MultiRealizationToDAG
+    physical                  DAGCircuit -> DAGCircuit             enc.physical_pm(): stock O3
+
+``build_pm`` nests it in a ``qiskit.transpiler.PassManager``, which converts the
+circuit to a DAG and back as for any transpiler pipeline.
 """
 
 from __future__ import annotations
@@ -20,14 +21,19 @@ from qiskit.circuit import (
     Clbit,
     ControlFlowOp,
     Measure,
-    QuantumCircuit,
     QuantumRegister,
 )
-from qiskit.converters import circuit_to_dag, dag_to_circuit
+from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import GenericPass, MultiStagePassManager
 from qiskit.passmanager.compilation_status import PassManagerState, RunState
-from qiskit.transpiler import CouplingMap, Layout, TranspileLayout, TranspilerError
+from qiskit.transpiler import (
+    CouplingMap,
+    Layout,
+    PassManager,
+    TranspileLayout,
+    TranspilerError,
+)
 
 from prism.ir import MultiRealization, MultiRealizationInstruction
 from prism.routing import PrismRouting, SearchBudget
@@ -36,45 +42,12 @@ if TYPE_CHECKING:
     from prism.encodings.base import QubitEncoding
 
 __all__ = [
-    "CircuitToDAG",
-    "DAGToCircuit",
     "DAGToMultiRealization",
     "MultiRealizationToDAG",
     "SearchBudget",
     "build_pm",
+    "prism_stages",
 ]
-
-
-class CircuitToDAG(GenericPass[QuantumCircuit, DAGCircuit]):
-    """``QuantumCircuit -> DAGCircuit``.
-
-    Writes no layout keys: the layout is rail-level, so ``MultiRealizationToDAG``
-    writes all of them.
-    """
-
-    def run(self, passmanager_ir: QuantumCircuit) -> DAGCircuit:
-        """Convert, copying operations so later passes may mutate them."""
-        return circuit_to_dag(passmanager_ir, copy_operations=True)
-
-
-class DAGToCircuit(GenericPass[DAGCircuit, QuantumCircuit]):
-    """``DAGCircuit -> QuantumCircuit``, as ``qiskit.transpiler.PassManager`` exits."""
-
-    def run(self, passmanager_ir: DAGCircuit) -> QuantumCircuit:
-        """Convert, attaching the ``TranspileLayout`` and writing its canonical form back."""
-        out = dag_to_circuit(passmanager_ir, copy_operations=False)
-        layout = TranspileLayout.from_property_set(passmanager_ir, self.property_set)
-        if layout is not None:
-            out._layout = layout
-            layout.write_into_property_set(self.property_set)
-        # Private fields Qiskit's own PassManager backend sets the same way.
-        out._clbit_write_latency = self.property_set["clbit_write_latency"]
-        out._conditional_latency = self.property_set["conditional_latency"]
-        if start_times := self.property_set["node_start_time"]:
-            out._op_start_times = [
-                start_times[node] for node in passmanager_ir.topological_op_nodes()
-            ]
-        return out
 
 
 class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
@@ -212,19 +185,17 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
         return state
 
 
-def build_pm(
+def prism_stages(
     coupling_map: CouplingMap,
     enc: type[QubitEncoding],
     *,
     seed: int = 42,
     budget: SearchBudget | None = None,
-) -> MultiStagePassManager[QuantumCircuit, QuantumCircuit]:
-    """Pass manager compiling ``enc``-encoded circuits onto ``coupling_map``.
+) -> MultiStagePassManager[DAGCircuit, DAGCircuit]:
+    """Prism's stages, compiling an ``enc``-encoded DAG onto ``coupling_map``.
 
-    Run it as ``pm.run(qc, property_set=ps)`` to read the property set
-    afterwards (``circuit_metrics``, ``realization_choices``, ``online_n_swaps``,
-    ``logical_output_permutation``). A callback receives ``passmanager_ir`` as a
-    ``QuantumCircuit``, ``DAGCircuit`` or ``MultiRealization``.
+    Replace a stage before nesting, e.g. ``stages.routing = [MyPass(), PrismRouting(...)]``,
+    then run ``PassManager([stages.to_flow_controller()])`` (what ``build_pm`` returns).
 
     Args:
         coupling_map: Connected, symmetric device graph.
@@ -236,11 +207,28 @@ def build_pm(
         ValueError: if ``coupling_map`` is disconnected or directed.
     """
     return MultiStagePassManager(
-        input=CircuitToDAG(),
         logical=enc.logical_pm(),
         dag_to_multi_realization=DAGToMultiRealization(enc),
         routing=PrismRouting(coupling_map, seed=seed, budget=budget),
         multi_realization_to_dag=MultiRealizationToDAG(),
         physical=enc.physical_pm(coupling_map, seed=seed),
-        output=DAGToCircuit(),
+    )
+
+
+def build_pm(
+    coupling_map: CouplingMap,
+    enc: type[QubitEncoding],
+    *,
+    seed: int = 42,
+    budget: SearchBudget | None = None,
+) -> PassManager:
+    """``PassManager`` compiling ``enc``-encoded circuits onto ``coupling_map``: ``prism_stages`` nested.
+
+    Read the property set afterwards from ``pm.property_set`` (``circuit_metrics``,
+    ``realization_choices``, ``online_n_swaps``, ``logical_output_permutation``).
+    A callback receives ``passmanager_ir`` as a ``DAGCircuit`` or ``MultiRealization``.
+    Arguments and errors are those of ``prism_stages``.
+    """
+    return PassManager(
+        [prism_stages(coupling_map, enc, seed=seed, budget=budget).to_flow_controller()]
     )

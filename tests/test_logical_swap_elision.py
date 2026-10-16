@@ -1,7 +1,6 @@
 """Semantic logical SWAPs are elided before dual-rail expansion."""
 
 from qiskit import QuantumCircuit
-from qiskit.passmanager import PropertySet
 from qiskit.transpiler import CouplingMap
 
 from prism.encodings import DualRail
@@ -31,8 +30,8 @@ def test_full_pipeline_records_permutation_without_touching_metadata():
         enc=DualRail,
         seed=0,
     )
-    ps = PropertySet()
-    out = pm.run(qc, property_set=ps)
+    out = pm.run(qc)
+    ps = pm.property_set
 
     assert ps["logical_output_permutation"] == (1, 0)
     assert out.metadata == {}

@@ -5,16 +5,14 @@ from typing import Any, TypeVar, get_args, get_origin
 import pytest
 from qiskit import QuantumCircuit
 from qiskit.dagcircuit import DAGCircuit
-from qiskit.passmanager import FlowControllerLinear, GenericPass, PropertySet
+from qiskit.passmanager import FlowControllerLinear, GenericPass
 from qiskit.passmanager.base_tasks import Task
 from qiskit.transpiler import CouplingMap, PassManager, TranspilerError
 from qiskit.transpiler.passes import Size
 
 from prism.encodings import DualRail
 from prism.ir import MultiRealization
-from prism.pipeline import (
-    build_pm,
-)
+from prism.pipeline import build_pm, prism_stages
 from prism.routing import PrismRouting
 
 
@@ -47,29 +45,27 @@ def stage_irs(stage: Any) -> tuple[type, type]:
     return irs[0][0], irs[-1][1]
 
 
-def check_ir_chain(pm: Any) -> None:
-    ir = QuantumCircuit
-    for name in pm.stages:
-        stage_in, stage_out = stage_irs(getattr(pm, name))
+def check_ir_chain(stages: Any) -> None:
+    ir = DAGCircuit
+    for name in stages.stages:
+        stage_in, stage_out = stage_irs(getattr(stages, name))
         assert stage_in is ir, (
             f"stage {name!r} takes {stage_in.__name__}, gets {ir.__name__}"
         )
         ir = stage_out
-    assert ir is QuantumCircuit
+    assert ir is DAGCircuit
 
 
 def test_stages_are_typed_and_adjacent():
-    pm = build_pm(CouplingMap.from_grid(3, 3), DualRail)
-    assert pm.stages == (
-        "input",
+    stages = prism_stages(CouplingMap.from_grid(3, 3), DualRail)
+    assert stages.stages == (
         "logical",
         "dag_to_multi_realization",
         "routing",
         "multi_realization_to_dag",
         "physical",
-        "output",
     )
-    check_ir_chain(pm)
+    check_ir_chain(stages)
 
 
 def _bell():
@@ -80,10 +76,10 @@ def _bell():
 
 
 def test_exit_needs_placement_and_choices():
-    pm = build_pm(CouplingMap.from_grid(2, 3), DualRail)
-    pm.routing = []
+    stages = prism_stages(CouplingMap.from_grid(2, 3), DualRail)
+    stages.routing = []
     with pytest.raises(TranspilerError, match="needs a placed program"):
-        pm.run(_bell())
+        PassManager([stages.to_flow_controller()]).run(_bell())
 
     class Undecide(GenericPass[MultiRealization, MultiRealization]):
         def run(self, passmanager_ir: MultiRealization) -> MultiRealization:
@@ -98,24 +94,24 @@ def test_exit_needs_placement_and_choices():
                     )
             return passmanager_ir
 
-    pm.routing = [PrismRouting(CouplingMap.from_grid(2, 3)), Undecide()]
+    stages.routing = [PrismRouting(CouplingMap.from_grid(2, 3)), Undecide()]
     with pytest.raises(
         TranspilerError,
         match=r"instruction \d+ \(\w+ on wires .*\) has no realization choice",
     ):
-        pm.run(_bell())
+        PassManager([stages.to_flow_controller()]).run(_bell())
 
 
 def test_ir_changing_passes_reset_completed_analyses():
     """An analysis equal to one that ran before an IR change runs again after it."""
-    pm = build_pm(CouplingMap.from_grid(2, 3), DualRail)
-    pm.logical = [*pm.logical.to_flow_controller().tasks, Size()]
-    pm.physical = [Size()]
-    ps = PropertySet()
-    out = pm.run(_bell(), property_set=ps)
-    assert ps["size"] == out.size() > 0
+    stages = prism_stages(CouplingMap.from_grid(2, 3), DualRail)
+    stages.logical = [*stages.logical.to_flow_controller().tasks, Size()]
+    stages.physical = [Size()]
+    pm = PassManager([stages.to_flow_controller()])
+    out = pm.run(_bell())
+    assert pm.property_set["size"] == out.size() > 0
 
 
-def test_several_circuits_run_serially():
+def test_a_list_of_circuits_compiles():
     outs = build_pm(CouplingMap.from_grid(2, 3), DualRail).run([_bell(), _bell()])
     assert len(outs) == 2

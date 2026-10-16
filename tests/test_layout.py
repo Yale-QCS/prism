@@ -1,7 +1,6 @@
 """The output's ``TranspileLayout`` is rail-level and complete."""
 
 from qiskit import QuantumCircuit
-from qiskit.passmanager import PropertySet
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap
 
@@ -10,11 +9,8 @@ from prism.pipeline import build_pm
 
 
 def _compile(qc: QuantumCircuit):
-    ps = PropertySet()
-    out = build_pm(CouplingMap.from_grid(3, 3), DualRail, seed=0).run(
-        qc, property_set=ps
-    )
-    return out, ps
+    pm = build_pm(CouplingMap.from_grid(3, 3), DualRail, seed=0)
+    return pm.run(qc), pm.property_set
 
 
 def test_every_accessor_works_on_rails_and_ancillas():

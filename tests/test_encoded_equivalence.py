@@ -93,10 +93,10 @@ def _encode(logical_state: np.ndarray, n: int) -> np.ndarray:
     return out
 
 
-def verify_ir(*, passmanager_ir, **_):
+def verify_ir(*, dag, **_):
     """Callback: full ``verify`` after every pass that returns a ``MultiRealization``."""
-    if isinstance(passmanager_ir, MultiRealization):
-        passmanager_ir.verify()
+    if isinstance(dag, MultiRealization):
+        dag.verify()
 
 
 @pytest.mark.parametrize(

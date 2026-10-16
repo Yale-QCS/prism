@@ -7,8 +7,8 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import Clbit, Measure
 from qiskit.circuit.library import CXGate
 from qiskit.converters import circuit_to_dag
-from qiskit.passmanager import GenericPass, PropertySet
-from qiskit.transpiler import CouplingMap, TranspilerError
+from qiskit.passmanager import GenericPass
+from qiskit.transpiler import CouplingMap, PassManager, TranspilerError
 
 from prism.encodings import DualRail
 from prism.ir import (
@@ -17,7 +17,7 @@ from prism.ir import (
     MultiRealizationOp,
     Placement,
 )
-from prism.pipeline import DAGToMultiRealization, build_pm
+from prism.pipeline import DAGToMultiRealization, build_pm, prism_stages
 from prism.routing import PrismRouting
 
 
@@ -166,16 +166,16 @@ class PinDefaultCRZ(GenericPass[MultiRealization, MultiRealization]):
 
 def test_user_pass_narrows_candidates_before_routing():
     cmap = CouplingMap.from_grid(2, 3)
-    pm = build_pm(cmap, DualRail, seed=0)
-    pm.routing = [PinDefaultCRZ(), PrismRouting(cmap, seed=0)]
+    stages = prism_stages(cmap, DualRail, seed=0)
+    stages.routing = [PinDefaultCRZ(), PrismRouting(cmap, seed=0)]
     seen = []
 
-    def watch(*, task, passmanager_ir, **_):
-        if isinstance(task, PrismRouting):
-            seen.append(passmanager_ir)
+    def watch(*, pass_, dag, **_):
+        if isinstance(pass_, PrismRouting):
+            seen.append(dag)
 
-    ps = PropertySet()
-    pm.run(_bell(), callback=watch, property_set=ps)
+    pm = PassManager([stages.to_flow_controller()])
+    pm.run(_bell(), callback=watch)
     (placed,) = seen
     crz = [
         ins.operation
@@ -185,7 +185,7 @@ def test_user_pass_narrows_candidates_before_routing():
     assert crz and all(len(op.candidates) == 1 and op.choice == 0 for op in crz)
     # the default candidate (control on rail 1) carries the open-control RZ
     assert all(dict(op.candidates[0].count_ops()) == {"crz": 1, "rz": 1} for op in crz)
-    assert ps["realization_choices"] == ()  # nothing left to decide
+    assert pm.property_set["realization_choices"] == ()  # nothing left to decide
 
 
 def test_loose_clbit_condition_compiles():
