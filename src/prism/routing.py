@@ -100,7 +100,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         ValueError: if ``coupling_map`` is disconnected or directed.
     """
 
-    LOOKAHEAD_LAYERS = 4
+    LOOKAHEAD_LAYERS = 8
 
     def __init__(
         self,
@@ -193,8 +193,9 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         """Qiskit 2.6 ``SabreLayout``'s heuristic, with ``LOOKAHEAD_LAYERS`` lookahead layers.
 
         Stock looks one layer ahead at weight ``0.5 / n_phys``. That is too
-        shallow for prism, whose commits route gates in cascades; four layers at
-        the stock weight route about as well as Qiskit 2.3's 20-gate extended set.
+        shallow for prism, whose commits route gates in cascades; eight layers at
+        the stock weight beat Qiskit 2.3's 20-gate extended set on both SWAPs and
+        depth.
         """
         return Heuristic(
             basic=BasicHeuristic(1.0, SetScaling.Constant),
