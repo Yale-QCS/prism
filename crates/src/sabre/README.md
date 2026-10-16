@@ -57,8 +57,7 @@ The Rust tests `lookahead_keeps_successor_of_routed_gate` (the minimal 4-gate ca
 those tests.
 
 With no `MultiTwoQ` node in the input and no lookahead, the patched router is the stock router.
-The stock-parity test checks this against the installed Qiskit wheel. With lookahead the two
-differ by the bug fix above.
+With lookahead the two differ by the bug fix above.
 
 `mod.rs` is local: it replaces upstream `mod.rs`, which registers upstream's Python functions,
 and omits upstream `layout.rs`, which imports the private `passes::disjoint_layout`. prism's
@@ -90,8 +89,7 @@ patch with `git diff --no-index` from the upstream files to this directory, with
 `a/src/sabre/<file>` and `b/src/sabre/<file>`. Update the git tags in `Cargo.toml` and reseed
 `Cargo.lock` from Qiskit's `Cargo.lock` at the same tag (see `crates/README.md`).
 
-To verify: run the stock-parity test (`tests/test_sabre_stock_parity.py`) against a Qiskit wheel
-of the same revision, `make test`, `make lint`, and the regression gate
+To verify: run `make test`, `make lint`, and the regression gate
 (`tools/gate/gate.py check`); a gate difference must be reviewed and re-recorded.
 
 ## Removal
