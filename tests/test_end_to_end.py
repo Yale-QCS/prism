@@ -1,5 +1,7 @@
 """What a compiled circuit looks like to a user: device gates on device edges, documented errors."""
 
+import math
+
 import pytest
 from qiskit.circuit import Clbit, QuantumCircuit
 from qiskit.circuit.library import QFTGate
@@ -47,13 +49,15 @@ def _ripple_adder() -> QuantumCircuit:
     ],
 )
 def test_output_is_physical_isa_on_device_edges(make, cmap):
-    """No gate leaves the code space, and every multi-qubit op, if_else included, is on an edge."""
+    """Device gates only, multi-qubit ops and if_else on edges, ``crz`` angles in ``[0, 2π)``."""
     # The largest seed checks that every seed derived from it stays in the router's u64 range.
     out = dualrail_pm(cmap, seed=2**64 - 1).run(make())
     edges = set(cmap.get_edges())
     for ins in out.data:
         if len(ins.qubits) == 2:
             assert tuple(out.find_bit(q).index for q in ins.qubits) in edges, ins.name
+        if ins.name == "crz":
+            assert 0 <= ins.operation.params[0] < 2 * math.pi
     ops = set(out.count_ops()) - {"if_else"}
     for ins in out.data:
         for block in getattr(ins.operation, "blocks", ()):

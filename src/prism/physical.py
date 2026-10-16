@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
+import math
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from qiskit.circuit import Instruction, Measure, QuantumCircuit
+from qiskit.circuit import Instruction, Measure, ParameterExpression, QuantumCircuit
 from qiskit.circuit.controlflow import (
     ForLoopOp,
     IfElseOp,
     SwitchCaseOp,
     WhileLoopOp,
 )
+from qiskit.circuit.library import CRZGate, RZGate
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.passmanager import ConditionalController
 from qiskit.transpiler import (
@@ -188,6 +190,37 @@ class RescheduleCommutingDiagonals(TransformationPass):
         return out
 
 
+class FoldCRZAngles(TransformationPass):
+    """Fold each ``crz`` angle into ``[0, 2π)``, the phase an SWS gate waits for.
+
+    The SWS conditional phase builds up while the photon waits in the coupler,
+    with one sign, so ``crz(θ)`` waits for ``θ mod 2π``. Since ``crz(θ + 2π)``
+    is ``crz(θ)`` times ``Z = i·rz(π)`` on the control, each angle folds into
+    that range with at most one free ``rz(π)``, and ``crz(2πk)`` is no SWS at all.
+    """
+
+    def run(self, dag: DAGCircuit) -> DAGCircuit:
+        """Replace each bound ``crz`` angle outside ``[0, 2π)``."""
+        for node in dag.named_nodes("crz"):
+            theta = node.op.params[0]
+            if isinstance(theta, ParameterExpression):
+                continue
+            turns, folded = divmod(theta, 2 * math.pi)
+            if math.isclose(folded, 2 * math.pi):
+                turns, folded = turns + 1, 0.0
+            if folded == theta:
+                continue
+            block = DAGCircuit()
+            block.add_qubits(node.qargs)
+            if folded:
+                block.apply_operation_back(CRZGate(folded), node.qargs)
+            if turns % 2:
+                block.apply_operation_back(RZGate(math.pi), node.qargs[:1])
+                block.global_phase = math.pi / 2
+            dag.substitute_node_with_dag(node, block)
+        return dag
+
+
 def _physical_target(enc: type[QubitEncoding], coupling_map: CouplingMap) -> Target:
     """``enc.PHYSICAL_ISA`` on each qubit or edge, plus measure and control flow.
 
@@ -227,8 +260,11 @@ def physical_pm(
     ``CheckMap`` finds a gate off the device edges, i.e. in an unplaced program
     or an operation that ``PrismRouting`` passed through.
     ``CommutativeOptimization`` merges the CRZ runs on an edge that O3 cannot
-    resynthesize without a one-qubit basis. ``EarlyMeasurement`` then turns
-    the diagonal gates behind each measurement into classical control.
+    resynthesize without a one-qubit basis. ``FoldCRZAngles`` then folds each
+    merged angle to its SWS wait, and a second ``CommutativeOptimization``
+    merges the ``rz(π)`` that adds into the control's other ``rz``.
+    ``EarlyMeasurement`` then turns the diagonal gates behind each measurement
+    into classical control.
     """
     target = _physical_target(enc, coupling_map)
     preset = generate_preset_pass_manager(
@@ -249,6 +285,8 @@ def physical_pm(
     )
     preset.post_optimization = PassManager(
         [
+            CommutativeOptimization(),
+            FoldCRZAngles(),
             CommutativeOptimization(),
             EarlyMeasurement(),
             RescheduleCommutingDiagonals(),
