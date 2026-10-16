@@ -4,7 +4,7 @@
 
     logical                   DAGCircuit -> DAGCircuit             enc.logical_pm(): stock passes
     dag_to_multi_realization  DAGCircuit -> MultiRealization       DAGToMultiRealization
-    multi_realization         MultiRealization -> MultiRealization [PrismRouting]
+    multi_realization         MultiRealization -> MultiRealization [ElideRailExchanges, PrismRouting]
     multi_realization_to_dag  MultiRealization -> DAGCircuit       MultiRealizationToDAG
     physical                  DAGCircuit -> DAGCircuit             physical_pm: stock O3
 
@@ -36,6 +36,7 @@ from qiskit.transpiler import (
 
 from prism.encodings import DualRail
 from prism.ir import MultiRealization, MultiRealizationInstruction
+from prism.passes import ElideRailExchanges
 from prism.physical import physical_pm
 from prism.routing import PrismRouting, SearchBudget
 
@@ -57,8 +58,8 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
 
     Every logical qubit gets ``WIRES_PER_LOGICAL`` rails and the encoding's
     preparation. A measurement writes rail 0 to its clbit ``c[i]`` and rail ``w``
-    to ``c_rail<w>[i]``, a register added per measured register. ``logical_output_permutation`` comes
-    from the property set (set by ``ElideLogicalPermutations``).
+    to ``c_rail<w>[i]``, a register added per measured register. ``output_permutation`` starts
+    as the property set's ``logical_output_permutation`` (set by ``ElideLogicalPermutations``) on rails.
     """
 
     def __init__(self, enc: type[QubitEncoding]) -> None:
@@ -113,14 +114,16 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
                 cl = tuple(node.cargs)
             data.append(MultiRealizationInstruction(op, rails, cl))
 
-        perm = self.property_set["logical_output_permutation"]
+        perm = self.property_set["logical_output_permutation"] or range(n)
         ir = MultiRealization(
             enc=enc,
             qregs=[QuantumRegister(wpl, f"q{i}") for i in range(n)],
             cregs=cregs,
             clbits=clbits,
             data=data,
-            logical_output_permutation=tuple(range(n) if perm is None else perm),
+            output_permutation=tuple(
+                wpl * perm[i] + w for i in range(n) for w in range(wpl)
+            ),
             metadata=dict(dag.metadata or {}),
         )
         ir.verify()
@@ -134,7 +137,7 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
     choice on every ``MultiRealizationOp``. Writes a rail-level layout: the
     output's ``TranspileLayout`` has virtual qubit ``WIRES_PER_LOGICAL * i + w``
     for rail ``w`` of logical qubit ``i``, ancillas after them, and the elided
-    logical permutation in its final layout.
+    ``output_permutation`` in its final layout.
     """
 
     def run(self, passmanager_ir: MultiRealization) -> DAGCircuit:
@@ -159,18 +162,13 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
         layout = Layout({q: initial[v] for v, q in enumerate(virtuals)})
         for reg in [*ir.qregs, ancillas]:
             layout.add_register(reg)
-        wpl = ir.enc.WIRES_PER_LOGICAL
         ps = self.property_set
         ps["layout"] = layout
         ps["original_qubit_indices"] = {q: v for v, q in enumerate(virtuals)}
         ps["num_input_qubits"] = len(ir.rails)
         # ElidePermutations' convention: qubit at the end -> its index at the start.
         ps["virtual_permutation_layout"] = Layout(
-            {
-                reg[w]: wpl * ir.logical_output_permutation[i] + w
-                for i, reg in enumerate(ir.qregs)
-                for w in range(wpl)
-            }
+            dict(zip(ir.rails, ir.output_permutation))
         )
         ps["final_layout"] = Layout(
             {dag.qubits[initial[v]]: final[v] for v in range(len(initial))}
@@ -218,7 +216,7 @@ def prism_stages(
     return MultiStagePassManager(
         logical=enc.logical_pm(),
         dag_to_multi_realization=DAGToMultiRealization(enc),
-        multi_realization=[routing],
+        multi_realization=[ElideRailExchanges(), routing],
         multi_realization_to_dag=MultiRealizationToDAG(),
         physical=physical_pm(routing.coupling_map, enc, seed=seed),
     )

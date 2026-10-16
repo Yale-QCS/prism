@@ -186,8 +186,9 @@ class MultiRealization(IR):
         cregs: The input's classical registers, then the register of the other rails' outcomes.
         clbits: Every classical bit, register or loose.
         data: The instructions, in a valid execution order.
-        logical_output_permutation: Output logical position ``i`` holds input
-            qubit ``logical_output_permutation[i]`` (SWAPs elided before expansion).
+        output_permutation: Output rail ``v`` holds input rail
+            ``output_permutation[v]``: the permutations elided so far, logical
+            SWAPs (``ElideLogicalPermutations``) and rail exchanges (``ElideRailExchanges``).
         metadata: Circuit metadata, carried to the output.
         placement: Set by routing; ``None`` before.
     """
@@ -197,7 +198,7 @@ class MultiRealization(IR):
     cregs: list[ClassicalRegister]
     clbits: list[Clbit]
     data: list[MultiRealizationInstruction]
-    logical_output_permutation: tuple[int, ...]
+    output_permutation: tuple[int, ...]
     metadata: dict[str, Any] = field(default_factory=dict)
     placement: Placement | None = None
 
@@ -278,10 +279,8 @@ class MultiRealization(IR):
         n_logical = len(self.qregs)
         if any(reg.size != wpl for reg in self.qregs):
             _fail(f"every logical qubit needs {wpl} rails")
-        if sorted(self.logical_output_permutation) != list(range(n_logical)):
-            _fail(
-                f"logical_output_permutation {self.logical_output_permutation} is not a permutation"
-            )
+        if sorted(self.output_permutation) != list(range(wpl * n_logical)):
+            _fail(f"output_permutation {self.output_permutation} is not a permutation")
         n = self.num_wires
         if self.placement is not None:
             if n < len(self.rails) or any(
