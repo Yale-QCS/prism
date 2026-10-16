@@ -32,14 +32,15 @@ print(pm.property_set["circuit_metrics"])
 ```
 
 ```text
-CircuitMetrics(swaps=0, depth=6, active_gates=14, size=19)
+CircuitMetrics(swaps=0, depth=6, active_gates=13, size=19)
 ```
 
 ![The input circuit](docs/quickstart_input.png)
 
 ![The compiled circuit](docs/quickstart_output.png)
 
-Rails `q<i>_0` and `q<i>_1` carry logical qubit `i`; the two `crz` use different rail pairs.
+Rails `q<i>_0` and `q<i>_1` carry logical qubit `i`.
+Qubit 0 has nothing but its first `crz` before its measurement, so it is measured first and that `crz` becomes an `rz` conditioned on the bit of the control rail; the second `crz` stays.
 A measurement writes rail 0, the logical bit, to `c[i]` and rail 1 to `c_rail1[i]`; both 0 means the photon was lost.
 `budget=SearchBudget(objective="depth")` keeps the shallowest route found instead of the one with the fewest SWAPs.
 
@@ -74,7 +75,7 @@ Limits:
 | `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | each operation becomes its candidates |
 | `multi_realization` | `MultiRealization` | prism's own passes (`prism.passes`): `ElideRailExchanges` drops logical X as a relabelling of its rails, then `PrismRouting` places the program and makes a choice per operation |
 | `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | the choices become gates; the layout is written |
-| `physical` | `DAGCircuit` | stock O3 over the dual-rail `Target` |
+| `physical` | `DAGCircuit` | stock O3 over the dual-rail `Target`, then `EarlyMeasurement`: each rail is measured before the `rz` and `crz` behind its measurement, which become `rz` conditioned on its bit |
 
 `prism.pipeline.prism_stages(cmap, DualRail)` returns these stages as a `MultiStagePassManager`; `dualrail_pm` nests them in a `PassManager`.
 In a `MultiRealization`, each logical operation is a `MultiRealizationOp` with its `candidates` and a `choice`; only the `multi_realization_to_dag` stage turns them into gates.

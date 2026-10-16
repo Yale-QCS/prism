@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from qiskit import QuantumCircuit
 from qiskit.circuit import ClassicalRegister
+from qiskit.circuit.library import QFTGate
 from qiskit.circuit.random import random_circuit
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap, PassManager
@@ -133,19 +134,46 @@ def test_op_the_router_passes_through_warns_and_stays_correct():
 
 
 def _clbit_probabilities(qc: QuantumCircuit, clbits) -> dict[int, float]:
-    """Exact distribution of ``clbits`` (bit k of the key = ``clbits[k]``) for final measurements."""
-    meas = {
-        qc.find_bit(ins.clbits[0]).index: qc.find_bit(ins.qubits[0]).index
-        for ins in qc.data
-        if ins.operation.name == "measure"
-    }
-    targets = [meas[qc.find_bit(c).index] for c in clbits]
-    probs = Statevector(qc.remove_final_measurements(inplace=False)).probabilities()
+    """Exact distribution of ``clbits`` (bit k of the key = ``clbits[k]``), enumerating measurement branches."""
+    qc = qc.decompose(["pauli_product_measurement", "initialize"])
+    rail = np.arange(2**qc.num_qubits)
+
+    def run(data, branches, wire):
+        """Apply ``data`` to each ``(bits, probability, state)``; ``wire`` maps block bits outward."""
+        for ins in data:
+            op, qargs = ins.operation, [qc.find_bit(wire[q]).index for q in ins.qubits]
+            if op.name == "measure":
+                bit, split = wire[ins.clbits[0]], []
+                for bits, p, sv in branches:
+                    for m, pm in enumerate(sv.probabilities(qargs)):
+                        if pm > 1e-12:
+                            kept = (rail >> qargs[0] & 1) == m
+                            post = Statevector(sv.data * kept / np.sqrt(pm))
+                            split.append(({**bits, bit: m}, p * pm, post))
+                branches = split
+            elif op.name == "if_else":
+                cond, value = op.condition
+                taken = []
+                for branch in branches:
+                    blocks = op.blocks[branch[0].get(wire[cond], 0) != value :]
+                    if not blocks:
+                        taken.append(branch)
+                        continue
+                    inner = dict(zip(blocks[0].qubits, ins.qubits))
+                    inner |= dict(zip(blocks[0].clbits, ins.clbits))
+                    inner = {k: wire[v] for k, v in inner.items()}
+                    taken += run(blocks[0].data, [branch], inner)
+                branches = taken
+            else:
+                branches = [(bits, p, sv.evolve(op, qargs)) for bits, p, sv in branches]
+        return branches
+
+    start = [({}, 1.0, Statevector.from_int(0, 2**qc.num_qubits))]
+    identity = {b: b for b in (*qc.qubits, *qc.clbits)}
     out: dict[int, float] = {}
-    for idx, p in enumerate(probs):
-        if p > 1e-12:
-            key = sum(((idx >> q) & 1) << k for k, q in enumerate(targets))
-            out[key] = out.get(key, 0.0) + p
+    for bits, p, _ in run(qc.data, start, identity):
+        key = sum(bits.get(c, 0) << k for k, c in enumerate(clbits))
+        out[key] = out.get(key, 0.0) + p
     return out
 
 
@@ -169,15 +197,8 @@ class OneWire(QubitEncoding):
     rz = sx = x = cz = _as_is
 
 
-@pytest.mark.parametrize(
-    ("enc", "cmap", "mc"),
-    [
-        (OneWire, CouplingMap.from_line(5), False),
-        (DualRail, CouplingMap.from_grid(3, 4), True),  # MCX adds an ancilla qubit
-    ],
-)
-def test_measured_distribution_matches_logical(enc, cmap, mc):
-    """Logical clbits keep the logical distribution, through a logical SWAP and an X."""
+def _random_measured(mc: bool) -> QuantumCircuit:
+    """Random circuit, an optional MCX, a logical SWAP and an X, then measured."""
     qc = random_circuit(4, 3, max_operands=2, seed=7)
     qc.h(range(3))
     if mc:
@@ -187,6 +208,35 @@ def test_measured_distribution_matches_logical(enc, cmap, mc):
     qc.x(2)
     qc.add_register(ClassicalRegister(4))
     qc.measure(range(4), range(4))
+    return qc
+
+
+def _semiclassical() -> QuantumCircuit:
+    """QFT, CRZs whose control or target is measured next, and a mid-circuit measurement."""
+    qc = QuantumCircuit(4, 4)
+    qc.rx(0.9, range(4))
+    qc.append(QFTGate(4), range(4))
+    qc.crz(0.6, 2, 3)
+    qc.rx(0.5, 2)
+    qc.measure(0, 0)
+    with qc.if_test((qc.clbits[0], True)):
+        qc.x(1)
+    qc.crz(1.3, 1, 3)
+    qc.measure(range(4), range(4))
+    return qc
+
+
+@pytest.mark.parametrize(
+    ("enc", "cmap", "qc"),
+    [
+        (OneWire, CouplingMap.from_line(5), _random_measured(mc=False)),
+        # MCX adds an ancilla qubit
+        (DualRail, CouplingMap.from_grid(3, 4), _random_measured(mc=True)),
+        (DualRail, CouplingMap.from_grid(2, 5), _semiclassical()),
+    ],
+)
+def test_measured_distribution_matches_logical(enc, cmap, qc):
+    """Logical clbits keep the logical distribution, also where measurement became classical control."""
     out = build_pm(cmap, enc=enc, seed=3).run(qc)
     want = _clbit_probabilities(qc, qc.clbits)
     got = _clbit_probabilities(out, qc.clbits)  # logical clbits read rail 0
