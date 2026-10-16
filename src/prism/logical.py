@@ -41,7 +41,11 @@ CONTROL_FLOW_OPS: frozenset[str] = frozenset(
 )
 
 
-NON_GATE_ISA_NAMES: frozenset[str] = CONTROL_FLOW_OPS | {"measure", "reset"}
+NON_GATE_ISA_NAMES: frozenset[str] = CONTROL_FLOW_OPS | {
+    "measure",
+    "reset",
+    "erasure_check",
+}
 
 
 def basic_logical_pm(

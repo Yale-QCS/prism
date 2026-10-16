@@ -12,7 +12,8 @@ from qiskit.circuit import (
     ParameterExpression,
     QuantumCircuit,
 )
-from qiskit.circuit.library import Initialize
+from qiskit.circuit.library import Initialize, PauliProductMeasurement
+from qiskit.quantum_info import Pauli
 from qiskit.transpiler import PassManager
 
 from prism.encodings.base import QubitEncoding
@@ -57,20 +58,42 @@ class RSwapGate(Gate):
         self.definition = qc
 
 
+class ErasureCheck(Instruction):
+    """Logical erasure check: its clbit reads 1 if the qubit holds its photon, 0 if erased.
+
+    ``qc.append(ErasureCheck(), [q], [c])``. Does not disturb the logical state.
+    """
+
+    def __init__(self) -> None:
+        """Create an erasure check on one qubit, writing one clbit."""
+        super().__init__("erasure_check", 1, 1, [])
+
+
 class DualRail(QubitEncoding):
     """Dual-rail encoding. Stateless — pass the class itself, not an instance."""
 
     WIRES_PER_LOGICAL: ClassVar[int] = 2
     LOGICAL_ISA: ClassVar[frozenset[str]] = frozenset(
-        {"x", "rx", "rz", "crz", "swap", "measure", "reset", "if_else"}
+        {
+            "x",
+            "rx",
+            "rz",
+            "crz",
+            "swap",
+            "measure",
+            "reset",
+            "if_else",
+            "erasure_check",
+        }
     )
     PHYSICAL_ISA: ClassVar[frozenset[str]] = frozenset(
-        {"rz", "crz", "swap", "rswap", "initialize"}
+        {"rz", "crz", "swap", "rswap", "initialize", "pauli_product_measurement"}
     )
     CUSTOM_GATES: ClassVar[dict[str, Instruction]] = {
         "rswap": RSwapGate(Parameter("theta")),
         # |0_L> = |01>: rail 1 holds the photon (label is little-endian).
         "initialize": Initialize("10"),
+        "pauli_product_measurement": PauliProductMeasurement(Pauli("ZZ")),
     }
 
     @classmethod
@@ -171,3 +194,15 @@ class DualRail(QubitEncoding):
         the reset qubit on other free rails is not expressed here.
         """
         return MultiRealizationOp("reset", (cls.initialize(),))
+
+    @classmethod
+    def erasure_check(cls, _op: Instruction) -> MultiRealizationOp:
+        """Logical erasure check → ZZ measurement of the rail pair, on one device edge.
+
+        ``ZZ = -1`` on both code states and ``+1`` on the vacuum, so the outcome
+        flags photon loss without reading the logical state: bit 1 is a photon,
+        bit 0 an erasure (``|00⟩``, or ``|11⟩``).
+        """
+        qc = QuantumCircuit(2, 1)
+        qc.append(cls.CUSTOM_GATES["pauli_product_measurement"], [0, 1], [0])
+        return MultiRealizationOp("erasure_check", (qc,))

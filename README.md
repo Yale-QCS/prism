@@ -34,6 +34,8 @@ print(pm.property_set["circuit_metrics"])
 
 The coupling map must be connected and symmetric, with at least two physical qubits per logical qubit.
 The only supported control flow is `if_else`. Its blocks may contain only single-qubit gates and no measurement; an `if_else` over several qubits is lowered as one `if_else` per qubit, so its blocks must not write classical bits.
+`qc.append(ErasureCheck(), [q], [c])` (from `prism.encodings`) is a mid-circuit erasure check: a stock `PauliProductMeasurement(Pauli("ZZ"))` on the rail pair, which writes 1 to `c` if the photon is present and 0 if it was lost, and leaves the logical state alone.
+Initialization and erasure checks are physically local: the two rails sit on one device edge when they run.
 Barriers are removed in the logical stage, as Qiskit's optimization passes would cross them anyway.
 A multi-controlled X with three or more controls, or a multi-controlled phase of π with four or more, adds one clean ancilla logical qubit (register `mcd_anc`).
 Other inputs raise a `ValueError` (bad `build_pm` arguments) or a `TranspilerError` (an unsupported circuit).

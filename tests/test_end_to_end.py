@@ -10,9 +10,10 @@ from qiskit.circuit import Measure, QuantumCircuit
 from qiskit.circuit.library import QFTGate, SwapGate
 from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGOpNode, DAGOutNode
+from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap, TranspilerError
 
-from prism.encodings import DualRail
+from prism.encodings import DualRail, ErasureCheck
 from prism.ir import MultiRealizationOp
 from prism.pipeline import DAGToMultiRealization, build_pm
 
@@ -255,3 +256,61 @@ def test_no_routing_swap_feeds_only_measurements(seed):
     out = build_pm(CouplingMap.from_heavy_hex(3), enc=DualRail, seed=seed).run(qc)
     assert out.count_ops().get("swap", 0) > 0
     assert _dead_swaps(out) == 0
+
+
+def _shot(qc: QuantumCircuit, seed: int) -> dict:
+    """One shot of ``qc`` by statevector, with mid-circuit measurements: clbit -> outcome."""
+    sv, bits = Statevector.from_int(0, 2**qc.num_qubits), {}
+    sv.seed(seed)
+    for ci in qc.decompose(["pauli_product_measurement", "initialize"]).data:
+        qargs = [qc.find_bit(q).index for q in ci.qubits]
+        if ci.operation.name == "measure":
+            outcome, sv = sv.measure(qargs)
+            bits[ci.clbits[0]] = int(outcome)
+        else:
+            sv = sv.evolve(ci.operation, qargs)
+    return bits
+
+
+def _checked_circuit() -> QuantumCircuit:
+    """Entangle three qubits, check each, undo: the logical outcome is ``000``."""
+    body = QuantumCircuit(3)
+    body.h(range(3))
+    body.crz(1.0, 0, 1)
+    body.crz(0.7, 1, 2)
+    body.crz(0.5, 0, 2)
+    qc = QuantumCircuit(3, 6)
+    qc.compose(body, inplace=True)
+    for q in range(3):
+        qc.append(ErasureCheck(), [q], [3 + q])
+    qc.compose(body.inverse(), inplace=True)
+    qc.measure(range(3), range(3))
+    return qc
+
+
+def test_erasure_check_is_local_and_keeps_the_logical_state():
+    """Each check is a ZZ measurement on a device edge; a superposition survives it."""
+    cmap = CouplingMap.from_line(6)
+    pm = build_pm(cmap, enc=DualRail, seed=0)
+    out = pm.run(_checked_circuit())
+    assert pm.property_set["online_n_swaps"] > 0
+    assert set(out.count_ops()) <= DualRail.PHYSICAL_ISA | {"measure"}
+    checks = [ci for ci in out.data if ci.name == "pauli_product_measurement"]
+    assert len(checks) == 3
+    edges = set(cmap.get_edges())
+    assert all(
+        tuple(out.find_bit(q).index for q in ci.qubits) in edges for ci in checks
+    )
+    for seed in range(8):
+        bits = _shot(out, seed)
+        assert [bits[out.clbits[i]] for i in range(3)] == [0, 0, 0]
+
+
+def test_erasure_check_reads_no_erasure_without_loss():
+    """Bit 1 means the photon is present: every check reads 1 on a lossless simulation."""
+    out = build_pm(CouplingMap.from_line(6), enc=DualRail, seed=0).run(
+        _checked_circuit()
+    )
+    for seed in range(8):
+        bits = _shot(out, seed)
+        assert [bits[out.clbits[i]] for i in range(3, 6)] == [1, 1, 1]

@@ -19,7 +19,6 @@ from typing import TYPE_CHECKING
 from qiskit.circuit import (
     ClassicalRegister,
     Clbit,
-    ControlFlowOp,
     Measure,
     QuantumRegister,
 )
@@ -100,10 +99,8 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
             if isinstance(node.op, Measure):
                 cl = (node.cargs[0], *herald[: op.num_clbits - 1])
                 herald = herald[op.num_clbits - 1 :]
-            elif isinstance(node.op, ControlFlowOp):
-                cl = tuple(node.cargs)
             else:
-                cl = ()
+                cl = tuple(node.cargs)
             data.append(MultiRealizationInstruction(op, rails, cl))
 
         perm = self.property_set["logical_output_permutation"]

@@ -85,8 +85,9 @@ def _physical_target(enc: type[QubitEncoding], coupling_map: CouplingMap) -> Tar
     """``enc.PHYSICAL_ISA`` on each qubit or edge, plus measure and control flow.
 
     For dual rail that is ``rz`` on one rail and ``crz``, ``swap``, ``rswap``,
-    ``initialize`` on an edge: no gate leaves the code space, so stock O3 cannot
-    produce one, and with no complete one-qubit basis it does not resynthesize.
+    ``initialize``, ``pauli_product_measurement`` on an edge: no gate leaves
+    the code space, so stock O3 cannot produce one, and with no complete
+    one-qubit basis it does not resynthesize.
     """
     target = Target.from_configuration(
         basis_gates=sorted(enc.PHYSICAL_ISA),
