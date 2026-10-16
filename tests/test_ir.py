@@ -54,7 +54,7 @@ def test_entrance_binds_rails_and_heralds():
     assert [ins.clbits[0] for ins in measures] == ir.clbits[
         :2
     ]  # logical bits read rail 0
-    assert ir.cregs[-1].name == "herald" and len(ir.cregs[-1]) == 2
+    assert ir.cregs[-1].name == "rail1" and len(ir.cregs[-1]) == 2
 
 
 def test_to_circuit_materializes_choices_on_rails():

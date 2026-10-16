@@ -178,7 +178,7 @@ class MultiRealization(IR):
     Args:
         enc: The qubit encoding.
         qregs: One register of ``WIRES_PER_LOGICAL`` rails per logical qubit.
-        cregs: The input's classical registers, then the herald register.
+        cregs: The input's classical registers, then the register of the other rails' outcomes.
         clbits: Every classical bit, register or loose.
         data: The instructions, in a valid execution order.
         logical_output_permutation: Output logical position ``i`` holds input

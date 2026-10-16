@@ -98,7 +98,7 @@ class QubitEncoding:
             if isinstance(instr.operation, Measure):
                 raise TranspilerError(
                     f"{cls.__name__} cannot lower a measurement inside a control-flow "
-                    "block: herald bits are allocated for top-level measurements only. "
+                    "block: clbits for the other rails are allocated for top-level measurements only. "
                     "Move the measurement out of the block."
                 )
             lowered = cls.lower(instr.operation, instr.clbits)

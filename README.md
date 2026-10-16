@@ -19,12 +19,13 @@ Building from source needs a Rust toolchain.
 import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.transpiler import CouplingMap
-from prism.encodings import DualRail
+from prism.encodings import DualRail, ErasureCheck
 from prism.pipeline import build_pm
 
 qc = QuantumCircuit(3, 3)
 qc.rx(np.pi / 2, [0, 1, 2])
 qc.crz(np.pi / 2, 0, 1)
+qc.append(ErasureCheck(), [1], [1])  # 1 unless qubit 1 lost its photon
 qc.crz(np.pi / 2, 1, 2)
 qc.rx(np.pi / 2, [1, 2])
 qc.measure(range(3), range(3))
@@ -43,14 +44,13 @@ The output, on rails `q<i>_0` and `q<i>_1` of logical qubit `i`:
 - Each logical qubit starts with `Initialize` on its two rails.
 - `rx` is an `rswap` between the qubit's two rails.
 - Each `crz` runs between one rail of each qubit; the router picked a different rail pair for each, with an `rz` correcting an open control.
-- Each measurement reads both rails: the logical bit into `c` and the other rail into `herald`.
-
-A mid-circuit erasure check can reuse the qubit's own clbit: `qc.append(ErasureCheck(), [q], [q])` (from `prism.encodings`) writes 1 unless the photon was lost.
+- The erasure check is a ZZ measurement on qubit 1's two rails; it writes the rail parity to `c[1]`, which the final measurement later overwrites, and leaves the logical state alone.
+- Each measurement reads both rails: rail 0, the logical bit, into `c` and rail 1 into `rail1`; the pair heralds a lost photon (both 0).
 
 `build_pm` returns a Qiskit `PassManager`. After a run, `pm.property_set` holds `circuit_metrics`, `online_n_swaps` (routing SWAPs) and `logical_output_permutation`.
 `out.layout` is a rail-level `TranspileLayout`: virtual qubit `2*i + w` is rail `w` of logical qubit `i`.
 `SearchBudget` sets the layout search effort and the objective, `"swaps"` (default) or `"depth"`.
-A measurement writes the logical bit from rail 0 and the other rail to a `herald` register.
+A measurement writes rail 0 (the logical bit) to the circuit's clbit and rail 1 to a `rail1` register; together they herald a lost photon.
 
 ## Gate sets
 

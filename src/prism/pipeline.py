@@ -55,7 +55,7 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
 
     Every logical qubit gets ``WIRES_PER_LOGICAL`` rails and the encoding's
     preparation. A measurement writes the logical clbit from rail 0 and the
-    other rails to a ``herald`` register. ``logical_output_permutation`` comes
+    other rails to a ``rail1`` register. ``logical_output_permutation`` comes
     from the property set (set by ``ElideLogicalPermutations``).
     """
 
@@ -72,20 +72,20 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
         logical = {q: i for i, q in enumerate(dag.qubits)}
         cregs = list(dag.cregs.values())
         clbits = list(dag.clbits)
-        n_herald = sum(
+        n_extra = sum(
             node.op.num_qubits * (wpl - 1)
             for node in dag.op_nodes()
             if isinstance(node.op, Measure)
         )
-        herald: list[Clbit] = []
-        if n_herald:
-            name, k = "herald", 0
+        extra: list[Clbit] = []
+        if n_extra:
+            name, k = "rail1", 0
             while name in dag.cregs:
                 k += 1
-                name = f"herald{k}"
-            cregs.append(ClassicalRegister(n_herald, name))
-            herald = list(cregs[-1])
-            clbits += herald
+                name = f"rail1_{k}"
+            cregs.append(ClassicalRegister(n_extra, name))
+            extra = list(cregs[-1])
+            clbits += extra
 
         data = []
         prep = enc.initialize()
@@ -97,8 +97,8 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
             op = enc.lower(node.op, tuple(node.cargs))
             rails = tuple(wpl * logical[q] + w for q in node.qargs for w in range(wpl))
             if isinstance(node.op, Measure):
-                cl = (node.cargs[0], *herald[: op.num_clbits - 1])
-                herald = herald[op.num_clbits - 1 :]
+                cl = (node.cargs[0], *extra[: op.num_clbits - 1])
+                extra = extra[op.num_clbits - 1 :]
             else:
                 cl = tuple(node.cargs)
             data.append(MultiRealizationInstruction(op, rails, cl))
