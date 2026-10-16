@@ -1,4 +1,4 @@
-"""Dual-rail encoding rules. Convention ``|0_L⟩ = |01⟩, |1_L⟩ = |10⟩``."""
+"""Dual-rail encoding: its rules and ``RSwapGate``. Convention ``|0_L⟩ = |01⟩, |1_L⟩ = |10⟩``."""
 
 from __future__ import annotations
 
@@ -46,10 +46,7 @@ class RSwapGate(Gate):
         )
 
     def _define(self) -> None:
-        """Exact standard-gate form (execution/simulation boundary only).
-
-        SWAP^(θ/π) = e^{iθ/4}·rxx(θ/2)·ryy(θ/2)·rzz(θ/2).
-        """
+        """``SWAP^(θ/π) = e^{iθ/4} · rxx(θ/2) · ryy(θ/2) · rzz(θ/2)``."""
         theta = self.params[0]
         qc = QuantumCircuit(2, global_phase=theta / 4)
         qc.rxx(theta / 2, 0, 1)
@@ -65,7 +62,6 @@ class DualRail(QubitEncoding):
     LOGICAL_ISA: ClassVar[frozenset[str]] = frozenset(
         {"x", "rx", "rz", "crz", "swap", "measure", "reset", "if_else"}
     )
-    # Adds ``rswap`` (post-lowering RX(theta) → RSwapGate on a rail pair).
     PHYSICAL_ISA: ClassVar[frozenset[str]] = frozenset(
         {"x", "rx", "rz", "crz", "swap", "rswap", "joint_herald"}
     )
@@ -99,7 +95,6 @@ class DualRail(QubitEncoding):
             reshape_passes=(MargolusPairOptimizer(),),
         )
 
-    # ---- Encoding-specific lowering rules --------------------------------
     @classmethod
     def x(cls, op: Instruction) -> MultiRealizationOp:
         """Logical X → physical SWAP(0,1). Single realization."""
@@ -109,7 +104,7 @@ class DualRail(QubitEncoding):
 
     @classmethod
     def rx(cls, op: Instruction) -> MultiRealizationOp:
-        """Logical RX(θ) → rejoin (RSwap on the rails)."""
+        """Logical RX(θ) → RSwap(θ) on the rails."""
         (theta,) = op.params
         qc = QuantumCircuit(2)
         qc.append(RSwapGate(theta), [0, 1])

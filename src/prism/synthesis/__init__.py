@@ -1,1 +1,1 @@
-"""Synthesis passes and gate templates for dual-rail transpilation."""
+"""The physical stage's rescheduling pass and the dual-rail preparation gate."""
