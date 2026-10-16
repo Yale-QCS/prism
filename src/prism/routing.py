@@ -95,7 +95,8 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
     every ``MultiRealizationOp``. An op that is not ``single_edge`` is passed
     through at ``default_index`` and left for the physical stage to route,
     with a ``UserWarning``. Publishes ``online_n_swaps`` (routing SWAPs) to the
-    property set.
+    property set. The result shares its registers, clbits and metadata with the
+    input.
 
     Args:
         coupling_map: Connected, symmetric device graph.
