@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import (
-    AncillaRegister,
     EquivalenceLibrary,
     Parameter,
     ParameterExpression,
@@ -33,10 +32,6 @@ from qiskit.circuit.library import (
     RZZGate,
     iSwapGate,
 )
-from qiskit.converters import circuit_to_dag
-from qiskit.dagcircuit import DAGCircuit
-from qiskit.synthesis import synth_mcx_1_clean_kg24
-from qiskit.transpiler import TransformationPass
 
 if TYPE_CHECKING:
     from prism.synthesis.margolus import RTOFGate
@@ -238,64 +233,3 @@ def build_equivalence_library() -> EquivalenceLibrary:
     ):
         lib.add_equivalence(gate, template)
     return lib
-
-
-# Qiskit's EquivalenceLibrary is fixed-arity, so MCX/MCPhase can't be templated
-# with an ancilla. The kg24 form (Khattar/Gidney 2024, synth_mcx_1_clean_kg24)
-# uses one clean ancilla and is much cheaper than the ancilla-free Gray-code
-# alternative for grover-class circuits.
-
-
-class MCDecomposeWithAncilla(TransformationPass):
-    """Rewrite ``MCXGate(>=3 ctrls)`` / ``MCPhaseGate(theta=π, >=4 ctrls)`` via kg24 + one clean ancilla.
-
-    Adds an ``AncillaRegister(1, 'mcd_anc')`` only if a target gate is found
-    (and reuses it across substitutions). ``mcphase(π)`` is rewritten as
-    ``H_t · MCX · H_t``. Other-theta ``mcphase`` falls through to the
-    default decomposition. Place between ``Unroll3qOrMore`` (with mcx/mcphase
-    kept) and ``BasisTranslator``, followed by ``Decompose(['rccx', 'rccx_dg'])``.
-    """
-
-    def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Substitute each eligible mcx/mcphase node with its kg24 form."""
-        targets = []
-        for node in dag.op_nodes():
-            if node.name == "mcx" and node.op.num_ctrl_qubits >= 3:
-                targets.append(node)
-                continue
-            if node.name == "mcphase" and node.op.num_ctrl_qubits >= 4:
-                # Skip non-pi mcphase here so the ancilla register isn't
-                # allocated for a circuit that has nothing actionable.
-                theta = float(node.op.params[0])
-                wrapped = (theta + np.pi) % (2 * np.pi) - np.pi
-                if abs(abs(wrapped) - np.pi) <= 1e-9:
-                    targets.append(node)
-        if not targets:
-            return dag
-
-        anc_reg = AncillaRegister(1, name="mcd_anc")
-        dag.add_qreg(anc_reg)
-        anc_qubit = dag.qubits[-1]
-
-        new_dag = dag.copy_empty_like()
-        target_set = set(targets)
-        for node in dag.topological_op_nodes():
-            if node not in target_set:
-                new_dag.apply_operation_back(node.op, node.qargs, node.cargs)
-                continue
-            n_ctrl = node.op.num_ctrl_qubits
-            qubits = list(node.qargs)
-            if node.name == "mcx":
-                sub = synth_mcx_1_clean_kg24(num_ctrl_qubits=n_ctrl)
-            else:  # mcphase (theta = pi mod 2pi, already filtered)
-                sub = QuantumCircuit(n_ctrl + 2, name=f"mcphase_kg24_{n_ctrl}")
-                sub.h(n_ctrl)  # H on target wire
-                sub.compose(
-                    synth_mcx_1_clean_kg24(num_ctrl_qubits=n_ctrl),
-                    qubits=list(range(n_ctrl + 2)),
-                    inplace=True,
-                )
-                sub.h(n_ctrl)
-            wires = qubits + [anc_qubit]
-            new_dag.compose(circuit_to_dag(sub), qubits=wires)
-        return new_dag
