@@ -48,7 +48,7 @@ Every prism pass is a `GenericPass[IN, OUT]`.
 | `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | `DAGToMultiRealization`: each gate becomes its encoding rule |
 | `routing` | `MultiRealization` | `PrismRouting`: placement and every realization choice |
 | `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | `MultiRealizationToDAG`: materializes the choices, writes the layout |
-| `physical` | `DAGCircuit` | the stock O3 preset (no layout or routing) and prism's rail passes |
+| `physical` | `DAGCircuit` | the stock O3 preset (no layout; it routes only the ops `PrismRouting` passed through) and prism's rail passes |
 
 Replace a stage by assigning it, for example `stages.routing = [MyPass(), PrismRouting(cmap)]`, then run `PassManager([stages.to_flow_controller()])`.
 A callback gets `dag` as a `DAGCircuit` or a `MultiRealization`.

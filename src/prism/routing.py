@@ -6,11 +6,17 @@ undergo alternating forward/backward refinement, then one multi-trial forward
 route is kept per start. The best final route by ``SearchBudget.objective``
 gives the placement and the choices. The kernel is
 ``crates/src/prism_routing/layout.rs``.
+
+Routing SWAPs go between operations, never inside one. An operation that is
+not ``MultiRealizationOp.single_edge`` cannot be routed onto one device edge:
+it is passed through, at its default candidate and off the device edges, and
+the physical stage routes it.
 """
 
 from __future__ import annotations
 
 import random
+import warnings
 from dataclasses import dataclass, replace
 from typing import Literal, get_args
 
@@ -86,8 +92,10 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
 
     Reads a ``MultiRealization`` with no placement; returns one with a
     placement, physical-qubit instructions, routing SWAPs, and a choice on
-    every ``MultiRealizationOp``. Publishes ``online_n_swaps`` (routing SWAPs)
-    to the property set.
+    every ``MultiRealizationOp``. An op that is not ``single_edge`` is passed
+    through at ``default_index`` and left for the physical stage to route,
+    with a ``UserWarning``. Publishes ``online_n_swaps`` (routing SWAPs) to the
+    property set.
 
     Args:
         coupling_map: Connected, symmetric device graph.
@@ -140,6 +148,17 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
                 f"the circuit needs {n_virt} physical qubits ({len(ir.qregs)} logical "
                 f"x {ir.enc.WIRES_PER_LOGICAL} wires) but the coupling map has "
                 f"{n_phys}. Use a larger coupling map or fewer qubits."
+            )
+        if n_through := sum(
+            isinstance(ins.operation, MultiRealizationOp)
+            and not ins.operation.single_edge
+            for ins in ir.data
+        ):
+            warnings.warn(
+                f"PrismRouting passed {n_through} operation(s) through unrouted: no "
+                "candidate has its 2-qubit gates on one rail pair. Each keeps its "
+                "default candidate, and the physical stage routes it.",
+                UserWarning,
             )
         forward, reverse = _routing_problems(ir)
         base_seed = (
@@ -222,7 +241,9 @@ def _routing_problems(ir: MultiRealization) -> tuple[tuple, tuple]:
 
     A problem is ``(virt_pairs, succ, pred_count, local_default)``, one entry
     per instruction (see ``crates/src/prism_routing/input.rs``). The reverse
-    problem is the program reversed, for backward refinement.
+    problem is the program reversed, for backward refinement. An op that is
+    not ``single_edge`` gets candidates with no pairs: the kernel commits its
+    default at once, adding no SWAP for it.
     """
     virt_pairs, wires, diagonal, local_default = [], [], [], []
     for ins in ir.data:
@@ -245,6 +266,8 @@ def _routing_problems(ir: MultiRealization) -> tuple[tuple, tuple]:
             ]
             used.update(v for g in gates for v in g)
             pairs.append([[g[0], g[1]] for g in gates if len(g) == 2])
+        if isinstance(op, MultiRealizationOp) and not op.single_edge:
+            pairs = [[] for _ in pairs]
         virt_pairs.append(pairs)
         wires.append(used)
 

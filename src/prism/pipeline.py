@@ -226,7 +226,7 @@ def build_pm(
 
     Read the property set afterwards from ``pm.property_set`` (``circuit_metrics``,
     ``online_n_swaps``, ``logical_output_permutation``).
-    A callback receives ``passmanager_ir`` as a ``DAGCircuit`` or ``MultiRealization``.
+    A callback receives the IR as ``dag``: a ``DAGCircuit`` or a ``MultiRealization``.
     Arguments and errors are those of ``prism_stages``.
     """
     return PassManager(

@@ -118,6 +118,19 @@ class MultiRealizationOp:
             raise ValueError(f"{self.name}: choice {self.choice} out of range")
 
     @property
+    def single_edge(self) -> bool:
+        """Some candidate has all its 2-qubit gates on one pair of wires.
+
+        Routing places such an op on one device edge. It passes any other op
+        through at ``default_index``, off the device edges, for the physical
+        stage to route.
+        """
+        return any(
+            len({frozenset(ci.qubits) for ci in real.data if len(ci.qubits) == 2}) <= 1
+            for real in self.candidates
+        )
+
+    @property
     def num_qubits(self) -> int:
         """Block-local width every candidate shares."""
         return self.candidates[0].num_qubits
@@ -148,7 +161,9 @@ class Placement(NamedTuple):
     Virtual wire ``v`` (the rails, then ancillas) starts on physical qubit
     ``initial[v]`` and ends on ``final[v]``. Both have one entry per physical qubit.
     ``edges`` are the device's coupled pairs, in both orientations: every
-    two-qubit gate of a placed program must sit on one.
+    two-qubit gate of a placed program must sit on one, except inside a
+    ``MultiRealizationOp`` that is not ``single_edge`` (left for the physical
+    stage to route).
     """
 
     initial: tuple[int, ...]
@@ -288,7 +303,7 @@ class MultiRealization(IR):
                 if len(ins.qubits) == 2:
                     self._check_on_edge(ins.qubits, where)
                 continue
-            if op.choice is not None:
+            if op.choice is not None and op.single_edge:
                 real = op.candidates[op.choice]
                 for ci in real.data:
                     if len(ci.qubits) == 2:

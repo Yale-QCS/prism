@@ -26,7 +26,9 @@ from qiskit.transpiler import (
     Target,
     TransformationPass,
 )
+from qiskit.transpiler.passes import SabreSwap
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+from qiskit.transpiler.preset_passmanagers.common import generate_routing_passmanager
 
 from prism.metrics import (
     RecordCircuitMetrics,
@@ -108,19 +110,25 @@ def physical_pm(
 ) -> StagedPassManager:
     """Preset O3 over the retained route.
 
-    Built with ``routing_method="none"``: the routing stage already placed
-    and routed, so the layout stage is empty and Qiskit's ``CheckMap`` certifies
-    the route. The init stage of that preset omits ``ElidePermutations``, which
-    would turn a committed rail exchange (a real beamsplitter SWAP) into a free
-    virtual permutation.
+    Built with ``routing_method="none"``, whose init stage omits
+    ``ElidePermutations``: that pass would turn a committed rail exchange (a
+    real beamsplitter SWAP) into a free virtual permutation. The layout stage is
+    empty, because ``PrismRouting`` placed the program. The routing stage is O3's
+    ``SabreSwap`` stage without ``VF2PostLayout``, so it keeps the layout: it
+    routes only if ``CheckMap`` finds a gate off the device edges, i.e. in an
+    operation that ``PrismRouting`` passed through.
     """
+    target = _physical_target(enc, coupling_map)
     preset = generate_preset_pass_manager(
         optimization_level=3,
-        target=_physical_target(enc, coupling_map),
+        target=target,
         seed_transpiler=seed,
         routing_method="none",
     )
     preset.layout = PassManager()
+    preset.routing = generate_routing_passmanager(
+        SabreSwap(target, heuristic="decay", seed=seed, trials=20), target
+    )
     # ``CancelRailX`` strips the X-on-rail that O3's 2Q resynthesis leaves behind.
     preset.post_optimization = PassManager(
         [CancelRailX(), RescheduleCommutingDiagonals(), RecordCircuitMetrics()]
