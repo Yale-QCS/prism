@@ -2,11 +2,14 @@
 //!
 //! For every starting layout, alternate forward and backward refinement routes for
 //! `max_iterations`, then route forward once more with `swap_trials` trials from the refined
-//! layout, and keep the final route of the lowest score.  Python keeps starting-layout generation
-//! and circuit emission.
+//! layout, and keep the final route of the lowest score over every trial of every start.  Python
+//! keeps starting-layout generation and circuit emission.
 
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use rand::distr::StandardUniform;
+use rand::prelude::*;
+use rand_pcg::Pcg64Mcg;
 use rayon_cond::CondIterator;
 
 use qiskit_circuit::dag_circuit::DAGCircuit;
@@ -17,18 +20,19 @@ use super::input::{Op, RoutedOp, sabre_dags};
 use super::score::{Objective, Program, best};
 use super::{explicit_target, layout_from_v2p, v2p_of};
 use crate::sabre::heuristic::Heuristic;
-use crate::sabre::route::{PyRoutingTarget, RoutingProblem, routed_ops, swap_map};
+use crate::sabre::route::{PyRoutingTarget, RoutingProblem, routed_ops, swap_map, swap_map_trial};
 
 /// One final route: `(routed, final_v2p, refined_v2p)`.
 type StartResult = (Vec<RoutedOp>, Vec<u32>, Vec<u32>);
 
 /// Refine every start and route it.  Returns the [`StartResult`] whose route scores lowest under
-/// `objective` (`"swaps"` or `"depth"`, see [`Objective`]), the earliest start on a tie, where
-/// `refined_v2p` is the layout the final route began from.
+/// `objective` (`"swaps"` or `"depth"`, see [`Objective`]) over every final trial of every start,
+/// the earliest trial and start on a tie, where `refined_v2p` is the layout the final route began
+/// from.
 ///
 /// Route seeds follow prism's schedule: for start seed `s`, forward refinement `it` uses
 /// `s*1000 + 2*it`, backward `s*1000 + 2*it + 1`, and the final route `s*1000 + 2*max_iterations`,
-/// all mod 2^64.  Starts run in parallel unless Qiskit's settings ask for one thread
+/// all mod 2^64; the final route's trials take their seeds from it as upstream `swap_map` does.  Starts run in parallel unless Qiskit's settings ask for one thread
 /// (`getenv_use_multiple_threads`); the result does not depend on it.
 ///
 /// # Errors
@@ -74,18 +78,24 @@ pub fn prism_layout_and_routing(
             let seed = base.wrapping_add(2 * it + 1);
             layout = swap_map(reverse, &layout, Some(seed), 1, Some(false)).final_layout;
         }
+        // The trial seeds of upstream `swap_map`, but the trial is chosen by `objective`, not by
+        // SWAP count alone, so trials with equal SWAPs are ranked by depth.
         let seed = base.wrapping_add(2 * max_iterations);
-        let result = swap_map(
-            forward,
-            &layout,
-            Some(seed),
-            swap_trials.max(1),
-            Some(false),
-        );
-        let routed = routed_ops(&result);
-        let metrics = program.metrics(&routed, &layout);
-        let route = (routed, v2p_of(&result.final_layout), v2p_of(&layout));
-        (metrics, route)
+        let (metrics, routed, final_v2p) = Pcg64Mcg::seed_from_u64(seed)
+            .sample_iter(StandardUniform)
+            .take(swap_trials.max(1))
+            .map(|trial_seed| {
+                let result = swap_map_trial(forward, &layout, trial_seed);
+                let routed = routed_ops(&result);
+                (
+                    program.metrics(&routed, &layout),
+                    routed,
+                    v2p_of(&result.final_layout),
+                )
+            })
+            .min_by_key(|(metrics, ..)| metrics.score(objective))
+            .expect("at least one trial");
+        (metrics, (routed, final_v2p, v2p_of(&layout)))
     };
     let routes: Vec<_> = CondIterator::new(starts, parallel).map(run_start).collect();
     best(routes, objective).ok_or_else(|| PyValueError::new_err("no starting layout"))
