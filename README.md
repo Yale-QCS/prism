@@ -34,66 +34,20 @@ pm = build_pm(
 out = pm.run(qc)
 
 print(pm.property_set["circuit_metrics"])
-print(qc.draw(cregbundle=False))
-print(out.draw(idle_wires=False, fold=-1, cregbundle=False))
 ```
 
-The input:
+The input, `qc.draw("mpl")`:
 
-```text
-     ┌───┐                       ┌─┐  
-q_0: ┤ H ├──■────────────────────┤M├───────────
-     └───┘┌─┴─┐┌────────────────┐└╥┘     ┌─┐  
-q_1: ─────┤ X ├┤0               ├─╫───■──┤M├───
-          └───┘│                │ ║ ┌─┴─┐└╥┘┌─┐
-q_2: ──────────┤                ├─╫─┤ X ├─╫─┤M├
-               │                │ ║ └───┘ ║ └╥┘
-c_0: ══════════╡                ╞═╩═══════╬══╬═
-               │  Erasure_check │         ║  ║
-c_1: ══════════╡                ╞═════════╩══╬═
-               │                │            ║
-c_2: ══════════╡                ╞════════════╩═
-               │                │  
-c_3: ══════════╡0               ╞══════════════
-               └────────────────┘  
-```
+![The input circuit](docs/quickstart_input.png)
 
-The output, on rails `q<i>_0` and `q<i>_1` of logical qubit `i` (`CircuitMetrics(swaps=0, depth=7, active_gates=14, size=22)`):
+The output, `out.draw("mpl", idle_wires=False)`, on rails `q<i>_0` and `q<i>_1` of logical qubit `i` (`CircuitMetrics(swaps=0, depth=7, active_gates=14, size=22)`):
 
 - each logical qubit starts with `Initialize` on its two rails;
 - `h` and `cx` become `rz`, `rswap` and one `crz`, and each `crz` uses the pair of rails the router chose for it;
 - the erasure check is a ZZ measurement on the qubit's two rails;
 - each measurement reads both rails, the second into `herald`.
 
-```text
-          ┌──────────────────┐┌──────────┐┌──────────────┐                                                        ┌─────────────┐┌─┐  
-q2_0 -> 0 ┤0                 ├┤ Rz(-π/2) ├┤0             ├────────────────────────────────────────────────────────┤0            ├┤M├───
-          │  Initialize(1,0) │└──────────┘│  Rswap(-π/2) │                                               ┌───────┐│  Rswap(π/2) │└╥┘┌─┐
-q2_1 -> 1 ┤1                 ├────────────┤1             ├───────────────────────────────────────────────┤ Rz(π) ├┤1            ├─╫─┤M├
-          ├──────────────────┤┌──────────┐├──────────────┤         ┌─────────────┐┌─────────┐┌──────────┐└───┬───┘└─────┬─┬─────┘ ║ └╥┘
-q1_0 -> 2 ┤0                 ├┤ Rz(-π/2) ├┤0             ├─────────┤0            ├┤ Rz(π/2) ├┤0         ├────■──────────┤M├───────╫──╫─
-          │  Initialize(1,0) │└──────────┘│  Rswap(-π/2) │┌───────┐│  Rswap(π/2) │└─────────┘│          │   ┌─┐         └╥┘       ║  ║
-q1_1 -> 3 ┤1                 ├────────────┤1             ├┤ Rz(π) ├┤1            ├───────────┤1         ├───┤M├──────────╫────────╫──╫─
-          ├──────────────────┤┌──────────┐├──────────────┤└───┬───┘└─┬──────────┬┘    ┌─┐    │          │   └╥┘          ║        ║  ║
-q0_0 -> 4 ┤0                 ├┤ Rz(-π/2) ├┤0             ├────■──────┤ Rz(-π/2) ├─────┤M├────┤          ├────╫───────────╫────────╫──╫─
-          │  Initialize(1,0) │└──────────┘│  Rswap(-π/2) │   ┌─┐     └──────────┘     └╥┘    │          │    ║           ║        ║  ║
-q0_1 -> 5 ┤1                 ├────────────┤1             ├───┤M├───────────────────────╫─────┤          ├────╫───────────╫────────╫──╫─
-          └──────────────────┘            └──────────────┘   └╥┘                       ║     │  PPM(ZZ) │    ║           ║        ║  ║
-     c_0: ════════════════════════════════════════════════════╬════════════════════════╩═════╡          ╞════╬═══════════╬════════╬══╬═
-                                                              ║                              │          │    ║           ║        ║  ║
-     c_1: ════════════════════════════════════════════════════╬══════════════════════════════╡          ╞════╬═══════════╩════════╬══╬═
-                                                              ║                              │          │    ║                    ║  ║
-     c_2: ════════════════════════════════════════════════════╬══════════════════════════════╡          ╞════╬════════════════════╩══╬═
-                                                              ║                              │          │    ║                       ║
-     c_3: ════════════════════════════════════════════════════╬══════════════════════════════╡0         ╞════╬═══════════════════════╬═
-                                                              ║                              └──────────┘    ║                       ║
-herald_0: ════════════════════════════════════════════════════╩══════════════════════════════════════════════╬═══════════════════════╬═
-                                                                                                             ║                       ║
-herald_1: ═══════════════════════════════════════════════════════════════════════════════════════════════════╩═══════════════════════╬═
-                                                                                                                                     ║
-herald_2: ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╩═
-
-```
+![The compiled circuit](docs/quickstart_output.png)
 
 `build_pm` returns a Qiskit `PassManager`. After a run, `pm.property_set` holds `circuit_metrics`, `online_n_swaps` (routing SWAPs) and `logical_output_permutation`.
 `out.layout` is a rail-level `TranspileLayout`: virtual qubit `2*i + w` is rail `w` of logical qubit `i`.
@@ -187,7 +141,7 @@ out = pm.run(qc)
 
 ```bash
 make init  # .venv, the package in editable mode, git hooks
-make test  # Rust and Python tests, including the examples in this README
+make test  # Rust and Python tests
 ```
 
 Citation: TODO, once the paper is out.
