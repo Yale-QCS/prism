@@ -8,6 +8,7 @@ from qiskit.circuit.random import random_circuit
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap, PassManager
 
+from prism import dualrail_pm
 from prism.encodings import DualRail, QubitEncoding
 from prism.ir import MultiRealization, MultiRealizationOp
 from prism.pipeline import SearchBudget, build_pm, prism_stages
@@ -108,7 +109,7 @@ def verify_ir(*, dag, **_):
 @pytest.mark.parametrize("seed", [0, 1])
 def test_routed_rails_match_encoded_logical_state(make, seed):
     qc = make(seed)
-    pm = build_pm(CouplingMap.from_grid(2, 4), enc=DualRail, seed=seed, budget=BUDGET)
+    pm = dualrail_pm(CouplingMap.from_grid(2, 4), seed=seed, budget=BUDGET)
     compiled = pm.run(qc, callback=verify_ir)
     branch = seed % 2  # the branch an if_else takes, in both circuits
     overlap = _overlap(_take(qc, branch), _take(compiled, branch))

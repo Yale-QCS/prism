@@ -4,12 +4,11 @@ from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap
 
-from prism.encodings import DualRail
-from prism.pipeline import build_pm
+from prism import dualrail_pm
 
 
 def _compile(qc: QuantumCircuit):
-    pm = build_pm(CouplingMap.from_grid(3, 3), DualRail, seed=0)
+    pm = dualrail_pm(CouplingMap.from_grid(3, 3), seed=0)
     return pm.run(qc), pm.property_set
 
 
