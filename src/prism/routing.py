@@ -20,7 +20,6 @@ import warnings
 from dataclasses import dataclass, replace
 from typing import Literal, get_args
 
-from qiskit import QuantumCircuit
 from qiskit.circuit.library import SwapGate
 from qiskit.passmanager import GenericPass
 from qiskit.transpiler import CouplingMap, TranspilerError
@@ -41,7 +40,7 @@ from prism.ir import (
     Placement,
     commuting_predecessors,
 )
-from prism.metrics import active_gate_count, physical_depth
+from prism.metrics import CircuitMetrics
 
 __all__ = ["Objective", "PrismRouting", "SearchBudget"]
 
@@ -76,12 +75,25 @@ class SearchBudget:
                 raise ValueError(f"{name} must be >= 1, got {getattr(self, name)}")
 
 
-def _score(qc: QuantumCircuit, objective: Objective) -> tuple[int, int, int]:
-    """Post-selection score for ``qc`` under ``objective``; lower is better."""
-    d, g, sz = physical_depth(qc), active_gate_count(qc), qc.size()
+def _score(placed: MultiRealization, objective: Objective) -> tuple[int, int, int]:
+    """Post-selection score for ``placed`` under ``objective``; lower is better."""
+    m = CircuitMetrics.of(placed.to_circuit())
     if objective == "swaps":
-        return (qc.count_ops().get("swap", 0), d, g)
-    return (d, g, sz)
+        return (m.swaps, m.depth, m.active_gates)
+    return (m.depth, m.active_gates, m.size)
+
+
+def _swaps(placed: MultiRealization) -> int:
+    """``CircuitMetrics.swaps`` of ``placed.to_circuit()``, without building the circuit."""
+    return sum(
+        ci.operation.name == "swap"
+        for ins in placed.data
+        for ci in (
+            ins.operation.candidates[ins.operation.choice].data
+            if isinstance(ins.operation, MultiRealizationOp)
+            else (ins,)
+        )
+    )
 
 
 class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
@@ -180,19 +192,24 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         edges = frozenset(
             e for a, b in self.coupling_map.get_edges() for e in ((a, b), (b, a))
         )
-        best = None  # (score, placed program, n_swaps); first start wins ties
-        for routed, final_v2p, refined_v2p in results:
-            data = _replay(routed, ir.data, list(refined_v2p), n_phys)
-            placed = replace(
-                ir,
-                data=data,
-                placement=Placement(tuple(refined_v2p), tuple(final_v2p), edges),
+        starts = [
+            (
+                replace(
+                    ir,
+                    data=_replay(routed, ir.data, list(refined_v2p), n_phys),
+                    placement=Placement(tuple(refined_v2p), tuple(final_v2p), edges),
+                ),
+                sum(len(swaps) for swaps, _, _ in routed),
             )
-            s = _score(placed.to_circuit(), self.budget.objective)
-            if best is None or s < best[0]:
-                best = (s, placed, sum(len(swaps) for swaps, _, _ in routed))
-        assert best is not None
-        _, placed, n_swaps = best
+            for routed, final_v2p, refined_v2p in results
+        ]
+        if self.budget.objective == "swaps":
+            # Only the starts with the fewest SWAPs can win: score just those.
+            counts = [_swaps(placed) for placed, _ in starts]
+            fewest = min(counts)
+            starts = [s for s, c in zip(starts, counts) if c == fewest]
+        # min keeps the first of equal scores: the earliest start wins ties.
+        placed, n_swaps = min(starts, key=lambda s: _score(s[0], self.budget.objective))
         self.property_set["online_n_swaps"] = n_swaps
         return placed
 

@@ -5,7 +5,7 @@ from qiskit import QuantumCircuit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.quantum_info import Operator
 
-from prism.metrics import physical_depth
+from prism.metrics import CircuitMetrics
 from prism.synthesis.reschedule import RescheduleCommutingDiagonals
 
 
@@ -31,5 +31,5 @@ def test_reschedule_preserves_unitary_and_depth_does_not_grow():
         qc = _circuit(seed)
         out = dag_to_circuit(RescheduleCommutingDiagonals().run(circuit_to_dag(qc)))
         assert Operator(out).equiv(Operator(qc))
-        assert physical_depth(out) <= physical_depth(qc)
+        assert CircuitMetrics.of(out).depth <= CircuitMetrics.of(qc).depth
         assert out.count_ops() == qc.count_ops()
