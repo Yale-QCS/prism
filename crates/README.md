@@ -9,7 +9,7 @@ Rust extension module backing prism's routing, exposed to Python as `prism._acce
   reproduce, update and remove the copy.
 - [`src/prism_routing/`](src/prism_routing/): prism's code. `route_ext.rs` holds the
   multi-realization routing hooks and is compiled inside the vendored `route` module; `input.rs`
-  converts Python's flat routing problem; `layout.rs` is the Python entry point, prism's layout
+  converts Python's routing problem into Sabre DAGs and the route back; `layout.rs` is the Python entry point, prism's layout
   search (the outer loop that upstream `SabreLayout` runs); `mod.rs` builds the routing target
   and its dense starting layout.
 

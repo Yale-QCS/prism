@@ -51,7 +51,7 @@ use qiskit_circuit::packed_instruction::PackedInstruction;
 use qiskit_circuit::{BlocksMode, PhysicalQubit, Qubit, VirtualQubit};
 use qiskit_util::getenv_use_multiple_threads;
 use route_ext::MultiLayers;
-pub use route_ext::flatten_routing_result;
+pub use route_ext::routed_ops;
 
 /// Number of trials for control flow block swap epilogues.
 const SWAP_EPILOGUE_TRIALS: usize = 4;
@@ -321,7 +321,7 @@ impl RoutingResult<'_> {
                     dag.push_back(new_inst)?
                 }
                 RoutedItemKind::MultiTwoQ(_) => {
-                    unreachable!("PRISM emits multi-realization nodes from its own event stream")
+                    unreachable!("PRISM reads multi-realization nodes through `routed_ops`")
                 }
             };
             for node in rest {

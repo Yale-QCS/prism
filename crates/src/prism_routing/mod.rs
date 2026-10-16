@@ -1,6 +1,6 @@
 //! prism's multi-realization extension of the vendored Qiskit Sabre router.
 //!
-//! - [`input`]: the flat routing problem from Python and the event stream back to it.
+//! - [`input`]: the routing problem from Python and the routed order back to it.
 //! - [`layout`]: prism's layout search, the outer loop of upstream `SabreLayout`.
 //!
 //! The routing hooks themselves are in `route_ext.rs`, which is compiled as a child module of

@@ -47,9 +47,6 @@ __all__ = ["Objective", "PrismRouting", "SearchBudget"]
 
 Objective = Literal["swaps", "depth"]
 
-# Rust event kind (crates/src/prism_routing/input.rs); every other event is a commit.
-_SWAP = 1
-
 
 @dataclass(frozen=True)
 class SearchBudget:
@@ -161,7 +158,6 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
                 "default candidate, and the physical stage routes it.",
                 UserWarning,
             )
-        forward, reverse = _routing_problems(ir)
         base_seed = (
             self.seed
             if self.seed is not None
@@ -171,8 +167,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             list(self.coupling_map.get_edges()), n_phys
         )
         results = prism_layout_and_routing(
-            forward,
-            reverse,
+            _routing_problem(ir),
             target,
             self._make_heuristic(n_phys),
             [
@@ -186,8 +181,8 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             e for a, b in self.coupling_map.get_edges() for e in ((a, b), (b, a))
         )
         best = None  # (score, placed program, n_swaps); first start wins ties
-        for events, final_v2p, n_swaps, refined_v2p in results:
-            data = _replay(events, ir.data, list(refined_v2p), n_phys)
+        for routed, final_v2p, refined_v2p in results:
+            data = _replay(routed, ir.data, list(refined_v2p), n_phys)
             placed = replace(
                 ir,
                 data=data,
@@ -195,10 +190,10 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             )
             s = _score(placed.to_circuit(), self.budget.objective)
             if best is None or s < best[0]:
-                best = (s, placed, n_swaps)
+                best = (s, placed, sum(len(swaps) for swaps, _, _ in routed))
         assert best is not None
         _, placed, n_swaps = best
-        self.property_set["online_n_swaps"] = int(n_swaps)
+        self.property_set["online_n_swaps"] = n_swaps
         return placed
 
     def _make_heuristic(self, n_phys: int) -> Heuristic:
@@ -237,86 +232,67 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         ]
 
 
-def _routing_problems(ir: MultiRealization) -> tuple[tuple, tuple]:
-    """The kernel's forward and reverse problems.
+def _routing_problem(ir: MultiRealization) -> list[tuple]:
+    """The kernel's routing problem: per instruction, ``(pairs, default, predecessors)``.
 
-    A problem is ``(virt_pairs, succ, pred_count, local_default)``, one entry
-    per instruction (see ``crates/src/prism_routing/input.rs``). The reverse
-    problem is the program reversed, for backward refinement. An op that is
-    not ``single_edge`` gets candidates with no pairs: the kernel commits its
+    ``pairs[r]`` lists the rail pairs of the two-qubit gates of realization
+    ``r`` (see ``crates/src/prism_routing/input.rs``). An op that is not
+    ``single_edge`` gets realizations with no pairs: the kernel commits its
     default at once, adding no SWAP for it.
     """
-    virt_pairs, wires, diagonal, local_default = [], [], [], []
+    ops, wires, diagonal = [], [], []
     for ins in ir.data:
         op = ins.operation
-        if isinstance(op, MultiRealizationOp):
-            cands = op.candidates
-            diagonal.append(op.diagonal)
-            local_default.append(op.default_index)
-        else:
-            qc = QuantumCircuit(len(ins.qubits), len(ins.clbits))
-            qc.append(op, qc.qubits, qc.clbits)
-            cands = (qc,)
+        if not isinstance(op, MultiRealizationOp):
+            ops.append(([[ins.qubits] if len(ins.qubits) == 2 else []], 0))
+            wires.append({*ins.qubits, *ins.clbits})
             diagonal.append(False)
-            local_default.append(0)
-        pairs, used = [], set(ins.clbits)
-        for real in cands:
-            gates = [
+            continue
+        gates = [
+            [
                 [ins.qubits[real.find_bit(q).index] for q in ci.qubits]
                 for ci in real.data
             ]
-            used.update(v for g in gates for v in g)
-            pairs.append([[g[0], g[1]] for g in gates if len(g) == 2])
-        if isinstance(op, MultiRealizationOp) and not op.single_edge:
+            for real in op.candidates
+        ]
+        pairs = [[g for g in real if len(g) == 2] for real in gates]
+        if not op.single_edge:
             pairs = [[] for _ in pairs]
-        virt_pairs.append(pairs)
-        wires.append(used)
-
-    def problem(order: list[int]) -> tuple:
-        preds = commuting_predecessors(
-            [wires[k] for k in order], [diagonal[k] for k in order]
-        )
-        succ: list[list[int]] = [[] for _ in preds]
-        for k, deps in enumerate(preds):
-            for j in sorted(deps):
-                succ[j].append(k)
-        return (
-            [virt_pairs[k] for k in order],
-            succ,
-            [len(deps) for deps in preds],
-            [local_default[k] for k in order],
-        )
-
-    order = list(range(len(ir.data)))
-    return problem(order), problem(order[::-1])
+        ops.append((pairs, op.default_index))
+        wires.append({v for real in gates for g in real for v in g} | set(ins.clbits))
+        diagonal.append(op.diagonal)
+    preds = commuting_predecessors(wires, diagonal)
+    return [(*op, sorted(deps)) for op, deps in zip(ops, preds)]
 
 
 def _replay(
-    events: list[tuple[int, int, int]],
+    routed: list[tuple[list[tuple[int, int]], int, int]],
     data: list[MultiRealizationInstruction],
     v2p: list[int],
     n_phys: int,
 ) -> list[MultiRealizationInstruction]:
-    """Turn a kernel trace into placed instructions.
+    """Turn the kernel's routed order into placed instructions.
 
-    ``COMMIT(k, r)`` places instruction ``k`` whole, with choice ``r``.
-    ``SWAP(p, q)`` is a routing SWAP between two instructions.
+    Each ``(swaps, k, r)`` places the routing SWAPs ``swaps``, then
+    instruction ``k`` whole, with choice ``r``.
     """
     p2v = [0] * n_phys
     for v, p in enumerate(v2p):
         p2v[p] = v
     placed: list[MultiRealizationInstruction] = []
-    for kind, a, b in events:
-        if kind == _SWAP:
+    for swaps, k, r in routed:
+        for a, b in swaps:
             placed.append(MultiRealizationInstruction(SwapGate(), (a, b)))
             v_a, v_b = p2v[a], p2v[b]
             v2p[v_a], v2p[v_b] = v2p[v_b], v2p[v_a]
             p2v[a], p2v[b] = p2v[b], p2v[a]
-            continue
-        ins = data[a]
+        ins = data[k]
         op = ins.operation
-        qubits = tuple(v2p[v] for v in ins.qubits)
         if isinstance(op, MultiRealizationOp):
-            op = replace(op, choice=b)
-        placed.append(MultiRealizationInstruction(op, qubits, ins.clbits))
+            op = replace(op, choice=r)
+        placed.append(
+            MultiRealizationInstruction(
+                op, tuple(v2p[v] for v in ins.qubits), ins.clbits
+            )
+        )
     return placed

@@ -12,13 +12,13 @@ use qiskit_circuit::dag_circuit::DAGCircuit;
 use qiskit_circuit::nlayout::NLayout;
 use qiskit_util::getenv_use_multiple_threads;
 
-use super::input::{Event, Flat, sabre_dag_from_flat};
+use super::input::{Op, RoutedOp, sabre_dags};
 use super::{explicit_target, layout_from_v2p, v2p_of};
 use crate::sabre::heuristic::Heuristic;
-use crate::sabre::route::{PyRoutingTarget, RoutingProblem, flatten_routing_result, swap_map};
+use crate::sabre::route::{PyRoutingTarget, RoutingProblem, routed_ops, swap_map};
 
-/// One final route: `(events, final_v2p, n_swaps, refined_v2p)`.
-type StartResult = (Vec<Event>, Vec<u32>, u32, Vec<u32>);
+/// One final route: `(routed, final_v2p, refined_v2p)`.
+type StartResult = (Vec<RoutedOp>, Vec<u32>, Vec<u32>);
 
 /// Refine every start and route it.  Returns one [`StartResult`] per start, in start order, where
 /// `refined_v2p` is the layout the final route began from.
@@ -30,11 +30,10 @@ type StartResult = (Vec<Event>, Vec<u32>, u32, Vec<u32>);
 ///
 /// # Errors
 ///
-/// If the target is all-to-all, a start is not a permutation, or a problem is invalid.
+/// If the target is all-to-all, a start is not a permutation, or `ops` is invalid.
 #[pyfunction]
 pub fn prism_layout_and_routing(
-    forward: Flat,
-    reverse: Flat,
+    ops: Vec<Op>,
     target: &PyRoutingTarget,
     heuristic: &Heuristic,
     starts: Vec<(u64, Vec<u32>)>,
@@ -56,8 +55,7 @@ pub fn prism_layout_and_routing(
         return Err(PyValueError::new_err("starting layouts differ in length"));
     }
     let num_qubits = u32::try_from(num_qubits)?;
-    let sabre_fwd = sabre_dag_from_flat(&forward, num_qubits)?;
-    let sabre_rev = sabre_dag_from_flat(&reverse, num_qubits)?;
+    let [sabre_fwd, sabre_rev] = sabre_dags(&ops, num_qubits)?;
     // Upstream reads the `DAGCircuit` only to rebuild a routed circuit or route control flow;
     // prism does neither, so an empty one fills the slot.
     let dag = DAGCircuit::new();
@@ -86,11 +84,9 @@ pub fn prism_layout_and_routing(
             swap_trials.max(1),
             Some(false),
         );
-        let (events, n_swaps) = flatten_routing_result(&result);
         (
-            events,
+            routed_ops(&result),
             v2p_of(&result.final_layout),
-            n_swaps,
             v2p_of(&layout),
         )
     };

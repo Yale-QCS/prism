@@ -2,9 +2,9 @@
 
 Every op here has one realization of one pair, so prism builds only stock ``TwoQ`` nodes, and the
 routed circuit and final layout must match ``qiskit._accelerate.sabre.sabre_routing`` exactly for
-the same heuristic, layout, trials and seed.  The flat input mirrors ``SabreDAG::from_dag``: ops in
-``topological_op_nodes`` order, successors ascending, and no consecutive gates on the same pair
-(which ``from_dag`` would merge).
+the same heuristic, layout, trials and seed.  The input mirrors ``SabreDAG::from_dag``: ops in
+``topological_op_nodes`` order and no consecutive gates on the same pair (which ``from_dag`` would
+merge).
 
 The heuristic has no lookahead: prism's router fixes a defect in the lookahead layers that the
 installed Qiskit still has (``crates/src/sabre/README.md``), so with lookahead the two differ.
@@ -73,15 +73,9 @@ def _route_ours(dag, cmap, n, seed, trials):
     nodes = list(dag.topological_op_nodes())
     index = {node: k for k, node in enumerate(nodes)}
     qubits = [[dag.find_bit(q).index for q in node.qargs] for node in nodes]
-    succ = [sorted({index[s] for s in dag.op_successors(node)}) for node in nodes]
-    pred = [0] * len(nodes)
-    for ss in succ:
-        for s in ss:
-            pred[s] += 1
-    flat = ([[[q]] for q in qubits], succ, pred, [0] * len(nodes))
-    [(events, final_v2p, _, _)] = ours.prism_layout_and_routing(
-        flat,
-        flat,
+    preds = [sorted({index[p] for p in dag.op_predecessors(node)}) for node in nodes]
+    [(routed, final_v2p, _)] = ours.prism_layout_and_routing(
+        [([[q]], 0, p) for q, p in zip(qubits, preds)],
         ours.RoutingTarget.from_coupling_list([list(e) for e in cmap.get_edges()], n),
         _heuristic(ours, n),
         [(seed, list(range(n)))],
@@ -89,15 +83,14 @@ def _route_ours(dag, cmap, n, seed, trials):
         trials,
     )
     qc, v2p, p2v = QuantumCircuit(n), list(range(n)), list(range(n))
-    for kind, a, b in events:
-        if kind == 1:  # swap physical a, b
+    for swaps, k, _ in routed:
+        for a, b in swaps:
             qc.swap(b, a)
             va, vb = p2v[a], p2v[b]
             v2p[va], v2p[vb] = b, a
             p2v[a], p2v[b] = vb, va
-        else:
-            q0, q1 = qubits[a]
-            qc.cx(v2p[q0], v2p[q1])
+        q0, q1 = qubits[k]
+        qc.cx(v2p[q0], v2p[q1])
     return circuit_to_dag(qc), final_v2p
 
 

@@ -40,7 +40,7 @@ use qiskit_circuit::{PhysicalQubit, VirtualQubit};
 use super::super::dag::{InteractionKind, SabreDAG};
 use super::super::vec_map::VecMap;
 use super::{RoutedItemKind, RoutingProblem, RoutingResult, RoutingTarget, State};
-use crate::prism_routing::input::{EVENT_KIND_COMMIT, EVENT_KIND_SWAP, Event};
+use crate::prism_routing::input::RoutedOp;
 use crate::prism_routing::{VirtRealizations, single_edge};
 
 /// Per-routing-step decay of the physical-load tie-break.
@@ -334,30 +334,30 @@ impl State {
     }
 }
 
-/// Flatten a routing result into prism's `(kind, a, b)` event stream and its swap count.
+/// The routed order of `result`: per node, the swaps before it, its node index and its
+/// realization.
 ///
-/// See [`crate::prism_routing::input`] for the event encoding.
-pub fn flatten_routing_result(result: &RoutingResult<'_>) -> (Vec<Event>, u32) {
-    let mut events = Vec::with_capacity(result.order.order.len() * 2);
-    let mut n_swaps: u32 = 0;
-    let mut push_swaps = |events: &mut Vec<Event>, swaps: &[[PhysicalQubit; 2]]| {
-        for [a, b] in swaps {
-            events.push((EVENT_KIND_SWAP, a.0, b.0));
-            n_swaps += 1;
-        }
+/// prism's input has no control flow, so the order ends with no swaps (`Order::final_swaps`).
+pub fn routed_ops(result: &RoutingResult<'_>) -> Vec<RoutedOp> {
+    debug_assert!(result.order.final_swaps.is_empty());
+    let realization = |kind: &RoutedItemKind| match kind {
+        RoutedItemKind::Simple => 0,
+        RoutedItemKind::MultiTwoQ(r) => *r,
+        RoutedItemKind::ControlFlow(_) => unreachable!("prism's input has no control flow"),
     };
-    for item in &result.order.order {
-        push_swaps(&mut events, item.initial_swaps());
-        let op_idx = u32::try_from(result.problem.sabre.dag[item.node].indices[0].index())
-            .expect("op count fits in u32");
-        match &item.kind {
-            RoutedItemKind::Simple => events.push((EVENT_KIND_COMMIT, op_idx, 0)),
-            RoutedItemKind::MultiTwoQ(r) => events.push((EVENT_KIND_COMMIT, op_idx, *r)),
-            RoutedItemKind::ControlFlow(_) => unreachable!("prism's input has no control flow"),
-        }
-    }
-    push_swaps(&mut events, &result.order.final_swaps);
-    (events, n_swaps)
+    result
+        .order
+        .order
+        .iter()
+        .map(|item| {
+            let swaps = item
+                .initial_swaps()
+                .iter()
+                .map(|s| s.map(|p| p.0))
+                .collect();
+            (swaps, item.node.index(), realization(&item.kind))
+        })
+        .collect()
 }
 
 #[cfg(test)]
@@ -432,10 +432,10 @@ mod tests {
             1,
             None,
         );
-        let (events, n_swaps) = super::flatten_routing_result(&result);
-        let commits = events.iter().filter(|e| e.0 != 1).map(|e| e.2).collect();
-        assert_eq!(n_swaps as usize, result.swap_count());
-        (result.swap_count(), commits)
+        let routed = super::routed_ops(&result);
+        let swaps = routed.iter().map(|(swaps, _, _)| swaps.len()).sum();
+        assert_eq!(swaps, result.swap_count());
+        (swaps, routed.iter().map(|&(_, _, r)| r).collect())
     }
 
     #[test]
