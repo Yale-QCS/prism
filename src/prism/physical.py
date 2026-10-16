@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from qiskit.circuit import Measure, QuantumCircuit
+from qiskit.circuit import Instruction, Measure, QuantumCircuit
 from qiskit.circuit.controlflow import (
     ForLoopOp,
     IfElseOp,
@@ -127,6 +127,16 @@ class EarlyMeasurement(TransformationPass):
         return out
 
 
+def _is_diagonal(operation: Instruction) -> bool:
+    """A diagonal gate, or control flow whose bodies are diagonal: reading a clbit commutes."""
+    if operation.name in DIAGONAL_GATES:
+        return True
+    blocks = getattr(operation, "blocks", None)
+    return blocks is not None and all(
+        _is_diagonal(instr.operation) for block in blocks for instr in block.data
+    )
+
+
 class RescheduleCommutingDiagonals(TransformationPass):
     """Critical-path list scheduling over a dependency graph where diagonal gates commute.
 
@@ -142,7 +152,7 @@ class RescheduleCommutingDiagonals(TransformationPass):
         n = len(nodes)
         preds = commuting_predecessors(
             [(*node.qargs, *node.cargs) for node in nodes],
-            [node.op.name in DIAGONAL_GATES for node in nodes],
+            [_is_diagonal(node.op) for node in nodes],
         )
         succs: list[list[int]] = [[] for _ in range(n)]
         for k, ps in enumerate(preds):
