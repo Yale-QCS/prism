@@ -151,8 +151,9 @@ impl MultiLayers {
     }
 
     /// The pair of each single-edge realization of each front-layer multi node, for the release
-    /// valve.  Every multi node has one (`input` checks it), and a node whose pair is adjacent has
-    /// already committed.
+    /// valve.  Every front-layer multi node has one: `input` requires a realization with no pairs,
+    /// which commits at once, or with every pair on one qubit pair.  A node whose pair is adjacent
+    /// has already committed.
     pub(super) fn front_pairs<'s>(
         &'s self,
         sabre: &'s SabreDAG,

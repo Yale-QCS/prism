@@ -4,7 +4,6 @@
 //! `max_iterations`, then route forward once more with `swap_trials` trials from the refined
 //! layout.  Python keeps starting-layout generation, circuit emission and objective scoring.
 
-use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use rayon_cond::CondIterator;
 
@@ -30,7 +29,7 @@ type StartResult = (Vec<RoutedOp>, Vec<u32>, Vec<u32>);
 ///
 /// # Errors
 ///
-/// If the target is all-to-all, a start is not a permutation, or `ops` is invalid.
+/// If the target is all-to-all, a start is not a permutation of its qubits, or `ops` is invalid.
 #[pyfunction]
 pub fn prism_layout_and_routing(
     ops: Vec<Op>,
@@ -41,20 +40,11 @@ pub fn prism_layout_and_routing(
     swap_trials: usize,
 ) -> PyResult<Vec<StartResult>> {
     let target = explicit_target(target)?;
+    let num_qubits = u32::try_from(target.num_qubits())?;
     let starts = starts
-        .iter()
-        .map(|(seed, v2p)| Ok((*seed, layout_from_v2p(v2p)?)))
+        .into_iter()
+        .map(|(seed, v2p)| Ok((seed, layout_from_v2p(&v2p, num_qubits)?)))
         .collect::<PyResult<Vec<(u64, NLayout)>>>()?;
-    let Some(num_qubits) = starts.first().map(|(_, layout)| layout.num_qubits()) else {
-        return Ok(Vec::new());
-    };
-    if starts
-        .iter()
-        .any(|(_, layout)| layout.num_qubits() != num_qubits)
-    {
-        return Err(PyValueError::new_err("starting layouts differ in length"));
-    }
-    let num_qubits = u32::try_from(num_qubits)?;
     let [sabre_fwd, sabre_rev] = sabre_dags(&ops, num_qubits)?;
     // Upstream reads the `DAGCircuit` only to rebuild a routed circuit or route control flow;
     // prism does neither, so an empty one fills the slot.

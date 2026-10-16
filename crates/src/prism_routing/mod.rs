@@ -115,19 +115,20 @@ fn explicit_target(target: &PyRoutingTarget) -> PyResult<&RoutingTarget> {
     })
 }
 
-/// A layout from a virtual-to-physical list, which must be a permutation of `0..len`.
-fn layout_from_v2p(v2p: &[u32]) -> PyResult<NLayout> {
-    let mut seen = vec![false; v2p.len()];
-    for &p in v2p {
-        match seen.get_mut(p as usize) {
-            Some(slot @ false) => *slot = true,
-            _ => {
-                return Err(PyValueError::new_err(format!(
-                    "layout {v2p:?} is not a permutation of 0..{}",
-                    v2p.len()
-                )));
-            }
+/// A layout from a virtual-to-physical list, which must be a permutation of `0..num_qubits`.
+fn layout_from_v2p(v2p: &[u32], num_qubits: u32) -> PyResult<NLayout> {
+    let mut seen = vec![false; num_qubits as usize];
+    let distinct = v2p.iter().all(|&p| match seen.get_mut(p as usize) {
+        Some(slot @ false) => {
+            *slot = true;
+            true
         }
+        _ => false,
+    });
+    if !distinct || v2p.len() != seen.len() {
+        return Err(PyValueError::new_err(format!(
+            "layout {v2p:?} is not a permutation of 0..{num_qubits}"
+        )));
     }
     NLayout::from_virtual_to_physical(v2p.iter().copied().map(PhysicalQubit::new).collect())
 }
@@ -135,4 +136,20 @@ fn layout_from_v2p(v2p: &[u32]) -> PyResult<NLayout> {
 /// The virtual-to-physical list of `layout`.
 fn v2p_of(layout: &NLayout) -> Vec<u32> {
     layout.iter_virtual().map(|(_, p)| p.0).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::layout_from_v2p;
+
+    #[test]
+    fn layouts_are_permutations_of_every_qubit() {
+        assert!(layout_from_v2p(&[1, 0, 2], 3).is_ok());
+        assert!(layout_from_v2p(&[1, 0], 3).is_err(), "too short");
+        assert!(layout_from_v2p(&[1, 1, 2], 3).is_err(), "repeated qubit");
+        assert!(
+            layout_from_v2p(&[1, 0, 3], 3).is_err(),
+            "qubit out of range"
+        );
+    }
 }
