@@ -112,10 +112,11 @@ def physical_pm(
     Built with ``routing_method="none"``, whose init stage omits
     ``ElidePermutations``: that pass would turn a committed rail exchange (a
     real beamsplitter SWAP) into a free virtual permutation. The layout stage is
-    empty, because ``PrismRouting`` placed the program. The routing stage is O3's
-    ``SabreSwap`` stage without ``VF2PostLayout``, so it keeps the layout: it
-    routes only if ``CheckMap`` finds a gate off the device edges, i.e. in an
-    operation that ``PrismRouting`` passed through.
+    empty, because ``PrismRouting`` placed the program; ``layout_method="trivial"``
+    says so, which also leaves ``VF2PostLayout`` out of the optimization stage.
+    The routing stage is O3's ``SabreSwap`` stage without ``VF2PostLayout``, so
+    it keeps the layout: it routes only if ``CheckMap`` finds a gate off the
+    device edges, i.e. in an operation that ``PrismRouting`` passed through.
     ``CommutativeOptimization`` merges the CRZ runs on an edge that O3 cannot
     resynthesize without a one-qubit basis.
     """
@@ -124,6 +125,7 @@ def physical_pm(
         optimization_level=3,
         target=target,
         seed_transpiler=seed,
+        layout_method="trivial",
         routing_method="none",
     )
     preset.layout = PassManager()
