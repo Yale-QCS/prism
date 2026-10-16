@@ -6,7 +6,7 @@
     dag_to_multi_realization  DAGCircuit -> MultiRealization       DAGToMultiRealization
     routing                   MultiRealization -> MultiRealization PrismRouting
     multi_realization_to_dag  MultiRealization -> DAGCircuit       MultiRealizationToDAG
-    physical                  DAGCircuit -> DAGCircuit             enc.physical_pm(): stock O3
+    physical                  DAGCircuit -> DAGCircuit             physical_pm: stock O3
 
 ``build_pm`` nests it in a ``qiskit.transpiler.PassManager``, which converts the
 circuit to a DAG and back as for any transpiler pipeline.
@@ -36,6 +36,7 @@ from qiskit.transpiler import (
 )
 
 from prism.ir import MultiRealization, MultiRealizationInstruction
+from prism.physical import physical_pm
 from prism.routing import PrismRouting, SearchBudget
 
 if TYPE_CHECKING:
@@ -211,7 +212,7 @@ def prism_stages(
         dag_to_multi_realization=DAGToMultiRealization(enc),
         routing=PrismRouting(coupling_map, seed=seed, budget=budget),
         multi_realization_to_dag=MultiRealizationToDAG(),
-        physical=enc.physical_pm(coupling_map, seed=seed),
+        physical=physical_pm(coupling_map, enc, seed=seed),
     )
 
 

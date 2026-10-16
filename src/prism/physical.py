@@ -91,7 +91,7 @@ def _physical_target(enc: type[QubitEncoding], coupling_map: CouplingMap) -> Tar
     """Build the physical-stage Target with Measure + control-flow ops registered opaquely."""
     target = Target.from_configuration(
         basis_gates=sorted(enc.PHYSICAL_ISA),
-        custom_name_mapping=enc.custom_name_mapping(),
+        custom_name_mapping=enc.CUSTOM_GATES,
         coupling_map=coupling_map,
     )
     target.add_instruction(Measure(), name="measure")

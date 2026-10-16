@@ -8,8 +8,8 @@ from qiskit.circuit.random import random_circuit
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap
 
-from prism.encodings import DualRail
-from prism.ir import MultiRealization
+from prism.encodings import DualRail, QubitEncoding
+from prism.ir import MultiRealization, MultiRealizationOp
 from prism.pipeline import SearchBudget, build_pm
 
 
@@ -166,5 +166,49 @@ def test_measured_output_matches_logical_distribution(seed):
     out = pm.run(qc)
     want = _clbit_probabilities(qc, qc.clbits)
     got = _clbit_probabilities(out, qc.clbits)  # logical clbits read rail 0
+    assert got.keys() == want.keys()
+    assert all(got[k] == pytest.approx(want[k], abs=1e-9) for k in want)
+
+
+class OneWire(QubitEncoding):
+    """Each logical qubit on one wire: any encoding with rules compiles."""
+
+    WIRES_PER_LOGICAL = 1
+    LOGICAL_ISA = frozenset({"rz", "sx", "x", "cz", "measure"})
+    PHYSICAL_ISA = frozenset({"rz", "sx", "x", "cz"})
+
+    @classmethod
+    def initialize(cls):
+        return QuantumCircuit(1)
+
+    @classmethod
+    def _as_is(cls, op):
+        qc = QuantumCircuit(op.num_qubits)
+        qc.append(op, qc.qubits)
+        return MultiRealizationOp(op.name, (qc,), diagonal=op.name in ("rz", "cz"))
+
+    rz = sx = x = cz = _as_is
+
+
+@pytest.mark.parametrize(
+    ("enc", "cmap", "mc"),
+    [
+        (OneWire, CouplingMap.from_line(5), False),
+        (DualRail, CouplingMap.from_grid(3, 4), True),  # MCX adds an ancilla qubit
+    ],
+)
+def test_measured_distribution_other_encoding_and_mcx(enc, cmap, mc):
+    qc = random_circuit(4, 3, max_operands=2, seed=7)
+    qc.h(range(3))
+    if mc:
+        qc.mcx([0, 1, 2], 3)
+    qc.cx(0, 3)
+    qc.add_register(ClassicalRegister(4))
+    qc.measure(range(4), range(4))
+    out = build_pm(cmap, enc=enc, seed=3).run(qc)
+    rails = out.layout.initial_index_layout(filter_ancillas=True)
+    assert len(rails) == enc.WIRES_PER_LOGICAL * (4 + mc)
+    want = _clbit_probabilities(qc, qc.clbits)
+    got = _clbit_probabilities(out, qc.clbits)
     assert got.keys() == want.keys()
     assert all(got[k] == pytest.approx(want[k], abs=1e-9) for k in want)

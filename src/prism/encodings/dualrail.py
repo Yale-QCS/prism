@@ -31,6 +31,10 @@ class DualRail(QubitEncoding):
     PHYSICAL_ISA: ClassVar[frozenset[str]] = frozenset(
         {"x", "rx", "rz", "crz", "swap", "rswap", "joint_herald"}
     )
+    CUSTOM_GATES: ClassVar[dict[str, type]] = {
+        "rswap": RSwapGate,
+        "joint_herald": JointHeraldGate,
+    }
 
     @classmethod
     def initialize(cls) -> QuantumCircuit:
@@ -56,14 +60,6 @@ class DualRail(QubitEncoding):
             # but RTOF is cheaper; phases cancel pairwise).
             reshape_passes=(MargolusPairOptimizer(),),
         )
-
-    @classmethod
-    def custom_name_mapping(cls) -> dict:
-        """Register ``rswap`` opaquely so the physical Target accepts it post-lowering."""
-        return {
-            "rswap": RSwapGate,
-            "joint_herald": JointHeraldGate,
-        }
 
     # ---- Encoding-specific lowering rules --------------------------------
     @classmethod
