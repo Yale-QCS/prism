@@ -4,20 +4,58 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from qiskit.circuit import Instruction, QuantumCircuit
+import numpy as np
+from qiskit.circuit import Gate, Instruction, ParameterExpression, QuantumCircuit
 from qiskit.circuit.library import XGate
 from qiskit.transpiler import PassManager
 
 from prism.encodings.base import QubitEncoding
+from prism.encodings.dualrail_logical import (
+    MargolusPairOptimizer,
+    equivalence_library,
+)
 from prism.ir import MultiRealizationOp
 from prism.logical import basic_logical_pm
-from prism.synthesis.delocal_decomp import build_equivalence_library
-from prism.synthesis.margolus import MargolusPairOptimizer
 from prism.synthesis.preparation import (
     SYNTHETIC_PREPARATION_LABEL,
     JointHeraldGate,
 )
-from prism.synthesis.rswap import RSwapGate
+
+
+class RSwapGate(Gate):
+    """Fractional SWAP; exactly ``SwapGate().power(theta/pi)``."""
+
+    def __init__(self, theta: float | ParameterExpression) -> None:
+        """Create an rswap gate with angle ``theta``."""
+        super().__init__("rswap", 2, [theta])
+
+    def __array__(
+        self, dtype: np.dtype | None = None, copy: bool | None = None
+    ) -> np.ndarray:
+        theta = float(self.params[0])
+        p = np.exp(1j * theta / 2)
+        c, s = np.cos(theta / 2), np.sin(theta / 2)
+        return np.array(
+            [
+                [1, 0, 0, 0],
+                [0, p * c, -1j * p * s, 0],
+                [0, -1j * p * s, p * c, 0],
+                [0, 0, 0, 1],
+            ],
+            dtype=dtype or complex,
+        )
+
+    def _define(self) -> None:
+        """Exact standard-gate form (execution/simulation boundary only).
+
+        SWAP^(θ/π) = e^{iθ/4}·rxx(θ/2)·ryy(θ/2)·rzz(θ/2).
+        """
+        theta = self.params[0]
+        qc = QuantumCircuit(2, global_phase=theta / 4)
+        qc.rxx(theta / 2, 0, 1)
+        qc.ryy(theta / 2, 0, 1)
+        qc.rzz(theta / 2, 0, 1)
+        self.definition = qc
 
 
 class DualRail(QubitEncoding):
@@ -55,7 +93,7 @@ class DualRail(QubitEncoding):
         """Basic cleanup with Margolus pairs and the dual-rail equivalence library."""
         return basic_logical_pm(
             cls,
-            eq_library=build_equivalence_library(),
+            eq_library=equivalence_library(),
             # CCX compute/uncompute pairs → RTOF (DR has a 4-RX CCX template
             # but RTOF is cheaper; phases cancel pairwise).
             reshape_passes=(MargolusPairOptimizer(),),
