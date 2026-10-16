@@ -6,12 +6,12 @@ from qiskit.circuit.library import QFTGate
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap, TranspilerError
 
-from prism.encodings import DualRail, ErasureCheck
-from prism.pipeline import build_pm
+from prism import ErasureCheck, dualrail_pm
+from prism.encodings import DualRail
 
 
-def test_output_is_physical_isa_on_device_edges():
-    """No gate leaves the code space, and every multi-qubit op, if_else included, is on an edge."""
+def _mixed() -> QuantumCircuit:
+    """QFT, RX, CCX, a distant CRZ and an if_else over five qubits."""
     qc = QuantumCircuit(6, 6)
     qc.append(QFTGate(4), range(4))
     qc.rx(0.4, 1)
@@ -22,9 +22,34 @@ def test_output_is_physical_isa_on_device_edges():
         for q in range(1, 6):
             qc.rx(0.3 * q, q)
     qc.measure(range(6), range(6))
-    cmap = CouplingMap.from_heavy_hex(3)
+    return qc
+
+
+def _ripple_adder() -> QuantumCircuit:
+    """CDKM-style MAJ/UMA chain: CX and CCX runs that O3 would resynthesize into any 1q basis."""
+    qc = QuantumCircuit(5)
+    for i in (0, 2):
+        qc.cx(i + 2, i + 1)
+        qc.cx(i + 2, i)
+        qc.ccx(i, i + 1, i + 2)
+    for i in (2, 0):
+        qc.ccx(i, i + 1, i + 2)
+        qc.cx(i + 2, i)
+        qc.cx(i, i + 1)
+    return qc
+
+
+@pytest.mark.parametrize(
+    ("make", "cmap"),
+    [
+        (_mixed, CouplingMap.from_heavy_hex(3)),
+        (_ripple_adder, CouplingMap.from_line(10)),
+    ],
+)
+def test_output_is_physical_isa_on_device_edges(make, cmap):
+    """No gate leaves the code space, and every multi-qubit op, if_else included, is on an edge."""
     # The largest seed checks that every seed derived from it stays in the router's u64 range.
-    out = build_pm(cmap, enc=DualRail, seed=2**64 - 1).run(qc)
+    out = dualrail_pm(cmap, seed=2**64 - 1).run(make())
     edges = set(cmap.get_edges())
     for ins in out.data:
         if len(ins.qubits) == 2:
@@ -76,7 +101,7 @@ def _four_qubits():
     ],
 )
 def test_unsupported_circuit_raises(make, message):
-    pm = build_pm(CouplingMap.from_grid(2, 3), enc=DualRail, seed=0)
+    pm = dualrail_pm(CouplingMap.from_grid(2, 3), seed=0)
     with pytest.raises(TranspilerError, match=message):
         pm.run(make())
 
@@ -90,7 +115,7 @@ def test_unsupported_circuit_raises(make, message):
 )
 def test_unsupported_coupling_map_raises(cmap, message):
     with pytest.raises(ValueError, match=message):
-        build_pm(cmap, enc=DualRail)
+        dualrail_pm(cmap)
 
 
 def _shot(qc: QuantumCircuit, seed: int, lost: int | None = None) -> dict[Clbit, int]:
@@ -142,7 +167,7 @@ def test_erasure_check_is_local_flags_its_own_qubit_and_keeps_the_state():
     qc.measure(range(3), range(3))  # entangle, check, undo: the logical outcome is 000
 
     cmap = CouplingMap.from_line(6)
-    pm = build_pm(cmap, enc=DualRail, seed=0)
+    pm = dualrail_pm(cmap, seed=0)
     out = pm.run(qc)
     assert pm.property_set["online_n_swaps"] > 0  # the checks sit between routed gates
     checks = [ci for ci in out.data if ci.name == "pauli_product_measurement"]
