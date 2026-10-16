@@ -1,4 +1,4 @@
-"""Dual-rail encoding: its rules and ``RSwapGate``. Convention ``|0_L⟩ = |01⟩, |1_L⟩ = |10⟩``."""
+"""Dual-rail encoding: its rules, ``RSwapGate`` and ``PrepareGate``. Convention ``|0_L⟩ = |01⟩, |1_L⟩ = |10⟩``."""
 
 from __future__ import annotations
 
@@ -6,7 +6,6 @@ from typing import ClassVar
 
 import numpy as np
 from qiskit.circuit import Gate, Instruction, ParameterExpression, QuantumCircuit
-from qiskit.circuit.library import XGate
 from qiskit.transpiler import PassManager
 
 from prism.encodings.base import QubitEncoding
@@ -16,10 +15,6 @@ from prism.encodings.dualrail_logical import (
 )
 from prism.ir import MultiRealizationOp
 from prism.logical import basic_logical_pm
-from prism.synthesis.preparation import (
-    SYNTHETIC_PREPARATION_LABEL,
-    JointHeraldGate,
-)
 
 
 class RSwapGate(Gate):
@@ -55,6 +50,24 @@ class RSwapGate(Gate):
         self.definition = qc
 
 
+class PrepareGate(Instruction):
+    """Prepare ``|0_L⟩`` on a rail pair: pump both rails to vacuum, load rail 1, check jointly.
+
+    Not unitary, so stock passes leave it in place. Two-rail because the joint
+    erasure check needs the rails adjacent.
+    """
+
+    def __init__(self) -> None:
+        """Create the two-rail preparation."""
+        super().__init__("prep", 2, 0, [])
+
+    def _define(self) -> None:
+        qc = QuantumCircuit(2)
+        qc.reset([0, 1])
+        qc.x(1)
+        self.definition = qc
+
+
 class DualRail(QubitEncoding):
     """Dual-rail encoding. Stateless — pass the class itself, not an instance."""
 
@@ -63,25 +76,18 @@ class DualRail(QubitEncoding):
         {"x", "rx", "rz", "crz", "swap", "measure", "reset", "if_else"}
     )
     PHYSICAL_ISA: ClassVar[frozenset[str]] = frozenset(
-        {"x", "rx", "rz", "crz", "swap", "rswap", "joint_herald"}
+        {"x", "rx", "rz", "crz", "swap", "rswap", "prep"}
     )
     CUSTOM_GATES: ClassVar[dict[str, type]] = {
         "rswap": RSwapGate,
-        "joint_herald": JointHeraldGate,
+        "prep": PrepareGate,
     }
 
     @classmethod
     def initialize(cls) -> QuantumCircuit:
-        """Create the routing placeholder for dual-rail preparation.
-
-        The labeled X and joint-herald operation expose the preparation
-        connectivity to the boundary router. Hardware-facing program metrics
-        exclude both labeled operations because prism does not model the
-        preparation circuit or erasure-check implementation.
-        """
+        """``PrepareGate`` on the rail pair; metrics count it as free."""
         qc = QuantumCircuit(2)
-        qc.append(XGate(label=SYNTHETIC_PREPARATION_LABEL), [1])
-        qc.append(JointHeraldGate(), [0, 1])
+        qc.append(PrepareGate(), [0, 1])
         return qc
 
     @classmethod
@@ -166,7 +172,7 @@ class DualRail(QubitEncoding):
     def reset(cls, _op: Instruction) -> MultiRealizationOp:
         """Logical reset → in-place re-preparation on the same rails (the ``initialize`` template).
 
-        Models pump-to-vacuum plus a fresh ``|0_L⟩`` prep; the joint herald is
+        ``PrepareGate`` pumps to vacuum and prepares ``|0_L⟩``; its joint check is
         the only routing constraint (rails co-located at reset time). Re-hosting
         the reset qubit on other free rails is not expressed here.
         """

@@ -347,7 +347,7 @@ def test_xonrail_absent_swap():
 
 
 # ===========================================================================
-# 7. Initialization: entangling init (joint herald)
+# 7. Initialization: one prep on the rail pair
 # ===========================================================================
 
 
@@ -360,13 +360,6 @@ def test_init_prepares_0L():
     np.testing.assert_allclose(sv, exp, atol=TOL)
 
 
-def test_init_herald_erasure_safe():
-    """CRZ(pi) herald is block-diagonal: code space is invariant (no population leakage)."""
-    qc = QuantumCircuit(2)
-    qc.crz(math.pi, 0, 1)
-    assert _erasure_safe(qc, [(0, 1)])
-
-
 # ===========================================================================
 # 8. Reset: in-place re-preparation
 # ===========================================================================
@@ -377,4 +370,4 @@ def test_reset_is_in_place_reprep():
     op = DualRail.reset(None)  # _op is intentionally unused (prefixed _)
     assert len(op.candidates) == 1 and op.num_qubits == 2
     names = [ins.operation.name for ins in op.candidates[0].data]
-    assert names == ["x", "joint_herald"]
+    assert names == ["prep"]

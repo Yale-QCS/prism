@@ -10,20 +10,14 @@ from qiskit.converters import dag_to_circuit
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import AnalysisPass
 
-from prism.synthesis.preparation import SYNTHETIC_PREPARATION_LABEL
-
 __all__ = ["CircuitMetrics", "RecordCircuitMetrics"]
 
-_FREE_GATES = frozenset({"rz", "u1", "p", "z"})
+_FREE_GATES = frozenset({"rz", "u1", "p", "z", "prep"})
 
 
 def is_free(operation: Instruction) -> bool:
-    """Diagonal-Z ops, preparation placeholders, and control flow whose bodies are free."""
-    if (
-        operation.name in _FREE_GATES
-        or operation.name == "joint_herald"
-        or getattr(operation, "label", None) == SYNTHETIC_PREPARATION_LABEL
-    ):
+    """Single-wire Z rotations, preparation, and control flow whose bodies are free."""
+    if operation.name in _FREE_GATES:
         return True
     blocks = getattr(operation, "blocks", None)
     return blocks is not None and all(

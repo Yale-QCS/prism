@@ -202,7 +202,7 @@ build_pm(CouplingMap.from_grid(3, 4), DualRail, seed=1).run(qc)
 
 
 def test_physical_stage_commutation_does_not_hang():
-    """Stock commutation passes on rswap/joint_herald/if_else and diagonal runs finish (Qiskit/qiskit#16937)."""
+    """Stock commutation passes on rswap/prep/if_else and diagonal runs finish (Qiskit/qiskit#16937)."""
     env = {**os.environ, "QISKIT_IN_PARALLEL": "FALSE", "RAYON_NUM_THREADS": "4"}
     subprocess.run([sys.executable, "-c", _NO_HANG], env=env, check=True, timeout=120)
 

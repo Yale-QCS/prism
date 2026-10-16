@@ -1,1 +1,1 @@
-"""The physical stage's rescheduling pass and the dual-rail preparation gate."""
+"""The physical stage's rescheduling pass."""
