@@ -16,38 +16,36 @@ Building from source needs a Rust toolchain.
 ## Quickstart
 
 ```python
+import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.transpiler import CouplingMap
-from prism.encodings import DualRail, ErasureCheck
-from prism.pipeline import SearchBudget, build_pm
+from prism.encodings import DualRail
+from prism.pipeline import build_pm
 
-qc = QuantumCircuit(3, 4)
-qc.h(0)
-qc.cx(0, 1)
-qc.append(ErasureCheck(), [1], [3])  # clbit 3 reads 1 unless the photon was lost
-qc.cx(1, 2)
+qc = QuantumCircuit(3, 3)
+qc.rx(np.pi / 2, [0, 1, 2])
+qc.crz(np.pi / 2, 0, 1)
+qc.crz(np.pi / 2, 1, 2)
+qc.rx(np.pi / 2, [1, 2])
 qc.measure(range(3), range(3))
 
-pm = build_pm(
-    CouplingMap.from_line(6), DualRail, seed=7, budget=SearchBudget(objective="depth")
-)
+pm = build_pm(CouplingMap.from_line(6), DualRail, seed=7)
 out = pm.run(qc)
-
 print(pm.property_set["circuit_metrics"])
 ```
 
-The input, `qc.draw("mpl")`:
-
 ![The input circuit](docs/quickstart_input.png)
 
-The output, `out.draw("mpl", idle_wires=False)`, on rails `q<i>_0` and `q<i>_1` of logical qubit `i` (`CircuitMetrics(swaps=0, depth=7, active_gates=14, size=22)`):
-
-- each logical qubit starts with `Initialize` on its two rails;
-- `h` and `cx` become `rz`, `rswap` and one `crz`, and each `crz` uses the pair of rails the router chose for it;
-- the erasure check is a ZZ measurement on the qubit's two rails;
-- each measurement reads both rails, the second into `herald`.
+The output, on rails `q<i>_0` and `q<i>_1` of logical qubit `i`:
 
 ![The compiled circuit](docs/quickstart_output.png)
+
+- Each logical qubit starts with `Initialize` on its two rails.
+- `rx` is an `rswap` between the qubit's two rails.
+- Each `crz` runs between one rail of each qubit; the router picked a different rail pair for each, with an `rz` correcting an open control.
+- Each measurement reads both rails: the logical bit into `c` and the other rail into `herald`.
+
+A mid-circuit erasure check can reuse the qubit's own clbit: `qc.append(ErasureCheck(), [q], [q])` (from `prism.encodings`) writes 1 unless the photon was lost.
 
 `build_pm` returns a Qiskit `PassManager`. After a run, `pm.property_set` holds `circuit_metrics`, `online_n_swaps` (routing SWAPs) and `logical_output_permutation`.
 `out.layout` is a rail-level `TranspileLayout`: virtual qubit `2*i + w` is rail `w` of logical qubit `i`.
