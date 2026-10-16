@@ -175,22 +175,18 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             if self.seed is not None
             else random.SystemRandom().getrandbits(64)
         )
-        target = RoutingTarget.from_coupling_list(
-            list(self.coupling_map.get_edges()), n_phys
-        )
+        edges = frozenset(self.coupling_map.get_edges())  # both orientations
+        target = RoutingTarget.from_coupling_list(list(edges), n_phys)
         results = prism_layout_and_routing(
             _routing_problem(ir),
             target,
             self._make_heuristic(n_phys),
             [
-                (int(seed) % (1 << 64), list(v2p))
+                (seed % (1 << 64), v2p)
                 for seed, v2p in self._starting_layouts(base_seed, target, n_virt)
             ],
             self.budget.refinement_iterations,
             self.budget.swap_trials,
-        )
-        edges = frozenset(
-            e for a, b in self.coupling_map.get_edges() for e in ((a, b), (b, a))
         )
         starts = [
             (
