@@ -6,9 +6,6 @@
 //! - `(EVENT_KIND_COMMIT, op_idx, real_idx)`: emit the whole realization `real_idx` of op `op_idx`
 //!   at the current layout.
 //! - `(EVENT_KIND_SWAP, p1, p2)`: swap physical qubits `p1` and `p2`.
-//! - `(EVENT_KIND_SUB_GATE, op_idx, packed)`: emit one pair of a sub-routed realization at the
-//!   current layout, where `packed = (real_idx << 16) | sub_idx`.  Every sub-gate event of one op
-//!   carries the same `real_idx`.
 
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -16,7 +13,7 @@ use rustworkx_core::petgraph::prelude::*;
 
 use qiskit_circuit::VirtualQubit;
 
-use super::VirtRealizations;
+use super::{VirtRealizations, single_edge};
 use crate::sabre::{InteractionKind, SabreDAG, SabreNode};
 
 /// One `(kind, a, b)` event.
@@ -26,12 +23,12 @@ pub type Event = (u8, u32, u32);
 pub const EVENT_KIND_COMMIT: u8 = 0;
 /// Event tag: apply a swap.
 pub const EVENT_KIND_SWAP: u8 = 1;
-/// Event tag: fire one pair of a sub-routed realization.
-pub const EVENT_KIND_SUB_GATE: u8 = 2;
 
 /// One routing problem as Python flattens it: `(virt_pairs, succ, pred_count, local_default)`.
 ///
-/// - `virt_pairs[k][r]`: the virtual-qubit pairs of realization `r` of op `k`.
+/// - `virt_pairs[k][r]`: the virtual-qubit pairs of realization `r` of op `k`.  Some realization
+///   of each op has no pairs or all its pairs on one qubit pair, so the router can route it as one
+///   edge.
 /// - `succ[k]`: the ops that depend on op `k`, one entry per dependency edge.
 /// - `pred_count[k]`: the number of dependency edges into op `k`.
 /// - `local_default[k]`: the realization of op `k` preferred on a tie.
@@ -49,9 +46,9 @@ fn invalid(msg: String) -> PyErr {
 ///
 /// # Errors
 ///
-/// If the arrays differ in length, an op has no realization, a default is out of range, a pair
-/// names an out-of-range or repeated qubit, a successor is out of range, or `pred_count`
-/// disagrees with `succ`.
+/// If the arrays differ in length, an op has no realization or none on at most one qubit pair, a
+/// default is out of range, a pair names an out-of-range or repeated qubit, a successor is out of
+/// range, or `pred_count` disagrees with `succ`.
 pub fn sabre_dag_from_flat(flat: &Flat, num_qubits: u32) -> PyResult<SabreDAG> {
     let (virt_pairs, succ, pred_count, local_default) = flat;
     let n_ops = virt_pairs.len();
@@ -122,6 +119,12 @@ fn op_kind(
         .iter()
         .map(|real| real.iter().map(pair).collect())
         .collect::<Result<_, _>>()?;
+    if !realizations
+        .iter()
+        .any(|real| real.is_empty() || single_edge(real).is_some())
+    {
+        return Err("every realization has pairs on several qubit pairs".into());
+    }
     Ok(InteractionKind::MultiTwoQ {
         realizations,
         default_realization: default,
@@ -183,6 +186,12 @@ mod tests {
         let mut bad = ok();
         bad.2[0] = 1;
         assert!(sabre_dag_from_flat(&bad, 2).is_err(), "pred_count mismatch");
+        let mut bad = ok();
+        bad.0[0] = vec![vec![[0, 1], [1, 2]]];
+        assert!(
+            sabre_dag_from_flat(&bad, 3).is_err(),
+            "no single-edge realization"
+        );
         let mut bad = ok();
         bad.2.push(0);
         assert!(sabre_dag_from_flat(&bad, 2).is_err(), "length mismatch");

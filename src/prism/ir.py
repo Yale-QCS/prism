@@ -9,9 +9,7 @@ the device.
 
 Wire convention: rail ``w`` of logical qubit ``i`` is wire ``WIRES_PER_LOGICAL * i + w``.
 While ``placement`` is ``None``, instruction qubits are those rail indices. Once
-placed, they are physical qubits: a routing SWAP is then a regular ``swap``, and
-a sub-routed gate is its chosen realization's regular operations with SWAPs
-between them.
+placed, they are physical qubits, and a routing SWAP is a regular ``swap``.
 """
 
 from __future__ import annotations

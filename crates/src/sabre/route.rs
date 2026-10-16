@@ -50,8 +50,8 @@ use qiskit_circuit::operations::{ControlFlow, StandardGate};
 use qiskit_circuit::packed_instruction::PackedInstruction;
 use qiskit_circuit::{BlocksMode, PhysicalQubit, Qubit, VirtualQubit};
 use qiskit_util::getenv_use_multiple_threads;
+use route_ext::MultiLayers;
 pub use route_ext::flatten_routing_result;
-use route_ext::{MultiLayers, SubGate};
 
 /// Number of trials for control flow block swap epilogues.
 const SWAP_EPILOGUE_TRIALS: usize = 4;
@@ -90,11 +90,6 @@ enum RoutedItemKind {
     ControlFlow(ControlFlowBlockCount),
     /// PRISM: a multi-realization node committed whole, using this realization.
     MultiTwoQ(u32),
-    /// PRISM: a multi-realization node routed one sub-gate at a time.
-    SubRoutedMultiTwoQ {
-        real_idx: u32,
-        schedule: Box<[SubGate]>,
-    },
 }
 /// A node in the routing order.
 struct RoutedItem {
@@ -147,7 +142,10 @@ impl<'a> Order<'a> {
     /// control-flow operations).
     #[inline]
     pub fn swap_count(&self) -> usize {
-        self.order.iter().map(RoutedItem::swap_count).sum()
+        self.order
+            .iter()
+            .map(|item| item.initial_swaps().len())
+            .sum()
     }
 }
 
@@ -322,7 +320,7 @@ impl RoutingResult<'_> {
                     );
                     dag.push_back(new_inst)?
                 }
-                RoutedItemKind::MultiTwoQ(_) | RoutedItemKind::SubRoutedMultiTwoQ { .. } => {
+                RoutedItemKind::MultiTwoQ(_) => {
                     unreachable!("PRISM emits multi-realization nodes from its own event stream")
                 }
             };
@@ -882,6 +880,8 @@ impl State {
             self.layers
                 .front()
                 .iter_gates()
+                // PRISM: and the single-edge realizations of the front-layer multi nodes.
+                .chain(self.multi.front_pairs(problem.sabre))
                 .map(|(node, virtuals)| (node, virtuals.map(|q| self.layout[q])))
                 .min_by(|(_, qubits_a), (_, qubits_b)| {
                     dist[[qubits_a[0].index(), qubits_a[1].index()]]
@@ -922,10 +922,15 @@ impl State {
         //  A - B - A - B
         // and we swap the middle two qubits. This cannot happen if we apply 2 or more swaps.
         match current_swaps.as_slice() {
-            [swap] => swap
-                .iter()
-                .filter_map(|q| self.routable_node_on_qubit(problem, *q))
-                .collect(),
+            [swap] => {
+                let mut nodes: Vec<_> = swap
+                    .iter()
+                    .filter_map(|q| self.routable_node_on_qubit(problem, *q))
+                    .collect();
+                // PRISM: a single swap can also make a multi node routable.
+                self.push_multi_routable(problem, *swap, &mut nodes);
+                nodes.into()
+            }
             _ => smallvec![closest_node],
         }
     }
@@ -1157,12 +1162,10 @@ pub fn swap_map_trial<'a>(
                 .drain(..)
                 .rev()
                 .for_each(|swap| state.apply_swap(swap));
-            let force_routed =
-                state.force_enable_or_subroute(problem, &mut order, &mut current_swaps);
+            let force_routed = state.force_enable_closest_node(problem, &mut current_swaps);
             routable_nodes.extend(force_routed);
         }
-        let initial_swaps = (!routable_nodes.is_empty()).then_some(current_swaps);
-        state.update_route(problem, &mut order, &routable_nodes, initial_swaps);
+        state.update_route(problem, &mut order, &routable_nodes, Some(current_swaps));
         state.multi.decay_load();
 
         if problem.heuristic.decay.is_some() {

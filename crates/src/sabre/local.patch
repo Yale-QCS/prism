@@ -75,7 +75,7 @@ index 31d5544..4391e68 100644
  pub struct Heuristic {
      pub basic: Option<BasicHeuristic>,
 diff --git a/src/sabre/route.rs b/src/sabre/route.rs
-index 90847d4..9aff32a 100644
+index 90847d4..ef1901a 100644
 --- a/src/sabre/route.rs
 +++ b/src/sabre/route.rs
 @@ -38,6 +38,9 @@ use super::dag::{InteractionKind, SabreDAG};
@@ -92,48 +92,31 @@ index 90847d4..9aff32a 100644
  use qiskit_circuit::packed_instruction::PackedInstruction;
  use qiskit_circuit::{BlocksMode, PhysicalQubit, Qubit, VirtualQubit};
  use qiskit_util::getenv_use_multiple_threads;
++use route_ext::MultiLayers;
 +pub use route_ext::flatten_routing_result;
-+use route_ext::{MultiLayers, SubGate};
  
  /// Number of trials for control flow block swap epilogues.
  const SWAP_EPILOGUE_TRIALS: usize = 4;
-@@ -83,6 +88,13 @@ enum RoutedItemKind {
+@@ -83,6 +88,8 @@ enum RoutedItemKind {
      /// of the item kind because control-flow is expected to be very uncommon, and we don't want to
      /// needless increase the size of the enum.
      ControlFlow(ControlFlowBlockCount),
 +    /// PRISM: a multi-realization node committed whole, using this realization.
 +    MultiTwoQ(u32),
-+    /// PRISM: a multi-realization node routed one sub-gate at a time.
-+    SubRoutedMultiTwoQ {
-+        real_idx: u32,
-+        schedule: Box<[SubGate]>,
-+    },
  }
  /// A node in the routing order.
  struct RoutedItem {
-@@ -135,10 +147,7 @@ impl<'a> Order<'a> {
-     /// control-flow operations).
-     #[inline]
-     pub fn swap_count(&self) -> usize {
--        self.order
--            .iter()
--            .map(|item| item.initial_swaps().len())
--            .sum()
-+        self.order.iter().map(RoutedItem::swap_count).sum()
-     }
- }
- 
-@@ -313,6 +322,9 @@ impl RoutingResult<'_> {
+@@ -313,6 +320,9 @@ impl RoutingResult<'_> {
                      );
                      dag.push_back(new_inst)?
                  }
-+                RoutedItemKind::MultiTwoQ(_) | RoutedItemKind::SubRoutedMultiTwoQ { .. } => {
++                RoutedItemKind::MultiTwoQ(_) => {
 +                    unreachable!("PRISM emits multi-realization nodes from its own event stream")
 +                }
              };
              for node in rest {
                  let NodeType::Operation(inst) = &self.problem.dag[*node] else {
-@@ -354,7 +366,7 @@ impl RoutingTarget {
+@@ -354,7 +364,7 @@ impl RoutingTarget {
  /// Contains `None` when the target had all-to-all connectivity (in which case the two property
  /// methods [coupling_list] and [distance_matrix] also return `None`).
  #[pyclass]
@@ -142,7 +125,7 @@ index 90847d4..9aff32a 100644
  pub struct PyRoutingTarget(pub Option<RoutingTarget>);
  #[pymethods]
  impl PyRoutingTarget {
-@@ -453,9 +465,10 @@ fn try_route<'a>(
+@@ -453,9 +463,10 @@ fn try_route<'a>(
      initial_swaps: &mut Option<Vec<[PhysicalQubit; 2]>>,
      problem: RoutingProblem<'a>,
      order: &mut Order<'a>,
@@ -154,7 +137,7 @@ index 90847d4..9aff32a 100644
      let node = &problem.sabre.dag[node_id];
      let kind = match &node.kind {
          InteractionKind::Synchronize => RoutedItemKind::Simple,
-@@ -464,7 +477,10 @@ fn try_route<'a>(
+@@ -464,7 +475,10 @@ fn try_route<'a>(
              .neighbors
              .contains_edge(layout[*a], layout[*b])
              .then_some(RoutedItemKind::Simple)
@@ -166,7 +149,7 @@ index 90847d4..9aff32a 100644
          InteractionKind::ControlFlow(blocks) => {
              let dag_node_id = *node
                  .indices
-@@ -570,6 +586,8 @@ fn satisfy_successor_edges(
+@@ -570,6 +584,8 @@ fn satisfy_successor_edges(
  struct State {
      layout: NLayout,
      layers: Layers,
@@ -175,7 +158,7 @@ index 90847d4..9aff32a 100644
      /// How many predecessors still need to be satisfied for each node index before it can enter the
      /// layer at the same index.
      ///
-@@ -611,6 +629,7 @@ impl State {
+@@ -611,6 +627,7 @@ impl State {
              num_qubits,
              problem.sabre.dag.node_count() as u32,
          );
@@ -183,7 +166,7 @@ index 90847d4..9aff32a 100644
  
          // Initialise the layer structures.  This has slightly different logic to subsequent delta
          // updates, because in this first step, we need to set the entire frontiers at every level,
-@@ -629,14 +648,17 @@ impl State {
+@@ -629,14 +646,17 @@ impl State {
          // Route any available initial gates, to populate the front layer.
          visit.extend(problem.sabre.first_layer.iter().copied());
          while let Some(node) = visit.pop_front() {
@@ -203,7 +186,7 @@ index 90847d4..9aff32a 100644
              }
          }
  
-@@ -648,7 +670,9 @@ impl State {
+@@ -648,7 +668,9 @@ impl State {
                  .last()
                  .expect("we always have at least the front layer")
                  .clone();
@@ -214,7 +197,7 @@ index 90847d4..9aff32a 100644
                  satisfy_successor_edges(
                      node,
                      problem.sabre,
-@@ -669,6 +693,7 @@ impl State {
+@@ -669,6 +691,7 @@ impl State {
                      InteractionKind::TwoQ(qubits) => {
                          layers.insert(num_layer, node, *qubits, &layout)
                      }
@@ -222,7 +205,7 @@ index 90847d4..9aff32a 100644
                  }
              }
              predecessors.push(these_predecessors);
-@@ -678,6 +703,7 @@ impl State {
+@@ -678,6 +701,7 @@ impl State {
              predecessors: predecessors.into(),
              decay: vec![1.; num_qubits as usize].into(),
              layers,
@@ -230,7 +213,7 @@ index 90847d4..9aff32a 100644
              layout,
              visit,
              reached_previous_layer: Vec::new(),
-@@ -735,7 +761,9 @@ impl State {
+@@ -735,7 +759,9 @@ impl State {
          // fully initialised.
          for &node in nodes {
              assert_eq!(
@@ -241,7 +224,7 @@ index 90847d4..9aff32a 100644
                  Some(0),
                  "only nodes in the front layer can begin a routing update",
              );
-@@ -744,6 +772,7 @@ impl State {
+@@ -744,6 +770,7 @@ impl State {
                  &mut initial_swaps,
                  problem,
                  order,
@@ -249,7 +232,7 @@ index 90847d4..9aff32a 100644
                  &self.layout,
                  self.seed,
              )
-@@ -758,9 +787,11 @@ impl State {
+@@ -758,9 +785,11 @@ impl State {
          let sabre_dag = &problem.sabre.dag;
          while let Some(node) = self.visit.pop_front() {
              if self.layers.num_layers().get() > 1
@@ -262,7 +245,7 @@ index 90847d4..9aff32a 100644
                  self.reached_previous_layer.push(node);
              }
              match try_route(
-@@ -768,6 +799,7 @@ impl State {
+@@ -768,6 +797,7 @@ impl State {
                  &mut initial_swaps,
                  problem,
                  order,
@@ -270,7 +253,7 @@ index 90847d4..9aff32a 100644
                  &self.layout,
                  self.seed,
              ) {
-@@ -777,9 +809,10 @@ impl State {
+@@ -777,9 +807,10 @@ impl State {
                      &mut self.predecessors[0],
                      |satisfied| self.visit.push_back(satisfied),
                  ),
@@ -282,7 +265,7 @@ index 90847d4..9aff32a 100644
              }
          }
  
-@@ -787,22 +820,26 @@ impl State {
+@@ -787,22 +818,26 @@ impl State {
              if self.reached_previous_layer.is_empty() {
                  break;
              }
@@ -320,7 +303,7 @@ index 90847d4..9aff32a 100644
              }
              while let Some(node) = self.visit.pop_front() {
                  match &sabre_dag[node].kind {
-@@ -817,6 +854,12 @@ impl State {
+@@ -817,6 +852,12 @@ impl State {
                              self.reached_previous_layer.push(node);
                          }
                      }
@@ -333,7 +316,36 @@ index 90847d4..9aff32a 100644
                  }
              }
          }
-@@ -901,19 +944,21 @@ impl State {
+@@ -839,6 +880,8 @@ impl State {
+             self.layers
+                 .front()
+                 .iter_gates()
++                // PRISM: and the single-edge realizations of the front-layer multi nodes.
++                .chain(self.multi.front_pairs(problem.sabre))
+                 .map(|(node, virtuals)| (node, virtuals.map(|q| self.layout[q])))
+                 .min_by(|(_, qubits_a), (_, qubits_b)| {
+                     dist[[qubits_a[0].index(), qubits_a[1].index()]]
+@@ -879,10 +922,15 @@ impl State {
+         //  A - B - A - B
+         // and we swap the middle two qubits. This cannot happen if we apply 2 or more swaps.
+         match current_swaps.as_slice() {
+-            [swap] => swap
+-                .iter()
+-                .filter_map(|q| self.routable_node_on_qubit(problem, *q))
+-                .collect(),
++            [swap] => {
++                let mut nodes: Vec<_> = swap
++                    .iter()
++                    .filter_map(|q| self.routable_node_on_qubit(problem, *q))
++                    .collect();
++                // PRISM: a single swap can also make a multi node routable.
++                self.push_multi_routable(problem, *swap, &mut nodes);
++                nodes.into()
++            }
+             _ => smallvec![closest_node],
+         }
+     }
+@@ -901,19 +949,21 @@ impl State {
                  }
              }
          }
@@ -357,7 +369,7 @@ index 90847d4..9aff32a 100644
                      }
                  }
              };
-@@ -921,17 +966,22 @@ impl State {
+@@ -921,17 +971,22 @@ impl State {
              for (swap, score) in self.swap_scores.iter_mut() {
                  *score += weight * front.score(*swap, dist);
              }
@@ -383,7 +395,7 @@ index 90847d4..9aff32a 100644
                          }
                      }
                  };
-@@ -939,6 +989,9 @@ impl State {
+@@ -939,6 +994,9 @@ impl State {
                  for (swap, score) in self.swap_scores.iter_mut() {
                      *score += weight * layer.score(*swap, dist);
                  }
@@ -393,7 +405,7 @@ index 90847d4..9aff32a 100644
              }
          }
  
-@@ -1067,7 +1120,7 @@ pub fn swap_map_trial<'a>(
+@@ -1067,7 +1125,7 @@ pub fn swap_map_trial<'a>(
      let mut num_search_steps = 0;
      // The front layer only becomes empty when all nodes have been routed.  At each iteration of
      // this loop, we route either one or two gates.
@@ -402,7 +414,7 @@ index 90847d4..9aff32a 100644
          let mut current_swaps: Vec<[PhysicalQubit; 2]> = Vec::new();
          // Swap-mapping loop.  This is the main part of the algorithm, which we repeat until we
          // either successfully route a node, or exceed the maximum number of attempts.
-@@ -1084,6 +1137,7 @@ pub fn swap_map_trial<'a>(
+@@ -1084,6 +1142,7 @@ pub fn swap_map_trial<'a>(
              if let Some(node) = state.routable_node_on_qubit(problem, best_swap[0]) {
                  routable_nodes.push(node);
              }
@@ -410,18 +422,10 @@ index 90847d4..9aff32a 100644
              if let Some(DecayHeuristic { increment, reset }) = problem.heuristic.decay {
                  num_search_steps += 1;
                  if num_search_steps >= reset {
-@@ -1103,10 +1157,13 @@ pub fn swap_map_trial<'a>(
-                 .drain(..)
-                 .rev()
-                 .for_each(|swap| state.apply_swap(swap));
--            let force_routed = state.force_enable_closest_node(problem, &mut current_swaps);
-+            let force_routed =
-+                state.force_enable_or_subroute(problem, &mut order, &mut current_swaps);
+@@ -1107,6 +1166,7 @@ pub fn swap_map_trial<'a>(
              routable_nodes.extend(force_routed);
          }
--        state.update_route(problem, &mut order, &routable_nodes, Some(current_swaps));
-+        let initial_swaps = (!routable_nodes.is_empty()).then_some(current_swaps);
-+        state.update_route(problem, &mut order, &routable_nodes, initial_swaps);
+         state.update_route(problem, &mut order, &routable_nodes, Some(current_swaps));
 +        state.multi.decay_load();
  
          if problem.heuristic.decay.is_some() {

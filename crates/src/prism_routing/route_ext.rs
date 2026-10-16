@@ -9,6 +9,11 @@
 //! as soon as any realization has every pair adjacent; ties go to the realization with the lowest
 //! decayed physical load, then to the default realization.
 //!
+//! When the router is stuck, the stock release valve also considers the realizations of the
+//! front-layer multi nodes that sit on one qubit pair: it swaps the closest pair of all together
+//! along a shortest path, and the node then commits as usual.  Swaps go between nodes, never inside
+//! one.
+//!
 //! With no `MultiTwoQ` nodes in the input, every hook here is a no-op and the router is stock
 //! Qiskit Sabre.
 
@@ -28,43 +33,18 @@ use std::cmp::Ordering;
 
 use ndarray::ArrayView2;
 use rustworkx_core::petgraph::prelude::*;
-use smallvec::SmallVec;
 
 use qiskit_circuit::nlayout::NLayout;
 use qiskit_circuit::{PhysicalQubit, VirtualQubit};
 
-use super::super::dag::{InteractionKind, SabreDAG, SabreNode};
+use super::super::dag::{InteractionKind, SabreDAG};
 use super::super::vec_map::VecMap;
-use super::{
-    Order, RoutedItem, RoutedItemKind, RoutingProblem, RoutingResult, RoutingTarget, State,
-    satisfy_successor_edges, swap_map_trial,
-};
-use crate::prism_routing::VirtRealizations;
-use crate::prism_routing::input::{EVENT_KIND_COMMIT, EVENT_KIND_SUB_GATE, EVENT_KIND_SWAP, Event};
+use super::{RoutedItemKind, RoutingProblem, RoutingResult, RoutingTarget, State};
+use crate::prism_routing::input::{EVENT_KIND_COMMIT, EVENT_KIND_SWAP, Event};
+use crate::prism_routing::{VirtRealizations, single_edge};
 
 /// Per-routing-step decay of the physical-load tie-break.
 const PHYS_LOAD_DECAY: f64 = 0.9;
-
-/// One sub-gate fire inside a sub-routed `MultiTwoQ` commit.
-pub(super) struct SubGate {
-    /// Index of the pair within the chosen realization.
-    sub_idx: u32,
-    /// Swaps applied immediately before this sub-gate.
-    swaps_before: Box<[[PhysicalQubit; 2]]>,
-}
-
-impl RoutedItem {
-    /// Swaps inserted for this item, including those inside a sub-routed schedule.
-    pub(super) fn swap_count(&self) -> usize {
-        let inner = match &self.kind {
-            RoutedItemKind::SubRoutedMultiTwoQ { schedule, .. } => {
-                schedule.iter().map(|g| g.swaps_before.len()).sum()
-            }
-            _ => 0,
-        };
-        self.initial_swaps().len() + inner
-    }
-}
 
 /// The realizations of a node known to be `MultiTwoQ`.
 ///
@@ -168,6 +148,21 @@ impl MultiLayers {
     /// The multi nodes in `layer`.
     pub(super) fn nodes(&self, layer: u16) -> impl Iterator<Item = NodeIndex> + '_ {
         self.layers[usize::from(layer)].iter().copied()
+    }
+
+    /// The pair of each single-edge realization of each front-layer multi node, for the release
+    /// valve.  Every multi node has one (`input` checks it), and a node whose pair is adjacent has
+    /// already committed.
+    pub(super) fn front_pairs<'s>(
+        &'s self,
+        sabre: &'s SabreDAG,
+    ) -> impl Iterator<Item = (NodeIndex, [VirtualQubit; 2])> + 's {
+        self.layers[0].iter().flat_map(move |&node| {
+            realizations(sabre, node)
+                .iter()
+                .filter_map(|real| single_edge(real))
+                .map(move |pair| (node, pair))
+        })
     }
 
     /// Put `node` in lookahead `layer`, moving it out of any deeper layer that holds it, as
@@ -337,118 +332,6 @@ impl State {
             }
         }
     }
-
-    /// Release valve.  If a multi node's closest realization is strictly closer than the closest
-    /// stock gate, route that realization gate by gate and commit it; otherwise use the stock
-    /// valve.  An empty return means the commit already happened.
-    pub(super) fn force_enable_or_subroute<'a>(
-        &mut self,
-        problem: RoutingProblem<'a>,
-        order: &mut Order<'a>,
-        current_swaps: &mut Vec<[PhysicalQubit; 2]>,
-    ) -> SmallVec<[NodeIndex; 2]> {
-        let dist = problem.target.distance.view();
-        let stock_best = self
-            .layers
-            .front()
-            .iter_gates()
-            .map(|(_, [a, b])| dist[[self.layout[a].index(), self.layout[b].index()]])
-            .fold(f64::INFINITY, f64::min);
-        let mut best: Option<(NodeIndex, usize, f64)> = None;
-        for &node in &self.multi.layers[0] {
-            for (r, real) in realizations(problem.sabre, node).iter().enumerate() {
-                let d = cost(real, &self.layout, None, &dist);
-                if best.is_none_or(|(_, _, b)| d < b) {
-                    best = Some((node, r, d));
-                }
-            }
-        }
-        match best {
-            Some((node, r, d)) if d < stock_best => {
-                debug_assert!(current_swaps.is_empty());
-                let schedule = self.sub_route(problem, node, r);
-                self.commit_sub_routed(problem, order, node, r, schedule);
-                SmallVec::new()
-            }
-            _ => self.force_enable_closest_node(problem, current_swaps),
-        }
-    }
-
-    /// Route realization `r` of `node` as a chain of two-qubit gates with a nested Sabre trial,
-    /// and apply its swaps to this state.
-    fn sub_route(&mut self, problem: RoutingProblem, node: NodeIndex, r: usize) -> Box<[SubGate]> {
-        let real = &realizations(problem.sabre, node)[r];
-        let chain = chain_dag(real);
-        let result = swap_map_trial(
-            problem.with_sabre(&chain),
-            &self.layout,
-            self.seed.wrapping_add(1),
-        );
-        let mut schedule = Vec::with_capacity(result.order.order.len());
-        for item in &result.order.order {
-            for &swap in item.initial_swaps() {
-                self.apply_swap(swap);
-            }
-            let sub_idx = chain.dag[item.node].indices[0].index();
-            for v in real[sub_idx] {
-                self.multi.phys_load[self.layout[v].index()] += 1.0;
-            }
-            schedule.push(SubGate {
-                sub_idx: u32::try_from(sub_idx).expect("pair count fits in u32"),
-                swaps_before: item.initial_swaps().into(),
-            });
-        }
-        schedule.into_boxed_slice()
-    }
-
-    /// Record a sub-routed commit, then advance the layers as `update_route` does.
-    fn commit_sub_routed<'a>(
-        &mut self,
-        problem: RoutingProblem<'a>,
-        order: &mut Order<'a>,
-        node: NodeIndex,
-        r: usize,
-        schedule: Box<[SubGate]>,
-    ) {
-        assert_eq!(self.multi.remove(node, problem.sabre), Some(0));
-        order.order.push(RoutedItem {
-            initial_swaps: None,
-            node,
-            kind: RoutedItemKind::SubRoutedMultiTwoQ {
-                real_idx: u32::try_from(r).expect("realization count fits in u32"),
-                schedule,
-            },
-        });
-        let visit = &mut self.visit;
-        satisfy_successor_edges(node, problem.sabre, &mut self.predecessors[0], |s| {
-            visit.push_back(s);
-        });
-        self.update_route(problem, order, &[], None);
-    }
-}
-
-/// A [`SabreDAG`] that is a chain of the pairs of one realization.  `indices[0]` of each node holds
-/// the pair's index in `real`.
-fn chain_dag(real: &[[VirtualQubit; 2]]) -> SabreDAG {
-    let mut dag = DiGraph::with_capacity(real.len(), real.len().saturating_sub(1));
-    let nodes: Vec<NodeIndex> = real
-        .iter()
-        .enumerate()
-        .map(|(i, pair)| {
-            dag.add_node(SabreNode {
-                indices: vec![NodeIndex::new(i)],
-                kind: InteractionKind::TwoQ(*pair),
-            })
-        })
-        .collect();
-    for w in nodes.windows(2) {
-        dag.add_edge(w[0], w[1], ());
-    }
-    SabreDAG {
-        initial: Vec::new(),
-        dag,
-        first_layer: nodes.first().copied().into_iter().collect(),
-    }
 }
 
 /// Flatten a routing result into prism's `(kind, a, b)` event stream and its swap count.
@@ -470,13 +353,6 @@ pub fn flatten_routing_result(result: &RoutingResult<'_>) -> (Vec<Event>, u32) {
         match &item.kind {
             RoutedItemKind::Simple => events.push((EVENT_KIND_COMMIT, op_idx, 0)),
             RoutedItemKind::MultiTwoQ(r) => events.push((EVENT_KIND_COMMIT, op_idx, *r)),
-            RoutedItemKind::SubRoutedMultiTwoQ { real_idx, schedule } => {
-                for g in schedule {
-                    push_swaps(&mut events, &g.swaps_before);
-                    let packed = (*real_idx << 16) | (g.sub_idx & 0xFFFF);
-                    events.push((EVENT_KIND_SUB_GATE, op_idx, packed));
-                }
-            }
             RoutedItemKind::ControlFlow(_) => unreachable!("prism's input has no control flow"),
         }
     }
@@ -489,13 +365,14 @@ mod tests {
     use ndarray::array;
     use qiskit_circuit::dag_circuit::DAGCircuit;
 
+    use super::super::super::dag::SabreNode;
     use super::super::super::heuristic::{
         BasicHeuristic, Heuristic, LookaheadHeuristic, SetScaling,
     };
-    use super::super::{PyRoutingTarget, State, satisfy_successor_edges, swap_map};
+    use super::super::{PyRoutingTarget, RoutedItemKind, State, satisfy_successor_edges, swap_map};
     use super::{
         DiGraph, InteractionKind, MultiLayers, NLayout, NodeIndex, PhysicalQubit, RoutingProblem,
-        SabreDAG, SabreNode, VirtRealizations, VirtualQubit, chain_dag, min_cost,
+        SabreDAG, VirtRealizations, VirtualQubit, min_cost,
     };
 
     fn v(i: u32) -> VirtualQubit {
@@ -621,7 +498,7 @@ mod tests {
         let (multi_swaps, commits) = route(&multi, &target);
         assert_eq!(stock_swaps, 3);
         assert_eq!(multi_swaps, stock_swaps);
-        assert!(commits.iter().all(|&packed| packed >> 16 == 0));
+        assert_eq!(commits, vec![0]);
     }
 
     #[test]
@@ -772,19 +649,56 @@ mod tests {
             while !(state.layers.front().is_empty() && state.multi.is_empty(0)) {
                 assert_eq!(held_layers(&state), rebuilt_layers(&state, &sabre));
                 let mut swaps = Vec::new();
-                let nodes = state.force_enable_or_subroute(problem, &mut order, &mut swaps);
-                if !nodes.is_empty() {
-                    state.update_route(problem, &mut order, &nodes, Some(swaps));
-                }
+                let nodes = state.force_enable_closest_node(problem, &mut swaps);
+                state.update_route(problem, &mut order, &nodes, Some(swaps));
             }
             assert_eq!(order.order.len(), sabre.dag.node_count());
         }
     }
 
+    /// One release-valve step on a line of `n` qubits from the trivial layout: the valve's swaps
+    /// and the realization that the multi node then commits with.
+    fn force_once(n: u32, sabre: &SabreDAG) -> (Vec<[u32; 2]>, Option<u32>) {
+        let target = line(n);
+        let dag = DAGCircuit::new();
+        let heuristic = heuristic();
+        let problem = RoutingProblem {
+            target: target.0.as_ref().expect("explicit target"),
+            sabre,
+            dag: &dag,
+            heuristic: &heuristic,
+        };
+        let (mut state, mut order) = State::begin(problem, NLayout::generate_trivial_layout(n), 0);
+        let mut swaps = Vec::new();
+        let nodes = state.force_enable_closest_node(problem, &mut swaps);
+        let swapped = swaps.iter().map(|s| s.map(|p| p.0)).collect();
+        state.update_route(problem, &mut order, &nodes, Some(swaps));
+        let committed = order.order.iter().find_map(|item| match item.kind {
+            RoutedItemKind::MultiTwoQ(r) => Some(r),
+            _ => None,
+        });
+        (swapped, committed)
+    }
+
     #[test]
-    fn chain_dag_orders_pairs() {
-        let chain = chain_dag(&[[v(0), v(1)], [v(1), v(2)], [v(2), v(3)]]);
-        assert_eq!(chain.first_layer, vec![NodeIndex::new(0)]);
-        assert_eq!(chain.dag.edge_count(), 2);
+    fn release_valve_brings_closest_realization_together() {
+        let multi = |pairs: &[&[[u32; 2]]]| InteractionKind::MultiTwoQ {
+            realizations: reals(pairs),
+            default_realization: 0,
+        };
+        // Realization 1 (distance 3) is the closest single-edge realization; realization 2 has a closer
+        // pair but spans two pairs, so the valve ignores it.  The stock path split takes 3 swaps.
+        let sabre = single_node_dag(multi(&[&[[0, 5]], &[[1, 4], [4, 1]], &[[0, 2], [3, 5]]]));
+        assert_eq!(
+            force_once(6, &sabre),
+            (vec![[1, 2], [2, 3], [4, 3]], Some(1))
+        );
+        // The multi node (distance 2) is closer than the stock gate (distance 4), and one swap makes
+        // it routable.
+        let sabre = dag_of(vec![
+            InteractionKind::TwoQ([v(0), v(4)]),
+            multi(&[&[[1, 3]]]),
+        ]);
+        assert_eq!(force_once(5, &sabre), (vec![[1, 2]], Some(0)));
     }
 }

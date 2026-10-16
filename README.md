@@ -59,7 +59,7 @@ A callback gets `dag` as a `DAGCircuit` or a `MultiRealization`.
 An operation is a regular Qiskit operation or a `MultiRealizationOp`: one logical gate with its `candidates` (circuits on the gate's rails), the encoding's `default_index`, a `diagonal` flag, and a `choice`.
 Constraint passes may shrink `candidates`; decision passes set `choice`, and a later pass may revise it.
 `placement` (initial and final virtual-to-physical maps) is `None` until routing.
-Before placement, instruction qubits are rail indices; after it, they are physical qubits, a routing SWAP is a regular `swap`, and a sub-routed gate is its chosen candidate's gates with SWAPs between them.
+Before placement, instruction qubits are rail indices; after it, they are physical qubits and a routing SWAP is a regular `swap`.
 `MultiRealizationToDAG` is the only step that drops candidates: it needs a placement and a choice on every `MultiRealizationOp`.
 `ir.verify()` checks the invariants; it runs after the entrance and before the exit.
 

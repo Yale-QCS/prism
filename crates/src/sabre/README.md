@@ -23,11 +23,11 @@ New items in the patch carry a `PRISM:` comment. The patch:
 - `heuristic.rs`, `route.rs`: sets the `module` of the six Python classes to `prism._accelerate`,
   where prism exports them, so that pickling resolves to prism's classes and not Qiskit's.
 - `route.rs`: declares `route_ext` (prism's code in `../prism_routing/route_ext.rs`) as a child
-  module, so that it can use the private `State` and `Order`; adds two `RoutedItemKind` variants;
-  counts sub-routed swaps in `Order::swap_count`; keeps `MultiTwoQ` nodes in a parallel
-  `State.multi` at every point where `TwoQ` nodes enter or leave `Layers`; adds their candidate
-  swaps and scores in `choose_best_swap`; and calls the multi-realization release valve and load
-  decay from the main loop.
+  module, so that it can use the private `State` and `Order`; adds a `RoutedItemKind` variant;
+  keeps `MultiTwoQ` nodes in a parallel `State.multi` at every point where `TwoQ` nodes enter or
+  leave `Layers`; adds their candidate swaps and scores in `choose_best_swap`; lets the release
+  valve `force_enable_closest_node` also bring a multi node's single-edge realization together;
+  and decays the load tie-break from the main loop.
 - `route.rs`: fixes the delta update of the lookahead layers (below).
 
 ### Local bug fix: lookahead layers

@@ -22,6 +22,15 @@ use crate::sabre::route::{PyRoutingTarget, RoutingTarget};
 /// Candidate realizations of one node in virtual qubits: per realization, its two-qubit pairs.
 pub type VirtRealizations = Box<[Box<[[VirtualQubit; 2]]>]>;
 
+/// The qubit pair that every pair of `real` is on, in either order: one coupling edge executes
+/// `real`.  `None` if `real` has no pairs or pairs on several qubit pairs.
+pub fn single_edge(real: &[[VirtualQubit; 2]]) -> Option<[VirtualQubit; 2]> {
+    let (&[a, b], rest) = real.split_first()?;
+    rest.iter()
+        .all(|&pair| pair == [a, b] || pair == [b, a])
+        .then_some([a, b])
+}
+
 #[pymethods]
 impl PyRoutingTarget {
     /// Build a target from an undirected edge list on `num_qubits` physical qubits.

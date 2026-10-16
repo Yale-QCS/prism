@@ -41,8 +41,8 @@ __all__ = ["Objective", "PrismRouting", "SearchBudget"]
 
 Objective = Literal["swaps", "depth"]
 
-# Rust event kinds (crates/src/prism_routing/input.rs).
-_COMMIT, _SWAP = 0, 1
+# Rust event kind (crates/src/prism_routing/input.rs); every other event is a commit.
+_SWAP = 1
 
 
 @dataclass(frozen=True)
@@ -283,10 +283,8 @@ def _replay(
 ) -> tuple[list[MultiRealizationInstruction], dict[int, int]]:
     """Turn a kernel trace into placed instructions and the chosen candidate per instruction.
 
-    ``COMMIT(k, r)`` places instruction ``k`` with choice ``r``. ``SWAP(p, q)``
-    is a routing SWAP. ``SUB_GATE(k, r << 16 | j)`` emits the ``j``-th 2-qubit
-    gate of candidate ``r`` (with the 1-qubit gates before it, and after it
-    for the last one) as regular operations.
+    ``COMMIT(k, r)`` places instruction ``k`` whole, with choice ``r``.
+    ``SWAP(p, q)`` is a routing SWAP between two instructions.
     """
     p2v = [0] * n_phys
     for v, p in enumerate(v2p):
@@ -303,25 +301,8 @@ def _replay(
         ins = data[a]
         op = ins.operation
         qubits = tuple(v2p[v] for v in ins.qubits)
-        if kind == _COMMIT:
-            chosen[a] = b
-            if isinstance(op, MultiRealizationOp):
-                op = replace(op, choice=b)
-            placed.append(MultiRealizationInstruction(op, qubits, ins.clbits))
-            continue
-        # Only a multi-realization node is sub-routed.
-        r, sub = b >> 16, b & 0xFFFF
-        chosen.setdefault(a, r)
-        real = op.candidates[r]
-        twoq = [i for i, ci in enumerate(real.data) if len(ci.qubits) == 2]
-        start = twoq[sub - 1] + 1 if sub else 0
-        end = len(real.data) if sub == len(twoq) - 1 else twoq[sub] + 1
-        for ci in real.data[start:end]:
-            placed.append(
-                MultiRealizationInstruction(
-                    ci.operation,
-                    tuple(qubits[real.find_bit(q).index] for q in ci.qubits),
-                    tuple(ins.clbits[real.find_bit(c).index] for c in ci.clbits),
-                )
-            )
+        chosen[a] = b
+        if isinstance(op, MultiRealizationOp):
+            op = replace(op, choice=b)
+        placed.append(MultiRealizationInstruction(op, qubits, ins.clbits))
     return placed, chosen
