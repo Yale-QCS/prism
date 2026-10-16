@@ -86,10 +86,8 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
 
     Reads a ``MultiRealization`` with no placement; returns one with a
     placement, physical-qubit instructions, routing SWAPs, and a choice on
-    every ``MultiRealizationOp``. Publishes, as routed, ``realization_choices``
-    (the chosen index of each op with several candidates, in program order) and
-    ``online_n_swaps`` (routing SWAPs) to the property set; a later pass that
-    revises a choice does not update them.
+    every ``MultiRealizationOp``. Publishes ``online_n_swaps`` (routing SWAPs)
+    to the property set.
 
     Args:
         coupling_map: Connected, symmetric device graph.
@@ -167,9 +165,9 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         edges = frozenset(
             e for a, b in self.coupling_map.get_edges() for e in ((a, b), (b, a))
         )
-        best = None  # (score, placed program, choices, n_swaps); first start wins ties
+        best = None  # (score, placed program, n_swaps); first start wins ties
         for events, final_v2p, n_swaps, refined_v2p in results:
-            data, chosen = _replay(events, ir.data, list(refined_v2p), n_phys)
+            data = _replay(events, ir.data, list(refined_v2p), n_phys)
             placed = replace(
                 ir,
                 data=data,
@@ -177,15 +175,9 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             )
             s = _score(placed.to_circuit(), self.budget.objective)
             if best is None or s < best[0]:
-                best = (s, placed, chosen, n_swaps)
+                best = (s, placed, n_swaps)
         assert best is not None
-        _, placed, chosen, n_swaps = best
-        self.property_set["realization_choices"] = tuple(
-            r
-            for k, r in sorted(chosen.items())
-            if isinstance(op := ir.data[k].operation, MultiRealizationOp)
-            and len(op.candidates) > 1
-        )
+        _, placed, n_swaps = best
         self.property_set["online_n_swaps"] = int(n_swaps)
         return placed
 
@@ -280,8 +272,8 @@ def _replay(
     data: list[MultiRealizationInstruction],
     v2p: list[int],
     n_phys: int,
-) -> tuple[list[MultiRealizationInstruction], dict[int, int]]:
-    """Turn a kernel trace into placed instructions and the chosen candidate per instruction.
+) -> list[MultiRealizationInstruction]:
+    """Turn a kernel trace into placed instructions.
 
     ``COMMIT(k, r)`` places instruction ``k`` whole, with choice ``r``.
     ``SWAP(p, q)`` is a routing SWAP between two instructions.
@@ -290,7 +282,6 @@ def _replay(
     for v, p in enumerate(v2p):
         p2v[p] = v
     placed: list[MultiRealizationInstruction] = []
-    chosen: dict[int, int] = {}
     for kind, a, b in events:
         if kind == _SWAP:
             placed.append(MultiRealizationInstruction(SwapGate(), (a, b)))
@@ -301,8 +292,7 @@ def _replay(
         ins = data[a]
         op = ins.operation
         qubits = tuple(v2p[v] for v in ins.qubits)
-        chosen[a] = b
         if isinstance(op, MultiRealizationOp):
             op = replace(op, choice=b)
         placed.append(MultiRealizationInstruction(op, qubits, ins.clbits))
-    return placed, chosen
+    return placed

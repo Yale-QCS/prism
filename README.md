@@ -29,7 +29,7 @@ routed = pm.run(qc)
 print(pm.property_set["circuit_metrics"])
 ```
 
-`pm.property_set` holds `circuit_metrics`, `realization_choices`, `online_n_swaps` and `logical_output_permutation`.
+`pm.property_set` holds `circuit_metrics`, `online_n_swaps` and `logical_output_permutation`.
 `routed.layout` is a rail-level `TranspileLayout`: virtual qubit `2*i + w` is rail `w` of logical qubit `i`, so `routed.layout.final_index_layout()[2*i + w]` is where that rail ends, the elided logical permutation included.
 
 The coupling map must be connected and symmetric, with at least two physical qubits per logical qubit.

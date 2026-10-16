@@ -225,7 +225,7 @@ def build_pm(
     """``PassManager`` compiling ``enc``-encoded circuits onto ``coupling_map``: ``prism_stages`` nested.
 
     Read the property set afterwards from ``pm.property_set`` (``circuit_metrics``,
-    ``realization_choices``, ``online_n_swaps``, ``logical_output_permutation``).
+    ``online_n_swaps``, ``logical_output_permutation``).
     A callback receives ``passmanager_ir`` as a ``DAGCircuit`` or ``MultiRealization``.
     Arguments and errors are those of ``prism_stages``.
     """

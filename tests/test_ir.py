@@ -185,7 +185,6 @@ def test_user_pass_narrows_candidates_before_routing():
     assert crz and all(len(op.candidates) == 1 and op.choice == 0 for op in crz)
     # the default candidate (control on rail 1) carries the open-control RZ
     assert all(dict(op.candidates[0].count_ops()) == {"crz": 1, "rz": 1} for op in crz)
-    assert pm.property_set["realization_choices"] == ()  # nothing left to decide
 
 
 def test_loose_clbit_condition_compiles():
