@@ -20,7 +20,6 @@ $(VENV)/bin/python:
 	$(PYTHON_VERSION) -m venv $(VENV)
 
 init: $(VENV)/bin/python  ## Create the development environment and install git hooks
-	@$(VENV)/bin/pip install --upgrade pip --quiet
 	$(INSTALL) -e .[dev] --quiet
 	@$(VENV)/bin/pre-commit install --hook-type pre-commit --hook-type commit-msg
 
