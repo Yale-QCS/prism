@@ -12,6 +12,7 @@ from qiskit.circuit.controlflow import (
     WhileLoopOp,
 )
 from qiskit.dagcircuit import DAGCircuit
+from qiskit.passmanager import ConditionalController
 from qiskit.transpiler import (
     CouplingMap,
     PassManager,
@@ -112,12 +113,13 @@ def physical_pm(
 
     Built with ``routing_method="none"``, whose init stage omits
     ``ElidePermutations``: that pass would turn a committed rail exchange (a
-    real beamsplitter SWAP) into a free virtual permutation. The layout stage is
-    empty, because ``PrismRouting`` placed the program; ``layout_method="trivial"``
-    says so, which also leaves ``VF2PostLayout`` out of the optimization stage.
-    The routing stage is O3's ``SabreSwap`` stage without ``VF2PostLayout``, so
-    it keeps the layout: it routes only if ``CheckMap`` finds a gate off the
-    device edges, i.e. in an operation that ``PrismRouting`` passed through.
+    real beamsplitter SWAP) into a free virtual permutation. The layout stage
+    runs only on a program no ``multi_realization`` pass placed, as the stock
+    trivial layout; ``layout_method="trivial"`` also leaves ``VF2PostLayout`` out
+    of the optimization stage. The routing stage is O3's ``SabreSwap`` stage
+    without ``VF2PostLayout``, so it keeps the layout: it routes only if
+    ``CheckMap`` finds a gate off the device edges, i.e. in an unplaced program
+    or an operation that ``PrismRouting`` passed through.
     ``CommutativeOptimization`` merges the CRZ runs on an edge that O3 cannot
     resynthesize without a one-qubit basis.
     """
@@ -129,7 +131,12 @@ def physical_pm(
         layout_method="trivial",
         routing_method="none",
     )
-    preset.layout = PassManager()
+    preset.layout = PassManager(
+        ConditionalController(
+            preset.layout.to_flow_controller(),
+            condition=lambda ps: ps["layout"] is None,
+        )
+    )
     preset.routing = generate_routing_passmanager(
         SabreSwap(target, heuristic="decay", seed=seed, trials=20), target
     )

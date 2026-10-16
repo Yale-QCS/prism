@@ -31,7 +31,6 @@ from qiskit.transpiler import (
     Layout,
     PassManager,
     TranspileLayout,
-    TranspilerError,
 )
 
 from prism.encodings import DualRail
@@ -133,8 +132,10 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
 class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
     """``MultiRealization -> DAGCircuit``: materialize every choice on the physical qubits.
 
-    The only step that drops the candidate sets. Needs a placement and a
-    choice on every ``MultiRealizationOp``. Writes a rail-level layout: the
+    The only step that drops the candidate sets. Needs a choice on every
+    ``MultiRealizationOp``. An unplaced program is emitted on its rails, with
+    the elided ``output_permutation``, for the physical stage to lay out and
+    route. A placed one gets a rail-level layout: the
     output's ``TranspileLayout`` has virtual qubit ``WIRES_PER_LOGICAL * i + w``
     for rail ``w`` of logical qubit ``i``, ancillas after them, and the elided
     ``output_permutation`` in its final layout.
@@ -144,16 +145,20 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
         """Verify, materialize, and publish the rail-level layout.
 
         Raises:
-            TranspilerError: if the program is unplaced, has an undecided op, or
-                fails ``verify``.
+            TranspilerError: if the program has an undecided op or fails ``verify``.
         """
         ir = passmanager_ir
-        if ir.placement is None:
-            raise TranspilerError(
-                "MultiRealizationToDAG needs a placed program; run a routing pass (PrismRouting) first"
-            )
         ir.verify()
         dag = circuit_to_dag(ir.to_circuit())
+        ps = self.property_set
+        ps["original_qubit_indices"] = {q: v for v, q in enumerate(ir.rails)}
+        ps["num_input_qubits"] = len(ir.rails)
+        # ElidePermutations' convention: qubit at the end -> its index at the start.
+        ps["virtual_permutation_layout"] = Layout(
+            dict(zip(ir.rails, ir.output_permutation))
+        )
+        if ir.placement is None:
+            return dag
         initial, final = ir.placement.initial, ir.placement.final
         # The virtual circuit is the rail circuit: rail w of logical qubit i is
         # virtual index wpl * i + w; free physical qubits become ancillas.
@@ -162,14 +167,8 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
         layout = Layout({q: initial[v] for v, q in enumerate(virtuals)})
         for reg in [*ir.qregs, ancillas]:
             layout.add_register(reg)
-        ps = self.property_set
         ps["layout"] = layout
         ps["original_qubit_indices"] = {q: v for v, q in enumerate(virtuals)}
-        ps["num_input_qubits"] = len(ir.rails)
-        # ElidePermutations' convention: qubit at the end -> its index at the start.
-        ps["virtual_permutation_layout"] = Layout(
-            dict(zip(ir.rails, ir.output_permutation))
-        )
         ps["final_layout"] = Layout(
             {dag.qubits[initial[v]]: final[v] for v in range(len(initial))}
         )

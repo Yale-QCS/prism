@@ -5,7 +5,6 @@ from dataclasses import replace
 import pytest
 from qiskit import QuantumCircuit
 from qiskit.converters import circuit_to_dag
-from qiskit.passmanager import GenericPass
 from qiskit.transpiler import CouplingMap, PassManager, TranspilerError
 from qiskit.transpiler.passes import Size
 
@@ -61,25 +60,9 @@ def test_verify_rejects_a_choice_off_the_device_edges():
     pytest.fail("every candidate is on an edge; pick a sparser coupling map")
 
 
-class Undecide(GenericPass[MultiRealization, MultiRealization]):
-    """Clear every choice the router made."""
-
-    def run(self, passmanager_ir: MultiRealization) -> MultiRealization:
-        for k, ins in enumerate(passmanager_ir.data):
-            if isinstance(ins.operation, MultiRealizationOp):
-                passmanager_ir.data[k] = ins._replace(
-                    operation=replace(ins.operation, choice=None)
-                )
-        return passmanager_ir
-
-
-def test_exit_needs_placement_and_choices():
-    cmap = CouplingMap.from_grid(2, 3)
-    stages = prism_stages(cmap, DualRail)
+def test_exit_needs_choices():
+    stages = prism_stages(CouplingMap.from_grid(2, 3), DualRail)
     stages.multi_realization = []
-    with pytest.raises(TranspilerError, match="needs a placed program"):
-        PassManager([stages.to_flow_controller()]).run(_bell())
-    stages.multi_realization = [PrismRouting(cmap), Undecide()]
     with pytest.raises(TranspilerError, match="has no realization choice"):
         PassManager([stages.to_flow_controller()]).run(_bell())
 

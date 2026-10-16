@@ -78,31 +78,28 @@ Limits:
 
 `prism.pipeline.prism_stages(cmap, DualRail)` returns these stages as a `MultiStagePassManager`; `dualrail_pm` nests them in a `PassManager`.
 In a `MultiRealization`, each logical operation is a `MultiRealizationOp` with its `candidates` and a `choice`; only the `multi_realization_to_dag` stage turns them into gates.
-A pass can narrow the candidates before routing:
+Any pass that sets a `choice` on every op is a complete `multi_realization` stage; if none places the program, the physical stage lays it out and routes it with stock Qiskit:
 
 ```python
+import random
+
 from qiskit.passmanager import GenericPass
 from qiskit.transpiler import PassManager
 from prism.encodings import DualRail
 from prism.ir import MultiRealization, MultiRealizationOp
-from prism.passes import ElideRailExchanges
 from prism.pipeline import prism_stages
-from prism.routing import PrismRouting
 
 
-class PinDefaultCRZ(GenericPass[MultiRealization, MultiRealization]):
+class RandomChoice(GenericPass[MultiRealization, MultiRealization]):
     def run(self, passmanager_ir: MultiRealization) -> MultiRealization:
         for ins in passmanager_ir.data:
-            op = ins.operation
-            if isinstance(op, MultiRealizationOp) and op.name == "crz":
-                op.candidates = (op.candidates[op.default_index],)
-                op.default_index = 0
+            if isinstance(op := ins.operation, MultiRealizationOp):
+                op.choice = random.randrange(len(op.candidates))
         return passmanager_ir
 
 
-cmap = CouplingMap.from_line(6)
-stages = prism_stages(cmap, DualRail)
-stages.multi_realization = [ElideRailExchanges(), PinDefaultCRZ(), PrismRouting(cmap)]
+stages = prism_stages(CouplingMap.from_line(6), DualRail)
+stages.multi_realization = [RandomChoice()]
 out = PassManager([stages.to_flow_controller()]).run(qc)
 ```
 
