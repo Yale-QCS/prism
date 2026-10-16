@@ -56,8 +56,8 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
     """``DAGCircuit -> MultiRealization``: each logical operation becomes its encoding rule.
 
     Every logical qubit gets ``WIRES_PER_LOGICAL`` rails and the encoding's
-    preparation. A measurement writes the logical clbit from rail 0 and the
-    other rails to a ``rail1`` register. ``logical_output_permutation`` comes
+    preparation. A measurement writes rail 0 to its clbit ``c[i]`` and rail ``w``
+    to ``c_rail<w>[i]``, a register added per measured register. ``logical_output_permutation`` comes
     from the property set (set by ``ElideLogicalPermutations``).
     """
 
@@ -74,20 +74,28 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
         logical = {q: i for i, q in enumerate(dag.qubits)}
         cregs = list(dag.cregs.values())
         clbits = list(dag.clbits)
-        n_extra = sum(
-            node.op.num_qubits * (wpl - 1)
-            for node in dag.op_nodes()
-            if isinstance(node.op, Measure)
-        )
-        extra: list[Clbit] = []
-        if n_extra:
-            name, k = "rail1", 0
-            while name in dag.cregs:
-                k += 1
-                name = f"rail1_{k}"
-            cregs.append(ClassicalRegister(n_extra, name))
-            extra = list(cregs[-1])
-            clbits += extra
+        # Rail w of the measurement that writes clbit c goes to the partner of c
+        # in "<register>_rail<w>", one register per measured register.
+        measured = {node.cargs[0] for node in dag.op_nodes(Measure)}
+        sources = [
+            (f"{r.name}_", list(r)) for r in dag.cregs.values() if measured & set(r)
+        ]
+        loose = [
+            c for c in dag.clbits if c in measured and not dag.find_bit(c).registers
+        ]
+        if loose:
+            sources.append(("", loose))
+        partner: dict[tuple[Clbit, int], Clbit] = {}
+        for prefix, bits in sources:
+            for w in range(1, wpl):
+                name = f"{prefix}rail{w}"
+                while any(r.name == name for r in cregs):
+                    name += "_"
+                reg = ClassicalRegister(len(bits), name)
+                cregs.append(reg)
+                clbits += list(reg)
+                for bit, p in zip(bits, reg):
+                    partner.setdefault((bit, w), p)
 
         data = []
         prep = enc.initialize()
@@ -99,8 +107,8 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
             op = enc.lower(node.op, tuple(node.cargs))
             rails = tuple(wpl * logical[q] + w for q in node.qargs for w in range(wpl))
             if isinstance(node.op, Measure):
-                cl = (node.cargs[0], *extra[: op.num_clbits - 1])
-                extra = extra[op.num_clbits - 1 :]
+                c = node.cargs[0]
+                cl = (c, *(partner[c, w] for w in range(1, wpl)))
             else:
                 cl = tuple(node.cargs)
             data.append(MultiRealizationInstruction(op, rails, cl))

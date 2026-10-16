@@ -44,12 +44,12 @@ The output, on rails `q<i>_0` and `q<i>_1` of logical qubit `i`:
 - `rx` is an `rswap` between the qubit's two rails.
 - Each `crz` runs between one rail of each qubit; the router picked a different rail pair for each, with an `rz` correcting an open control.
 - The erasure check is a ZZ measurement on qubit 1's two rails; it writes the rail parity to `c[1]`, which the final measurement later overwrites, and leaves the logical state alone.
-- Each measurement reads both rails: rail 0, the logical bit, into `c` and rail 1 into `rail1`; the pair heralds a lost photon (both 0).
+- Each measurement reads both rails: rail 0, the logical bit, into `c` and rail 1 into `c_rail1`; the pair heralds a lost photon (both 0).
 
 `dualrail_pm` returns a Qiskit `PassManager`; it is `prism.pipeline.build_pm(coupling_map, DualRail, ...)`, which takes any `QubitEncoding`. After a run, `pm.property_set` holds `circuit_metrics`, `online_n_swaps` (routing SWAPs) and `logical_output_permutation`.
 `out.layout` is a rail-level `TranspileLayout`: virtual qubit `2*i + w` is rail `w` of logical qubit `i`.
 `SearchBudget` sets the layout search effort and the objective, `"swaps"` (default) or `"depth"`.
-A measurement writes rail 0 (the logical bit) to the circuit's clbit and rail 1 to a `rail1` register; together they herald a lost photon.
+A measurement into `c[i]` writes rail 0 (the logical bit) there and rail 1 to `c_rail1[i]`, a register prism adds for each measured register; together they herald a lost photon.
 
 ## Gate sets
 
