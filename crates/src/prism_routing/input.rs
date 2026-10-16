@@ -6,16 +6,19 @@ use rustworkx_core::petgraph::prelude::*;
 
 use qiskit_circuit::VirtualQubit;
 
+use super::score::Gate;
 use super::{VirtRealizations, single_edge};
 use crate::sabre::{InteractionKind, SabreDAG, SabreNode};
 
-/// One op of the routing problem, in program order: `(realizations, default, predecessors)`.
+/// One op of the routing problem, in program order: `(realizations, default, predecessors, gates)`.
 ///
 /// - `realizations[r]`: the virtual-qubit pairs of realization `r`.  Some realization has no
 ///   pairs or all its pairs on one qubit pair, so the router can route it on one edge.
 /// - `default`: the realization preferred on a tie.
 /// - `predecessors`: the earlier ops that this op must follow.
-pub type Op = (Vec<Vec<[u32; 2]>>, u32, Vec<u32>);
+/// - `gates[r]`: every gate of realization `r`, in order, to score routes (see
+///   [`Program`](super::score::Program)).
+pub type Op = (Vec<Vec<[u32; 2]>>, u32, Vec<u32>, Vec<Vec<Gate>>);
 
 /// One routed op: `(swaps, op, realization)`, where `swaps` are the physical-qubit swaps applied
 /// just before op `op` executes with realization `realization`.
@@ -35,7 +38,7 @@ pub type RoutedOp = (Vec<[u32; 2]>, usize, u32);
 pub fn sabre_dags(ops: &[Op], num_qubits: u32) -> PyResult<[SabreDAG; 2]> {
     let mut kinds = Vec::with_capacity(ops.len());
     let mut edges = Vec::new();
-    for (k, (reals, default, preds)) in ops.iter().enumerate() {
+    for (k, (reals, default, preds, _)) in ops.iter().enumerate() {
         let invalid = |e: String| PyValueError::new_err(format!("op {k}: {e}"));
         kinds.push(op_kind(reals, *default, num_qubits).map_err(invalid)?);
         for &p in preds {
@@ -118,9 +121,9 @@ mod tests {
     #[test]
     fn single_pair_ops_are_stock_two_qubit_nodes() {
         let ops: Vec<Op> = vec![
-            (vec![vec![[0, 1]]], 0, vec![]),
-            (vec![vec![[1, 2]], vec![[0, 2]]], 0, vec![0]),
-            (vec![vec![]], 0, vec![]),
+            (vec![vec![[0, 1]]], 0, vec![], vec![]),
+            (vec![vec![[1, 2]], vec![[0, 2]]], 0, vec![0], vec![]),
+            (vec![vec![]], 0, vec![], vec![]),
         ];
         let [forward, reverse] = sabre_dags(&ops, 3).expect("valid input");
         let kinds: Vec<_> = forward.dag.node_weights().map(|n| &n.kind).collect();
@@ -144,22 +147,25 @@ mod tests {
     #[test]
     fn invalid_inputs_are_errors() {
         let check = |op: Op, num_qubits| sabre_dags(&[op], num_qubits);
-        assert!(check((vec![vec![[0, 1]]], 0, vec![]), 2).is_ok());
+        assert!(check((vec![vec![[0, 1]]], 0, vec![], vec![]), 2).is_ok());
         assert!(
-            check((vec![vec![[0, 1]]], 0, vec![]), 1).is_err(),
+            check((vec![vec![[0, 1]]], 0, vec![], vec![]), 1).is_err(),
             "qubit out of range"
         );
-        assert!(check((vec![], 0, vec![]), 2).is_err(), "no realizations");
         assert!(
-            check((vec![vec![[1, 1]]], 0, vec![]), 2).is_err(),
+            check((vec![], 0, vec![], vec![]), 2).is_err(),
+            "no realizations"
+        );
+        assert!(
+            check((vec![vec![[1, 1]]], 0, vec![], vec![]), 2).is_err(),
             "repeated qubit"
         );
         assert!(
-            check((vec![vec![[0, 1]]], 0, vec![0]), 2).is_err(),
+            check((vec![vec![[0, 1]]], 0, vec![0], vec![]), 2).is_err(),
             "not an earlier op"
         );
         assert!(
-            check((vec![vec![[0, 1], [1, 2]]], 0, vec![]), 3).is_err(),
+            check((vec![vec![[0, 1], [1, 2]]], 0, vec![], vec![]), 3).is_err(),
             "no single-edge realization"
         );
     }

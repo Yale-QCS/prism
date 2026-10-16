@@ -2,12 +2,14 @@
 //!
 //! - [`input`]: the routing problem from Python and the routed order back to it.
 //! - [`layout`]: prism's layout search, the outer loop of upstream `SabreLayout`.
+//! - [`score`]: the metrics that rank the routes of the layout search.
 //!
 //! The routing hooks themselves are in `route_ext.rs`, which is compiled as a child module of
 //! `crate::sabre::route` (declared there) so that it can reach the router's private state.
 
 pub mod input;
 pub mod layout;
+pub mod score;
 
 use ndarray::Array2;
 use pyo3::exceptions::PyValueError;

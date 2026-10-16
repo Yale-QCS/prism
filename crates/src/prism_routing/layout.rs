@@ -2,8 +2,10 @@
 //!
 //! For every starting layout, alternate forward and backward refinement routes for
 //! `max_iterations`, then route forward once more with `swap_trials` trials from the refined
-//! layout.  Python keeps starting-layout generation, circuit emission and objective scoring.
+//! layout, and keep the final route of the lowest score.  Python keeps starting-layout generation
+//! and circuit emission.
 
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use rayon_cond::CondIterator;
 
@@ -12,6 +14,7 @@ use qiskit_circuit::nlayout::NLayout;
 use qiskit_util::getenv_use_multiple_threads;
 
 use super::input::{Op, RoutedOp, sabre_dags};
+use super::score::{Objective, Program, best};
 use super::{explicit_target, layout_from_v2p, v2p_of};
 use crate::sabre::heuristic::Heuristic;
 use crate::sabre::route::{PyRoutingTarget, RoutingProblem, routed_ops, swap_map};
@@ -19,7 +22,8 @@ use crate::sabre::route::{PyRoutingTarget, RoutingProblem, routed_ops, swap_map}
 /// One final route: `(routed, final_v2p, refined_v2p)`.
 type StartResult = (Vec<RoutedOp>, Vec<u32>, Vec<u32>);
 
-/// Refine every start and route it.  Returns one [`StartResult`] per start, in start order, where
+/// Refine every start and route it.  Returns the [`StartResult`] whose route scores lowest under
+/// `objective` (`"swaps"` or `"depth"`, see [`Objective`]), the earliest start on a tie, where
 /// `refined_v2p` is the layout the final route began from.
 ///
 /// Route seeds follow prism's schedule: for start seed `s`, forward refinement `it` uses
@@ -29,7 +33,8 @@ type StartResult = (Vec<RoutedOp>, Vec<u32>, Vec<u32>);
 ///
 /// # Errors
 ///
-/// If the target is all-to-all, a start is not a permutation of its qubits, or `ops` is invalid.
+/// If there are no starts, the target is all-to-all, a start is not a permutation of its qubits,
+/// `ops` is invalid, or `objective` is unknown.
 #[pyfunction]
 pub fn prism_layout_and_routing(
     ops: Vec<Op>,
@@ -38,7 +43,9 @@ pub fn prism_layout_and_routing(
     starts: Vec<(u64, Vec<u32>)>,
     max_iterations: u64,
     swap_trials: usize,
-) -> PyResult<Vec<StartResult>> {
+    objective: &str,
+) -> PyResult<StartResult> {
+    let objective = Objective::try_from(objective)?;
     let target = explicit_target(target)?;
     let num_qubits = u32::try_from(target.num_qubits())?;
     let starts = starts
@@ -46,6 +53,7 @@ pub fn prism_layout_and_routing(
         .map(|(seed, v2p)| Ok((seed, layout_from_v2p(&v2p, num_qubits)?)))
         .collect::<PyResult<Vec<(u64, NLayout)>>>()?;
     let [sabre_fwd, sabre_rev] = sabre_dags(&ops, num_qubits)?;
+    let program = Program::new(&ops, num_qubits)?;
     // Upstream reads the `DAGCircuit` only to rebuild a routed circuit or route control flow;
     // prism does neither, so an empty one fills the slot.
     let dag = DAGCircuit::new();
@@ -74,11 +82,11 @@ pub fn prism_layout_and_routing(
             swap_trials.max(1),
             Some(false),
         );
-        (
-            routed_ops(&result),
-            v2p_of(&result.final_layout),
-            v2p_of(&layout),
-        )
+        let routed = routed_ops(&result);
+        let metrics = program.metrics(&routed, &layout);
+        let route = (routed, v2p_of(&result.final_layout), v2p_of(&layout));
+        (metrics, route)
     };
-    Ok(CondIterator::new(starts, parallel).map(run_start).collect())
+    let routes: Vec<_> = CondIterator::new(starts, parallel).map(run_start).collect();
+    best(routes, objective).ok_or_else(|| PyValueError::new_err("no starting layout"))
 }

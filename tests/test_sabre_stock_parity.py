@@ -74,13 +74,14 @@ def _route_ours(dag, cmap, n, seed, trials):
     index = {node: k for k, node in enumerate(nodes)}
     qubits = [[dag.find_bit(q).index for q in node.qargs] for node in nodes]
     preds = [sorted({index[p] for p in dag.op_predecessors(node)}) for node in nodes]
-    [(routed, final_v2p, _)] = ours.prism_layout_and_routing(
-        [([[q]], 0, p) for q, p in zip(qubits, preds)],
+    routed, final_v2p, _ = ours.prism_layout_and_routing(
+        [([[q]], 0, p, [[(q, [], False, False)]]) for q, p in zip(qubits, preds)],
         ours.RoutingTarget.from_coupling_list([list(e) for e in cmap.get_edges()], n),
         _heuristic(ours, n),
         [(seed, list(range(n)))],
         0,
         trials,
+        "swaps",
     )
     qc, v2p, p2v = QuantumCircuit(n), list(range(n)), list(range(n))
     for swaps, k, _ in routed:

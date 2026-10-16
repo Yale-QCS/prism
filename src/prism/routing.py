@@ -5,7 +5,8 @@ follows Qiskit's O3 ``SabreLayout``: random and standard starting layouts
 undergo alternating forward/backward refinement, then one multi-trial forward
 route is kept per start. The best final route by ``SearchBudget.objective``
 gives the placement and the choices. The kernel is
-``crates/src/prism_routing/layout.rs``.
+``crates/src/prism_routing/layout.rs``; it scores every start and returns only
+the winning route.
 
 Routing SWAPs go between operations, never inside one. An operation that is
 not ``MultiRealizationOp.single_edge`` cannot be routed onto one device edge:
@@ -20,6 +21,8 @@ import warnings
 from dataclasses import dataclass, replace
 from typing import Literal, get_args
 
+from qiskit.circuit import Clbit, Operation
+from qiskit.circuit.controlflow._builder_utils import condition_resources
 from qiskit.circuit.library import SwapGate
 from qiskit.passmanager import GenericPass
 from qiskit.transpiler import CouplingMap, TranspilerError
@@ -40,7 +43,7 @@ from prism.ir import (
     Placement,
     commuting_predecessors,
 )
-from prism.metrics import CircuitMetrics
+from prism.metrics import is_free
 
 __all__ = ["Objective", "PrismRouting", "SearchBudget"]
 
@@ -73,27 +76,6 @@ class SearchBudget:
         for name in ("layout_starts", "refinement_iterations", "swap_trials"):
             if getattr(self, name) < 1:
                 raise ValueError(f"{name} must be >= 1, got {getattr(self, name)}")
-
-
-def _score(placed: MultiRealization, objective: Objective) -> tuple[int, int, int]:
-    """Post-selection score for ``placed`` under ``objective``; lower is better."""
-    m = CircuitMetrics.of(placed.to_circuit())
-    if objective == "swaps":
-        return (m.swaps, m.depth, m.active_gates)
-    return (m.depth, m.active_gates, m.size)
-
-
-def _swaps(placed: MultiRealization) -> int:
-    """``CircuitMetrics.swaps`` of ``placed.to_circuit()``, without building the circuit."""
-    return sum(
-        ci.operation.name == "swap"
-        for ins in placed.data
-        for ci in (
-            ins.operation.candidates[ins.operation.choice].data
-            if isinstance(ins.operation, MultiRealizationOp)
-            else (ins,)
-        )
-    )
 
 
 class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
@@ -143,7 +125,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         self.budget = budget or SearchBudget()
 
     def run(self, passmanager_ir: MultiRealization) -> MultiRealization:
-        """Refine every start in the kernel, then keep the best final route by objective.
+        """Refine and score every start in the kernel, then replay the best final route.
 
         Raises:
             TranspilerError: if the program is already placed or needs more
@@ -177,7 +159,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         )
         edges = frozenset(self.coupling_map.get_edges())  # both orientations
         target = RoutingTarget.from_coupling_list(list(edges), n_phys)
-        results = prism_layout_and_routing(
+        routed, final_v2p, refined_v2p = prism_layout_and_routing(
             _routing_problem(ir),
             target,
             self._make_heuristic(n_phys),
@@ -187,27 +169,14 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             ],
             self.budget.refinement_iterations,
             self.budget.swap_trials,
+            self.budget.objective,
         )
-        starts = [
-            (
-                replace(
-                    ir,
-                    data=_replay(routed, ir.data, list(refined_v2p), n_phys),
-                    placement=Placement(tuple(refined_v2p), tuple(final_v2p), edges),
-                ),
-                sum(len(swaps) for swaps, _, _ in routed),
-            )
-            for routed, final_v2p, refined_v2p in results
-        ]
-        if self.budget.objective == "swaps":
-            # Only the starts with the fewest SWAPs can win: score just those.
-            counts = [_swaps(placed) for placed, _ in starts]
-            fewest = min(counts)
-            starts = [s for s, c in zip(starts, counts) if c == fewest]
-        # min keeps the first of equal scores: the earliest start wins ties.
-        placed, n_swaps = min(starts, key=lambda s: _score(s[0], self.budget.objective))
-        self.property_set["online_n_swaps"] = n_swaps
-        return placed
+        self.property_set["online_n_swaps"] = sum(len(swaps) for swaps, _, _ in routed)
+        return replace(
+            ir,
+            data=_replay(routed, ir.data, list(refined_v2p), n_phys),
+            placement=Placement(tuple(refined_v2p), tuple(final_v2p), edges),
+        )
 
     def _make_heuristic(self, n_phys: int) -> Heuristic:
         """Qiskit 2.6 ``SabreLayout``'s heuristic, with ``LOOKAHEAD_LAYERS`` lookahead layers.
@@ -246,36 +215,59 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
 
 
 def _routing_problem(ir: MultiRealization) -> list[tuple]:
-    """The kernel's routing problem: per instruction, ``(pairs, default, predecessors)``.
+    """The kernel's routing problem: per instruction, ``(pairs, default, predecessors, gates)``.
 
     ``pairs[r]`` lists the rail pairs of the two-qubit gates of realization
-    ``r`` (see ``crates/src/prism_routing/input.rs``). An op that is not
-    ``single_edge`` gets realizations with no pairs: the kernel commits its
-    default at once, adding no SWAP for it.
+    ``r``, and ``gates[r]`` its gates as the kernel scores them (see
+    ``crates/src/prism_routing/input.rs``). An op that is not ``single_edge``
+    gets realizations with no pairs: the kernel commits its default at once,
+    adding no SWAP for it.
     """
+    clbit_index = {bit: i for i, bit in enumerate(ir.clbits)}
+
+    def gate(op: Operation, qubits: list[int], clbits: list[Clbit]) -> tuple:
+        """``(qubits, clbits, free, swap)``; clbits as ``QuantumCircuit.depth`` reads them."""
+        if (condition := getattr(op, "condition", None)) is not None:
+            clbits = [*clbits, *condition_resources(condition).clbits]
+        return (
+            qubits,
+            sorted({clbit_index[c] for c in clbits}),
+            is_free(op),
+            op.name == "swap",
+        )
+
     ops, wires, diagonal = [], [], []
     for ins in ir.data:
         op = ins.operation
-        if not isinstance(op, MultiRealizationOp):
-            ops.append(([[ins.qubits] if len(ins.qubits) == 2 else []], 0))
-            wires.append({*ins.qubits, *ins.clbits})
-            diagonal.append(False)
-            continue
-        gates = [
-            [
-                [ins.qubits[real.find_bit(q).index] for q in ci.qubits]
-                for ci in real.data
+        if isinstance(op, MultiRealizationOp):
+            gates = [
+                [
+                    gate(
+                        ci.operation,
+                        [ins.qubits[real.find_bit(q).index] for q in ci.qubits],
+                        [ins.clbits[real.find_bit(c).index] for c in ci.clbits],
+                    )
+                    for ci in real.data
+                ]
+                for real in op.candidates
             ]
-            for real in op.candidates
+            routed, default, diag = op.single_edge, op.default_index, op.diagonal
+        else:
+            gates = [[gate(op, list(ins.qubits), list(ins.clbits))]]
+            routed, default, diag = True, 0, False
+        pairs = [
+            [g[0] for g in real if len(g[0]) == 2] if routed else [] for real in gates
         ]
-        pairs = [[g for g in real if len(g) == 2] for real in gates]
-        if not op.single_edge:
-            pairs = [[] for _ in pairs]
-        ops.append((pairs, op.default_index))
-        wires.append({v for real in gates for g in real for v in g} | set(ins.clbits))
-        diagonal.append(op.diagonal)
+        ops.append((pairs, default, gates))
+        wires.append(
+            {q for real in gates for g in real for q in g[0]} | set(ins.clbits)
+        )
+        diagonal.append(diag)
     preds = commuting_predecessors(wires, diagonal)
-    return [(*op, sorted(deps)) for op, deps in zip(ops, preds)]
+    return [
+        (pairs, default, sorted(deps), gates)
+        for (pairs, default, gates), deps in zip(ops, preds)
+    ]
 
 
 def _replay(
