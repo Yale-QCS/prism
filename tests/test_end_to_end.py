@@ -29,6 +29,18 @@ def test_build_pm_runs():
     assert "circuit_metrics" in ps
 
 
+def test_output_is_in_the_physical_isa():
+    """Stock O3 over the physical Target emits no single-rail X/RX (no gate leaves the code space)."""
+    n = 4
+    qc = QuantumCircuit(n)
+    qc.append(QFTGate(n), range(n))
+    qc.rx(0.4, 1)
+    qc.ccx(0, 1, 2)
+    qc.measure_all()
+    out = build_pm(CouplingMap.from_grid(2, 2 * n), enc=DualRail, seed=0).run(qc)
+    assert set(out.count_ops()) <= DualRail.PHYSICAL_ISA | {"measure"}
+
+
 def test_conditional_logical_x_survives_physical_optimization():
     """A control-flow block must retain the rail SWAP that implements X_L."""
     qc = QuantumCircuit(2, 1)
