@@ -12,9 +12,7 @@ from prism.encodings.base import QubitEncoding
 from prism.ir import MultiRealizationOp
 from prism.logical import basic_logical_pm
 from prism.synthesis.delocal_decomp import build_equivalence_library
-from prism.synthesis.h_reduction import HadamardReduction
 from prism.synthesis.margolus import MargolusPairOptimizer
-from prism.synthesis.pauli_frame import PauliFramePropagation
 from prism.synthesis.preparation import (
     SYNTHETIC_PREPARATION_LABEL,
     JointHeraldGate,
@@ -50,19 +48,13 @@ class DualRail(QubitEncoding):
 
     @classmethod
     def logical_pm(cls) -> PassManager:
-        """DR rich pre-lowering: basic cleanup + DR-specific reshape + DR equivalence library."""
+        """Basic cleanup with Margolus pairs and the dual-rail equivalence library."""
         return basic_logical_pm(
             cls,
             eq_library=build_equivalence_library(),
-            reshape_passes=(
-                # CCX compute/uncompute pairs → RTOF (DR has a 4-RX CCX template
-                # but RTOF is cheaper; phases cancel pairwise).
-                MargolusPairOptimizer(),
-                # Clifford + RZ frame propagation; settles at H, RX, CX-target.
-                PauliFramePropagation(),
-                # Local H-reduction (Nam-Maslov 1710.07345 patterns 1 & 4).
-                HadamardReduction(),
-            ),
+            # CCX compute/uncompute pairs → RTOF (DR has a 4-RX CCX template
+            # but RTOF is cheaper; phases cancel pairwise).
+            reshape_passes=(MargolusPairOptimizer(),),
         )
 
     @classmethod
