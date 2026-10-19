@@ -7,9 +7,9 @@ run before or after it.
 from __future__ import annotations
 
 from bisect import bisect_left
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from itertools import permutations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, NamedTuple
 
 from qiskit.circuit.library import PermutationGate
 from qiskit.exceptions import QiskitError
@@ -190,17 +190,26 @@ def _is_swap(ins: MultiRealizationInstruction) -> bool:
     )
 
 
+@dataclass
 class _Schedule:
-    """An order of the instructions, with the physical qubits and choice of each."""
+    """An order of the instructions, with the physical qubits, choice and gates of each."""
 
-    def __init__(self, rt: _Retime, order: list[int]) -> None:
-        self.order = order
-        self.qubits = [ins.qubits for ins in rt.data]
-        self.choice = [getattr(ins.operation, "choice", None) for ins in rt.data]
-        self.gates = [
-            rt.gates(k, qs, r)
-            for k, (qs, r) in enumerate(zip(self.qubits, self.choice))
-        ]
+    order: list[int]
+    qubits: list[tuple[int, ...]]
+    choice: list[int | None]
+    gates: list[tuple[Gate, ...]]
+
+
+class _Analysis(NamedTuple):
+    """``_times`` of a schedule, and where each of its ops sits."""
+
+    ends: list[dict]
+    tails: list[dict]
+    crit: list[bool]
+    depth: int
+    on_wire: dict[Hashable, list[int]]  # wire -> slots of the ops on it
+    n_swaps: list[int]  # slot -> routing SWAPs before it
+    pos: dict[int, int]  # instruction -> slot
 
 
 class RetimeDiagonals(GenericPass[MultiRealization, MultiRealization]):
@@ -230,15 +239,11 @@ class RetimeDiagonals(GenericPass[MultiRealization, MultiRealization]):
                 "RetimeDiagonals needs a placed program; run PrismRouting first"
             )
         rt = _Retime(ir)
-        routed = _Schedule(rt, list(range(len(ir.data))))
-        listed = _Schedule(rt, [])
-        listed.order = _list_schedule(ir.data, listed.gates, rt.movable, rt.preds)
-        t = 0
-        for k in listed.order:
-            t += rt.swap[k]
-            if k in rt.movable:
-                listed.qubits[k] = tuple(rt.layouts[t][v] for v in rt.virt[k])
-        best = min((routed, listed), key=rt.polish)
+        routed = rt.schedule(list(range(len(ir.data))))
+        order = _list_schedule(ir.data, routed.gates, rt.movable, rt.preds)
+        listed = rt.schedule(order)
+        routed_depth, listed_depth = rt.polish(routed).depth, rt.polish(listed).depth
+        best = routed if routed_depth <= listed_depth else listed
         out = []
         for k in best.order:
             ins = ir.data[k]
@@ -297,6 +302,21 @@ class _Retime:
             and all(len(t) == 1 and len(t[0][0]) == 2 for t in self.templates[k])
         }
 
+    def schedule(self, order: list[int]) -> _Schedule:
+        """``order`` with the routed choices, each movable op on the rails' qubits at its slot.
+
+        A movable op crosses only SWAPs off its gate's qubits, so its gates stay.
+        """
+        qubits = [ins.qubits for ins in self.data]
+        t = 0
+        for k in order:
+            t += self.swap[k]
+            if k in self.movable:
+                qubits[k] = tuple(self.layouts[t][v] for v in self.virt[k])
+        choice = [getattr(ins.operation, "choice", None) for ins in self.data]
+        gates = [self.gates(k, q, r) for k, (q, r) in enumerate(zip(qubits, choice))]
+        return _Schedule(order, qubits, choice, gates)
+
     def gates(self, k: int, qubits: Sequence[int], r: int | None) -> tuple[Gate, ...]:
         """The gates of instruction ``k`` on physical ``qubits`` with choice ``r``."""
         ins, templates = self.data[k], self.templates[k]
@@ -307,8 +327,8 @@ class _Retime:
             for qs, cs, w in templates[r]
         )
 
-    def analyse(self, sch: _Schedule) -> tuple[Any, ...]:
-        """``_times`` of ``sch``, the positions on each wire, the SWAPs before each slot, and each op's slot."""
+    def analyse(self, sch: _Schedule) -> _Analysis:
+        """``_times`` of ``sch``, and where each of its ops sits."""
         ends, tails, crit, depth = _times([sch.gates[k] for k in sch.order])
         on_wire: dict = {}
         for j, e in enumerate(ends):
@@ -318,60 +338,58 @@ class _Retime:
         for k in sch.order:
             n_swaps.append(n_swaps[-1] + self.swap[k])
         pos = {k: j for j, k in enumerate(sch.order)}
-        return ends, tails, crit, depth, on_wire, n_swaps, pos
+        return _Analysis(ends, tails, crit, depth, on_wire, n_swaps, pos)
 
     def best_slot(
-        self, sch: _Schedule, i: int, a: tuple[Any, ...]
+        self, sch: _Schedule, i: int, a: _Analysis
     ) -> tuple[int, int, tuple[int, ...], int]:
         """``(path, slot, qubits, choice)`` of the least path through ``sch.order[i]``, moved."""
-        ends, tails, _, _, on_wire, n_swaps, pos = a
         k = sch.order[i]
-        lo = max((pos[p] for p in self.preds[k]), default=-1) + 1
-        hi = min((pos[s] for s in self.succs[k]), default=len(sch.order))
+        lo = max((a.pos[p] for p in self.preds[k]), default=-1) + 1
+        hi = min((a.pos[s] for s in self.succs[k]), default=len(sch.order))
         best = None
         # ponytail: scans every slot of the window, O(window * candidates * log n) per move
         for j in range(lo, hi + 1):
-            qubits = tuple(self.layouts[n_swaps[j]][v] for v in self.virt[k])
+            qubits = tuple(self.layouts[a.n_swaps[j]][v] for v in self.virt[k])
             for r in range(len(self.templates[k])):
                 ((ws, w),) = self.gates(k, qubits, r)
                 if ws not in self.edges:
                     continue
                 head = tail = 0
                 for x in ws:  # the neighbours of slot j on wire x, other than k itself
-                    lst = on_wire.get(x, ())
+                    lst = a.on_wire.get(x, ())
                     b = bisect_left(lst, j)
                     p = b - 1 - (b > 0 and lst[b - 1] == i)
                     if p >= 0:
-                        head = max(head, ends[lst[p]][x])
+                        head = max(head, a.ends[lst[p]][x])
                     c = b + (b < len(lst) and lst[b] == i)
                     if c < len(lst):
-                        tail = max(tail, tails[lst[c]][x])
+                        tail = max(tail, a.tails[lst[c]][x])
                 if best is None or head + w + tail < best[0]:
                     best = (head + w + tail, j, qubits, r)
         return best
 
-    def polish(self, sch: _Schedule) -> int:
-        """Reinsert critical diagonal ops of ``sch`` while (depth, critical ops) drops; the depth."""
+    def polish(self, sch: _Schedule) -> _Analysis:
+        """Reinsert critical diagonal ops of ``sch`` while (depth, critical ops) drops."""
         a = self.analyse(sch)
         tried: set[int] = set()
         while True:
-            n_crit = sum(a[2])
             for i, k in enumerate(sch.order):
-                if not a[2][i] or k not in self.movable or k in tried:
+                if not a.crit[i] or k not in self.movable or k in tried:
                     continue
                 tried.add(k)
                 path, j, qubits, r = self.best_slot(sch, i, a)
-                if path >= a[3]:
+                if path >= a.depth:
                     continue
                 saved = sch.order[:], sch.qubits[k], sch.choice[k], sch.gates[k]
                 sch.order.insert(j - (j > i), sch.order.pop(i))
                 sch.qubits[k], sch.choice[k] = qubits, r
                 sch.gates[k] = self.gates(k, qubits, r)
                 new = self.analyse(sch)
-                if (new[3], sum(new[2])) < (a[3], n_crit):
+                if (new.depth, sum(new.crit)) < (a.depth, sum(a.crit)):
                     a = new
                     tried.clear()
                     break
                 sch.order, sch.qubits[k], sch.choice[k], sch.gates[k] = saved
             else:
-                return a[3]
+                return a
