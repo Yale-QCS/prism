@@ -7,12 +7,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from qiskit.circuit import Instruction, Measure, ParameterExpression, QuantumCircuit
-from qiskit.circuit.controlflow import (
-    ForLoopOp,
-    IfElseOp,
-    SwitchCaseOp,
-    WhileLoopOp,
-)
+from qiskit.circuit.controlflow import IfElseOp
 from qiskit.circuit.library import CRZGate, RZGate
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode, DAGOutNode
 from qiskit.passmanager import ConditionalController
@@ -220,7 +215,7 @@ class FoldCRZAngles(TransformationPass):
 
 
 def _physical_target(enc: type[QubitEncoding], coupling_map: CouplingMap) -> Target:
-    """``enc.PHYSICAL_ISA`` on each qubit or edge, plus measure and control flow.
+    """``enc.PHYSICAL_ISA`` on each qubit or edge, plus measure and ``if_else``.
 
     For dual rail that is ``rz`` on one rail and ``crz``, ``swap``, ``rswap``,
     ``initialize``, ``pauli_product_measurement`` on an edge: no gate leaves
@@ -234,9 +229,6 @@ def _physical_target(enc: type[QubitEncoding], coupling_map: CouplingMap) -> Tar
     )
     target.add_instruction(Measure(), name="measure")
     target.add_instruction(IfElseOp, name="if_else")
-    target.add_instruction(WhileLoopOp, name="while_loop")
-    target.add_instruction(ForLoopOp, name="for_loop")
-    target.add_instruction(SwitchCaseOp, name="switch_case")
     return target
 
 

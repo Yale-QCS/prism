@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 from qiskit.circuit import AncillaRegister, IfElseOp, QuantumCircuit
+from qiskit.circuit.controlflow import CONTROL_FLOW_OP_NAMES
 from qiskit.circuit.library import MCPhaseGate, MCXGate
 from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit
@@ -36,12 +37,7 @@ if TYPE_CHECKING:
     from prism.encodings.base import QubitEncoding
 
 
-CONTROL_FLOW_OPS: frozenset[str] = frozenset(
-    {"if_else", "while_loop", "for_loop", "switch_case"}
-)
-
-
-NON_GATE_ISA_NAMES: frozenset[str] = CONTROL_FLOW_OPS | {
+NON_GATE_ISA_NAMES: frozenset[str] = CONTROL_FLOW_OP_NAMES | {
     "measure",
     "reset",
     "erasure_check",
@@ -73,7 +69,9 @@ def basic_logical_pm(
             Decompose(["rccx", "rccx_dg"]),
             Unroll3qOrMore(basis_gates=["ccx"]),
             *reshape_passes,
-            BasisTranslator(eq_library, sorted(enc.LOGICAL_ISA | CONTROL_FLOW_OPS)),
+            BasisTranslator(
+                eq_library, sorted(enc.LOGICAL_ISA | CONTROL_FLOW_OP_NAMES)
+            ),
             Optimize1qGatesDecomposition(basis=isa_basis),
             SplitIfElse(),
             # Before layout a SWAP only relabels logical qubits.
