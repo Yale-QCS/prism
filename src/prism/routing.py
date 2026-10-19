@@ -196,13 +196,10 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
 
 
 def _routing_problem(ir: MultiRealization) -> list[tuple]:
-    """The kernel's routing problem: per instruction, ``(pairs, default, predecessors, gates)``.
+    """The kernel's routing problem: per instruction, ``(default, predecessors, gates)``.
 
-    ``pairs[r]`` lists the rail pairs of the two-qubit gates of realization
-    ``r``, and ``gates[r]`` its gates as the kernel scores them (see
-    ``crates/src/prism_routing/input.rs``). An op that is not ``single_edge``
-    gets realizations with no pairs: the kernel commits its default at once,
-    adding no SWAP for it.
+    ``gates[r]`` lists the gates of realization ``r`` as the kernel routes and
+    scores them (see ``crates/src/prism_routing/input.rs``).
     """
     clbit_index = {bit: i for i, bit in enumerate(ir.clbits)}
 
@@ -230,22 +227,18 @@ def _routing_problem(ir: MultiRealization) -> list[tuple]:
                 ]
                 for real in op.candidates
             ]
-            routed, default, diag = op.single_edge, op.default_index, op.diagonal
+            default, diag = op.default_index, op.diagonal
         else:
             gates = [[gate(op, list(ins.qubits), list(ins.clbits))]]
-            routed, default, diag = True, 0, False
-        pairs = [
-            [g[0] for g in real if len(g[0]) == 2] if routed else [] for real in gates
-        ]
-        ops.append((pairs, default, gates))
+            default, diag = 0, False
+        ops.append((default, gates))
         wires.append(
             {q for real in gates for g in real for q in g[0]} | set(ins.clbits)
         )
         diagonal.append(diag)
     preds = commuting_predecessors(wires, diagonal)
     return [
-        (pairs, default, sorted(deps), gates)
-        for (pairs, default, gates), deps in zip(ops, preds)
+        (default, sorted(deps), gates) for (default, gates), deps in zip(ops, preds)
     ]
 
 

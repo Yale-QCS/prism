@@ -136,18 +136,10 @@ impl<'a> Program<'a> {
     ///
     /// # Errors
     ///
-    /// If an op does not list the gates of each of its realizations, or a gate names a qubit out
-    /// of range.
+    /// If a gate names a qubit out of range.
     pub fn new(ops: &'a [Op], num_qubits: u32) -> PyResult<Self> {
         let mut num_clbits = 0;
-        for (k, (reals, _, _, gates)) in ops.iter().enumerate() {
-            if gates.len() != reals.len() {
-                return Err(PyValueError::new_err(format!(
-                    "op {k}: gates for {} realizations, but {} realizations",
-                    gates.len(),
-                    reals.len()
-                )));
-            }
+        for (k, (.., gates)) in ops.iter().enumerate() {
             for (qubits, clbits, ..) in gates.iter().flatten() {
                 if let Some(q) = qubits.iter().find(|&&q| q >= num_qubits) {
                     return Err(PyValueError::new_err(format!(
@@ -196,7 +188,7 @@ mod tests {
 
     /// A one-realization op of `gates`, for scoring only: it has no pairs.
     fn op(gates: Vec<Gate>) -> Op {
-        (vec![vec![]], 0, vec![], vec![gates])
+        (0, vec![], vec![gates])
     }
 
     fn gate(qubits: &[u32], clbits: &[u32], free: bool) -> Gate {

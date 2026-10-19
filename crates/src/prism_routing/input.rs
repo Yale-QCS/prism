@@ -10,15 +10,13 @@ use super::score::Gate;
 use super::{VirtRealizations, single_edge};
 use crate::sabre::{InteractionKind, SabreDAG, SabreNode};
 
-/// One op of the routing problem, in program order: `(realizations, default, predecessors, gates)`.
+/// One op of the routing problem, in program order: `(default, predecessors, gates)`.
 ///
-/// - `realizations[r]`: the virtual-qubit pairs of realization `r`.  Some realization has no
-///   pairs or all its pairs on one qubit pair, so the router can route it on one edge.
 /// - `default`: the realization preferred on a tie.
 /// - `predecessors`: the earlier ops that this op must follow.
-/// - `gates[r]`: every gate of realization `r`, in order, to score routes (see
-///   [`Program`](super::score::Program)).
-pub type Op = (Vec<Vec<[u32; 2]>>, u32, Vec<u32>, Vec<Vec<Gate>>);
+/// - `gates[r]`: every gate of realization `r`, in order (see [`Gate`]).  Its two-qubit gates are
+///   the pairs the router must bring together.
+pub type Op = (u32, Vec<u32>, Vec<Vec<Gate>>);
 
 /// One routed op: `(swaps, op, realization)`, where `swaps` are the physical-qubit swaps applied
 /// just before op `op` executes with realization `realization`.
@@ -33,14 +31,14 @@ pub type RoutedOp = (Vec<[u32; 2]>, usize, u32);
 ///
 /// # Errors
 ///
-/// If an op has no realization or none on at most one qubit pair, a pair names an out-of-range or
-/// repeated qubit, or a predecessor is not an earlier op.
+/// If an op has no realization, a pair names an out-of-range or repeated qubit, or a predecessor
+/// is not an earlier op.
 pub fn sabre_dags(ops: &[Op], num_qubits: u32) -> PyResult<[SabreDAG; 2]> {
     let mut kinds = Vec::with_capacity(ops.len());
     let mut edges = Vec::new();
-    for (k, (reals, default, preds, _)) in ops.iter().enumerate() {
+    for (k, (default, preds, gates)) in ops.iter().enumerate() {
         let invalid = |e: String| PyValueError::new_err(format!("op {k}: {e}"));
-        kinds.push(op_kind(reals, *default, num_qubits).map_err(invalid)?);
+        kinds.push(op_kind(gates, *default, num_qubits).map_err(invalid)?);
         for &p in preds {
             if p as usize >= k {
                 return Err(invalid(format!("predecessor {p} is not an earlier op")));
@@ -80,12 +78,11 @@ fn sabre_dag(
     }
 }
 
-/// The interaction kind of one op, or why its realizations are invalid.
-fn op_kind(
-    reals: &[Vec<[u32; 2]>],
-    default: u32,
-    num_qubits: u32,
-) -> Result<InteractionKind, String> {
+/// The interaction kind of one op of realizations `gates`, or why a gate is invalid.
+///
+/// An op with no realization on at most one qubit pair cannot be routed onto one coupling edge:
+/// its realizations lose their pairs, so it commits `default` at once and adds no SWAP.
+fn op_kind(gates: &[Vec<Gate>], default: u32, num_qubits: u32) -> Result<InteractionKind, String> {
     let pair = |&[a, b]: &[u32; 2]| {
         if a >= num_qubits || b >= num_qubits || a == b {
             Err(format!("invalid pair ({a}, {b}) on {num_qubits} qubits"))
@@ -93,20 +90,29 @@ fn op_kind(
             Ok([VirtualQubit::new(a), VirtualQubit::new(b)])
         }
     };
-    if let [real] = reals
-        && let [only] = real.as_slice()
-    {
-        return Ok(InteractionKind::TwoQ(pair(only)?));
+    let pairs = |real: &[Gate]| -> Result<Box<[_]>, String> {
+        real.iter()
+            .filter_map(|(qubits, ..)| <&[u32; 2]>::try_from(qubits.as_slice()).ok())
+            .map(pair)
+            .collect()
+    };
+    if gates.is_empty() {
+        return Err("no realization".into());
     }
-    let realizations: VirtRealizations = reals
+    let mut realizations: VirtRealizations = gates
         .iter()
-        .map(|real| real.iter().map(pair).collect())
+        .map(|real| pairs(real))
         .collect::<Result<_, _>>()?;
+    if let [real] = &*realizations
+        && let [only] = &**real
+    {
+        return Ok(InteractionKind::TwoQ(*only));
+    }
     if !realizations
         .iter()
         .any(|real| real.is_empty() || single_edge(real).is_some())
     {
-        return Err("no realization on at most one qubit pair".into());
+        realizations = realizations.iter().map(|_| Box::default()).collect();
     }
     Ok(InteractionKind::MultiTwoQ {
         realizations,
