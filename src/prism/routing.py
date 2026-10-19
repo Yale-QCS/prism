@@ -24,7 +24,6 @@ from dataclasses import dataclass, replace
 from typing import Literal, get_args
 
 from qiskit.circuit import Clbit, Operation
-from qiskit.circuit.controlflow._builder_utils import condition_resources
 from qiskit.circuit.library import SwapGate
 from qiskit.passmanager import GenericPass
 from qiskit.transpiler import CouplingMap, TranspilerError
@@ -239,8 +238,6 @@ def _routing_problem(ir: MultiRealization) -> list[tuple]:
 
     def gate(op: Operation, qubits: list[int], clbits: list[Clbit]) -> tuple:
         """``(qubits, clbits, free, swap)``; clbits as ``QuantumCircuit.depth`` reads them."""
-        if (condition := getattr(op, "condition", None)) is not None:
-            clbits = [*clbits, *condition_resources(condition).clbits]
         return (
             qubits,
             sorted({clbit_index[c] for c in clbits}),
