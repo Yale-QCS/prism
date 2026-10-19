@@ -79,6 +79,15 @@ impl Objective {
             }
         }
     }
+
+    /// The most routing SWAPs that a route may have and still rank at least level with `best`.
+    /// Only [`Objective::Swaps`] bounds them: every routing SWAP is a `swap` gate.
+    pub fn max_swaps(self, best: &Metrics) -> usize {
+        match self {
+            Self::Swaps => best.swaps,
+            Self::Depth | Self::Weighted(_) => usize::MAX,
+        }
+    }
 }
 
 /// The metrics of a routed program, as `prism.metrics.CircuitMetrics` defines them.

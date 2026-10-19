@@ -17,7 +17,7 @@ use qiskit_circuit::nlayout::NLayout;
 use qiskit_util::getenv_use_multiple_threads;
 
 use super::input::{Op, RoutedOp, sabre_dags};
-use super::score::{Objective, ObjectiveArg, Program, best};
+use super::score::{Metrics, Objective, ObjectiveArg, Program, best};
 use super::{layout_from_v2p, routing_target, v2p_of};
 use crate::sabre::heuristic::{
     BasicHeuristic, DecayHeuristic, Heuristic, LookaheadHeuristic, SetScaling,
@@ -101,22 +101,27 @@ pub fn prism_layout_and_routing(
             layout = swap_map(reverse, &layout, Some(seed), 1, Some(false)).final_layout;
         }
         // The trial seeds of upstream `swap_map`, but the trial is chosen by `objective`, not by
-        // SWAP count alone, so trials with equal SWAPs are ranked by depth.
+        // SWAP count alone, so trials with equal SWAPs are ranked by depth.  The first of equally
+        // good trials wins, and a trial stops once it cannot win.
         let seed = base.wrapping_add(2 * max_iterations);
-        let (metrics, routed, final_v2p) = Pcg64Mcg::seed_from_u64(seed)
-            .sample_iter(StandardUniform)
-            .take(swap_trials.max(1))
-            .map(|trial_seed| {
-                let result = swap_map_trial(forward, &layout, trial_seed);
-                let routed = routed_ops(&result);
-                (
-                    program.metrics(&routed, &layout),
-                    routed,
-                    v2p_of(&result.final_layout),
-                )
-            })
-            .min_by(|(a, ..), (b, ..)| objective.cmp(a, b))
-            .expect("at least one trial");
+        let mut best: Option<(Metrics, _, _)> = None;
+        let mut max_swaps = usize::MAX;
+        let trial_seeds = Pcg64Mcg::seed_from_u64(seed).sample_iter(StandardUniform);
+        for trial_seed in trial_seeds.take(swap_trials.max(1)) {
+            let Some(result) = swap_map_trial(forward, &layout, trial_seed, max_swaps) else {
+                continue;
+            };
+            let routed = routed_ops(&result);
+            let metrics = program.metrics(&routed, &layout);
+            if let Some((m, ..)) = &best
+                && objective.cmp(&metrics, m).is_ge()
+            {
+                continue;
+            }
+            max_swaps = objective.max_swaps(&metrics);
+            best = Some((metrics, routed, v2p_of(&result.final_layout)));
+        }
+        let (metrics, routed, final_v2p) = best.expect("at least one trial");
         (metrics, (routed, final_v2p, v2p_of(&layout)))
     };
     let routes: Vec<_> = CondIterator::new(starts, parallel).map(run_start).collect();

@@ -15,7 +15,8 @@ from the `qiskit-circuit`, `qiskit-transpiler` and `qiskit-util` git dependencie
 | `route.rs` | `crates/transpiler/src/passes/sabre/route.rs` |
 | `vec_map.rs` | `crates/transpiler/src/passes/sabre/vec_map.rs` |
 
-`heuristic.rs`, `layer.rs` and `vec_map.rs` are verbatim. The other files have [local.patch](local.patch) applied.
+`heuristic.rs`, `layer.rs` and `vec_map.rs` are verbatim. `dag.rs` and `route.rs` have
+[local.patch](local.patch) applied.
 New items in the patch carry a `PRISM:` comment. The patch:
 
 - `dag.rs`: adds the `InteractionKind::MultiTwoQ` variant (a node with alternative
@@ -25,7 +26,8 @@ New items in the patch carry a `PRISM:` comment. The patch:
   keeps `MultiTwoQ` nodes in a parallel `State.multi` at every point where `TwoQ` nodes enter or
   leave `Layers`; adds their candidate swaps and scores in `choose_best_swap`; lets the release
   valve `force_enable_closest_node` also bring a multi node's single-edge realization together;
-  and decays the load tie-break from the main loop.
+  decays the load tie-break from the main loop; and gives `swap_map_trial` a bound on its swaps,
+  past which it returns `None`, so that prism can stop a final trial that cannot win.
 - `route.rs`: fixes the delta update of the lookahead layers (below).
 
 ### Local bug fix: lookahead layers

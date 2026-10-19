@@ -26,7 +26,7 @@ index 0343e98..2bb5552 100644
              };
              // `NodeWeights` guarantees that the weights come out in index order, so the new indexes
 diff --git a/src/sabre/route.rs b/src/sabre/route.rs
-index 90847d4..4f4ac61 100644
+index 90847d4..7b155b6 100644
 --- a/src/sabre/route.rs
 +++ b/src/sabre/route.rs
 @@ -38,6 +38,9 @@ use super::dag::{InteractionKind, SabreDAG};
@@ -82,6 +82,15 @@ index 90847d4..4f4ac61 100644
          InteractionKind::ControlFlow(blocks) => {
              let dag_node_id = *node
                  .indices
+@@ -514,7 +526,7 @@ fn route_control_flow_block<'a>(
+     layout: &NLayout,
+     seed: u64,
+ ) -> RoutingResult<'a> {
+-    let mut result = swap_map_trial(problem, layout, seed);
++    let mut result = swap_map_trial(problem, layout, seed, usize::MAX).expect("unbounded");
+     // For now, we always append a swap circuit that gets the inner block back to the
+     // parent's layout.
+     result.order.final_swaps = token_swapper(
 @@ -570,6 +582,8 @@ fn satisfy_successor_edges(
  struct State {
      layout: NLayout,
@@ -301,7 +310,32 @@ index 90847d4..4f4ac61 100644
              }
          }
  
-@@ -1067,7 +1118,7 @@ pub fn swap_map_trial<'a>(
+@@ -1048,7 +1099,7 @@ pub fn swap_map<'a>(
+         num_trials > 1
+             && run_in_parallel.unwrap_or_else(|| getenv_use_multiple_threads() && num_trials > 1),
+     )
+-    .map(|seed| swap_map_trial(problem, initial_layout, seed))
++    .map(|seed| swap_map_trial(problem, initial_layout, seed, usize::MAX).expect("unbounded"))
+     .enumerate()
+     .min_by_key(|(index, result)| (result.order.swap_count(), *index))
+     .map(|(_, result)| result)
+@@ -1056,18 +1107,22 @@ pub fn swap_map<'a>(
+ }
+ 
+ /// Run a single trial of the Sabre routing algorithm.
++///
++/// PRISM: `None` once the route has more than `max_swaps` swaps.
+ pub fn swap_map_trial<'a>(
+     problem: RoutingProblem<'a>,
+     initial_layout: &NLayout,
+     seed: u64,
+-) -> RoutingResult<'a> {
++    max_swaps: usize,
++) -> Option<RoutingResult<'a>> {
+     let (mut state, mut order) = State::begin(problem, initial_layout.clone(), seed);
++    let mut num_swaps = 0;
+ 
+     let mut routable_nodes = Vec::<NodeIndex>::with_capacity(2);
      let mut num_search_steps = 0;
      // The front layer only becomes empty when all nodes have been routed.  At each iteration of
      // this loop, we route either one or two gates.
@@ -310,7 +344,7 @@ index 90847d4..4f4ac61 100644
          let mut current_swaps: Vec<[PhysicalQubit; 2]> = Vec::new();
          // Swap-mapping loop.  This is the main part of the algorithm, which we repeat until we
          // either successfully route a node, or exceed the maximum number of attempts.
-@@ -1084,6 +1135,7 @@ pub fn swap_map_trial<'a>(
+@@ -1084,6 +1139,7 @@ pub fn swap_map_trial<'a>(
              if let Some(node) = state.routable_node_on_qubit(problem, best_swap[0]) {
                  routable_nodes.push(node);
              }
@@ -318,11 +352,28 @@ index 90847d4..4f4ac61 100644
              if let Some(DecayHeuristic { increment, reset }) = problem.heuristic.decay {
                  num_search_steps += 1;
                  if num_search_steps >= reset {
-@@ -1107,6 +1159,7 @@ pub fn swap_map_trial<'a>(
+@@ -1106,17 +1162,22 @@ pub fn swap_map_trial<'a>(
+             let force_routed = state.force_enable_closest_node(problem, &mut current_swaps);
              routable_nodes.extend(force_routed);
          }
++        num_swaps += current_swaps.len();
++        if num_swaps > max_swaps {
++            return None;
++        }
          state.update_route(problem, &mut order, &routable_nodes, Some(current_swaps));
 +        state.multi.decay_load();
  
          if problem.heuristic.decay.is_some() {
              state.decay.fill(1.);
+         }
+         routable_nodes.clear();
+     }
+-    RoutingResult {
++    Some(RoutingResult {
+         problem,
+         order,
+         initial_layout: initial_layout.clone(),
+         final_layout: state.layout,
+-    }
++    })
+ }

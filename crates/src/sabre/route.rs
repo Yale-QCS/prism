@@ -526,7 +526,7 @@ fn route_control_flow_block<'a>(
     layout: &NLayout,
     seed: u64,
 ) -> RoutingResult<'a> {
-    let mut result = swap_map_trial(problem, layout, seed);
+    let mut result = swap_map_trial(problem, layout, seed, usize::MAX).expect("unbounded");
     // For now, we always append a swap circuit that gets the inner block back to the
     // parent's layout.
     result.order.final_swaps = token_swapper(
@@ -1099,7 +1099,7 @@ pub fn swap_map<'a>(
         num_trials > 1
             && run_in_parallel.unwrap_or_else(|| getenv_use_multiple_threads() && num_trials > 1),
     )
-    .map(|seed| swap_map_trial(problem, initial_layout, seed))
+    .map(|seed| swap_map_trial(problem, initial_layout, seed, usize::MAX).expect("unbounded"))
     .enumerate()
     .min_by_key(|(index, result)| (result.order.swap_count(), *index))
     .map(|(_, result)| result)
@@ -1107,12 +1107,16 @@ pub fn swap_map<'a>(
 }
 
 /// Run a single trial of the Sabre routing algorithm.
+///
+/// PRISM: `None` once the route has more than `max_swaps` swaps.
 pub fn swap_map_trial<'a>(
     problem: RoutingProblem<'a>,
     initial_layout: &NLayout,
     seed: u64,
-) -> RoutingResult<'a> {
+    max_swaps: usize,
+) -> Option<RoutingResult<'a>> {
     let (mut state, mut order) = State::begin(problem, initial_layout.clone(), seed);
+    let mut num_swaps = 0;
 
     let mut routable_nodes = Vec::<NodeIndex>::with_capacity(2);
     let mut num_search_steps = 0;
@@ -1158,6 +1162,10 @@ pub fn swap_map_trial<'a>(
             let force_routed = state.force_enable_closest_node(problem, &mut current_swaps);
             routable_nodes.extend(force_routed);
         }
+        num_swaps += current_swaps.len();
+        if num_swaps > max_swaps {
+            return None;
+        }
         state.update_route(problem, &mut order, &routable_nodes, Some(current_swaps));
         state.multi.decay_load();
 
@@ -1166,10 +1174,10 @@ pub fn swap_map_trial<'a>(
         }
         routable_nodes.clear();
     }
-    RoutingResult {
+    Some(RoutingResult {
         problem,
         order,
         initial_layout: initial_layout.clone(),
         final_layout: state.layout,
-    }
+    })
 }
