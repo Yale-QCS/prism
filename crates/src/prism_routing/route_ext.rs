@@ -121,6 +121,11 @@ pub(super) struct MultiLayers {
     front_active: VecMap<VirtualQubit, u32>,
     /// Decayed count of committed two-qubit gates on each physical qubit.
     phys_load: Vec<f64>,
+    /// Positions in `State::swap_scores` of the candidate swaps on each physical qubit, for the
+    /// current routing step.
+    swaps_on: Vec<Vec<usize>>,
+    /// Scratch for [`Self::add_scores`]: the candidate swaps on one node's qubits.
+    touched: Vec<usize>,
 }
 
 impl MultiLayers {
@@ -130,6 +135,8 @@ impl MultiLayers {
             location: vec![None; sabre.dag.node_count()].into(),
             front_active: vec![0; num_qubits as usize].into(),
             phys_load: vec![0.0; num_qubits as usize],
+            swaps_on: vec![Vec::new(); num_qubits as usize],
+            touched: Vec::new(),
         }
     }
 
@@ -254,7 +261,7 @@ impl MultiLayers {
     /// Add `weight` times the score change of every multi node in `layer` to each candidate swap,
     /// and return `weight` times their summed current score.
     pub(super) fn add_scores(
-        &self,
+        &mut self,
         layer: u16,
         weight: f64,
         swap_scores: &mut [([PhysicalQubit; 2], f64)],
@@ -267,7 +274,15 @@ impl MultiLayers {
             let reals = realizations(problem.sabre, node);
             let base = min_cost(reals, layout, None, &dist);
             absolute += base;
-            for (swap, score) in swap_scores.iter_mut() {
+            // A swap on none of the node's qubits leaves its cost unchanged, so only the swaps on
+            // them change score, in the same order of additions as a full pass.
+            self.touched.clear();
+            self.touched
+                .extend(qubits(reals).flat_map(|v| &self.swaps_on[layout[v].index()]));
+            self.touched.sort_unstable();
+            self.touched.dedup();
+            for &i in &self.touched {
+                let (swap, score) = &mut swap_scores[i];
                 *score += weight * (min_cost(reals, layout, Some(*swap), &dist) - base);
             }
         }
@@ -277,10 +292,20 @@ impl MultiLayers {
 
 impl State {
     /// Append the candidate swaps touching qubits of front-layer multi nodes, after the stock
-    /// candidates and without duplicating them.  With no multi nodes the list is unchanged.
+    /// candidates and without duplicating them, and index all candidates by qubit.  With no multi
+    /// nodes the list is unchanged.
     pub(super) fn push_multi_candidates(&mut self, problem: RoutingProblem) {
         let front = self.layers.front();
-        for &node in &self.multi.layers[0] {
+        let multi = &mut self.multi;
+        for swaps in &mut multi.swaps_on {
+            swaps.clear();
+        }
+        for (i, (swap, _)) in self.swap_scores.iter().enumerate() {
+            for p in swap {
+                multi.swaps_on[p.index()].push(i);
+            }
+        }
+        for &node in &multi.layers[0] {
             for v in qubits(realizations(problem.sabre, node)) {
                 let phys = self.layout[v];
                 for &neighbor in &problem.target.neighbors[phys] {
@@ -289,12 +314,16 @@ impl State {
                         continue;
                     }
                     // Mirror the stock convention: edges between two active qubits are ordered.
-                    let swap = if self.multi.front_active[self.layout[neighbor]] > 0 {
+                    let swap = if multi.front_active[self.layout[neighbor]] > 0 {
                         [phys.min(neighbor), phys.max(neighbor)]
                     } else {
                         [phys, neighbor]
                     };
-                    if !self.swap_scores.iter().any(|(s, _)| *s == swap) {
+                    let on_phys = &multi.swaps_on[phys.index()];
+                    if !on_phys.iter().any(|&i| self.swap_scores[i].0 == swap) {
+                        for p in swap {
+                            multi.swaps_on[p.index()].push(self.swap_scores.len());
+                        }
                         self.swap_scores.push((swap, 0.0));
                     }
                 }
