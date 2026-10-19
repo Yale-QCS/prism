@@ -29,8 +29,6 @@
 )]
 #![deny(clippy::unwrap_used, clippy::wildcard_imports)]
 
-use std::cmp::Ordering;
-
 use ndarray::ArrayView2;
 use rustworkx_core::petgraph::prelude::*;
 
@@ -219,7 +217,7 @@ impl MultiLayers {
         else {
             unreachable!("`try_route` only commits MultiTwoQ nodes here");
         };
-        let is_default = |r: usize| u32::try_from(r).is_ok_and(|r| r == *default_realization);
+        let default = *default_realization as usize;
         let load = |real: &[[VirtualQubit; 2]]| -> f64 {
             real.iter()
                 .flatten()
@@ -234,11 +232,7 @@ impl MultiLayers {
             .map(|(r, real)| (r, load(real)))
             .min_by(|(ra, la), (rb, lb)| {
                 la.total_cmp(lb)
-                    .then_with(|| match (is_default(*ra), is_default(*rb)) {
-                        (true, false) => Ordering::Less,
-                        (false, true) => Ordering::Greater,
-                        _ => Ordering::Equal,
-                    })
+                    .then((*ra != default).cmp(&(*rb != default)))
             });
         let Some((r, _)) = best else {
             self.defer(node, reals);
