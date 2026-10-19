@@ -27,6 +27,8 @@ from prism.metrics import is_free
 if TYPE_CHECKING:
     from collections.abc import Hashable, Sequence
 
+    from qiskit.circuit import QuantumCircuit
+
 __all__ = ["ElideRailExchanges", "RetimeDiagonals"]
 
 
@@ -100,25 +102,19 @@ def _rail_permutation(op: MultiRealizationOp, wpl: int) -> tuple[int, ...] | Non
 
 #: One gate as depth counts it: the wires it orders, and 1 unless it is free.
 Gate = tuple[tuple["Hashable", ...], int]
+#: A candidate's gates as ``Gate`` s on its local wires: qubit indices, clbit indices, weight.
+Template = tuple[tuple[tuple[int, ...], tuple[int, ...], int], ...]
 
 
-def _gates(
-    ins: MultiRealizationInstruction, qubits: Sequence[int], r: int | None
-) -> tuple[Gate, ...]:
-    """The gates of ``ins`` on physical ``qubits`` with choice ``r``.
+def _template(real: QuantumCircuit) -> Template:
+    """The gates of candidate ``real`` on its local wires.
 
     Free one-qubit gates neither take a layer nor order wires, so they are left out.
     """
-    op = ins.operation
-    if not isinstance(op, MultiRealizationOp):
-        return (((*qubits, *ins.clbits), 0 if is_free(op) else 1),)
-    real = op.candidates[r]
     return tuple(
         (
-            (
-                *(qubits[real.find_bit(q).index] for q in ci.qubits),
-                *(ins.clbits[real.find_bit(c).index] for c in ci.clbits),
-            ),
+            tuple(real.find_bit(q).index for q in ci.qubits),
+            tuple(real.find_bit(c).index for c in ci.clbits),
             0 if is_free(ci.operation) else 1,
         )
         for ci in real.data
@@ -231,13 +227,14 @@ def _is_swap(ins: MultiRealizationInstruction) -> bool:
 class _Schedule:
     """An order of the instructions, with the physical qubits and choice of each."""
 
-    def __init__(
-        self, data: Sequence[MultiRealizationInstruction], order: list[int]
-    ) -> None:
+    def __init__(self, rt: _Retime, order: list[int]) -> None:
         self.order = order
-        self.qubits = [ins.qubits for ins in data]
-        self.choice = [getattr(ins.operation, "choice", None) for ins in data]
-        self.gates = [_gates(ins, ins.qubits, r) for ins, r in zip(data, self.choice)]
+        self.qubits = [ins.qubits for ins in rt.data]
+        self.choice = [getattr(ins.operation, "choice", None) for ins in rt.data]
+        self.gates = [
+            rt.gates(k, qs, r)
+            for k, (qs, r) in enumerate(zip(self.qubits, self.choice))
+        ]
 
 
 class RetimeDiagonals(GenericPass[MultiRealization, MultiRealization]):
@@ -266,6 +263,30 @@ class RetimeDiagonals(GenericPass[MultiRealization, MultiRealization]):
             raise TranspilerError(
                 "RetimeDiagonals needs a placed program; run PrismRouting first"
             )
+        rt = _Retime(ir)
+        routed = _Schedule(rt, list(range(len(ir.data))))
+        listed = _Schedule(rt, [])
+        listed.order = _list_schedule(ir.data, listed.gates, rt.movable, rt.preds)
+        t = 0
+        for k in listed.order:
+            t += rt.swap[k]
+            if k in rt.movable:
+                listed.qubits[k] = tuple(rt.layouts[t][v] for v in rt.virt[k])
+        best = min((routed, listed), key=rt.polish)
+        out = []
+        for k in best.order:
+            ins = ir.data[k]
+            if k in rt.movable:
+                op = replace(ins.operation, choice=best.choice[k])
+                ins = ins._replace(operation=op, qubits=best.qubits[k])
+            out.append(ins)
+        return replace(ir, data=out)
+
+
+class _Retime:
+    """One ``RetimeDiagonals`` run: the placed program's fixed facts, and the local search."""
+
+    def __init__(self, ir: MultiRealization) -> None:
         self.data = data = ir.data
         self.edges = ir.placement.edges
         self.swap = [_is_swap(ins) for ins in data]
@@ -296,36 +317,32 @@ class RetimeDiagonals(GenericPass[MultiRealization, MultiRealization]):
         for k, ps in self.preds.items():
             for p in ps:
                 self.succs[p].append(k)
+        self.templates = [
+            [_template(real) for real in op.candidates]
+            if isinstance(op := ins.operation, MultiRealizationOp)
+            else None
+            for ins in data
+        ]
         self.movable = {
             k
             for k in rest
             if isinstance(op := data[k].operation, MultiRealizationOp)
             and op.diagonal
-            and all(
-                len(g := _gates(data[k], data[k].qubits, r)) == 1 and len(g[0][0]) == 2
-                for r in range(len(op.candidates))
-            )
+            and all(len(t) == 1 and len(t[0][0]) == 2 for t in self.templates[k])
         }
-        routed = _Schedule(data, list(range(len(data))))
-        listed = _Schedule(data, [])
-        listed.order = _list_schedule(data, listed.gates, self.movable, self.preds)
-        t = 0
-        for k in listed.order:
-            t += self.swap[k]
-            if k in self.movable:
-                listed.qubits[k] = tuple(self.layouts[t][v] for v in self.virt[k])
-        best = min((routed, listed), key=self._polish)
-        out = []
-        for k in best.order:
-            ins = data[k]
-            if k in self.movable:
-                op = replace(ins.operation, choice=best.choice[k])
-                ins = ins._replace(operation=op, qubits=best.qubits[k])
-            out.append(ins)
-        return replace(ir, data=out)
 
-    def _analyse(self, sch: _Schedule) -> tuple[Any, ...]:
-        """``_times`` of ``sch``, the positions on each wire, and the SWAPs before each slot."""
+    def gates(self, k: int, qubits: Sequence[int], r: int | None) -> tuple[Gate, ...]:
+        """The gates of instruction ``k`` on physical ``qubits`` with choice ``r``."""
+        ins, templates = self.data[k], self.templates[k]
+        if templates is None:
+            return (((*qubits, *ins.clbits), 0 if is_free(ins.operation) else 1),)
+        return tuple(
+            ((*(qubits[i] for i in qs), *(ins.clbits[i] for i in cs)), w)
+            for qs, cs, w in templates[r]
+        )
+
+    def analyse(self, sch: _Schedule) -> tuple[Any, ...]:
+        """``_times`` of ``sch``, the positions on each wire, the SWAPs before each slot, and each op's slot."""
         ends, tails, crit, depth = _times([sch.gates[k] for k in sch.order])
         on_wire: dict = {}
         for j, e in enumerate(ends):
@@ -334,24 +351,23 @@ class RetimeDiagonals(GenericPass[MultiRealization, MultiRealization]):
         n_swaps = [0]
         for k in sch.order:
             n_swaps.append(n_swaps[-1] + self.swap[k])
-        return ends, tails, crit, depth, on_wire, n_swaps
+        pos = {k: j for j, k in enumerate(sch.order)}
+        return ends, tails, crit, depth, on_wire, n_swaps, pos
 
-    def _best_slot(
+    def best_slot(
         self, sch: _Schedule, i: int, a: tuple[Any, ...]
     ) -> tuple[int, int, tuple[int, ...], int]:
         """``(path, slot, qubits, choice)`` of the least path through ``sch.order[i]``, moved."""
-        ends, tails, _, _, on_wire, n_swaps = a
+        ends, tails, _, _, on_wire, n_swaps, pos = a
         k = sch.order[i]
-        pos = {kk: j for j, kk in enumerate(sch.order)}
         lo = max((pos[p] for p in self.preds[k]), default=-1) + 1
         hi = min((pos[s] for s in self.succs[k]), default=len(sch.order))
-        ins = self.data[k]
         best = None
         # ponytail: scans every slot of the window, O(window * candidates * log n) per move
         for j in range(lo, hi + 1):
             qubits = tuple(self.layouts[n_swaps[j]][v] for v in self.virt[k])
-            for r in range(len(ins.operation.candidates)):
-                ((ws, w),) = _gates(ins, qubits, r)
+            for r in range(len(self.templates[k])):
+                ((ws, w),) = self.gates(k, qubits, r)
                 if ws not in self.edges:
                     continue
                 head = tail = 0
@@ -368,9 +384,9 @@ class RetimeDiagonals(GenericPass[MultiRealization, MultiRealization]):
                     best = (head + w + tail, j, qubits, r)
         return best
 
-    def _polish(self, sch: _Schedule) -> int:
+    def polish(self, sch: _Schedule) -> int:
         """Reinsert critical diagonal ops of ``sch`` while (depth, critical ops) drops; the depth."""
-        a = self._analyse(sch)
+        a = self.analyse(sch)
         tried: set[int] = set()
         while True:
             n_crit = sum(a[2])
@@ -378,14 +394,14 @@ class RetimeDiagonals(GenericPass[MultiRealization, MultiRealization]):
                 if not a[2][i] or k not in self.movable or k in tried:
                     continue
                 tried.add(k)
-                path, j, qubits, r = self._best_slot(sch, i, a)
+                path, j, qubits, r = self.best_slot(sch, i, a)
                 if path >= a[3]:
                     continue
                 saved = sch.order[:], sch.qubits[k], sch.choice[k], sch.gates[k]
                 sch.order.insert(j - (j > i), sch.order.pop(i))
                 sch.qubits[k], sch.choice[k] = qubits, r
-                sch.gates[k] = _gates(self.data[k], qubits, r)
-                new = self._analyse(sch)
+                sch.gates[k] = self.gates(k, qubits, r)
+                new = self.analyse(sch)
                 if (new[3], sum(new[2])) < (a[3], n_crit):
                     a = new
                     tried.clear()
