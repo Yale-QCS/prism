@@ -5,18 +5,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from qiskit.circuit import AncillaRegister, IfElseOp, QuantumCircuit
+from qiskit.circuit import AncillaRegister, IfElseOp, QuantumCircuit, Qubit
 from qiskit.circuit.controlflow import CONTROL_FLOW_OP_NAMES
 from qiskit.circuit.library import MCPhaseGate, MCXGate
 from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import DoWhileController
-from qiskit.synthesis import synth_mcx_1_clean_kg24
-from qiskit.transpiler import (
-    PassManager,
-    Target,
-    TransformationPass,
-)
+from qiskit.transpiler import PassManager, TransformationPass
 from qiskit.transpiler.passes import (
     BasisTranslator,
     Decompose,
@@ -53,21 +48,15 @@ def basic_logical_pm(
 ) -> PassManager:
     """Standard cleanup, translate to ``enc.LOGICAL_ISA``, split ``if_else`` per qubit, elide SWAPs, drop diagonals before measures."""
     isa_basis = sorted(enc.LOGICAL_ISA - NON_GATE_ISA_NAMES)
-    # Unroll every 3+-qubit gate but CCX (the equivalence library has CCX) and
-    # the multi-controlled gates MCDecomposeWithAncilla rewrites.
-    keep_mc = Target.from_configuration(["ccx"])
-    keep_mc.add_instruction(MCXGate, name="mcx")
-    keep_mc.add_instruction(MCPhaseGate, name="mcphase")
     return PassManager(
         [
             RemoveBarriers(),
-            # High-level gates (QFT, MCMT, ...) by their default plugins, except
-            # mcx and mcphase.
-            HighLevelSynthesis(hls_config=HLSConfig(mcx=[], mcphase=[])),
+            MCPrepare(),
+            # High-level gates (QFT, MCMT, ...) by their default plugins; mcx
+            # with one clean ancilla.
+            HighLevelSynthesis(hls_config=HLSConfig(mcx=["1_clean_kg24"])),
             Decompose(["c-unitary", "unitary"]),
-            Unroll3qOrMore(target=keep_mc),
-            MCDecomposeWithAncilla(),
-            Decompose(["rccx", "rccx_dg"]),
+            # Unroll every 3+-qubit gate but CCX (the equivalence library has CCX).
             Unroll3qOrMore(basis_gates=["ccx"]),
             *reshape_passes,
             BasisTranslator(
@@ -92,45 +81,29 @@ def basic_logical_pm(
     )
 
 
-class MCDecomposeWithAncilla(TransformationPass):
-    """Rewrite ``mcx`` with 3+ controls and ``mcphase(pi)`` with 4+ by ``synth_mcx_1_clean_kg24``.
+class MCPrepare(TransformationPass):
+    """Prepare multi-controlled gates for ``HighLevelSynthesis`` with ``mcx=["1_clean_kg24"]``.
 
-    Stock ``HighLevelSynthesis`` uses only idle qubits of the circuit as
-    ancillas; this pass adds one clean ancilla qubit (register ``mcd_anc``),
-    shared by every rewrite, if some gate qualifies. ``mcphase(pi)`` is
-    ``H_t . mcx . H_t``; other ``mcphase`` angles are left to ``Unroll3qOrMore``.
+    Rewrites ``mcphase(pi)`` with 4+ controls as ``H_t . mcx . H_t`` (``mcphase``
+    has no synthesis plugin). If an ``mcx`` remains and no qubit is idle, adds one
+    clean ancilla qubit (register ``mcd_anc``) for the synthesis to share.
     """
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Substitute each qualifying gate by its one-ancilla form."""
-        targets = {
-            node
-            for node in dag.op_nodes()
-            if (node.name == "mcx" and node.op.num_ctrl_qubits >= 3)
-            or (
-                node.name == "mcphase"
-                and node.op.num_ctrl_qubits >= 4
-                and _is_pi(float(node.op.params[0]))
-            )
-        }
-        if not targets:
-            return dag
-        anc = AncillaRegister(1, name="mcd_anc")
-        dag.add_qreg(anc)
-        new_dag = dag.copy_empty_like()
-        for node in dag.topological_op_nodes():
-            if node not in targets:
-                new_dag.apply_operation_back(node.op, node.qargs, node.cargs)
-                continue
-            n_ctrl = node.op.num_ctrl_qubits
-            sub = synth_mcx_1_clean_kg24(num_ctrl_qubits=n_ctrl)
-            if node.name == "mcphase":
-                mcx, sub = sub, QuantumCircuit(n_ctrl + 2)
-                sub.h(n_ctrl)
-                sub.compose(mcx, inplace=True)
-                sub.h(n_ctrl)
-            new_dag.compose(circuit_to_dag(sub), qubits=[*node.qargs, anc[0]])
-        return new_dag
+        """Rewrite ``mcphase(pi)`` and add the ancilla if needed."""
+        for node in dag.op_nodes(MCPhaseGate):
+            n = node.op.num_ctrl_qubits
+            if n >= 4 and _is_pi(float(node.op.params[0])):
+                sub = QuantumCircuit(n + 1)
+                sub.h(n)
+                sub.append(MCXGate(n, ctrl_state=node.op.ctrl_state), range(n + 1))
+                sub.h(n)
+                dag.substitute_node_with_dag(node, circuit_to_dag(sub))
+        if "mcx" in dag.count_ops() and not any(
+            isinstance(w, Qubit) for w in dag.idle_wires()
+        ):
+            dag.add_qreg(AncillaRegister(1, name="mcd_anc"))
+        return dag
 
 
 def _is_pi(theta: float) -> bool:

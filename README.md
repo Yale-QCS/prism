@@ -64,7 +64,7 @@ Limits:
 
 - The coupling map must be connected, with at least two physical qubits per logical qubit.
 - `if_else` is the only control flow; its blocks hold single-qubit gates and no measurement.
-- A multi-controlled X with three or more controls borrows one extra logical qubit as a clean ancilla (register `mcd_anc`), which needs far fewer gates.
+- A multi-controlled X with three or more controls uses an idle qubit as a clean ancilla, or adds one (register `mcd_anc`) if none is idle, which needs far fewer gates.
 - Barriers are dropped.
 
 ## Pipeline
