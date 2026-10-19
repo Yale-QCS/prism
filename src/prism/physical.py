@@ -40,7 +40,7 @@ from qiskit.transpiler.preset_passmanagers.common import (
 )
 
 from prism.ir import DIAGONAL_GATES, commuting_predecessors, list_schedule
-from prism.metrics import RecordCircuitMetrics, is_free
+from prism.metrics import RecordCircuitMetrics, is_free, only_ops
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
@@ -107,7 +107,7 @@ def _scheduled_duration(
         if op.name == "if_else":
             known = max((ready.get(c, 0) for c in cargs), default=0)
             known += duration(op, qargs)
-            if _is_diagonal(op):
+            if only_ops(op, DIAGONAL_GATES):
                 for q in qargs:
                     frame[q] = max(frame.get(q, 0), known)
                 continue
@@ -313,16 +313,6 @@ class DropMeasuredSwaps(TransformationPass):
         return dag
 
 
-def _is_diagonal(operation: Instruction) -> bool:
-    """A diagonal gate, or control flow whose bodies are diagonal: reading a clbit commutes."""
-    if operation.name in DIAGONAL_GATES:
-        return True
-    blocks = getattr(operation, "blocks", None)
-    return blocks is not None and all(
-        _is_diagonal(instr.operation) for block in blocks for instr in block.data
-    )
-
-
 class RescheduleCommutingDiagonals(TransformationPass):
     """Critical-path list scheduling over a dependency graph where diagonal gates commute.
 
@@ -337,7 +327,9 @@ class RescheduleCommutingDiagonals(TransformationPass):
         """Re-emit ``dag`` in a depth-minimizing order that respects the relaxed dependencies."""
         nodes = list(dag.topological_op_nodes())
         wires = [(*node.qargs, *node.cargs) for node in nodes]
-        preds = commuting_predecessors(wires, [_is_diagonal(node.op) for node in nodes])
+        preds = commuting_predecessors(
+            wires, [only_ops(node.op, DIAGONAL_GATES) for node in nodes]
+        )
         weight = [0 if is_free(node.op) else 1 for node in nodes]
         out = dag.copy_empty_like()
         for k in list_schedule(preds, wires, weight):

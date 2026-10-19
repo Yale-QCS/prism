@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import Instruction
@@ -10,19 +11,27 @@ from qiskit.converters import dag_to_circuit
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import AnalysisPass
 
+if TYPE_CHECKING:
+    from collections.abc import Collection
+
 __all__ = ["CircuitMetrics", "RecordCircuitMetrics"]
 
 _FREE_GATES = frozenset({"rz", "u1", "p", "z", "initialize"})
 
 
-def is_free(operation: Instruction) -> bool:
-    """Single-wire Z rotations, preparation, and control flow whose bodies are free."""
-    if operation.name in _FREE_GATES:
+def only_ops(operation: Instruction, names: Collection[str]) -> bool:
+    """``operation`` is named in ``names``, or is control flow whose bodies hold only such ops."""
+    if operation.name in names:
         return True
     blocks = getattr(operation, "blocks", None)
     return blocks is not None and all(
-        is_free(instr.operation) for block in blocks for instr in block.data
+        only_ops(instr.operation, names) for block in blocks for instr in block.data
     )
+
+
+def is_free(operation: Instruction) -> bool:
+    """Single-wire Z rotations, preparation, and control flow whose bodies are free."""
+    return only_ops(operation, _FREE_GATES)
 
 
 @dataclass(frozen=True)
