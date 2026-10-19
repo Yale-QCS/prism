@@ -20,19 +20,24 @@ from qiskit.passmanager import ConditionalController
 from qiskit.transpiler import (
     CouplingMap,
     PassManager,
-    StagedPassManager,
     Target,
     TransformationPass,
 )
 from qiskit.transpiler.passes import (
+    CommutativeCancellation,
     CommutativeOptimization,
-    ConsolidateBlocks,
+    ContractIdleWiresInControlFlow,
+    InverseCancellation,
     RemoveBarriers,
+    RemoveDiagonalGatesBeforeMeasure,
+    RemoveIdentityEquivalent,
     SabreSwap,
-    Split2QUnitaries,
+    TrivialLayout,
 )
-from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
-from qiskit.transpiler.preset_passmanagers.common import generate_routing_passmanager
+from qiskit.transpiler.preset_passmanagers.common import (
+    generate_embed_passmanager,
+    generate_routing_passmanager,
+)
 
 from prism.ir import DIAGONAL_GATES, commuting_predecessors, list_schedule
 from prism.metrics import RecordCircuitMetrics, is_free
@@ -371,25 +376,12 @@ class FoldCRZAngles(TransformationPass):
         return dag
 
 
-def _physical_target(
-    enc: type[QubitEncoding],
-    coupling_map: CouplingMap,
-    durations: InstructionDurations | None = None,
-) -> Target:
-    """``enc.PHYSICAL_ISA`` on each qubit or edge, plus measure and ``if_else``.
-
-    For dual rail that is ``rz`` on one rail and ``crz``, ``swap``, ``rswap``,
-    ``initialize``, ``pauli_product_measurement`` on an edge: no gate leaves
-    the code space, so stock O3 cannot produce one, and with no complete
-    one-qubit basis it does not resynthesize. ``durations`` fill the
-    ``InstructionProperties``; without them the Target has none.
-    """
+def _physical_target(enc: type[QubitEncoding], coupling_map: CouplingMap) -> Target:
+    """``enc.PHYSICAL_ISA`` on each qubit or edge, plus measure and ``if_else``."""
     target = Target.from_configuration(
         basis_gates=sorted(enc.PHYSICAL_ISA | {"measure"}),
         custom_name_mapping=enc.CUSTOM_GATES,
         coupling_map=coupling_map,
-        instruction_durations=durations,
-        dt=None if durations is None else durations.dt,
     )
     target.add_instruction(IfElseOp, name="if_else")
     return target
@@ -401,78 +393,42 @@ def physical_pm(
     *,
     seed: int = 42,
     durations: InstructionDurations | None = None,
-) -> StagedPassManager:
-    """Preset O3 over the retained route.
+) -> PassManager:
+    """The physical stage: stock cleanups, layout and routing for what is left, then prism's passes.
 
-    Built with ``routing_method="none"``, whose init stage omits
-    ``ElidePermutations``: that pass would turn a committed rail exchange (a
-    real beamsplitter SWAP) into a free virtual permutation. The layout stage
-    runs only on a program no ``multi_realization`` pass placed, as the stock
-    trivial layout; ``layout_method="trivial"`` also leaves ``VF2PostLayout`` out
-    of the optimization stage. The routing stage is O3's ``SabreSwap`` stage
-    without ``VF2PostLayout``, so it keeps the layout: it routes only if
-    ``CheckMap`` finds a gate off the device edges, i.e. in an unplaced program
-    or an operation that ``PrismRouting`` passed through.
-    ``CommutativeOptimization`` merges the CRZ runs on an edge that O3 cannot
-    resynthesize without a one-qubit basis. ``FoldCRZAngles`` then folds each
-    merged angle to its SWS wait, and a second ``CommutativeOptimization``
-    merges the ``rz(π)`` that adds into the control's other ``rz``.
-    ``EarlyMeasurement`` then turns the diagonal gates behind each measurement
-    into classical control (with ``durations``, only where the duration does
-    not grow), and ``DropMeasuredSwaps`` drops the SWAPs it leaves
-    after both their rails are measured. ``RescheduleCommutingDiagonals`` then
-    reorders the commuting diagonal gates for depth, and ``RecordCircuitMetrics``
-    sets ``circuit_metrics``. ``FenceErasureChecks`` runs first and
-    ``RemoveBarriers`` after the commutation passes, so no gate crosses an
-    erasure check.
-
-    The init stage leaves out ``ConsolidateBlocks`` and ``Split2QUnitaries``.
-    Before layout, ``ConsolidateBlocks`` has no Target: it turns every block of
-    more than 20 gates on two wires (a long ``rswap``/``rz`` run on one rail
-    pair) into a ``UnitaryGate``. With only ``rz`` on one wire, no unitary
-    synthesis reaches this Target, so ``UnitarySynthesis`` keeps the unitary
-    and ``HighLevelSynthesis`` expands it by its definition to ``u``/``cx``,
-    which the translation stage then cannot translate.
-
-    ``durations`` are the caller's ``InstructionDurations``; prism assumes none.
-    They fill the Target's ``InstructionProperties``, and ``EarlyMeasurement``
-    also reads their ``if_else`` entry, the feed-forward latency.
+    An unplaced program gets the stock trivial layout; ``SabreSwap`` routes only
+    if ``CheckMap`` finds a gate off the device edges.
     """
-    target = _physical_target(enc, coupling_map, durations)
-    preset = generate_preset_pass_manager(
-        optimization_level=3,
-        target=target,
-        seed_transpiler=seed,
-        layout_method="trivial",
-        routing_method="none",
-    )
-    preset.pre_init = PassManager([FenceErasureChecks()])
-    preset.init = PassManager(
+    target = _physical_target(enc, coupling_map)
+    return PassManager(
         [
-            p
-            for p in preset.init.to_flow_controller().passes
-            if not isinstance(p, (ConsolidateBlocks, Split2QUnitaries))
-        ]
-    )
-    preset.layout = PassManager(
-        ConditionalController(
-            preset.layout.to_flow_controller(),
-            condition=lambda ps: ps["layout"] is None,
-        )
-    )
-    preset.routing = generate_routing_passmanager(
-        SabreSwap(target, heuristic="decay", seed=seed, trials=20), target
-    )
-    preset.post_optimization = PassManager(
-        [
+            FenceErasureChecks(),
+            # The passes of the stock O3 init stage that act on this ISA.
+            RemoveDiagonalGatesBeforeMeasure(),
+            RemoveIdentityEquivalent(),
+            InverseCancellation(),
+            ContractIdleWiresInControlFlow(),
+            CommutativeCancellation(),
+            ConditionalController(
+                [
+                    TrivialLayout(target),
+                    *generate_embed_passmanager(target).to_flow_controller().tasks,
+                ],
+                condition=lambda ps: ps["layout"] is None,
+            ),
+            generate_routing_passmanager(
+                SabreSwap(target, heuristic="decay", seed=seed, trials=20), target
+            ).to_flow_controller(),
             CommutativeOptimization(),
             FoldCRZAngles(),
             CommutativeOptimization(),
             RemoveBarriers(),
-            EarlyMeasurement(durations),
-            DropMeasuredSwaps(),
+            *(
+                [EarlyMeasurement(durations), DropMeasuredSwaps()]
+                if durations is not None
+                else []
+            ),
             RescheduleCommutingDiagonals(),
             RecordCircuitMetrics(),
         ]
     )
-    return preset
