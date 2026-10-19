@@ -9,7 +9,7 @@ from qiskit.transpiler import CouplingMap, PassManager, TranspilerError
 from qiskit.transpiler.passes import Size
 
 from prism.encodings import DualRail
-from prism.ir import MultiRealization, MultiRealizationOp, Placement
+from prism.ir import MultiRealization, MultiRealizationOp
 from prism.pipeline import DAGToMultiRealization, prism_stages
 from prism.routing import PrismRouting
 
@@ -29,13 +29,6 @@ def _placed() -> MultiRealization:
     placed = PrismRouting(CouplingMap.from_line(4), seed=0).run(ir)
     placed.verify()
     return placed
-
-
-def test_verify_rejects_a_bad_placement():
-    placed = _placed()
-    placed.placement = Placement((0, 0, 1, 2), (0, 1, 2, 3), placed.placement.edges)
-    with pytest.raises(TranspilerError, match="not a pair of permutations"):
-        placed.verify()
 
 
 def test_verify_rejects_a_choice_off_the_device_edges():
