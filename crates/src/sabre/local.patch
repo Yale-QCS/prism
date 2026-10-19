@@ -26,7 +26,7 @@ index 0343e98..2bb5552 100644
              };
              // `NodeWeights` guarantees that the weights come out in index order, so the new indexes
 diff --git a/src/sabre/route.rs b/src/sabre/route.rs
-index 90847d4..7b155b6 100644
+index 90847d4..f511fd7 100644
 --- a/src/sabre/route.rs
 +++ b/src/sabre/route.rs
 @@ -38,6 +38,9 @@ use super::dag::{InteractionKind, SabreDAG};
@@ -58,7 +58,13 @@ index 90847d4..7b155b6 100644
              };
              for node in rest {
                  let NodeType::Operation(inst) = &self.problem.dag[*node] else {
-@@ -453,9 +461,10 @@ fn try_route<'a>(
+@@ -448,14 +456,16 @@ impl<'a> RoutingProblem<'a> {
+ /// is required because a control-flow operation may need to be recursively routed.
+ ///
+ /// Returns `Ok` if the node was routed, and `Err` with the unroutable 2q pair if not.
++/// PRISM: `Err(None)` if a multi-realization node was deferred into `State::multi` instead.
+ fn try_route<'a>(
+     node_id: NodeIndex,
      initial_swaps: &mut Option<Vec<[PhysicalQubit; 2]>>,
      problem: RoutingProblem<'a>,
      order: &mut Order<'a>,
@@ -70,7 +76,7 @@ index 90847d4..7b155b6 100644
      let node = &problem.sabre.dag[node_id];
      let kind = match &node.kind {
          InteractionKind::Synchronize => RoutedItemKind::Simple,
-@@ -464,7 +473,10 @@ fn try_route<'a>(
+@@ -464,7 +474,10 @@ fn try_route<'a>(
              .neighbors
              .contains_edge(layout[*a], layout[*b])
              .then_some(RoutedItemKind::Simple)
@@ -82,7 +88,7 @@ index 90847d4..7b155b6 100644
          InteractionKind::ControlFlow(blocks) => {
              let dag_node_id = *node
                  .indices
-@@ -514,7 +526,7 @@ fn route_control_flow_block<'a>(
+@@ -514,7 +527,7 @@ fn route_control_flow_block<'a>(
      layout: &NLayout,
      seed: u64,
  ) -> RoutingResult<'a> {
@@ -91,7 +97,7 @@ index 90847d4..7b155b6 100644
      // For now, we always append a swap circuit that gets the inner block back to the
      // parent's layout.
      result.order.final_swaps = token_swapper(
-@@ -570,6 +582,8 @@ fn satisfy_successor_edges(
+@@ -570,6 +583,8 @@ fn satisfy_successor_edges(
  struct State {
      layout: NLayout,
      layers: Layers,
@@ -100,7 +106,7 @@ index 90847d4..7b155b6 100644
      /// How many predecessors still need to be satisfied for each node index before it can enter the
      /// layer at the same index.
      ///
-@@ -611,6 +625,7 @@ impl State {
+@@ -611,6 +626,7 @@ impl State {
              num_qubits,
              problem.sabre.dag.node_count() as u32,
          );
@@ -108,7 +114,7 @@ index 90847d4..7b155b6 100644
  
          // Initialise the layer structures.  This has slightly different logic to subsequent delta
          // updates, because in this first step, we need to set the entire frontiers at every level,
-@@ -629,14 +644,17 @@ impl State {
+@@ -629,14 +645,17 @@ impl State {
          // Route any available initial gates, to populate the front layer.
          visit.extend(problem.sabre.first_layer.iter().copied());
          while let Some(node) = visit.pop_front() {
@@ -128,7 +134,7 @@ index 90847d4..7b155b6 100644
              }
          }
  
-@@ -648,7 +666,9 @@ impl State {
+@@ -648,7 +667,9 @@ impl State {
                  .last()
                  .expect("we always have at least the front layer")
                  .clone();
@@ -139,7 +145,7 @@ index 90847d4..7b155b6 100644
                  satisfy_successor_edges(
                      node,
                      problem.sabre,
-@@ -669,6 +689,7 @@ impl State {
+@@ -669,6 +690,7 @@ impl State {
                      InteractionKind::TwoQ(qubits) => {
                          layers.insert(num_layer, node, *qubits, &layout)
                      }
@@ -147,7 +153,7 @@ index 90847d4..7b155b6 100644
                  }
              }
              predecessors.push(these_predecessors);
-@@ -678,6 +699,7 @@ impl State {
+@@ -678,6 +700,7 @@ impl State {
              predecessors: predecessors.into(),
              decay: vec![1.; num_qubits as usize].into(),
              layers,
@@ -155,7 +161,7 @@ index 90847d4..7b155b6 100644
              layout,
              visit,
              reached_previous_layer: Vec::new(),
-@@ -735,7 +757,9 @@ impl State {
+@@ -735,7 +758,9 @@ impl State {
          // fully initialised.
          for &node in nodes {
              assert_eq!(
@@ -166,7 +172,7 @@ index 90847d4..7b155b6 100644
                  Some(0),
                  "only nodes in the front layer can begin a routing update",
              );
-@@ -744,6 +768,7 @@ impl State {
+@@ -744,6 +769,7 @@ impl State {
                  &mut initial_swaps,
                  problem,
                  order,
@@ -174,7 +180,7 @@ index 90847d4..7b155b6 100644
                  &self.layout,
                  self.seed,
              )
-@@ -758,9 +783,11 @@ impl State {
+@@ -758,9 +784,11 @@ impl State {
          let sabre_dag = &problem.sabre.dag;
          while let Some(node) = self.visit.pop_front() {
              if self.layers.num_layers().get() > 1
@@ -187,7 +193,7 @@ index 90847d4..7b155b6 100644
                  self.reached_previous_layer.push(node);
              }
              match try_route(
-@@ -768,6 +795,7 @@ impl State {
+@@ -768,6 +796,7 @@ impl State {
                  &mut initial_swaps,
                  problem,
                  order,
@@ -195,7 +201,7 @@ index 90847d4..7b155b6 100644
                  &self.layout,
                  self.seed,
              ) {
-@@ -777,9 +805,10 @@ impl State {
+@@ -777,9 +806,10 @@ impl State {
                      &mut self.predecessors[0],
                      |satisfied| self.visit.push_back(satisfied),
                  ),
@@ -207,7 +213,7 @@ index 90847d4..7b155b6 100644
              }
          }
  
-@@ -787,22 +816,26 @@ impl State {
+@@ -787,22 +817,26 @@ impl State {
              if self.reached_previous_layer.is_empty() {
                  break;
              }
@@ -245,7 +251,7 @@ index 90847d4..7b155b6 100644
              }
              while let Some(node) = self.visit.pop_front() {
                  match &sabre_dag[node].kind {
-@@ -817,6 +850,12 @@ impl State {
+@@ -817,6 +851,12 @@ impl State {
                              self.reached_previous_layer.push(node);
                          }
                      }
@@ -258,7 +264,7 @@ index 90847d4..7b155b6 100644
                  }
              }
          }
-@@ -839,6 +878,8 @@ impl State {
+@@ -839,6 +879,8 @@ impl State {
              self.layers
                  .front()
                  .iter_gates()
@@ -267,7 +273,7 @@ index 90847d4..7b155b6 100644
                  .map(|(node, virtuals)| (node, virtuals.map(|q| self.layout[q])))
                  .min_by(|(_, qubits_a), (_, qubits_b)| {
                      dist[[qubits_a[0].index(), qubits_a[1].index()]]
-@@ -882,6 +923,8 @@ impl State {
+@@ -882,6 +924,8 @@ impl State {
              [swap] => swap
                  .iter()
                  .filter_map(|q| self.routable_node_on_qubit(problem, *q))
@@ -276,7 +282,7 @@ index 90847d4..7b155b6 100644
                  .collect(),
              _ => smallvec![closest_node],
          }
-@@ -901,6 +944,7 @@ impl State {
+@@ -901,6 +945,7 @@ impl State {
                  }
              }
          }
@@ -284,7 +290,7 @@ index 90847d4..7b155b6 100644
  
          let dist = &problem.target.distance.view();
          let mut absolute_score = 0.0;
-@@ -921,10 +965,14 @@ impl State {
+@@ -921,10 +966,14 @@ impl State {
              for (swap, score) in self.swap_scores.iter_mut() {
                  *score += weight * front.score(*swap, dist);
              }
@@ -300,7 +306,7 @@ index 90847d4..7b155b6 100644
                  let weight = match lookahead.scale {
                      SetScaling::Constant => *weight,
                      SetScaling::Size => {
-@@ -939,6 +987,9 @@ impl State {
+@@ -939,6 +988,9 @@ impl State {
                  for (swap, score) in self.swap_scores.iter_mut() {
                      *score += weight * layer.score(*swap, dist);
                  }
@@ -310,7 +316,7 @@ index 90847d4..7b155b6 100644
              }
          }
  
-@@ -1048,7 +1099,7 @@ pub fn swap_map<'a>(
+@@ -1048,7 +1100,7 @@ pub fn swap_map<'a>(
          num_trials > 1
              && run_in_parallel.unwrap_or_else(|| getenv_use_multiple_threads() && num_trials > 1),
      )
@@ -319,7 +325,7 @@ index 90847d4..7b155b6 100644
      .enumerate()
      .min_by_key(|(index, result)| (result.order.swap_count(), *index))
      .map(|(_, result)| result)
-@@ -1056,18 +1107,22 @@ pub fn swap_map<'a>(
+@@ -1056,18 +1108,22 @@ pub fn swap_map<'a>(
  }
  
  /// Run a single trial of the Sabre routing algorithm.
@@ -344,7 +350,7 @@ index 90847d4..7b155b6 100644
          let mut current_swaps: Vec<[PhysicalQubit; 2]> = Vec::new();
          // Swap-mapping loop.  This is the main part of the algorithm, which we repeat until we
          // either successfully route a node, or exceed the maximum number of attempts.
-@@ -1084,6 +1139,7 @@ pub fn swap_map_trial<'a>(
+@@ -1084,6 +1140,7 @@ pub fn swap_map_trial<'a>(
              if let Some(node) = state.routable_node_on_qubit(problem, best_swap[0]) {
                  routable_nodes.push(node);
              }
@@ -352,7 +358,7 @@ index 90847d4..7b155b6 100644
              if let Some(DecayHeuristic { increment, reset }) = problem.heuristic.decay {
                  num_search_steps += 1;
                  if num_search_steps >= reset {
-@@ -1106,17 +1162,22 @@ pub fn swap_map_trial<'a>(
+@@ -1106,17 +1163,22 @@ pub fn swap_map_trial<'a>(
              let force_routed = state.force_enable_closest_node(problem, &mut current_swaps);
              routable_nodes.extend(force_routed);
          }

@@ -456,6 +456,7 @@ impl<'a> RoutingProblem<'a> {
 /// is required because a control-flow operation may need to be recursively routed.
 ///
 /// Returns `Ok` if the node was routed, and `Err` with the unroutable 2q pair if not.
+/// PRISM: `Err(None)` if a multi-realization node was deferred into `State::multi` instead.
 fn try_route<'a>(
     node_id: NodeIndex,
     initial_swaps: &mut Option<Vec<[PhysicalQubit; 2]>>,

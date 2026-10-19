@@ -107,7 +107,7 @@ pub fn prism_layout_and_routing(
         let mut best: Option<(Metrics, _, _)> = None;
         let mut max_swaps = usize::MAX;
         let trial_seeds = Pcg64Mcg::seed_from_u64(seed).sample_iter(StandardUniform);
-        for trial_seed in trial_seeds.take(swap_trials.max(1)) {
+        for trial_seed in trial_seeds.take(swap_trials) {
             let Some(result) = swap_map_trial(forward, &layout, trial_seed, max_swaps) else {
                 continue;
             };
@@ -121,7 +121,7 @@ pub fn prism_layout_and_routing(
             max_swaps = objective.max_swaps(&metrics);
             best = Some((metrics, routed, v2p_of(&result.final_layout)));
         }
-        let (metrics, routed, final_v2p) = best.expect("at least one trial");
+        let (metrics, routed, final_v2p) = best.expect("SearchBudget keeps swap_trials >= 1");
         (metrics, (routed, final_v2p, v2p_of(&layout)))
     };
     let routes: Vec<_> = CondIterator::new(starts, parallel).map(run_start).collect();
