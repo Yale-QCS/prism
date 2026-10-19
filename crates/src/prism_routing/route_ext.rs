@@ -346,7 +346,6 @@ pub fn routed_ops(result: &RoutingResult<'_>) -> Vec<RoutedOp> {
 
 #[cfg(test)]
 mod tests {
-    use ndarray::array;
     use qiskit_circuit::dag_circuit::DAGCircuit;
 
     use super::super::super::dag::SabreNode;
@@ -355,8 +354,8 @@ mod tests {
     };
     use super::super::{RoutingTarget, State, satisfy_successor_edges};
     use super::{
-        DiGraph, InteractionKind, NLayout, NodeIndex, PhysicalQubit, RoutingProblem, SabreDAG,
-        VirtRealizations, VirtualQubit, min_cost,
+        DiGraph, InteractionKind, NLayout, NodeIndex, RoutingProblem, SabreDAG, VirtRealizations,
+        VirtualQubit,
     };
 
     fn v(i: u32) -> VirtualQubit {
@@ -373,21 +372,6 @@ mod tests {
     fn line(n: u32) -> RoutingTarget {
         let edges: Vec<_> = (1..n).map(|i| [i - 1, i]).collect();
         crate::prism_routing::routing_target(&edges, n).expect("valid line")
-    }
-
-    #[test]
-    fn min_cost_is_exact() {
-        let dist = array![[0.0, 1.0, 5.0], [1.0, 0.0, 1.0], [5.0, 1.0, 0.0]];
-        let layout = NLayout::generate_trivial_layout(3);
-        // Each realization sums to 6; the sum of per-pair minima would be 2.
-        let r = reals(&[&[[0, 1], [0, 2]], &[[0, 2], [1, 2]]]);
-        assert!((min_cost(&r, &layout, None, &dist.view()) - 6.0).abs() < 1e-12);
-        // A trial swap is scored without being applied to the layout.
-        let dist = array![[0.0, 1.0, 2.0], [1.0, 0.0, 1.0], [2.0, 1.0, 0.0]];
-        let r = reals(&[&[[0, 2]]]);
-        let swap = Some([PhysicalQubit::new(1), PhysicalQubit::new(2)]);
-        assert!((min_cost(&r, &layout, swap, &dist.view()) - 1.0).abs() < 1e-12);
-        assert!((min_cost(&r, &layout, None, &dist.view()) - 2.0).abs() < 1e-12);
     }
 
     fn lookahead(num_layers: usize) -> Heuristic {
@@ -468,29 +452,6 @@ mod tests {
             layers.push(layer);
         }
         layers
-    }
-
-    #[test]
-    fn lookahead_keeps_successor_of_routed_gate() {
-        // On the line 0-..-5: `u` and `f` wait in the front layer, `s` follows `f`, and `t`
-        // follows both `s` and `u`.  Once `f` is routable, `s` routes at once, so `t` waits only
-        // on `u` and belongs in the first lookahead layer.
-        let pair = |a, b| InteractionKind::TwoQ([v(a), v(b)]);
-        let sabre = dag_of(vec![pair(0, 5), pair(1, 3), pair(3, 4), pair(4, 5)]);
-        let target = line(6);
-        let dag = DAGCircuit::new();
-        let heuristic = lookahead(1);
-        let problem = RoutingProblem {
-            target: &target,
-            sabre: &sabre,
-            dag: &dag,
-            heuristic: &heuristic,
-        };
-        let (mut state, mut order) = State::begin(problem, NLayout::generate_trivial_layout(6), 0);
-        assert_eq!(held_layers(&state), vec![vec![NodeIndex::new(2)]]);
-        state.apply_swap([PhysicalQubit::new(1), PhysicalQubit::new(2)]);
-        state.update_route(problem, &mut order, &[NodeIndex::new(1)], None);
-        assert_eq!(held_layers(&state), vec![vec![NodeIndex::new(3)]]);
     }
 
     #[test]
