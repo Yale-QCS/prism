@@ -28,15 +28,7 @@ from qiskit.circuit.library import SwapGate
 from qiskit.passmanager import GenericPass
 from qiskit.transpiler import CouplingMap, TranspilerError
 
-from prism._accelerate import (
-    BasicHeuristic,
-    DecayHeuristic,
-    Heuristic,
-    LookaheadHeuristic,
-    RoutingTarget,
-    SetScaling,
-    prism_layout_and_routing,
-)
+from prism._accelerate import dense_layout, prism_layout_and_routing
 from prism.ir import (
     MultiRealization,
     MultiRealizationInstruction,
@@ -109,8 +101,6 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         ValueError: if ``coupling_map`` is disconnected.
     """
 
-    LOOKAHEAD_LAYERS = 8
-
     def __init__(
         self,
         coupling_map: CouplingMap,
@@ -167,20 +157,18 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             else random.SystemRandom().getrandbits(64)
         )
         edges = frozenset(self.coupling_map.get_edges())  # both orientations
-        target = RoutingTarget.from_coupling_list(list(edges), n_phys)
+        edge_list = list(edges)
         routed, final_v2p, refined_v2p = prism_layout_and_routing(
             _routing_problem(ir),
-            target,
-            self._make_heuristic(n_phys),
+            edge_list,
+            n_phys,
             [
                 (seed % (1 << 64), v2p)
-                for seed, v2p in self._starting_layouts(base_seed, target, n_virt)
+                for seed, v2p in self._starting_layouts(base_seed, edge_list, n_virt)
             ],
             self.budget.refinement_iterations,
             self.budget.swap_trials,
-            self.budget.objective
-            if isinstance(self.budget.objective, str)
-            else float(self.budget.objective),
+            self.budget.objective,
         )
         self.property_set["online_n_swaps"] = sum(len(swaps) for swaps, _, _ in routed)
         return replace(
@@ -189,26 +177,8 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             placement=Placement(tuple(refined_v2p), tuple(final_v2p), edges),
         )
 
-    def _make_heuristic(self, n_phys: int) -> Heuristic:
-        """Qiskit 2.6 ``SabreLayout``'s heuristic, with ``LOOKAHEAD_LAYERS`` lookahead layers.
-
-        Stock looks one layer ahead at weight ``0.5 / n_phys``. That is too
-        shallow for prism, whose commits route gates in cascades; eight layers at
-        the stock weight beat Qiskit 2.3's 20-gate extended set on both SWAPs and
-        depth.
-        """
-        return Heuristic(
-            basic=BasicHeuristic(1.0, SetScaling.Constant),
-            lookahead=LookaheadHeuristic(
-                [0.5 / n_phys] * self.LOOKAHEAD_LAYERS, SetScaling.Constant
-            ),
-            decay=DecayHeuristic(0.001, 5),
-            attempt_limit=10 * n_phys,
-            best_epsilon=1e-10,
-        )
-
     def _starting_layouts(
-        self, base_seed: int, target: RoutingTarget, n_virt: int
+        self, base_seed: int, edges: list[tuple[int, int]], n_virt: int
     ) -> list[tuple[int, list[int]]]:
         """``layout_starts`` seeded random layouts, then Qiskit's dense, identity and reverse layouts."""
         n_phys = self.coupling_map.size()
@@ -219,7 +189,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             starts.append((base_seed + trial, v2p))
         seed = base_seed + self.budget.layout_starts
         return starts + [
-            (seed, target.dense_layout(n_virt)),
+            (seed, dense_layout(edges, n_phys, n_virt)),
             (seed + 1, list(range(n_phys))),
             (seed + 2, list(reversed(range(n_phys)))),
         ]

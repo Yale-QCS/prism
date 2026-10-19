@@ -21,7 +21,7 @@ extension-module = ["pyo3/extension-module"]
 # Requirements mirror Qiskit 2.6.0rc1's `[workspace.dependencies]`; exact versions come from
 # `Cargo.lock`, which is seeded from Qiskit's own lockfile at the same tag (see README).
 [dependencies]
-pyo3 = { version = "0.29", features = ["abi3-py310", "smallvec", "hashbrown", "indexmap", "num-complex", "num-bigint", "py-clone", "multiple-pymethods"] }
+pyo3 = { version = "0.29", features = ["abi3-py310", "smallvec", "hashbrown", "indexmap", "num-complex", "num-bigint", "py-clone"] }
 numpy = "0.29"
 ndarray = "0.17"
 hashbrown = "0.15.5"

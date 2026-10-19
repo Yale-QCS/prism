@@ -15,13 +15,11 @@ from the `qiskit-circuit`, `qiskit-transpiler` and `qiskit-util` git dependencie
 | `route.rs` | `crates/transpiler/src/passes/sabre/route.rs` |
 | `vec_map.rs` | `crates/transpiler/src/passes/sabre/vec_map.rs` |
 
-`layer.rs` and `vec_map.rs` are verbatim. The other files have [local.patch](local.patch) applied.
+`heuristic.rs`, `layer.rs` and `vec_map.rs` are verbatim. The other files have [local.patch](local.patch) applied.
 New items in the patch carry a `PRISM:` comment. The patch:
 
 - `dag.rs`: adds the `InteractionKind::MultiTwoQ` variant (a node with alternative
   realizations, each a list of qubit pairs) and its arm in `SabreDAG::only_interactions`.
-- `heuristic.rs`, `route.rs`: sets the `module` of the six Python classes to `prism._accelerate`,
-  where prism exports them, so that pickling resolves to prism's classes and not Qiskit's.
 - `route.rs`: declares `route_ext` (prism's code in `../prism_routing/route_ext.rs`) as a child
   module, so that it can use the private `State` and `Order`; adds a `RoutedItemKind` variant;
   keeps `MultiTwoQ` nodes in a parallel `State.multi` at every point where `TwoQ` nodes enter or

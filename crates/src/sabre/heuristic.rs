@@ -19,7 +19,7 @@ use pyo3::types::PyString;
 use qiskit_circuit::impl_intopyobject_for_copy_pyclass;
 
 /// Affect the dynamic scaling of the weight of node-set-based heuristics (basic and lookahead).
-#[pyclass(module = "prism._accelerate", frozen, eq, from_py_object)]
+#[pyclass(module = "qiskit._accelerate.sabre", frozen, eq, from_py_object)]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum SetScaling {
     /// No dynamic scaling of the weight.
@@ -46,7 +46,7 @@ impl SetScaling {
 
 /// Define the characteristics of the basic heuristic.  This is a simple sum of the physical
 /// distances of every gate in the front layer.
-#[pyclass(module = "prism._accelerate", frozen, from_py_object)]
+#[pyclass(module = "qiskit._accelerate.sabre", frozen, from_py_object)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct BasicHeuristic {
     /// The relative weighting of this heuristic to others.  Typically you should just set this to
@@ -80,7 +80,7 @@ impl BasicHeuristic {
 }
 
 /// Define the characteristics of the lookahead heuristic.
-#[pyclass(module = "prism._accelerate", frozen, from_py_object)]
+#[pyclass(module = "qiskit._accelerate.sabre", frozen, from_py_object)]
 #[derive(Clone, PartialEq, Debug)]
 pub struct LookaheadHeuristic {
     /// The relative weights of each sequential layer in this heuristic.  Typically each of these is
@@ -142,7 +142,7 @@ impl LookaheadHeuristic {
 /// the qubit is involved in a swap.  The final heuristic is calculated by multiplying all other
 /// components by the maximum multiplier involved in a given swap.
 #[pyclass(from_py_object)]
-#[pyo3(module = "prism._accelerate", frozen)]
+#[pyo3(module = "qiskit._accelerate.sabre", frozen)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct DecayHeuristic {
     /// The amount to add onto the multiplier of a physical qubit when it is used.
@@ -184,7 +184,7 @@ impl DecayHeuristic {
 ///     available options and configuration of it may change without warning in minor versions of
 ///     Qiskit.  If you are doing research using this, be sure to pin the version of Qiskit in your
 ///     requirements.
-#[pyclass(module = "prism._accelerate", frozen, eq, skip_from_py_object)]
+#[pyclass(module = "qiskit._accelerate.sabre", frozen, eq, skip_from_py_object)]
 #[derive(Clone, Debug, PartialEq)]
 pub struct Heuristic {
     pub basic: Option<BasicHeuristic>,

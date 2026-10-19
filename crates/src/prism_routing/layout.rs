@@ -18,9 +18,31 @@ use qiskit_util::getenv_use_multiple_threads;
 
 use super::input::{Op, RoutedOp, sabre_dags};
 use super::score::{Objective, ObjectiveArg, Program, best};
-use super::{explicit_target, layout_from_v2p, v2p_of};
-use crate::sabre::heuristic::Heuristic;
-use crate::sabre::route::{PyRoutingTarget, RoutingProblem, routed_ops, swap_map, swap_map_trial};
+use super::{layout_from_v2p, routing_target, v2p_of};
+use crate::sabre::heuristic::{
+    BasicHeuristic, DecayHeuristic, Heuristic, LookaheadHeuristic, SetScaling,
+};
+use crate::sabre::route::route_ext::routed_ops;
+use crate::sabre::route::{RoutingProblem, swap_map, swap_map_trial};
+
+/// SABRE lookahead layers.  Stock looks one layer ahead; prism's commits route gates in
+/// cascades, and eight layers at the stock weight beat Qiskit 2.3's 20-gate extended set on both
+/// SWAPs and depth.  The scaling is `Constant`: under `SetScaling::Size` the router would
+/// normalise by the number of stock gates in a layer only, not its multi nodes.
+const LOOKAHEAD_LAYERS: usize = 8;
+
+/// Qiskit 2.6 `SabreLayout`'s heuristic on `num_qubits` physical qubits, with
+/// [`LOOKAHEAD_LAYERS`] lookahead layers.
+fn heuristic(num_qubits: u32) -> Heuristic {
+    let n = f64::from(num_qubits);
+    Heuristic::new(
+        Some(BasicHeuristic::new(1.0, SetScaling::Constant)),
+        LookaheadHeuristic::new(vec![0.5 / n; LOOKAHEAD_LAYERS], SetScaling::Constant),
+        Some(DecayHeuristic::new(0.001, 5)),
+        Some(10 * num_qubits as usize),
+        1e-10,
+    )
+}
 
 /// One final route: `(routed, final_v2p, refined_v2p)`.
 type StartResult = (Vec<RoutedOp>, Vec<u32>, Vec<u32>);
@@ -42,16 +64,16 @@ type StartResult = (Vec<RoutedOp>, Vec<u32>, Vec<u32>);
 #[pyfunction]
 pub fn prism_layout_and_routing(
     ops: Vec<Op>,
-    target: &PyRoutingTarget,
-    heuristic: &Heuristic,
+    edges: Vec<[u32; 2]>,
+    num_qubits: u32,
     starts: Vec<(u64, Vec<u32>)>,
     max_iterations: u64,
     swap_trials: usize,
     objective: ObjectiveArg,
 ) -> PyResult<StartResult> {
     let objective = Objective::try_from(objective)?;
-    let target = explicit_target(target)?;
-    let num_qubits = u32::try_from(target.num_qubits())?;
+    let target = &routing_target(&edges, num_qubits)?;
+    let heuristic = &heuristic(num_qubits);
     let starts = starts
         .into_iter()
         .map(|(seed, v2p)| Ok((seed, layout_from_v2p(&v2p, num_qubits)?)))

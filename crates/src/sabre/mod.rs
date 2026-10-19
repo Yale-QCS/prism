@@ -14,16 +14,11 @@ pub use dag::{InteractionKind, SabreDAG, SabreNode};
 
 use pyo3::prelude::*;
 
-use crate::prism_routing::layout;
+use crate::prism_routing::{self, layout};
 
-/// Add the Sabre classes and prism's routing function to the extension module `m`.
+/// Add prism's routing functions to the extension module `m`.
 pub fn register(m: &Bound<PyModule>) -> PyResult<()> {
-    m.add_class::<route::PyRoutingTarget>()?;
-    m.add_class::<heuristic::SetScaling>()?;
-    m.add_class::<heuristic::Heuristic>()?;
-    m.add_class::<heuristic::BasicHeuristic>()?;
-    m.add_class::<heuristic::LookaheadHeuristic>()?;
-    m.add_class::<heuristic::DecayHeuristic>()?;
+    m.add_function(wrap_pyfunction!(prism_routing::dense_layout, m)?)?;
     m.add_function(wrap_pyfunction!(layout::prism_layout_and_routing, m)?)?;
     Ok(())
 }

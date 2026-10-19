@@ -135,11 +135,6 @@ impl MultiLayers {
         }
     }
 
-    /// Number of multi nodes in `layer`.
-    pub(super) fn len(&self, layer: u16) -> usize {
-        self.layers[usize::from(layer)].len()
-    }
-
     /// Whether `layer` holds no multi nodes.
     pub(super) fn is_empty(&self, layer: u16) -> bool {
         self.layers[usize::from(layer)].is_empty()
@@ -313,25 +308,19 @@ impl State {
         }
     }
 
-    /// Push the front-layer multi nodes on either qubit of `swap` that became executable.
-    pub(super) fn push_multi_routable(
+    /// The front-layer multi nodes on either qubit of `swap` that became executable.
+    pub(super) fn multi_routable(
         &self,
         problem: RoutingProblem,
         swap: [PhysicalQubit; 2],
-        out: &mut Vec<NodeIndex>,
-    ) {
-        for &node in &self.multi.layers[0] {
+    ) -> impl Iterator<Item = NodeIndex> {
+        self.multi.layers[0].iter().copied().filter(move |&node| {
             let reals = realizations(problem.sabre, node);
-            let touches = qubits(reals).any(|v| swap.contains(&self.layout[v]));
-            if touches
+            qubits(reals).any(|v| swap.contains(&self.layout[v]))
                 && reals
                     .iter()
                     .any(|r| executable(r, &self.layout, problem.target))
-                && !out.contains(&node)
-            {
-                out.push(node);
-            }
-        }
+        })
     }
 }
 
@@ -370,7 +359,7 @@ mod tests {
     use super::super::super::heuristic::{
         BasicHeuristic, Heuristic, LookaheadHeuristic, SetScaling,
     };
-    use super::super::{PyRoutingTarget, State, satisfy_successor_edges};
+    use super::super::{RoutingTarget, State, satisfy_successor_edges};
     use super::{
         DiGraph, InteractionKind, NLayout, NodeIndex, PhysicalQubit, RoutingProblem, SabreDAG,
         VirtRealizations, VirtualQubit, min_cost,
@@ -387,9 +376,9 @@ mod tests {
             .collect()
     }
 
-    fn line(n: u32) -> PyRoutingTarget {
-        let edges = (1..n).map(|i| [i - 1, i]).collect();
-        PyRoutingTarget::from_coupling_list(edges, n).expect("valid line")
+    fn line(n: u32) -> RoutingTarget {
+        let edges: Vec<_> = (1..n).map(|i| [i - 1, i]).collect();
+        crate::prism_routing::routing_target(&edges, n).expect("valid line")
     }
 
     #[test]
@@ -498,7 +487,7 @@ mod tests {
         let dag = DAGCircuit::new();
         let heuristic = lookahead(1);
         let problem = RoutingProblem {
-            target: target.0.as_ref().expect("explicit target"),
+            target: &target,
             sabre: &sabre,
             dag: &dag,
             heuristic: &heuristic,
@@ -534,7 +523,7 @@ mod tests {
         for num_layers in [1, 2, 4] {
             let heuristic = lookahead(num_layers);
             let problem = RoutingProblem {
-                target: target.0.as_ref().expect("explicit target"),
+                target: &target,
                 sabre: &sabre,
                 dag: &dag,
                 heuristic: &heuristic,

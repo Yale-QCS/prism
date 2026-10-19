@@ -39,5 +39,5 @@ cargo build            # without --locked once: drops Qiskit-only packages, adds
 cargo build --locked   # must now pass unchanged
 ```
 
-After the first build, every package version in `Cargo.lock` must still equal Qiskit's; only
-packages Qiskit does not use (today `inventory`, for pyo3's `multiple-pymethods`) may be added.
+After the first build, every package version in `Cargo.lock` must still equal Qiskit's, and no
+package may be added.

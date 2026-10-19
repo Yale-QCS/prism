@@ -40,7 +40,7 @@ use super::layer::Layers;
 use super::vec_map::VecMap;
 // PRISM: multi-realization routing hooks; see `crate::prism_routing::route_ext`.
 #[path = "../prism_routing/route_ext.rs"]
-mod route_ext;
+pub mod route_ext;
 use crate::TranspilerError;
 use crate::neighbors::Neighbors;
 use crate::target::{Target, TargetCouplingError};
@@ -50,8 +50,6 @@ use qiskit_circuit::operations::{ControlFlow, StandardGate};
 use qiskit_circuit::packed_instruction::PackedInstruction;
 use qiskit_circuit::{BlocksMode, PhysicalQubit, Qubit, VirtualQubit};
 use qiskit_util::getenv_use_multiple_threads;
-use route_ext::MultiLayers;
-pub use route_ext::routed_ops;
 
 /// Number of trials for control flow block swap epilogues.
 const SWAP_EPILOGUE_TRIALS: usize = 4;
@@ -364,7 +362,7 @@ impl RoutingTarget {
 /// Contains `None` when the target had all-to-all connectivity (in which case the two property
 /// methods [coupling_list] and [distance_matrix] also return `None`).
 #[pyclass]
-#[pyo3(name = "RoutingTarget", module = "prism._accelerate")]
+#[pyo3(name = "RoutingTarget", module = "qiskit._accelerate.sabre")]
 pub struct PyRoutingTarget(pub Option<RoutingTarget>);
 #[pymethods]
 impl PyRoutingTarget {
@@ -463,7 +461,7 @@ fn try_route<'a>(
     initial_swaps: &mut Option<Vec<[PhysicalQubit; 2]>>,
     problem: RoutingProblem<'a>,
     order: &mut Order<'a>,
-    multi: &mut MultiLayers,
+    multi: &mut route_ext::MultiLayers,
     layout: &NLayout,
     seed: u64,
 ) -> Result<(), Option<[VirtualQubit; 2]>> {
@@ -585,7 +583,7 @@ struct State {
     layout: NLayout,
     layers: Layers,
     /// PRISM: multi-realization nodes in each layer, alongside `layers`.
-    multi: MultiLayers,
+    multi: route_ext::MultiLayers,
     /// How many predecessors still need to be satisfied for each node index before it can enter the
     /// layer at the same index.
     ///
@@ -627,7 +625,7 @@ impl State {
             num_qubits,
             problem.sabre.dag.node_count() as u32,
         );
-        let mut multi = MultiLayers::new(num_layers, num_qubits, problem.sabre);
+        let mut multi = route_ext::MultiLayers::new(num_layers, num_qubits, problem.sabre);
 
         // Initialise the layer structures.  This has slightly different logic to subsequent delta
         // updates, because in this first step, we need to set the entire frontiers at every level,
@@ -922,15 +920,12 @@ impl State {
         //  A - B - A - B
         // and we swap the middle two qubits. This cannot happen if we apply 2 or more swaps.
         match current_swaps.as_slice() {
-            [swap] => {
-                let mut nodes: Vec<_> = swap
-                    .iter()
-                    .filter_map(|q| self.routable_node_on_qubit(problem, *q))
-                    .collect();
+            [swap] => swap
+                .iter()
+                .filter_map(|q| self.routable_node_on_qubit(problem, *q))
                 // PRISM: a single swap can also make a multi node routable.
-                self.push_multi_routable(problem, *swap, &mut nodes);
-                nodes.into()
-            }
+                .chain(self.multi_routable(problem, *swap))
+                .collect(),
             _ => smallvec![closest_node],
         }
     }
@@ -956,14 +951,13 @@ impl State {
 
         if let Some(BasicHeuristic { weight, scale }) = problem.heuristic.basic {
             let front = self.layers.front();
-            let len = front.len() + self.multi.len(0);
             let weight = match scale {
                 SetScaling::Constant => weight,
                 SetScaling::Size => {
-                    if len == 0 {
+                    if front.is_empty() {
                         0.0
                     } else {
-                        weight / (len as f64)
+                        weight / (front.len() as f64)
                     }
                 }
             };
@@ -979,14 +973,13 @@ impl State {
         if let Some(lookahead) = &problem.heuristic.lookahead {
             let layers = self.layers.layers()[1..].iter().zip(1..);
             for ((layer, k), weight) in layers.zip(lookahead.weights()) {
-                let len = layer.len() + self.multi.len(k);
                 let weight = match lookahead.scale {
                     SetScaling::Constant => *weight,
                     SetScaling::Size => {
-                        if len == 0 {
+                        if layer.is_empty() {
                             0.0
                         } else {
-                            *weight / (len as f64)
+                            *weight / (layer.len() as f64)
                         }
                     }
                 };
@@ -1142,7 +1135,7 @@ pub fn swap_map_trial<'a>(
             if let Some(node) = state.routable_node_on_qubit(problem, best_swap[0]) {
                 routable_nodes.push(node);
             }
-            state.push_multi_routable(problem, best_swap, &mut routable_nodes);
+            routable_nodes.extend(state.multi_routable(problem, best_swap));
             if let Some(DecayHeuristic { increment, reset }) = problem.heuristic.decay {
                 num_search_steps += 1;
                 if num_search_steps >= reset {
