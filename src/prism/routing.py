@@ -16,6 +16,7 @@ the physical stage routes it.
 
 from __future__ import annotations
 
+import math
 import random
 import warnings
 from copy import deepcopy
@@ -60,19 +61,28 @@ class SearchBudget:
             reverse layouts are always added).
         refinement_iterations: Forward/backward refinement rounds per start.
         swap_trials: Routing trials per start in the final forward pass.
-        objective: ``"swaps"`` (fewest inserted SWAPs, then depth, then gates) or
-            ``"depth"`` (critical-path depth in non-free gates, then gates, then size).
+        objective: How the final route is chosen among every trial of every
+            start. ``"swaps"``: fewest SWAPs, then least depth, then fewest
+            active gates. ``"depth"``: least depth (the critical path in
+            non-free gates), then fewest SWAPs, then fewest active gates. A
+            number ``w >= 0``: least ``swaps + w * depth``, then as ``"swaps"``.
+            It only ranks finished routes; the routing heuristic does not see it.
     """
 
     layout_starts: int = 40
     refinement_iterations: int = 16
     swap_trials: int = 40
-    objective: Objective = "swaps"
+    objective: Objective | float = "swaps"
 
     def __post_init__(self) -> None:
-        if self.objective not in get_args(Objective):
+        if isinstance(self.objective, bool) or not (
+            self.objective in get_args(Objective)
+            or isinstance(self.objective, (int, float))
+            and 0 <= self.objective < math.inf
+        ):
             raise ValueError(
-                f"objective must be one of {list(get_args(Objective))}, got {self.objective!r}"
+                f"objective must be one of {list(get_args(Objective))} or a finite "
+                f"depth weight >= 0, got {self.objective!r}"
             )
         for name in ("layout_starts", "refinement_iterations", "swap_trials"):
             if getattr(self, name) < 1:
@@ -169,7 +179,9 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             ],
             self.budget.refinement_iterations,
             self.budget.swap_trials,
-            self.budget.objective,
+            self.budget.objective
+            if isinstance(self.budget.objective, str)
+            else float(self.budget.objective),
         )
         self.property_set["online_n_swaps"] = sum(len(swaps) for swaps, _, _ in routed)
         return replace(

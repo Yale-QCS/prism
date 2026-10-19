@@ -42,7 +42,7 @@ CircuitMetrics(swaps=0, depth=6, active_gates=13, size=19)
 Rails `q<i>_0` and `q<i>_1` carry logical qubit `i`.
 Qubit 0 has nothing but its first `crz` before its measurement, so it is measured first and that `crz` becomes an `rz` conditioned on the bit of the control rail; the second `crz` stays.
 A measurement writes rail 0, the logical bit, to `c[i]` and rail 1 to `c_rail1[i]`; both 0 means the photon was lost.
-`budget=SearchBudget(objective="depth")` keeps the shallowest route found instead of the one with the fewest SWAPs.
+`budget=SearchBudget(objective="depth")` keeps the shallowest route found instead of the one with the fewest SWAPs; `objective=w`, a number, keeps the least `swaps + w·depth`.
 
 ## Gate set
 

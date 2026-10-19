@@ -17,7 +17,7 @@ use qiskit_circuit::nlayout::NLayout;
 use qiskit_util::getenv_use_multiple_threads;
 
 use super::input::{Op, RoutedOp, sabre_dags};
-use super::score::{Objective, Program, best};
+use super::score::{Objective, ObjectiveArg, Program, best};
 use super::{explicit_target, layout_from_v2p, v2p_of};
 use crate::sabre::heuristic::Heuristic;
 use crate::sabre::route::{PyRoutingTarget, RoutingProblem, routed_ops, swap_map, swap_map_trial};
@@ -26,7 +26,7 @@ use crate::sabre::route::{PyRoutingTarget, RoutingProblem, routed_ops, swap_map,
 type StartResult = (Vec<RoutedOp>, Vec<u32>, Vec<u32>);
 
 /// Refine every start and route it.  Returns the [`StartResult`] whose route scores lowest under
-/// `objective` (`"swaps"` or `"depth"`, see [`Objective`]) over every final trial of every start,
+/// `objective` (see [`Objective`]) over every final trial of every start,
 /// the earliest trial and start on a tie, where `refined_v2p` is the layout the final route began
 /// from.
 ///
@@ -47,7 +47,7 @@ pub fn prism_layout_and_routing(
     starts: Vec<(u64, Vec<u32>)>,
     max_iterations: u64,
     swap_trials: usize,
-    objective: &str,
+    objective: ObjectiveArg,
 ) -> PyResult<StartResult> {
     let objective = Objective::try_from(objective)?;
     let target = explicit_target(target)?;
@@ -93,7 +93,7 @@ pub fn prism_layout_and_routing(
                     v2p_of(&result.final_layout),
                 )
             })
-            .min_by_key(|(metrics, ..)| metrics.score(objective))
+            .min_by(|(a, ..), (b, ..)| objective.cmp(a, b))
             .expect("at least one trial");
         (metrics, (routed, final_v2p, v2p_of(&layout)))
     };

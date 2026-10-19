@@ -5,6 +5,8 @@
 //! each gate touches: its qubits, its clbits, and the clbits its condition reads, as
 //! `QuantumCircuit.depth` counts them.  A routing SWAP is a non-free `swap` on its two qubits.
 
+use std::cmp::Ordering;
+
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
@@ -20,23 +22,61 @@ use super::input::{Op, RoutedOp};
 pub type Gate = (Vec<u32>, Vec<u32>, bool, bool);
 
 /// The route-selection objective, `SearchBudget.objective` in Python.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+///
+/// It ranks finished routes only; the routing heuristic does not see it.
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Objective {
     /// Fewest SWAPs, then least depth, then fewest active gates.
     Swaps,
-    /// Least depth, then fewest active gates, then smallest size.
+    /// Least depth, then fewest SWAPs, then fewest active gates.
     Depth,
+    /// Least `swaps + w * depth`, then as [`Objective::Swaps`].
+    Weighted(f64),
 }
 
-impl TryFrom<&str> for Objective {
+/// `SearchBudget.objective` as Python passes it: a name or a depth weight.
+#[derive(FromPyObject)]
+pub enum ObjectiveArg {
+    Name(String),
+    DepthWeight(f64),
+}
+
+impl TryFrom<ObjectiveArg> for Objective {
     type Error = PyErr;
 
-    /// The objective named `"swaps"` or `"depth"`.
-    fn try_from(name: &str) -> PyResult<Self> {
-        match name {
-            "swaps" => Ok(Self::Swaps),
-            "depth" => Ok(Self::Depth),
-            _ => Err(PyValueError::new_err(format!("unknown objective {name:?}"))),
+    /// `"swaps"`, `"depth"`, or a finite depth weight `>= 0`.
+    fn try_from(arg: ObjectiveArg) -> PyResult<Self> {
+        match arg {
+            ObjectiveArg::Name(name) => match name.as_str() {
+                "swaps" => Ok(Self::Swaps),
+                "depth" => Ok(Self::Depth),
+                _ => Err(PyValueError::new_err(format!("unknown objective {name:?}"))),
+            },
+            ObjectiveArg::DepthWeight(w) if w.is_finite() && w >= 0.0 => Ok(Self::Weighted(w)),
+            ObjectiveArg::DepthWeight(w) => Err(PyValueError::new_err(format!(
+                "a depth weight must be finite and >= 0, got {w}"
+            ))),
+        }
+    }
+}
+
+impl Objective {
+    /// The order of `a` and `b` under this objective; `Less` means `a` is better.
+    #[allow(clippy::cast_precision_loss, reason = "gate counts are far below 2^52")]
+    pub fn cmp(self, a: &Metrics, b: &Metrics) -> Ordering {
+        let swaps_first = |m: &Metrics| (m.swaps, m.depth, m.active_gates);
+        match self {
+            Self::Swaps => swaps_first(a).cmp(&swaps_first(b)),
+            Self::Depth => {
+                let key = |m: &Metrics| (m.depth, m.swaps, m.active_gates);
+                key(a).cmp(&key(b))
+            }
+            Self::Weighted(w) => {
+                let cost = |m: &Metrics| m.swaps as f64 + w * m.depth as f64;
+                cost(a)
+                    .total_cmp(&cost(b))
+                    .then_with(|| swaps_first(a).cmp(&swaps_first(b)))
+            }
         }
     }
 }
@@ -55,14 +95,6 @@ pub struct Metrics {
 }
 
 impl Metrics {
-    /// The score of these metrics under `objective`; lower is better.
-    pub fn score(&self, objective: Objective) -> [usize; 3] {
-        match objective {
-            Objective::Swaps => [self.swaps, self.depth, self.active_gates],
-            Objective::Depth => [self.depth, self.active_gates, self.size],
-        }
-    }
-
     /// Count one gate on `wires`, whose depths are in `depths`.
     ///
     /// As in `QuantumCircuit.depth`, every wire of the gate moves to the deepest of them, plus one
@@ -84,12 +116,12 @@ impl Metrics {
     }
 }
 
-/// The route of the lowest score under `objective`, and the first of equal scores: `None` if
-/// there are no routes.
+/// The best route under `objective`, and the first of equally good ones: `None` if there are no
+/// routes.
 pub fn best<R>(routes: impl IntoIterator<Item = (Metrics, R)>, objective: Objective) -> Option<R> {
     routes
         .into_iter()
-        .min_by_key(|(metrics, _)| metrics.score(objective))
+        .min_by(|(a, _), (b, _)| objective.cmp(a, b))
         .map(|(_, route)| route)
 }
 
