@@ -21,6 +21,7 @@ from prism.ir import (
     MultiRealizationInstruction,
     MultiRealizationOp,
     commuting_predecessors,
+    list_schedule,
 )
 from prism.metrics import is_free
 
@@ -168,7 +169,6 @@ def _list_schedule(
     ``vpreds`` adds the dependencies on virtual wires. Routing SWAPs keep their
     order, so the layout after ``t`` SWAPs is unchanged.
     """
-    n = len(data)
     wires = [
         {x for ws, _ in gates[k] for x in ws}
         if k in movable
@@ -187,34 +187,9 @@ def _list_schedule(
         preds[b].add(a)
     for k, ps in vpreds.items():
         preds[k].update(ps)
-    succs: list[list[int]] = [[] for _ in range(n)]
-    for k, ps in enumerate(preds):
-        for p in ps:
-            succs[p].append(k)
-    weight = [max((w for _, w in g), default=0) for g in gates]
-    cp = [0] * n
-    for k in range(n - 1, -1, -1):
-        cp[k] = weight[k] + max((cp[s] for s in succs[k]), default=0)
-    done: dict[int, int] = {}
-    wire_free: dict = {}
-    remaining = set(range(n))
-    order: list[int] = []
-    while remaining:
-        ready = sorted(
-            (k for k in remaining if preds[k] <= done.keys()), key=lambda k: (-cp[k], k)
-        )
-        for k in ready:
-            start = max(
-                [done[p] for p in preds[k]]
-                + [wire_free.get(w, 0) for w in wires[k]]
-                + [0]
-            )
-            done[k] = start + weight[k]
-            for w in wires[k]:
-                wire_free[w] = done[k]
-            remaining.discard(k)
-        order += sorted(ready, key=lambda k: (done[k] - weight[k], k))
-    return order
+    return list_schedule(
+        preds, wires, [max((w for _, w in g), default=0) for g in gates]
+    )
 
 
 def _is_swap(ins: MultiRealizationInstruction) -> bool:

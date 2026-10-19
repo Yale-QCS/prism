@@ -41,6 +41,7 @@ __all__ = [
     "MultiRealizationOp",
     "Placement",
     "commuting_predecessors",
+    "list_schedule",
 ]
 
 #: Gate names a ``diagonal`` realization may contain.
@@ -77,6 +78,49 @@ def commuting_predecessors(
                 diags_since[w] = []
         preds.append(deps)
     return preds
+
+
+def list_schedule(
+    preds: Sequence[Collection[int]],
+    wires: Sequence[Collection[Hashable]],
+    weight: Sequence[int],
+) -> list[int]:
+    """An order of the ops by critical-path list scheduling.
+
+    ``preds`` holds earlier ops only. In waves of the ops whose predecessors
+    are scheduled, longest path to the end first, each op starts once its
+    predecessors end and its wires are free, and takes ``weight`` layers. Each
+    wave is emitted by start time, so the order is a valid schedule.
+    """
+    n = len(preds)
+    succs: list[list[int]] = [[] for _ in range(n)]
+    for k, ps in enumerate(preds):
+        for p in ps:
+            succs[p].append(k)
+    cp = [0] * n
+    for k in range(n - 1, -1, -1):
+        cp[k] = weight[k] + max((cp[s] for s in succs[k]), default=0)
+    done: dict[int, int] = {}
+    wire_free: dict[Hashable, int] = {}
+    remaining = set(range(n))
+    order: list[int] = []
+    while remaining:
+        ready = sorted(
+            (k for k in remaining if all(p in done for p in preds[k])),
+            key=lambda k: (-cp[k], k),
+        )
+        for k in ready:
+            start = max(
+                [done[p] for p in preds[k]]
+                + [wire_free.get(w, 0) for w in wires[k]]
+                + [0]
+            )
+            done[k] = start + weight[k]
+            for w in wires[k]:
+                wire_free[w] = done[k]
+        remaining.difference_update(ready)
+        order += sorted(ready, key=lambda k: (done[k] - weight[k], k))
+    return order
 
 
 @dataclass(eq=False)
