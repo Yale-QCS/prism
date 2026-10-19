@@ -74,25 +74,30 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
         wpl = enc.WIRES_PER_LOGICAL
         n = len(dag.qubits)
         logical = {q: i for i, q in enumerate(dag.qubits)}
-        cregs = list(dag.cregs.values())
         clbits = list(dag.clbits)
         # Rail w of the measurement that writes clbit c goes to the partner of c
-        # in "<register>_rail<w>", one register per measured register.
+        # in "<register>_rail<w>", one register per measured register, placed
+        # right after that register.
         measured = {node.cargs[0] for node in dag.op_nodes(Measure)}
-        sources = [
-            (f"{r.name}_", list(r)) for r in dag.cregs.values() if measured & set(r)
-        ]
+        sources = [(r, f"{r.name}_", list(r)) for r in dag.cregs.values()]
         loose = [
             c for c in dag.clbits if c in measured and not dag.find_bit(c).registers
         ]
         if loose:
-            sources.append(("", loose))
+            sources.append((None, "", loose))
+        names = {r.name for r in dag.cregs.values()}
+        cregs: list[ClassicalRegister] = []
         partner: dict[tuple[Clbit, int], Clbit] = {}
-        for prefix, bits in sources:
+        for creg, prefix, bits in sources:
+            if creg is not None:
+                cregs.append(creg)
+                if not measured & set(bits):
+                    continue
             for w in range(1, wpl):
                 name = f"{prefix}rail{w}"
-                while any(r.name == name for r in cregs):
+                while name in names:
                     name += "_"
+                names.add(name)
                 reg = ClassicalRegister(len(bits), name)
                 cregs.append(reg)
                 clbits += list(reg)

@@ -228,8 +228,9 @@ class MultiRealization(IR):
     Args:
         enc: The qubit encoding.
         qregs: One register of ``WIRES_PER_LOGICAL`` rails per logical qubit.
-        cregs: The input's classical registers, then one register per measured register
-            and other rail, for that rail's outcomes.
+        cregs: The input's classical registers in order, each followed by its partners:
+            one register per other rail, for that rail's outcomes, when it is measured.
+            The partners of measured loose bits come last.
         clbits: Every classical bit, register or loose.
         data: The instructions, in a valid execution order.
         output_permutation: Output rail ``v`` holds input rail
@@ -264,7 +265,7 @@ class MultiRealization(IR):
         """The circuit with every ``MultiRealizationOp`` replaced by its chosen candidate.
 
         Wires are the rails (unplaced) or ``QuantumRegister(num_physical, "q")``
-        (placed). Classical registers and loose bits appear in order of first use.
+        (placed), then ``cregs`` in order, then the loose classical bits.
 
         Raises:
             TranspilerError: if a ``MultiRealizationOp`` has no choice.
@@ -274,14 +275,14 @@ class MultiRealization(IR):
             if self.placement is None
             else [QuantumRegister(self.num_wires, "q")]
         )
-        out = QuantumCircuit(*qregs)
+        out = QuantumCircuit(*qregs, *self.cregs)
+        out.add_bits([b for b in self.clbits if b not in set(out.clbits)])
         out.metadata = dict(self.metadata)
         wires = out.qubits
-        emitted: list[tuple[Operation, list[Qubit], tuple[Clbit, ...]]] = []
         for k, ins in enumerate(self.data):
             op = ins.operation
             if not isinstance(op, MultiRealizationOp):
-                emitted.append((op, [wires[q] for q in ins.qubits], ins.clbits))
+                out.append(op, [wires[q] for q in ins.qubits], ins.clbits)
                 continue
             if op.choice is None:
                 raise TranspilerError(
@@ -290,29 +291,11 @@ class MultiRealization(IR):
                 )
             real = op.candidates[op.choice]
             for ci in real.data:
-                emitted.append(
-                    (
-                        ci.operation,
-                        [wires[ins.qubits[real.find_bit(q).index]] for q in ci.qubits],
-                        tuple(ins.clbits[real.find_bit(c).index] for c in ci.clbits),
-                    )
+                out.append(
+                    ci.operation,
+                    [wires[ins.qubits[real.find_bit(q).index]] for q in ci.qubits],
+                    [ins.clbits[real.find_bit(c).index] for c in ci.clbits],
                 )
-        creg_of: dict[Clbit, ClassicalRegister] = {}
-        for creg in self.cregs:
-            for bit in creg:
-                creg_of.setdefault(bit, creg)
-        seen: set[Clbit | ClassicalRegister] = set()
-        for _, _, clbits in emitted:
-            for bit in clbits:
-                reg = creg_of.get(bit)
-                if reg is None and bit not in seen:
-                    out.add_bits([bit])
-                    seen.add(bit)
-                elif reg is not None and reg not in seen:
-                    out.add_register(reg)
-                    seen.add(reg)
-        for op, qubits, clbits in emitted:
-            out.append(op, qubits, clbits)
         return out
 
     def verify(self) -> None:
