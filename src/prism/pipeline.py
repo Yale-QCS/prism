@@ -2,7 +2,8 @@
 
 ``prism_stages`` is a ``MultiStagePassManager`` from ``DAGCircuit`` to ``DAGCircuit``::
 
-    logical                   DAGCircuit -> DAGCircuit             enc.logical_pm(): stock passes
+    logical                   DAGCircuit -> DAGCircuit             enc.logical_pm(): stock passes, then
+                                                                   EarlyMeasurement (no durations)
     dag_to_multi_realization  DAGCircuit -> MultiRealization       DAGToMultiRealization
     multi_realization         MultiRealization -> MultiRealization [ElideRailExchanges, PrismRouting, RetimeDiagonals]
     multi_realization_to_dag  MultiRealization -> DAGCircuit       MultiRealizationToDAG
@@ -40,7 +41,7 @@ from qiskit.transpiler import (
 from prism.encodings import DualRail
 from prism.ir import MultiRealization, MultiRealizationInstruction
 from prism.passes import ElideRailExchanges, RetimeDiagonals
-from prism.physical import physical_pm
+from prism.physical import EarlyMeasurement, physical_pm
 from prism.routing import PrismRouting, SearchBudget
 
 if TYPE_CHECKING:
@@ -224,14 +225,22 @@ def prism_stages(
             ``pauli_product_measurement``; ``rz`` is a frame update) and an
             ``if_else`` entry for the feed-forward latency. They fill the
             physical Target, and ``EarlyMeasurement`` then moves a measurement
-            only where the duration does not grow. ``None``: no durations.
+            after routing only where the duration does not grow. ``None``: no
+            durations, and ``EarlyMeasurement`` moves every logical measurement
+            in the logical stage.
 
     Raises:
         ValueError: if ``coupling_map`` is disconnected.
     """
     routing = PrismRouting(coupling_map, seed=seed, budget=budget)
+    logical = enc.logical_pm()
+    if durations is None:
+        # Every measurement moves before routing, so routing spends no SWAP on the
+        # gates it turns into classical control. With durations, the physical
+        # EarlyMeasurement judges each move on the routed schedule.
+        logical.append(EarlyMeasurement())
     return MultiStagePassManager(
-        logical=enc.logical_pm(),
+        logical=logical,
         dag_to_multi_realization=DAGToMultiRealization(enc),
         multi_realization=[ElideRailExchanges(), routing, RetimeDiagonals()],
         multi_realization_to_dag=MultiRealizationToDAG(),

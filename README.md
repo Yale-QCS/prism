@@ -71,7 +71,7 @@ Limits:
 
 | Stage | IR | Passes |
 | --- | --- | --- |
-| `logical` | `DAGCircuit` | stock passes to the logical gate set, with a dual-rail equivalence library, then `FoldConstantQubits`: `rz` and `crz` on a qubit in a known basis state (only `x` since the start or a reset) become a global phase or a one-qubit `rz` |
+| `logical` | `DAGCircuit` | stock passes to the logical gate set, with a dual-rail equivalence library, then `FoldConstantQubits`: `rz` and `crz` on a qubit in a known basis state (only `x` since the start or a reset) become a global phase or a one-qubit `rz`; without `durations`, then `EarlyMeasurement` (see `physical`) on the logical qubits, so routing spends no SWAP on the `crz` it turns into classical control |
 | `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | each operation becomes its candidates |
 | `multi_realization` | `MultiRealization` | prism's own passes (`prism.passes`): `ElideRailExchanges` drops logical X as a relabelling of its rails, then `PrismRouting` places the program and makes a choice per operation, then `RetimeDiagonals` moves diagonal operations off the critical path, across routing SWAPs |
 | `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | the choices become gates; the layout is written |

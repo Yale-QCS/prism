@@ -73,7 +73,7 @@ def test_ir_changing_passes_reset_completed_analyses():
     stages.logical = [*stages.logical.to_flow_controller().tasks, Size()]
     stages.physical = [Size()]
     pm = PassManager([stages.to_flow_controller()])
-    out = pm.run(_bell())
+    out = pm.run(_bell().remove_final_measurements(inplace=False))
     assert pm.property_set["size"] == out.size() > 0
 
 

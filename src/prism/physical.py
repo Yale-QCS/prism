@@ -154,6 +154,9 @@ class EarlyMeasurement(TransformationPass):
     latency), a measurement moves only if the circuit's duration does not grow:
     from the last measurement to the first, each move is kept if the finish time
     of ``_scheduled_duration`` does not increase. Without, every measurement moves.
+
+    Without durations ``prism_stages`` also runs it at the end of the logical
+    stage, on logical qubits, so routing spends no SWAP on the gates it removes.
     """
 
     def __init__(self, durations: InstructionDurations | None = None) -> None:
