@@ -44,9 +44,10 @@ __all__ = [
     "list_schedule",
 ]
 
-#: Gate names a ``diagonal`` realization may contain.
+#: Names of diagonal gates: a ``diagonal`` realization holds only these.
 DIAGONAL_GATES = frozenset(
-    {"rz", "crz", "z", "s", "sdg", "t", "tdg", "p", "cp", "cz", "rzz"}
+    {"rz", "crz", "z", "s", "sdg", "t", "tdg", "p", "u1", "id", "cp", "cz", "rzz"}
+    | {"cs", "csdg"}
 )
 
 

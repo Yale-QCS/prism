@@ -47,6 +47,8 @@ from qiskit.transpiler.passes.optimization.collect_and_collapse import (
     collapse_to_operation,
 )
 
+from prism.ir import DIAGONAL_GATES
+
 
 def _h(qc: QuantumCircuit, q: int) -> None:
     """``H`` as ``Rz . Rx . Rz``: one RX."""
@@ -213,17 +215,13 @@ class RTOFGate(Gate):
 # The gates that can reach MargolusPairOptimizer (3+-qubit gates are unrolled to
 # CCX before it) and commute with D: diagonal ones, and controlled-X-like ones
 # whose target is off the trio.
-_DIAGONAL = frozenset(
-    {"rz", "p", "u1", "z", "s", "sdg", "t", "tdg", "id", "crz", "cp", "cz", "rzz"}
-    | {"cs", "csdg"}
-)
 _CONTROLLED_X_LIKE = frozenset({"cx", "cy", "ch", "ccx"})
 
 
 def _commutes_with_d(node: DAGOpNode, trio: set[int], qmap: dict) -> bool:
     """``node`` commutes with the ``D`` factor on ``trio``; unknown gates do not."""
     indices = [qmap[q] for q in node.qargs]
-    if not trio.intersection(indices) or node.op.name in _DIAGONAL:
+    if not trio.intersection(indices) or node.op.name in DIAGONAL_GATES:
         return True
     return node.op.name in _CONTROLLED_X_LIKE and indices[-1] not in trio
 
