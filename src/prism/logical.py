@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from qiskit.circuit import AncillaRegister, IfElseOp, QuantumCircuit, Qubit
+from qiskit.circuit import AncillaRegister, Gate, IfElseOp, QuantumCircuit, Qubit
 from qiskit.circuit.controlflow import CONTROL_FLOW_OP_NAMES
 from qiskit.circuit.library import MCPhaseGate, MCXGate
 from qiskit.converters import circuit_to_dag
@@ -46,7 +46,7 @@ def basic_logical_pm(
     eq_library: EquivalenceLibrary,
     reshape_passes: tuple[BasePass, ...] = (),
 ) -> PassManager:
-    """Standard cleanup, translate to ``enc.LOGICAL_ISA``, split ``if_else`` per qubit, elide SWAPs, drop diagonals before measures."""
+    """Standard cleanup, translate to ``enc.LOGICAL_ISA``, split ``if_else`` per qubit, elide SWAPs, fold constant qubits, drop diagonals before measures."""
     isa_basis = sorted(enc.LOGICAL_ISA - NON_GATE_ISA_NAMES)
     return PassManager(
         [
@@ -62,10 +62,12 @@ def basic_logical_pm(
             BasisTranslator(
                 eq_library, sorted(enc.LOGICAL_ISA | CONTROL_FLOW_OP_NAMES)
             ),
-            Optimize1qGatesDecomposition(basis=isa_basis),
             SplitIfElse(),
             # Before layout a SWAP only relabels logical qubits.
             ElideLogicalPermutations(),
+            FoldConstantQubits(),
+            # After the fold, which joins the 1q runs around each removed crz.
+            Optimize1qGatesDecomposition(basis=isa_basis),
             # A diagonal gate right before a final measurement does not change its
             # outcome; removing it here keeps routing from spending SWAPs on it. One
             # sweep can expose another (rz after crz), hence the fixed point.
@@ -109,6 +111,49 @@ class MCPrepare(TransformationPass):
 def _is_pi(theta: float) -> bool:
     """``theta`` is ``pi`` modulo ``2 pi``."""
     return abs(abs((theta + np.pi) % (2 * np.pi) - np.pi) - np.pi) <= 1e-9
+
+
+class FoldConstantQubits(TransformationPass):
+    """Fold ``rz`` and ``crz`` on qubits in a known computational basis state.
+
+    A qubit is known from the start (``|0>``) or a ``reset``, flips on ``x``, and
+    stays known through ``rz`` and ``crz`` (diagonal) until any other operation.
+    On a known qubit ``rz`` is a global phase. A ``crz`` with a known control is
+    ``rz`` on the target or nothing; with a known target it is an ``rz`` on the
+    control and a global phase.
+    """
+
+    def run(self, dag: DAGCircuit) -> DAGCircuit:
+        """Fold every ``rz`` and ``crz`` that touches a known qubit."""
+        known = dict.fromkeys(dag.qubits, 0)
+        for node in list(dag.topological_op_nodes()):
+            bits = [known.get(q) for q in node.qargs]
+            if node.name == "x" and bits != [None]:
+                known[node.qargs[0]] ^= 1
+            elif node.name == "reset":
+                known[node.qargs[0]] = 0
+            elif node.name in ("rz", "crz") and bits != [None] * len(bits):
+                dag.substitute_node_with_dag(node, circuit_to_dag(_fold(node.op, bits)))
+            else:
+                for q in node.qargs:
+                    known.pop(q, None)
+        return dag
+
+
+def _fold(op: Gate, bits: list[int | None]) -> QuantumCircuit:
+    """``rz`` or ``crz`` ``op`` with its known qubits (``bits``, ``None`` if unknown) fixed."""
+    (theta,) = op.params
+    *ctrl, t = bits
+    qc = QuantumCircuit(len(bits))
+    if ctrl == [None]:  # crz with known target: diag(1, e^{-+i theta/2}) on the control
+        sign = 2 * t - 1
+        qc.global_phase = sign * theta / 4
+        qc.rz(sign * theta / 2, 0)
+    elif ctrl != [0] and t is None:
+        qc.rz(theta, len(bits) - 1)
+    elif ctrl != [0]:
+        qc.global_phase = (2 * t - 1) * theta / 2
+    return qc
 
 
 class ElideLogicalPermutations(ElidePermutations):
