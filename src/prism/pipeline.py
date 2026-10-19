@@ -1,20 +1,8 @@
 """prism's stages, the passes that change IR, and ``build_pm``.
 
-``prism_stages`` is a ``MultiStagePassManager`` from ``DAGCircuit`` to ``DAGCircuit``::
-
-    logical                   DAGCircuit -> DAGCircuit             enc.logical_pm(): stock passes, then
-                                                                   EarlyMeasurement (no durations)
-    dag_to_multi_realization  DAGCircuit -> MultiRealization       DAGToMultiRealization
-    multi_realization         MultiRealization -> MultiRealization [ElideRailExchanges, PrismRouting, RetimeDiagonals]
-    multi_realization_to_dag  MultiRealization -> DAGCircuit       MultiRealizationToDAG
-    physical                  DAGCircuit -> DAGCircuit             physical_pm: FenceErasureChecks, stock O3, then
-                                                                   CommutativeOptimization, FoldCRZAngles,
-                                                                   CommutativeOptimization, RemoveBarriers,
-                                                                   EarlyMeasurement, DropMeasuredSwaps,
-                                                                   RescheduleCommutingDiagonals, RecordCircuitMetrics
-
-``build_pm`` nests it in a ``qiskit.transpiler.PassManager``, which converts the
-circuit to a DAG and back as for any transpiler pipeline.
+``prism_stages`` is a ``MultiStagePassManager`` from ``DAGCircuit`` to ``DAGCircuit``,
+with the stages and passes the README lists. ``build_pm`` nests it in a
+``qiskit.transpiler.PassManager``, which converts the circuit to a DAG and back.
 """
 
 from __future__ import annotations

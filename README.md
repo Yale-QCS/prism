@@ -32,7 +32,7 @@ print(pm.property_set["circuit_metrics"])
 ```
 
 ```text
-CircuitMetrics(swaps=0, depth=6, active_gates=13, size=19)
+CircuitMetrics(swaps=0, depth=6, active_gates=13, size=18)
 ```
 
 ![The input circuit](docs/quickstart_input.png)
@@ -75,7 +75,7 @@ Limits:
 | `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | each operation becomes its candidates |
 | `multi_realization` | `MultiRealization` | prism's own passes (`prism.passes`): `ElideRailExchanges` drops logical X as a relabelling of its rails, then `PrismRouting` places the program and makes a choice per operation, then `RetimeDiagonals` moves diagonal operations off the critical path, across routing SWAPs |
 | `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | the choices become gates; the layout is written |
-| `physical` | `DAGCircuit` | stock O3 over the dual-rail `Target`, then `CommutativeOptimization` merges the `crz` runs on each edge and `FoldCRZAngles` folds each angle into `[0, 2π)`, then `EarlyMeasurement`: each rail is measured before the `rz` and `crz` behind its measurement, which become `rz` conditioned on its bit, and `DropMeasuredSwaps`: a SWAP that ends two measured rails is dropped, then `RescheduleCommutingDiagonals` reorders commuting diagonal gates for depth and `RecordCircuitMetrics` records the metrics |
+| `physical` | `DAGCircuit` | stock cleanups over the dual-rail `Target`, and stock layout and routing for whatever `multi_realization` left unplaced or unrouted, then `CommutativeOptimization` merges the `crz` runs on each edge, with a barrier on each side of every erasure check so that no gate crosses it, and `FoldCRZAngles` folds each angle into `[0, 2π)`; with `durations`, `EarlyMeasurement` moves a measurement before its diagonal tail where the duration does not grow, and `DropMeasuredSwaps` drops a SWAP that ends two measured rails; then `RescheduleCommutingDiagonals` reorders commuting diagonal gates for depth and `RecordCircuitMetrics` records the metrics |
 
 `prism.pipeline.prism_stages(cmap, DualRail)` returns these stages as a `MultiStagePassManager`; `dualrail_pm` nests them in a `PassManager`.
 In a `MultiRealization`, each logical operation is a `MultiRealizationOp` with its `candidates` and a `choice`; only the `multi_realization_to_dag` stage turns them into gates.

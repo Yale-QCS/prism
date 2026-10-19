@@ -1,4 +1,4 @@
-"""Physical stage: the preset O3 pipeline over ``enc.PHYSICAL_ISA`` and prism's passes on it."""
+"""Physical stage over ``enc.PHYSICAL_ISA``: stock cleanups, layout and routing, then prism's passes."""
 
 from __future__ import annotations
 
