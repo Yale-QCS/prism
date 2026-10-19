@@ -53,15 +53,12 @@ class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):
         wpl = ir.enc.WIRES_PER_LOGICAL
         cur = list(range(len(ir.rails)))  # IR rail -> rail it now sits on
         data = []
-        # (id(candidates), diagonal) -> permutation: lowering shares the candidates of equal ops.
-        perms: dict[tuple[int, bool], tuple[int, ...] | None] = {}
         for ins in ir.data:
-            perm = None
-            if isinstance(op := ins.operation, MultiRealizationOp):
-                key = id(op.candidates), op.diagonal
-                if key not in perms:
-                    perms[key] = _rail_permutation(op, wpl)
-                perm = perms[key]
+            perm = (
+                _rail_permutation(ins.operation, wpl)
+                if isinstance(ins.operation, MultiRealizationOp)
+                else None
+            )
             if perm is None:
                 data.append(ins._replace(qubits=tuple(cur[q] for q in ins.qubits)))
                 continue
