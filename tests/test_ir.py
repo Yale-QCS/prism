@@ -75,3 +75,19 @@ def test_ir_changing_passes_reset_completed_analyses():
     pm = PassManager([stages.to_flow_controller()])
     out = pm.run(_bell())
     assert pm.property_set["size"] == out.size() > 0
+
+
+def test_routing_takes_commuting_ops_left_with_one_pair():
+    """A pass may drop candidates: diagonal ops left on one rail pair still route."""
+    qc = QuantumCircuit(3)
+    for theta, (a, b) in zip((0.3, 0.5, 0.7, 0.2), [(0, 1), (0, 1), (1, 2), (0, 1)]):
+        qc.crz(theta, a, b)
+    ir = DAGToMultiRealization(DualRail).run(
+        circuit_to_dag(DualRail.logical_pm().run(qc))
+    )
+    for k, ins in enumerate(ir.data):
+        op = ins.operation
+        if isinstance(op, MultiRealizationOp):
+            op = replace(op, candidates=op.candidates[:1], default_index=0)
+            ir.data[k] = ins._replace(operation=op)
+    PrismRouting(CouplingMap.from_line(6), seed=0).run(ir).verify()

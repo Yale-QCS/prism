@@ -27,7 +27,9 @@ pub type RoutedOp = (Vec<[u32; 2]>, usize, u32);
 /// Node `k` of the forward DAG is op `k`.  The reverse DAG runs the program backwards, for
 /// backward refinement: op `k` is its node `n - 1 - k`, and every dependency is flipped.  An op
 /// with one realization of one pair becomes `TwoQ`, so the stock router handles it unchanged;
-/// every other op becomes `MultiTwoQ`.
+/// every other op becomes `MultiTwoQ`.  The stock layers hold one `TwoQ` node per qubit, so the
+/// `TwoQ` ops on each qubit must be ordered: an op that commutes with the latest `TwoQ` op on one
+/// of its qubits becomes `MultiTwoQ` too.
 ///
 /// # Errors
 ///
@@ -36,14 +38,34 @@ pub type RoutedOp = (Vec<[u32; 2]>, usize, u32);
 pub fn sabre_dags(ops: &[Op], num_qubits: u32) -> PyResult<[SabreDAG; 2]> {
     let mut kinds = Vec::with_capacity(ops.len());
     let mut edges = Vec::new();
+    // The latest `TwoQ` op on each virtual qubit.
+    let mut last_two_q: Vec<Option<usize>> = vec![None; num_qubits as usize];
     for (k, (default, preds, gates)) in ops.iter().enumerate() {
         let invalid = |e: String| PyValueError::new_err(format!("op {k}: {e}"));
-        kinds.push(op_kind(gates, *default, num_qubits).map_err(invalid)?);
         for &p in preds {
             if p as usize >= k {
                 return Err(invalid(format!("predecessor {p} is not an earlier op")));
             }
             edges.push([p as usize, k]);
+        }
+        let realizations = realizations(gates, num_qubits).map_err(invalid)?;
+        let ordered = |pair: &[VirtualQubit; 2]| {
+            pair.iter()
+                .all(|q| last_two_q[q.index()].is_none_or(|j| precedes(ops, j, k)))
+        };
+        if let [real] = &*realizations
+            && let [pair] = &**real
+            && ordered(pair)
+        {
+            for q in pair {
+                last_two_q[q.index()] = Some(k);
+            }
+            kinds.push(InteractionKind::TwoQ(*pair));
+        } else {
+            kinds.push(InteractionKind::MultiTwoQ {
+                realizations,
+                default_realization: *default,
+            });
         }
     }
     let last = ops.len().saturating_sub(1);
@@ -78,11 +100,29 @@ fn sabre_dag(
     }
 }
 
-/// The interaction kind of one op of realizations `gates`, or why a gate is invalid.
+/// Whether op `j` precedes the later op `k` through the predecessors of `ops`.
+fn precedes(ops: &[Op], j: usize, k: usize) -> bool {
+    let mut seen = vec![false; k - j];
+    let mut stack = vec![k];
+    while let Some(n) = stack.pop() {
+        for &p in &ops[n].1 {
+            let p = p as usize;
+            if p == j {
+                return true;
+            }
+            if p > j && !std::mem::replace(&mut seen[p - j], true) {
+                stack.push(p);
+            }
+        }
+    }
+    false
+}
+
+/// The pairs of each realization `gates[r]` of one op, or why a gate is invalid.
 ///
 /// An op with no realization on at most one qubit pair cannot be routed onto one coupling edge:
-/// its realizations lose their pairs, so it commits `default` at once and adds no SWAP.
-fn op_kind(gates: &[Vec<Gate>], default: u32, num_qubits: u32) -> Result<InteractionKind, String> {
+/// its realizations lose their pairs, so it commits its default at once and adds no SWAP.
+fn realizations(gates: &[Vec<Gate>], num_qubits: u32) -> Result<VirtRealizations, String> {
     let pair = |&[a, b]: &[u32; 2]| {
         if a >= num_qubits || b >= num_qubits || a == b {
             Err(format!("invalid pair ({a}, {b}) on {num_qubits} qubits"))
@@ -99,23 +139,16 @@ fn op_kind(gates: &[Vec<Gate>], default: u32, num_qubits: u32) -> Result<Interac
     if gates.is_empty() {
         return Err("no realization".into());
     }
-    let mut realizations: VirtRealizations = gates
+    let realizations: VirtRealizations = gates
         .iter()
         .map(|real| pairs(real))
         .collect::<Result<_, _>>()?;
-    if let [real] = &*realizations
-        && let [only] = &**real
-    {
-        return Ok(InteractionKind::TwoQ(*only));
-    }
-    if !realizations
+    if realizations
         .iter()
         .any(|real| real.is_empty() || single_edge(real).is_some())
     {
-        realizations = realizations.iter().map(|_| Box::default()).collect();
+        Ok(realizations)
+    } else {
+        Ok(realizations.iter().map(|_| Box::default()).collect())
     }
-    Ok(InteractionKind::MultiTwoQ {
-        realizations,
-        default_realization: default,
-    })
 }
