@@ -36,6 +36,10 @@ class RSwapGate(Gate):
     def __array__(
         self, dtype: np.dtype | None = None, copy: bool | None = None
     ) -> np.ndarray:
+        if copy is False:
+            raise ValueError(
+                "unable to avoid copy while creating an array as requested"
+            )
         theta = float(self.params[0])
         p = np.exp(1j * theta / 2)
         c, s = np.cos(theta / 2), np.sin(theta / 2)
