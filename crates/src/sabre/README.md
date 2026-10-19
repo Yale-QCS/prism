@@ -51,9 +51,8 @@ the defect most routing steps score a wrong lookahead layer (+8% router SWAPs at
 deeper lookahead stops helping). `Synchronize` and `ControlFlow` nodes have the same
 multi-layer jump; prism emits neither, so the hunk leaves them alone.
 
-The Rust test `lookahead_layers_match_rebuild_while_routing` (layers rebuilt from scratch at
-every step, 1, 2 and 4 layers) fails without it. Drop the hunk when upstream fixes the defect,
-then rerun that test.
+Drop the hunk when upstream fixes the defect, then check that the regression gate
+(`tools/gate/gate.py check`) shows no change in SWAPs.
 
 With no `MultiTwoQ` node in the input and no lookahead, the patched router is the stock router.
 With lookahead the two differ by the bug fix above.
