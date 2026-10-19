@@ -147,7 +147,7 @@ def _shot(qc: QuantumCircuit, seed: int, lost: int | None = None) -> dict[Clbit,
 
 
 def test_erasure_check_is_local_flags_its_own_qubit_and_keeps_the_state():
-    """Each check is on a device edge, reads 1 (photon present), and leaves a superposition intact.
+    """Each check is on a device edge, stays between its gates, reads 1, and keeps a superposition.
 
     A qubit that lost its photon reads 0 on its own check and on no other.
     """
@@ -167,6 +167,8 @@ def test_erasure_check_is_local_flags_its_own_qubit_and_keeps_the_state():
     pm = dualrail_pm(cmap, seed=0)
     out = pm.run(qc)
     assert pm.property_set["online_n_swaps"] > 0  # the checks sit between routed gates
+    # No gate crosses a check: each CRZ and its inverse stay on their sides, unmerged.
+    assert out.count_ops()["crz"] == 6
     checks = [ci for ci in out.data if ci.name == "pauli_product_measurement"]
     assert len(checks) == 3
     edges = set(cmap.get_edges())

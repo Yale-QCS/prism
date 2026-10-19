@@ -6,8 +6,10 @@
     dag_to_multi_realization  DAGCircuit -> MultiRealization       DAGToMultiRealization
     multi_realization         MultiRealization -> MultiRealization [ElideRailExchanges, PrismRouting, RetimeDiagonals]
     multi_realization_to_dag  MultiRealization -> DAGCircuit       MultiRealizationToDAG
-    physical                  DAGCircuit -> DAGCircuit             physical_pm: stock O3, then CommutativeOptimization,
-                                                                   FoldCRZAngles, EarlyMeasurement, DropMeasuredSwaps,
+    physical                  DAGCircuit -> DAGCircuit             physical_pm: FenceErasureChecks, stock O3, then
+                                                                   CommutativeOptimization, FoldCRZAngles,
+                                                                   CommutativeOptimization, RemoveBarriers,
+                                                                   EarlyMeasurement, DropMeasuredSwaps,
                                                                    RescheduleCommutingDiagonals, RecordCircuitMetrics
 
 ``build_pm`` nests it in a ``qiskit.transpiler.PassManager``, which converts the

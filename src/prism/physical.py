@@ -6,7 +6,13 @@ import math
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from qiskit.circuit import Instruction, Measure, ParameterExpression, QuantumCircuit
+from qiskit.circuit import (
+    Barrier,
+    Instruction,
+    Measure,
+    ParameterExpression,
+    QuantumCircuit,
+)
 from qiskit.circuit.controlflow import IfElseOp
 from qiskit.circuit.library import CRZGate, RZGate
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode, DAGOutNode
@@ -18,7 +24,11 @@ from qiskit.transpiler import (
     Target,
     TransformationPass,
 )
-from qiskit.transpiler.passes import CommutativeOptimization, SabreSwap
+from qiskit.transpiler.passes import (
+    CommutativeOptimization,
+    RemoveBarriers,
+    SabreSwap,
+)
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit.transpiler.preset_passmanagers.common import generate_routing_passmanager
 
@@ -122,6 +132,30 @@ class EarlyMeasurement(TransformationPass):
                 out.apply_operation_back(node.op, node.qargs, node.cargs)
             measure_after(k)
         return out
+
+
+class FenceErasureChecks(TransformationPass):
+    """Put a ``Barrier`` on each side of every erasure check (``pauli_product_measurement``).
+
+    The user places each check, so no gate may cross it. Qiskit's commutation
+    checker finds that the ZZ check commutes with ``rz`` and ``crz``, so
+    ``CommutativeOptimization`` would merge gates across it; a barrier commutes
+    with nothing. The logical stage removes barriers, so ``RemoveBarriers``
+    after the commutation passes removes only these.
+    """
+
+    def run(self, dag: DAGCircuit) -> DAGCircuit:
+        """Fence each check of ``dag`` on its qubits."""
+        for node in dag.named_nodes("pauli_product_measurement"):
+            block = DAGCircuit()
+            block.add_qubits(node.qargs)
+            block.add_clbits(node.cargs)
+            fence = Barrier(len(node.qargs))
+            block.apply_operation_back(fence, node.qargs)
+            block.apply_operation_back(node.op, node.qargs, node.cargs)
+            block.apply_operation_back(fence, node.qargs)
+            dag.substitute_node_with_dag(node, block)
+        return dag
 
 
 class DropMeasuredSwaps(TransformationPass):
@@ -258,7 +292,9 @@ def physical_pm(
     into classical control, and ``DropMeasuredSwaps`` drops the SWAPs it leaves
     after both their rails are measured. ``RescheduleCommutingDiagonals`` then
     reorders the commuting diagonal gates for depth, and ``RecordCircuitMetrics``
-    sets ``circuit_metrics``.
+    sets ``circuit_metrics``. ``FenceErasureChecks`` runs first and
+    ``RemoveBarriers`` after the commutation passes, so no gate crosses an
+    erasure check.
     """
     target = _physical_target(enc, coupling_map)
     preset = generate_preset_pass_manager(
@@ -268,6 +304,7 @@ def physical_pm(
         layout_method="trivial",
         routing_method="none",
     )
+    preset.pre_init = PassManager([FenceErasureChecks()])
     preset.layout = PassManager(
         ConditionalController(
             preset.layout.to_flow_controller(),
@@ -282,6 +319,7 @@ def physical_pm(
             CommutativeOptimization(),
             FoldCRZAngles(),
             CommutativeOptimization(),
+            RemoveBarriers(),
             EarlyMeasurement(),
             DropMeasuredSwaps(),
             RescheduleCommutingDiagonals(),
