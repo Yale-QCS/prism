@@ -14,12 +14,15 @@ circuit to a DAG and back as for any transpiler pipeline.
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 from qiskit.circuit import (
     ClassicalRegister,
     Clbit,
+    ControlFlowOp,
     Measure,
+    Operation,
     QuantumRegister,
 )
 from qiskit.converters import circuit_to_dag
@@ -34,12 +37,14 @@ from qiskit.transpiler import (
 )
 
 from prism.encodings import DualRail
-from prism.ir import MultiRealization, MultiRealizationInstruction
+from prism.ir import MultiRealization, MultiRealizationInstruction, MultiRealizationOp
 from prism.passes import ElideRailExchanges, RetimeDiagonals
 from prism.physical import physical_pm
 from prism.routing import PrismRouting, SearchBudget
 
 if TYPE_CHECKING:
+    from collections.abc import Hashable
+
     from prism.encodings.base import QubitEncoding
 
 __all__ = [
@@ -103,8 +108,15 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
             for ci in prep.data:
                 rails = tuple(wpl * i + prep.find_bit(q).index for q in ci.qubits)
                 data.append(MultiRealizationInstruction(ci.operation, rails))
+        lowered: dict[Hashable, MultiRealizationOp] = {}
         for node in dag.topological_op_nodes():
-            op = enc.lower(node.op, tuple(node.cargs))
+            if (key := _lower_key(node.op)) is None:
+                op = enc.lower(node.op, tuple(node.cargs))
+            else:
+                if key not in lowered:
+                    lowered[key] = enc.lower(node.op)
+                # A copy, so each instruction has its own choice; the candidates are shared.
+                op = replace(lowered[key])
             rails = tuple(wpl * logical[q] + w for q in node.qargs for w in range(wpl))
             if isinstance(node.op, Measure):
                 c = node.cargs[0]
@@ -127,6 +139,18 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
         )
         ir.verify()
         return ir
+
+
+def _lower_key(op: Operation) -> Hashable | None:
+    """What ``enc.lower(op)`` depends on, or ``None`` for control flow or symbolic parameters.
+
+    ``repr`` keeps the exact value of each number, ``-0.0`` included.
+    """
+    if isinstance(op, ControlFlowOp) or not all(
+        isinstance(p, (int, float)) for p in op.params
+    ):
+        return None
+    return type(op), op.name, op.label, op.num_qubits, *map(repr, op.params)
 
 
 class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
