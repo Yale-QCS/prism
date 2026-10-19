@@ -167,8 +167,9 @@ class RescheduleCommutingDiagonals(TransformationPass):
 
     Routing emits gates in commit order. Physical diagonal gates on shared
     rails commute, so the emitted order is one of many; this pass re-emits the
-    circuit by critical-path list scheduling over the commutation-relaxed
-    dependency graph, which only shortens the circuit.
+    circuit in the order of ``list_schedule`` over the commutation-relaxed
+    dependency graph. List scheduling is a heuristic: it usually shortens the
+    circuit but does not guarantee it.
     """
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:

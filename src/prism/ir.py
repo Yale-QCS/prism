@@ -88,10 +88,12 @@ def list_schedule(
 ) -> list[int]:
     """An order of the ops by critical-path list scheduling.
 
-    ``preds`` holds earlier ops only. In waves of the ops whose predecessors
-    are scheduled, longest path to the end first, each op starts once its
-    predecessors end and its wires are free, and takes ``weight`` layers. Each
-    wave is emitted by start time, so the order is a valid schedule.
+    ``preds`` holds earlier ops only. Time advances to the next moment an op
+    can start; at each, the ops whose predecessors have ended and whose wires
+    are free start, longest path to the end first, and take ``weight`` layers.
+    An op waits for a wire rather than book it ahead, so a later critical op
+    is not queued behind one that was ready sooner. The order is the start
+    order. A heuristic: the result can be longer than the input order.
     """
     n = len(preds)
     succs: list[list[int]] = [[] for _ in range(n)]
@@ -101,26 +103,38 @@ def list_schedule(
     cp = [0] * n
     for k in range(n - 1, -1, -1):
         cp[k] = weight[k] + max((cp[s] for s in succs[k]), default=0)
-    done: dict[int, int] = {}
+    missing = [len(ps) for ps in preds]
+    release = [0] * n
     wire_free: dict[Hashable, int] = {}
-    remaining = set(range(n))
+    pending = [k for k in range(n) if not missing[k]]
     order: list[int] = []
-    while remaining:
-        ready = sorted(
-            (k for k in remaining if all(p in done for p in preds[k])),
-            key=lambda k: (-cp[k], k),
-        )
-        for k in ready:
-            start = max(
-                [done[p] for p in preds[k]]
-                + [wire_free.get(w, 0) for w in wires[k]]
-                + [0]
+    t = 0
+    while pending:
+        started = True
+        while started:
+            started = False
+            pending.sort(key=lambda k: (-cp[k], k))
+            waiting = []
+            for k in pending:
+                if release[k] > t or any(wire_free.get(w, 0) > t for w in wires[k]):
+                    waiting.append(k)
+                    continue
+                end = t + weight[k]
+                for w in wires[k]:
+                    wire_free[w] = end
+                order.append(k)
+                for s in succs[k]:
+                    release[s] = max(release[s], end)
+                    missing[s] -= 1
+                    if not missing[s]:
+                        waiting.append(s)
+                        started = True
+            pending = waiting
+        if pending:
+            t = min(
+                max([release[k], *(wire_free.get(w, 0) for w in wires[k])])
+                for k in pending
             )
-            done[k] = start + weight[k]
-            for w in wires[k]:
-                wire_free[w] = done[k]
-        remaining.difference_update(ready)
-        order += sorted(ready, key=lambda k: (done[k] - weight[k], k))
     return order
 
 
