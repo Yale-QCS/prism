@@ -36,7 +36,10 @@ from prism.ir import DIAGONAL_GATES, commuting_predecessors, list_schedule
 from prism.metrics import RecordCircuitMetrics, is_free
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Sequence
+
     from qiskit.circuit import Clbit, Qubit
+    from qiskit.transpiler import InstructionDurations
 
     from prism.encodings.base import QubitEncoding
 
@@ -65,6 +68,73 @@ def _classical_rz(
     return IfElseOp((bit, True), *blocks), rail, bit
 
 
+#: Operations that commute with a pending ``rz`` on their rails: they need not wait for it.
+_FRAME_FREE = DIAGONAL_GATES | {
+    "swap",
+    "measure",
+    "initialize",
+    "pauli_product_measurement",
+}
+
+
+def _scheduled_duration(
+    instructions: Iterable[tuple[Instruction, Sequence[Qubit], Sequence[Clbit]]],
+    duration: Callable[[Instruction, Sequence[Qubit]], float],
+) -> float:
+    """The ASAP finish time of ``instructions``, with ``rz`` as a frame update.
+
+    ``duration(op, qubits)`` is the caller's duration of each operation. An ``rz``,
+    and an ``if_else`` whose bodies are diagonal, update the rail's phase frame:
+    they hold no wire. The frame of an ``if_else`` is known ``duration(if_else)``
+    (the feed-forward latency) after its clbits are written, and only the next
+    operation on that content outside ``_FRAME_FREE`` (an ``rswap``) waits for it;
+    a ``swap`` carries it and an ``initialize`` drops it. Another ``if_else``
+    waits for its clbits plus that latency and runs its longest body.
+    """
+    ready: dict[Qubit | Clbit, float] = {}
+    frame: dict[Qubit, float] = {}
+    for op, qargs, cargs in instructions:
+        if op.name == "rz":
+            continue
+        start = max((ready.get(w, 0) for w in (*qargs, *cargs)), default=0)
+        if op.name == "if_else":
+            known = max((ready.get(c, 0) for c in cargs), default=0)
+            known += duration(op, qargs)
+            if _is_diagonal(op):
+                for q in qargs:
+                    frame[q] = max(frame.get(q, 0), known)
+                continue
+            start = max([start, known, *(frame.pop(q) for q in qargs if q in frame)])
+            length = max(
+                _scheduled_duration(
+                    (
+                        (
+                            ci.operation,
+                            [qargs[body.find_bit(q).index] for q in ci.qubits],
+                            [cargs[body.find_bit(c).index] for c in ci.clbits],
+                        )
+                        for ci in body.data
+                    ),
+                    duration,
+                )
+                for body in op.blocks
+            )
+        else:
+            if op.name not in _FRAME_FREE:
+                start = max([start, *(frame.pop(q) for q in qargs if q in frame)])
+            elif op.name == "swap":
+                a, b = qargs
+                held = {b: frame.pop(a, None), a: frame.pop(b, None)}
+                frame.update((q, t) for q, t in held.items() if t is not None)
+            elif op.name == "initialize":
+                for q in qargs:
+                    frame.pop(q, None)
+            length = duration(op, qargs)
+        for w in (*qargs, *cargs):
+            ready[w] = start + length
+    return max(ready.values(), default=0)
+
+
 class EarlyMeasurement(TransformationPass):
     """Measure each rail before its diagonal tail, which becomes classical control.
 
@@ -77,61 +147,108 @@ class EarlyMeasurement(TransformationPass):
     a ``crz`` it is the target of becomes ``rz(±θ/2)`` on the control, and a
     ``crz`` between two measured rails goes. The phases dropped are global within
     each measurement branch.
+
+    With ``durations`` (the caller's; an ``if_else`` entry is the feed-forward
+    latency), a measurement moves only if the circuit's duration does not grow:
+    from the last measurement to the first, each move is kept if the finish time
+    of ``_scheduled_duration`` does not increase. Without, every measurement moves.
     """
+
+    def __init__(self, durations: InstructionDurations | None = None) -> None:
+        """Move every measurement, or with ``durations`` those that do not lengthen the circuit."""
+        super().__init__()
+        self.durations = durations
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
         """Move the measurements in ``dag`` early and rewrite the gates they pass."""
         nodes = list(dag.topological_op_nodes())
-        # wire -> the measurement that reads the content the wire holds here
-        pending: dict[Qubit, int] = {}
-        # measurement -> the operation it can follow (-1: the start) and its wire there
-        reach: dict[int, tuple[int, Qubit]] = {}
-        rewritten: dict[int, tuple[IfElseOp, Qubit, Clbit] | None] = {}
-        moved: set[int] = set()
-        for k in range(len(nodes) - 1, -1, -1):
-            node = nodes[k]
-            blocked = [w for w, m in pending.items() if nodes[m].cargs[0] in node.cargs]
-            if node.op.name in ("rz", "crz") and (
-                measured := [q for q in node.qargs if q in pending]
-            ):
-                rewritten[k] = _classical_rz(
-                    node, {q: nodes[pending[q]] for q in measured}
-                )
-                moved.update(pending[q] for q in measured)
-            elif node.op.name == "swap":
-                a, b = node.qargs
-                held = {b: pending.pop(a, None), a: pending.pop(b, None)}
-                pending.update((w, m) for w, m in held.items() if m is not None)
-            else:
-                blocked += [q for q in node.qargs if q in pending]
-            for w in dict.fromkeys(blocked):
-                reach[pending.pop(w)] = (k, w)
-            if isinstance(node.op, Measure):
-                pending[node.qargs[0]] = k
-        if not rewritten:
+        emitted, moved = _move_measurements(nodes, None)
+        if not moved:
             return dag
-        reach.update((m, (-1, w)) for w, m in pending.items())
-
-        after: dict[int, list[tuple[DAGOpNode, Qubit]]] = defaultdict(list)
-        for m in moved:
-            k, w = reach[m]
-            after[k].append((nodes[m], w))
+        if self.durations is not None:
+            emitted, moved = self._shortest(dag, nodes, moved)
+            if not moved:
+                return dag
         out = dag.copy_empty_like()
-
-        def measure_after(k: int) -> None:
-            for m, w in after.get(k, ()):
-                out.apply_operation_back(m.op, (w,), m.cargs)
-
-        measure_after(-1)
-        for k, node in enumerate(nodes):
-            if k in rewritten:
-                if (rz := rewritten[k]) is not None:
-                    op, q, bit = rz
-                    out.apply_operation_back(op, (q,), (bit,))
-            elif k not in moved:
-                out.apply_operation_back(node.op, node.qargs, node.cargs)
-            measure_after(k)
+        for op, qargs, cargs in emitted:
+            out.apply_operation_back(op, qargs, cargs)
         return out
+
+    def _shortest(
+        self, dag: DAGCircuit, nodes: list[DAGOpNode], movable: set[int]
+    ) -> tuple[
+        list[tuple[Instruction, tuple[Qubit, ...], tuple[Clbit, ...]]], set[int]
+    ]:
+        """Keep each move, last measurement first, if the duration does not grow."""
+        durations = self.durations
+        unit = (
+            "dt" if durations.dt is None and durations.units_used() <= {"dt"} else "s"
+        )
+        cache: dict[tuple[str, tuple[int, ...]], float] = {}
+
+        def duration(op: Instruction, qargs: Sequence[Qubit]) -> float:
+            key = (op.name, tuple(dag.find_bit(q).index for q in qargs))
+            if key not in cache:
+                cache[key] = durations.get(op.name, list(key[1]), unit=unit)
+            return cache[key]
+
+        kept: set[int] = set()
+        best, _ = _move_measurements(nodes, kept)
+        best_time = _scheduled_duration(best, duration)
+        for m in sorted(movable, reverse=True):
+            trial, moved = _move_measurements(nodes, kept | {m})
+            if (time := _scheduled_duration(trial, duration)) <= best_time:
+                kept, best, best_time = moved, trial, time
+        return best, kept
+
+
+def _move_measurements(
+    nodes: list[DAGOpNode], movable: set[int] | None
+) -> tuple[list[tuple[Instruction, tuple[Qubit, ...], tuple[Clbit, ...]]], set[int]]:
+    """``nodes`` with the measurements in ``movable`` (all if ``None``) moved early.
+
+    Returns the instructions and the measurements that moved.
+    """
+    # wire -> the measurement that reads the content the wire holds here
+    pending: dict[Qubit, int] = {}
+    # measurement -> the operation it can follow (-1: the start) and its wire there
+    reach: dict[int, tuple[int, Qubit]] = {}
+    rewritten: dict[int, tuple[IfElseOp, Qubit, Clbit] | None] = {}
+    moved: set[int] = set()
+    for k in range(len(nodes) - 1, -1, -1):
+        node = nodes[k]
+        blocked = [w for w, m in pending.items() if nodes[m].cargs[0] in node.cargs]
+        if node.op.name in ("rz", "crz") and (
+            measured := [q for q in node.qargs if q in pending]
+        ):
+            rewritten[k] = _classical_rz(node, {q: nodes[pending[q]] for q in measured})
+            moved.update(pending[q] for q in measured)
+        elif node.op.name == "swap":
+            a, b = node.qargs
+            held = {b: pending.pop(a, None), a: pending.pop(b, None)}
+            pending.update((w, m) for w, m in held.items() if m is not None)
+        else:
+            blocked += [q for q in node.qargs if q in pending]
+        for w in dict.fromkeys(blocked):
+            reach[pending.pop(w)] = (k, w)
+        if isinstance(node.op, Measure) and (movable is None or k in movable):
+            pending[node.qargs[0]] = k
+    reach.update((m, (-1, w)) for w, m in pending.items())
+
+    after: dict[int, list[tuple[DAGOpNode, Qubit]]] = defaultdict(list)
+    for m in moved:
+        k, w = reach[m]
+        after[k].append((nodes[m], w))
+    out = [(m.op, (w,), m.cargs) for m, w in after.get(-1, ())]
+    for k, node in enumerate(nodes):
+        if k in rewritten:
+            if (rz := rewritten[k]) is not None:
+                op, q, bit = rz
+                out.append((op, (q,), (bit,)))
+        elif k not in moved:
+            out.append((node.op, node.qargs, node.cargs))
+        out.extend((m.op, (w,), m.cargs) for m, w in after.get(k, ()))
+    return out, moved
 
 
 class FenceErasureChecks(TransformationPass):
@@ -249,20 +366,26 @@ class FoldCRZAngles(TransformationPass):
         return dag
 
 
-def _physical_target(enc: type[QubitEncoding], coupling_map: CouplingMap) -> Target:
+def _physical_target(
+    enc: type[QubitEncoding],
+    coupling_map: CouplingMap,
+    durations: InstructionDurations | None = None,
+) -> Target:
     """``enc.PHYSICAL_ISA`` on each qubit or edge, plus measure and ``if_else``.
 
     For dual rail that is ``rz`` on one rail and ``crz``, ``swap``, ``rswap``,
     ``initialize``, ``pauli_product_measurement`` on an edge: no gate leaves
     the code space, so stock O3 cannot produce one, and with no complete
-    one-qubit basis it does not resynthesize.
+    one-qubit basis it does not resynthesize. ``durations`` fill the
+    ``InstructionProperties``; without them the Target has none.
     """
     target = Target.from_configuration(
-        basis_gates=sorted(enc.PHYSICAL_ISA),
+        basis_gates=sorted(enc.PHYSICAL_ISA | {"measure"}),
         custom_name_mapping=enc.CUSTOM_GATES,
         coupling_map=coupling_map,
+        instruction_durations=durations,
+        dt=None if durations is None else durations.dt,
     )
-    target.add_instruction(Measure(), name="measure")
     target.add_instruction(IfElseOp, name="if_else")
     return target
 
@@ -272,6 +395,7 @@ def physical_pm(
     enc: type[QubitEncoding],
     *,
     seed: int = 42,
+    durations: InstructionDurations | None = None,
 ) -> StagedPassManager:
     """Preset O3 over the retained route.
 
@@ -289,14 +413,19 @@ def physical_pm(
     merged angle to its SWS wait, and a second ``CommutativeOptimization``
     merges the ``rz(π)`` that adds into the control's other ``rz``.
     ``EarlyMeasurement`` then turns the diagonal gates behind each measurement
-    into classical control, and ``DropMeasuredSwaps`` drops the SWAPs it leaves
+    into classical control (with ``durations``, only where the duration does
+    not grow), and ``DropMeasuredSwaps`` drops the SWAPs it leaves
     after both their rails are measured. ``RescheduleCommutingDiagonals`` then
     reorders the commuting diagonal gates for depth, and ``RecordCircuitMetrics``
     sets ``circuit_metrics``. ``FenceErasureChecks`` runs first and
     ``RemoveBarriers`` after the commutation passes, so no gate crosses an
     erasure check.
+
+    ``durations`` are the caller's ``InstructionDurations``; prism assumes none.
+    They fill the Target's ``InstructionProperties``, and ``EarlyMeasurement``
+    also reads their ``if_else`` entry, the feed-forward latency.
     """
-    target = _physical_target(enc, coupling_map)
+    target = _physical_target(enc, coupling_map, durations)
     preset = generate_preset_pass_manager(
         optimization_level=3,
         target=target,
@@ -320,7 +449,7 @@ def physical_pm(
             FoldCRZAngles(),
             CommutativeOptimization(),
             RemoveBarriers(),
-            EarlyMeasurement(),
+            EarlyMeasurement(durations),
             DropMeasuredSwaps(),
             RescheduleCommutingDiagonals(),
             RecordCircuitMetrics(),
