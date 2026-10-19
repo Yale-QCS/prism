@@ -26,8 +26,10 @@ from qiskit.transpiler import (
 )
 from qiskit.transpiler.passes import (
     CommutativeOptimization,
+    ConsolidateBlocks,
     RemoveBarriers,
     SabreSwap,
+    Split2QUnitaries,
 )
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit.transpiler.preset_passmanagers.common import generate_routing_passmanager
@@ -421,6 +423,14 @@ def physical_pm(
     ``RemoveBarriers`` after the commutation passes, so no gate crosses an
     erasure check.
 
+    The init stage leaves out ``ConsolidateBlocks`` and ``Split2QUnitaries``.
+    Before layout, ``ConsolidateBlocks`` has no Target: it turns every block of
+    more than 20 gates on two wires (a long ``rswap``/``rz`` run on one rail
+    pair) into a ``UnitaryGate``. With only ``rz`` on one wire, no unitary
+    synthesis reaches this Target, so ``UnitarySynthesis`` keeps the unitary
+    and ``HighLevelSynthesis`` expands it by its definition to ``u``/``cx``,
+    which the translation stage then cannot translate.
+
     ``durations`` are the caller's ``InstructionDurations``; prism assumes none.
     They fill the Target's ``InstructionProperties``, and ``EarlyMeasurement``
     also reads their ``if_else`` entry, the feed-forward latency.
@@ -434,6 +444,13 @@ def physical_pm(
         routing_method="none",
     )
     preset.pre_init = PassManager([FenceErasureChecks()])
+    preset.init = PassManager(
+        [
+            p
+            for p in preset.init.to_flow_controller().passes
+            if not isinstance(p, (ConsolidateBlocks, Split2QUnitaries))
+        ]
+    )
     preset.layout = PassManager(
         ConditionalController(
             preset.layout.to_flow_controller(),
