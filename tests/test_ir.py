@@ -24,7 +24,9 @@ def _bell() -> QuantumCircuit:
 
 def _placed() -> MultiRealization:
     ir = DAGToMultiRealization(DualRail).run(
-        circuit_to_dag(DualRail.logical_pm().run(_bell()))
+        circuit_to_dag(
+            DualRail.logical_pm().run(_bell().remove_final_measurements(inplace=False))
+        )
     )
     placed = PrismRouting(CouplingMap.from_line(4), seed=0).run(ir)
     placed.verify()

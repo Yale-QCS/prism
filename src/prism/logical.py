@@ -2,14 +2,22 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import TYPE_CHECKING
 
 import numpy as np
-from qiskit.circuit import AncillaRegister, Gate, IfElseOp, QuantumCircuit, Qubit
+from qiskit.circuit import (
+    AncillaRegister,
+    Gate,
+    IfElseOp,
+    Measure,
+    QuantumCircuit,
+    Qubit,
+)
 from qiskit.circuit.controlflow import CONTROL_FLOW_OP_NAMES
 from qiskit.circuit.library import MCPhaseGate, MCXGate
 from qiskit.converters import circuit_to_dag
-from qiskit.dagcircuit import DAGCircuit
+from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.passmanager import DoWhileController
 from qiskit.transpiler import PassManager, TransformationPass
 from qiskit.transpiler.passes import (
@@ -27,7 +35,7 @@ from qiskit.transpiler.passes import (
 )
 
 if TYPE_CHECKING:
-    from qiskit.circuit import EquivalenceLibrary
+    from qiskit.circuit import Clbit, EquivalenceLibrary
     from qiskit.transpiler import BasePass
 
     from prism.encodings.base import QubitEncoding
@@ -46,7 +54,7 @@ def basic_logical_pm(
     eq_library: EquivalenceLibrary,
     reshape_passes: tuple[BasePass, ...] = (),
 ) -> PassManager:
-    """Standard cleanup, translate to ``enc.LOGICAL_ISA``, split ``if_else`` per qubit, elide SWAPs, fold constant qubits, drop diagonals before measures."""
+    """Standard cleanup, translate to ``enc.LOGICAL_ISA``, split ``if_else`` per qubit, elide SWAPs, fold constant qubits, drop diagonals before measures, measure early."""
     isa_basis = sorted(enc.LOGICAL_ISA - NON_GATE_ISA_NAMES)
     return PassManager(
         [
@@ -79,6 +87,7 @@ def basic_logical_pm(
                 ],
                 do_while=lambda property_set: not property_set["size_fixed_point"],
             ),
+            EarlyMeasurement(),
         ]
     )
 
@@ -214,3 +223,84 @@ def _restrict(block: QuantumCircuit, i: int) -> QuantumCircuit:
         if instr.qubits == (block.qubits[i],):
             sub.append(instr)
     return sub
+
+
+class EarlyMeasurement(TransformationPass):
+    """Measure each qubit before its diagonal tail, which becomes classical control.
+
+    A Z measurement commutes with ``rz`` and ``crz`` on its qubit (Rovara,
+    Burgholzer and Wille, arXiv:2511.22712), so a measurement with a diagonal
+    gate behind it moves to just after the last other operation on its qubit or
+    its clbit. The qubit is then in a known basis state: an ``rz`` on it is a
+    phase and goes, a ``crz`` it controls becomes ``rz`` on the target if its bit
+    is 1, a ``crz`` it is the target of becomes ``rz(±θ/2)`` on the control, and
+    a ``crz`` between two measured qubits goes. The phases dropped are global
+    within each measurement branch. Routing then spends no SWAP on these gates.
+    """
+
+    def run(self, dag: DAGCircuit) -> DAGCircuit:
+        """Move the measurements in ``dag`` early and rewrite the gates they pass."""
+        nodes = list(dag.topological_op_nodes())
+        pending: dict[Qubit, int] = {}  # qubit -> the measurement that reads it later
+        reach: dict[int, int] = {}  # measurement -> the op it follows (-1: the start)
+        rewritten: dict[int, tuple[IfElseOp, Qubit, Clbit] | None] = {}
+        moved: set[int] = set()
+        for k in range(len(nodes) - 1, -1, -1):
+            node = nodes[k]
+            blocked = [q for q, m in pending.items() if nodes[m].cargs[0] in node.cargs]
+            if node.name in ("rz", "crz") and (
+                measured := [q for q in node.qargs if q in pending]
+            ):
+                rewritten[k] = _classical_rz(
+                    node, {q: nodes[pending[q]] for q in measured}
+                )
+                moved.update(pending[q] for q in measured)
+            else:
+                blocked += [q for q in node.qargs if q in pending]
+            for q in dict.fromkeys(blocked):
+                reach[pending.pop(q)] = k
+            if isinstance(node.op, Measure):
+                pending[node.qargs[0]] = k
+        if not moved:
+            return dag
+        reach.update((m, -1) for m in pending.values())
+        after: dict[int, list[DAGOpNode]] = defaultdict(list)
+        for m in moved:
+            after[reach[m]].append(nodes[m])
+        out = dag.copy_empty_like()
+        for m in after[-1]:
+            out.apply_operation_back(m.op, m.qargs, m.cargs)
+        for k, node in enumerate(nodes):
+            if k in rewritten:
+                if (rz := rewritten[k]) is not None:
+                    op, q, bit = rz
+                    out.apply_operation_back(op, (q,), (bit,))
+            elif k not in moved:
+                out.apply_operation_back(node.op, node.qargs, node.cargs)
+            for m in after[k]:
+                out.apply_operation_back(m.op, m.qargs, m.cargs)
+        return out
+
+
+def _classical_rz(
+    node: DAGOpNode, measured: dict[Qubit, DAGOpNode]
+) -> tuple[IfElseOp, Qubit, Clbit] | None:
+    """The ``crz`` in ``node`` with one qubit measured, as an ``rz`` conditioned on its bit.
+
+    ``measured`` maps each measured qubit of ``node`` to its measurement. ``None``
+    for an ``rz`` or a ``crz`` with both qubits measured: a phase.
+    """
+    if len(measured) == len(node.qargs):
+        return None
+    (theta,) = node.op.params
+    control, target = node.qargs
+    if control in measured:
+        qubit, bit, angles = target, measured[control].cargs[0], (theta,)
+    else:
+        qubit, bit, angles = control, measured[target].cargs[0], (theta / 2, -theta / 2)
+    blocks = []
+    for angle in angles:
+        block = QuantumCircuit([qubit], [bit])
+        block.rz(angle, qubit)
+        blocks.append(block)
+    return IfElseOp((bit, True), *blocks), qubit, bit

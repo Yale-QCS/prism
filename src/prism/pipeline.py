@@ -29,12 +29,10 @@ from qiskit.transpiler import (
 from prism.encodings import DualRail
 from prism.ir import MultiRealization, MultiRealizationInstruction
 from prism.passes import ElideRailExchanges, RetimeDiagonals
-from prism.physical import EarlyMeasurement, physical_pm
+from prism.physical import physical_pm
 from prism.routing import PrismRouting, SearchBudget
 
 if TYPE_CHECKING:
-    from qiskit.transpiler import InstructionDurations
-
     from prism.encodings.base import QubitEncoding
 
 __all__ = [
@@ -196,7 +194,6 @@ def prism_stages(
     *,
     seed: int = 42,
     budget: SearchBudget | None = None,
-    durations: InstructionDurations | None = None,
 ) -> MultiStagePassManager[DAGCircuit, DAGCircuit]:
     """Prism's stages, compiling an ``enc``-encoded DAG onto ``coupling_map``.
 
@@ -208,31 +205,17 @@ def prism_stages(
         enc: The qubit encoding class, e.g. ``DualRail``.
         seed: Seed of the layout search and the physical stage.
         budget: Search effort and objective; ``None`` uses ``SearchBudget()``.
-        durations: The device's durations, if known: one per physical operation
-            (``measure``, ``crz``, ``swap``, ``rswap``, ``initialize``,
-            ``pauli_product_measurement``; ``rz`` is a frame update) and an
-            ``if_else`` entry for the feed-forward latency. They fill the
-            physical Target, and ``EarlyMeasurement`` then moves a measurement
-            after routing only where the duration does not grow. ``None``: no
-            durations, and ``EarlyMeasurement`` moves every logical measurement
-            in the logical stage.
 
     Raises:
         ValueError: if ``coupling_map`` is disconnected.
     """
     routing = PrismRouting(coupling_map, seed=seed, budget=budget)
-    logical = enc.logical_pm()
-    if durations is None:
-        # Every measurement moves before routing, so routing spends no SWAP on the
-        # gates it turns into classical control. With durations, the physical
-        # EarlyMeasurement judges each move on the routed schedule.
-        logical.append(EarlyMeasurement())
     return MultiStagePassManager(
-        logical=logical,
+        logical=enc.logical_pm(),
         dag_to_multi_realization=DAGToMultiRealization(enc),
         multi_realization=[ElideRailExchanges(), routing, RetimeDiagonals()],
         multi_realization_to_dag=MultiRealizationToDAG(),
-        physical=physical_pm(routing.coupling_map, enc, seed=seed, durations=durations),
+        physical=physical_pm(routing.coupling_map, enc, seed=seed),
     )
 
 
@@ -242,7 +225,6 @@ def build_pm(
     *,
     seed: int = 42,
     budget: SearchBudget | None = None,
-    durations: InstructionDurations | None = None,
 ) -> PassManager:
     """``PassManager`` compiling ``enc``-encoded circuits onto ``coupling_map``: ``prism_stages`` nested.
 
@@ -252,11 +234,7 @@ def build_pm(
     Arguments and errors are those of ``prism_stages``.
     """
     return PassManager(
-        [
-            prism_stages(
-                coupling_map, enc, seed=seed, budget=budget, durations=durations
-            ).to_flow_controller()
-        ]
+        [prism_stages(coupling_map, enc, seed=seed, budget=budget).to_flow_controller()]
     )
 
 
@@ -265,9 +243,6 @@ def dualrail_pm(
     *,
     seed: int = 42,
     budget: SearchBudget | None = None,
-    durations: InstructionDurations | None = None,
 ) -> PassManager:
     """``build_pm`` for the dual-rail encoding."""
-    return build_pm(
-        coupling_map, DualRail, seed=seed, budget=budget, durations=durations
-    )
+    return build_pm(coupling_map, DualRail, seed=seed, budget=budget)
