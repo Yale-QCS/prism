@@ -14,7 +14,7 @@ from qiskit.circuit.controlflow import (
     WhileLoopOp,
 )
 from qiskit.circuit.library import CRZGate, RZGate
-from qiskit.dagcircuit import DAGCircuit, DAGOpNode
+from qiskit.dagcircuit import DAGCircuit, DAGOpNode, DAGOutNode
 from qiskit.passmanager import ConditionalController
 from qiskit.transpiler import (
     CouplingMap,
@@ -127,6 +127,34 @@ class EarlyMeasurement(TransformationPass):
                 out.apply_operation_back(node.op, node.qargs, node.cargs)
             measure_after(k)
         return out
+
+
+class DropMeasuredSwaps(TransformationPass):
+    """Drop each ``swap`` that ends both its wires right after both were measured.
+
+    A measured rail holds a known Fock state that nothing reads afterwards, so
+    exchanging two of them changes no outcome. As in Qiskit's
+    ``OptimizeSwapBeforeMeasure``, the final layout is left as it is.
+    ``EarlyMeasurement`` leaves these behind: it moves measurements ahead of the
+    routing SWAPs that followed the diagonal gates it removed.
+    """
+
+    def run(self, dag: DAGCircuit) -> DAGCircuit:
+        """Remove the trailing measured ``swap`` gates of ``dag``, last first."""
+        for node in reversed(list(dag.topological_op_nodes())):
+            if node.op.name != "swap":
+                continue
+            preds = list(dag.predecessors(node))
+            if (
+                all(isinstance(s, DAGOutNode) for s in dag.successors(node))
+                and all(
+                    isinstance(p, DAGOpNode) and isinstance(p.op, Measure)
+                    for p in preds
+                )
+                and {q for p in preds for q in p.qargs} >= set(node.qargs)
+            ):
+                dag.remove_op_node(node)
+        return dag
 
 
 def _is_diagonal(operation: Instruction) -> bool:
@@ -264,7 +292,8 @@ def physical_pm(
     merged angle to its SWS wait, and a second ``CommutativeOptimization``
     merges the ``rz(π)`` that adds into the control's other ``rz``.
     ``EarlyMeasurement`` then turns the diagonal gates behind each measurement
-    into classical control.
+    into classical control, and ``DropMeasuredSwaps`` drops the SWAPs it leaves
+    after both their rails are measured.
     """
     target = _physical_target(enc, coupling_map)
     preset = generate_preset_pass_manager(
@@ -289,6 +318,7 @@ def physical_pm(
             FoldCRZAngles(),
             CommutativeOptimization(),
             EarlyMeasurement(),
+            DropMeasuredSwaps(),
             RescheduleCommutingDiagonals(),
             RecordCircuitMetrics(),
         ]
