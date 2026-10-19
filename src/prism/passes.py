@@ -8,9 +8,10 @@ from __future__ import annotations
 
 from bisect import bisect_left
 from dataclasses import replace
+from itertools import permutations
 from typing import TYPE_CHECKING, Any
 
-import numpy as np
+from qiskit.circuit.library import PermutationGate
 from qiskit.exceptions import QiskitError
 from qiskit.passmanager import GenericPass
 from qiskit.quantum_info import Operator
@@ -61,10 +62,10 @@ class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):
             if perm is None:
                 data.append(ins._replace(qubits=tuple(cur[q] for q in ins.qubits)))
                 continue
-            # Local wire k's content moves to local wire perm[k].
+            # Local wire k receives local wire perm[k]'s content.
             moved = [cur[q] for q in ins.qubits]
             for k, q in enumerate(ins.qubits):
-                cur[ins.qubits[perm[k]]] = moved[k]
+                cur[q] = moved[perm[k]]
         out = list(ir.output_permutation)
         for r, c in enumerate(cur):
             out[c] = ir.output_permutation[r]
@@ -74,30 +75,20 @@ class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):
 
 
 def _rail_permutation(op: MultiRealizationOp, wpl: int) -> tuple[int, ...] | None:
-    """The permutation ``k -> perm[k]`` of local wires shared by every candidate, or ``None``.
+    """The ``PermutationGate`` pattern every candidate equals up to global phase, or ``None``.
 
-    Only for an op on one logical qubit, with no clbits, whose candidates are
-    unitary circuits equal to one wire permutation up to global phase.
+    Only for an op on one logical qubit, with no clbits, whose candidates are unitary.
     """
     if op.diagonal or op.num_qubits != wpl or op.num_clbits:
         return None
-    perms = set()
-    for qc in op.candidates:
-        try:
-            u = Operator(qc).data
-        except (QiskitError, TypeError):  # non-unitary, control flow, or unbound
-            return None
-        cols = np.abs(u[:, [1 << k for k in range(wpl)]]).argmax(axis=0)
-        perm = tuple(int(c).bit_length() - 1 for c in cols)
-        if sorted(perm) != list(range(wpl)):
-            return None
-        rows = [
-            sum(1 << perm[k] for k in range(wpl) if x >> k & 1) for x in range(1 << wpl)
-        ]
-        diag = u[rows, range(1 << wpl)]
-        if not np.allclose(diag, diag[0]) or not np.isclose(abs(diag[0]), 1):
-            return None
-        perms.add(perm)
+    try:
+        ops = [Operator(qc) for qc in op.candidates]
+    except (QiskitError, TypeError):  # non-unitary, control flow, or unbound
+        return None
+    perms = {
+        next((p for p in permutations(range(wpl)) if u.equiv(PermutationGate(p))), None)
+        for u in ops
+    }
     return perms.pop() if len(perms) == 1 else None
 
 
