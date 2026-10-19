@@ -33,6 +33,7 @@ from qiskit.transpiler.passes import (
 
 if TYPE_CHECKING:
     from qiskit.circuit import EquivalenceLibrary
+    from qiskit.transpiler import BasePass
 
     from prism.encodings.base import QubitEncoding
 
@@ -48,7 +49,7 @@ def basic_logical_pm(
     enc: type[QubitEncoding],
     *,
     eq_library: EquivalenceLibrary,
-    reshape_passes: tuple = (),
+    reshape_passes: tuple[BasePass, ...] = (),
 ) -> PassManager:
     """Standard cleanup, translate to ``enc.LOGICAL_ISA``, split ``if_else`` per qubit, elide SWAPs, drop diagonals before measures."""
     isa_basis = sorted(enc.LOGICAL_ISA - NON_GATE_ISA_NAMES)

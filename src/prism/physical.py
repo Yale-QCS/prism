@@ -255,7 +255,9 @@ def physical_pm(
     merges the ``rz(π)`` that adds into the control's other ``rz``.
     ``EarlyMeasurement`` then turns the diagonal gates behind each measurement
     into classical control, and ``DropMeasuredSwaps`` drops the SWAPs it leaves
-    after both their rails are measured.
+    after both their rails are measured. ``RescheduleCommutingDiagonals`` then
+    reorders the commuting diagonal gates for depth, and ``RecordCircuitMetrics``
+    sets ``circuit_metrics``.
     """
     target = _physical_target(enc, coupling_map)
     preset = generate_preset_pass_manager(
