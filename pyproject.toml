@@ -24,9 +24,6 @@ classifiers = [
 ]
 dependencies = ["qiskit~=2.6.0", "numpy"]
 
-[tool.setuptools]
-include-package-data = false
-
 [tool.distutils.bdist_wheel]
 py_limited_api = "cp310"
 
@@ -40,7 +37,6 @@ Homepage = "https://github.com/evmckinney9/prism"
 Repository = "https://github.com/evmckinney9/prism"
 Issues = "https://github.com/evmckinney9/prism/issues"
 [project.optional-dependencies]
-viz = ["matplotlib", "pylatexenc"]
 format = ["pre-commit", "ruff"]
 test = ["pytest"]
 dev = ["prism-qc[format,test]"]
@@ -51,21 +47,11 @@ addopts = "--import-mode=importlib"
 filterwarnings = ["error"]
 
 [tool.ruff]
-extend-exclude = ["dev"]
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["D", "ANN", "F", "I"]
-ignore = [
-    "D105",   # magic methods like __init__ don't need docstrings
-    "ANN401", # Any is legitimate at the PyO3 FFI / numpy / Qiskit seam
-    "ANN002", # *args doesn't need type annotations
-    "ANN003", # **kwargs doesn't need type annotations
-]
-
-[tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["D1", "ANN"]
-"src/notebooks/**" = ["D", "ANN"]
+select = ["D", "F", "I", "UP"]
+ignore = ["D1"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

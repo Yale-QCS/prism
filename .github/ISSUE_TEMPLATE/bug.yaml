@@ -17,7 +17,7 @@ body:
     attributes:
       label: Minimal Reproducible Example
       placeholder: |
-        from prism.pipeline import build_pm
+        from prism import dualrail_pm
         ...
       render: python
     validations:

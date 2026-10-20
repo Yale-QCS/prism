@@ -1,5 +1,3 @@
-exclude: "^dev/"
-fail_fast: true
 default_install_hook_types: [pre-commit, commit-msg]
 
 repos:
@@ -11,7 +9,6 @@ repos:
 
   - repo: local
     hooks:
-      # Subject line only: fail if any non-comment line follows it.
       - id: no-commit-body
         name: commit message is one line
         language: pygrep
@@ -30,14 +27,6 @@ repos:
     rev: v6.0.0
     hooks:
       - id: trailing-whitespace
-        args: [--markdown-linebreak-ext=md]
-        exclude: ^crates/src/sabre/local\.patch$  # blank patch context lines
+        exclude: ^crates/src/sabre/local\.patch$
       - id: end-of-file-fixer
         exclude: ^crates/src/sabre/local\.patch$
-      - id: check-merge-conflict
-      - id: detect-private-key
-      - id: check-added-large-files
-        args: [--maxkb=2000]
-      - id: name-tests-test
-        args: [--pytest-test-first]
-        exclude: ^tests/(fixtures/|_common\.py$)

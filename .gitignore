@@ -1,29 +1,10 @@
-# Python
 __pycache__/
-*.py[cod]
 *.egg-info/
 build/
 dist/
 .venv/
-uv.lock
 .pytest_cache/
-.benchmarks/
 .ruff_cache/
-.ipynb_checkpoints/
-
-# Rust
 target/
 *.so
-
-# Experiment data: raw rows land here (Zenodo or a local run), never tracked
-artifacts/
-
-# Local research state and scratch, never packaged
-.local/
-dev/
-experiments/
-tmp/
-*.log
-
-# Editors
-.vscode/
+*.pyd

@@ -1,31 +1,19 @@
 # Contributing
 
-## Setup
-
-Development uses Python 3.12 and Rust 1.97 or newer.
+Development needs Python 3.10+ and Rust 1.97.
 
 ```sh
 git clone https://github.com/evmckinney9/prism.git
 cd prism
-make init
+make init   # .venv, editable install, git hooks
+make test   # rebuilds the Rust extension, runs Rust and Python tests
+make lint
 ```
 
-## Making changes
-
-Run `make test` and `make lint` before submitting changes. Tests rebuild the
-Rust extension. Use `make format` for formatting and `make help` for other commands.
-
-Test behavior through the public API, allowing different valid realizations
-and routes.
-
-Commit hooks enforce [Conventional Commits](https://www.conventionalcommits.org/).
-
-The HPCA paper artifact, with its baselines and evaluation pipeline, is on the
-`hpca-r1` and `hpca-r2` branches, not here.
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/), subject line only.
 
 ## Releases
 
-Push a stable `vX.Y.Z` tag matching the version in `pyproject.toml`.
-The [release workflow](../.github/workflows/release.yml) builds and tests distributions.
-Review the draft GitHub release and its distributions before publishing;
-publication triggers the [PyPI upload](../.github/workflows/publish.yml).
+Bump `version` in `pyproject.toml` and push a matching `vX.Y.Z` (or `vX.Y.ZrcN`) tag.
+The [release workflow](workflows/release.yml) builds the wheels and sdist into a draft GitHub
+release; publishing the release uploads it to PyPI ([publish.yml](workflows/publish.yml)).
