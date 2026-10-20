@@ -1,26 +1,26 @@
-"""Compile-time circuit metrics for the routed program body."""
+"""``CircuitMetrics`` and the pass that records them."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from qiskit import QuantumCircuit
-from qiskit.circuit import Instruction
 from qiskit.converters import dag_to_circuit
-from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import AnalysisPass
 
 if TYPE_CHECKING:
     from collections.abc import Collection
+
+    from qiskit.circuit import Operation, QuantumCircuit
+    from qiskit.dagcircuit import DAGCircuit
 
 __all__ = ["CircuitMetrics", "RecordCircuitMetrics"]
 
 _FREE_GATES = frozenset({"rz", "u1", "p", "z", "initialize"})
 
 
-def only_ops(operation: Instruction, names: Collection[str]) -> bool:
-    """``operation`` is named in ``names``, or is control flow whose bodies hold only such ops."""
+def only_ops(operation: Operation, names: Collection[str]) -> bool:
+    """``operation`` is in ``names``, or is control flow holding only such operations."""
     if operation.name in names:
         return True
     blocks = getattr(operation, "blocks", None)
@@ -29,14 +29,14 @@ def only_ops(operation: Instruction, names: Collection[str]) -> bool:
     )
 
 
-def is_free(operation: Instruction) -> bool:
-    """Single-wire Z rotations, preparation, and control flow whose bodies are free."""
+def is_free(operation: Operation) -> bool:
+    """Z rotations and preparation take no time; depth does not count them."""
     return only_ops(operation, _FREE_GATES)
 
 
 @dataclass(frozen=True)
 class CircuitMetrics:
-    """Metrics of a circuit; ``depth`` and ``active_gates`` count non-free ops only."""
+    """SWAPs, depth and gate counts; ``depth`` and ``active_gates`` skip free gates."""
 
     swaps: int
     depth: int
@@ -45,7 +45,6 @@ class CircuitMetrics:
 
     @classmethod
     def of(cls, qc: QuantumCircuit) -> CircuitMetrics:
-        """The metrics of ``qc``."""
         return cls(
             swaps=qc.count_ops().get("swap", 0),
             depth=qc.depth(lambda instr: not is_free(instr.operation)),
@@ -55,8 +54,7 @@ class CircuitMetrics:
 
 
 class RecordCircuitMetrics(AnalysisPass):
-    """Publish ``property_set["circuit_metrics"]``; runs at the end of the physical stage."""
+    """Set ``property_set["circuit_metrics"]``."""
 
     def run(self, dag: DAGCircuit) -> None:
-        """Compute ``CircuitMetrics`` of ``dag``."""
         self.property_set["circuit_metrics"] = CircuitMetrics.of(dag_to_circuit(dag))

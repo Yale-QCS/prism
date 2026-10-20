@@ -1,4 +1,4 @@
-"""Dual-rail encoding: its rules, and ``RSwapGate``. Convention ``|0_L⟩ = |01⟩, |1_L⟩ = |10⟩``."""
+"""Dual-rail encoding: ``|0_L> = |01>``, ``|1_L> = |10>`` on a pair of rails."""
 
 from __future__ import annotations
 
@@ -27,10 +27,9 @@ from prism.logical import NON_GATE_ISA_NAMES, basic_logical_pm
 
 
 class RSwapGate(Gate):
-    """Fractional SWAP; exactly ``SwapGate().power(theta/pi)``."""
+    """Fractional SWAP, ``SwapGate().power(theta / pi)``."""
 
     def __init__(self, theta: float | ParameterExpression) -> None:
-        """Create an rswap gate with angle ``theta``."""
         super().__init__("rswap", 2, [theta])
 
     def __array__(
@@ -54,7 +53,6 @@ class RSwapGate(Gate):
         )
 
     def _define(self) -> None:
-        """``SWAP^(θ/π) = e^{iθ/4} · rxx(θ/2) · ryy(θ/2) · rzz(θ/2)``."""
         theta = self.params[0]
         qc = QuantumCircuit(2, global_phase=theta / 4)
         qc.rxx(theta / 2, 0, 1)
@@ -64,63 +62,43 @@ class RSwapGate(Gate):
 
 
 class ErasureCheck(Instruction):
-    """Logical erasure check: its clbit reads 1 if the qubit holds its photon, 0 if erased.
+    """Erasure check of one qubit: its clbit reads 1 if the photon is there, 0 if lost.
 
-    ``qc.append(ErasureCheck(), [q], [c])``. Does not disturb the logical state.
+    It does not disturb the logical state. ``qc.append(ErasureCheck(), [q], [c])``.
     """
 
     def __init__(self) -> None:
-        """Create an erasure check on one qubit, writing one clbit."""
         super().__init__("erasure_check", 1, 1, [])
 
 
 class DualRail(QubitEncoding):
-    """Dual-rail encoding. Stateless — pass the class itself, not an instance."""
+    """The dual-rail encoding."""
 
     WIRES_PER_LOGICAL: ClassVar[int] = 2
     LOGICAL_ISA: ClassVar[frozenset[str]] = frozenset(
-        {
-            "x",
-            "rx",
-            "rz",
-            "crz",
-            "swap",
-            "measure",
-            "reset",
-            "if_else",
-            "erasure_check",
-        }
+        {"x", "rx", "rz", "crz", "swap", "measure", "reset", "if_else", "erasure_check"}
     )
     PHYSICAL_ISA: ClassVar[frozenset[str]] = frozenset(
         {"rz", "crz", "swap", "rswap", "initialize", "pauli_product_measurement"}
     )
     CUSTOM_GATES: ClassVar[dict[str, Instruction]] = {
         "rswap": RSwapGate(Parameter("theta")),
-        # |0_L> = |01>: rail 1 holds the photon (label is little-endian).
-        "initialize": Initialize("10"),
+        "initialize": Initialize("10"),  # little-endian: rail 1 holds the photon
         "pauli_product_measurement": PauliProductMeasurement(Pauli("ZZ")),
     }
 
     @classmethod
     def initialize(cls) -> QuantumCircuit:
-        """Stock ``Initialize`` of ``|0_L⟩`` on the rail pair; metrics count it as free.
-
-        Non-unitary, so stock passes leave it in place. Two-rail because the
-        joint erasure check needs the rails adjacent.
-        """
         qc = QuantumCircuit(2)
         qc.append(Initialize("10"), [0, 1])
         return qc
 
     @classmethod
     def logical_pm(cls) -> PassManager:
-        """Basic cleanup with Margolus pairs and the dual-rail equivalence library."""
         lib = equivalence_library()
         return basic_logical_pm(
             cls,
             eq_library=lib,
-            # CCX compute/uncompute pairs → RTOF (DR has a 4-RX CCX template
-            # but RTOF is cheaper; phases cancel pairwise).
             reshape_passes=(
                 MargolusPairOptimizer(),
                 MinRXCliffords(lib, sorted(cls.LOGICAL_ISA - NON_GATE_ISA_NAMES)),
@@ -129,89 +107,64 @@ class DualRail(QubitEncoding):
 
     @classmethod
     def x(cls, op: Instruction) -> MultiRealizationOp:
-        """Logical X → physical SWAP(0,1). Single realization."""
+        """Exchange the rails."""
         qc = QuantumCircuit(2)
         qc.swap(0, 1)
         return MultiRealizationOp("x", (qc,))
 
     @classmethod
     def rx(cls, op: Instruction) -> MultiRealizationOp:
-        """Logical RX(θ) → RSwap(θ) on the rails."""
-        (theta,) = op.params
         qc = QuantumCircuit(2)
-        qc.append(RSwapGate(theta), [0, 1])
+        qc.append(RSwapGate(op.params[0]), [0, 1])
         return MultiRealizationOp("rx", (qc,))
 
     @classmethod
     def rz(cls, op: Instruction) -> MultiRealizationOp:
-        """Logical RZ(θ) → physical RZ(θ) on wire 0. Single realization (either rail works; convention is wire 0)."""
         qc = QuantumCircuit(2)
         qc.append(op, [0])
         return MultiRealizationOp("rz", (qc,), diagonal=True)
 
     @classmethod
     def crz(cls, op: Instruction) -> MultiRealizationOp:
-        """Logical CRZ(θ) → 4 candidates over wire pairs ``(ra, rb)`` of (control, target).
+        """A ``crz`` from either rail of the control to either rail of the target.
 
-        ``Z_L = Z_a = -Z_b``, so b-rail target flips the sign. b-rail control is
-        anti-control at the logical level; absorbed via the codespace-safe identity
-        ``open-control CRZ(α) ≡ CRZ(-α) · RZ(α)_t`` (the X-sandwich alternative
-        would drop an unpaired X on ``b_c``, breaking dual-rail).
+        ``Z_L = Z_0 = -Z_1``, so a rail-1 target flips the angle, and a rail-1
+        control is an open control: ``crz(-a) . rz(a)_t``.
         """
         (theta,) = op.params
         candidates = []
-        for ra in (0, 1):
-            for rb in (0, 1):
+        for rc in (0, 1):
+            for rt in (0, 1):
+                sign = (-1) ** rt
                 qc = QuantumCircuit(4)
-                target_sign = (-1) ** rb
-                crz_sign = -target_sign if ra == 1 else target_sign
-                qc.crz(crz_sign * theta, ra, 2 + rb)
-                if ra == 1:
-                    qc.rz(target_sign * theta, 2 + rb)
+                qc.crz(-sign * theta if rc else sign * theta, rc, 2 + rt)
+                if rc:
+                    qc.rz(sign * theta, 2 + rt)
                 candidates.append(qc)
         return MultiRealizationOp(
             "crz", tuple(candidates), default_index=2, diagonal=True
         )
 
     @classmethod
-    def swap(cls, _op: Instruction) -> MultiRealizationOp:
-        """Logical SWAP → 2 partition options over wire-pair edges.
-
-        A (2 SWAPs): bare ``swap(0,2)+swap(1,3)``.
-        B (4 SWAPs): crossover ``swap(0,3)+swap(1,2)`` realizes ``SWAP_L · (X_L⊗X_L)``,
-        corrected by intra-pair ``swap(0,1)+swap(2,3)``. Intra-pair SWAP is
-        leakage-safe (preserves ``|00⟩/|11⟩``); ``X⊗X`` would scramble them.
-        """
-        qc0 = QuantumCircuit(4)
-        qc0.swap(0, 2)
-        qc0.swap(1, 3)
-
-        qc1 = QuantumCircuit(4)
-        qc1.swap(0, 3)
-        qc1.swap(1, 2)
-        qc1.swap(0, 1)
-        qc1.swap(2, 3)
-
-        return MultiRealizationOp("swap", (qc0, qc1))
+    def swap(cls, op: Instruction) -> MultiRealizationOp:
+        """Swap the rail pairs straight, or crossed and then exchanged within each pair."""
+        straight = QuantumCircuit(4)
+        straight.swap(0, 2)
+        straight.swap(1, 3)
+        crossed = QuantumCircuit(4)
+        crossed.swap(0, 3)
+        crossed.swap(1, 2)
+        crossed.swap(0, 1)
+        crossed.swap(2, 3)
+        return MultiRealizationOp("swap", (straight, crossed))
 
     @classmethod
-    def reset(cls, _op: Instruction) -> MultiRealizationOp:
-        """Logical reset → in-place re-preparation on the same rails (the ``initialize`` template).
-
-        ``Initialize`` resets and prepares ``|0_L⟩`` on both rails, so the only
-        routing constraint is the rails being adjacent at reset time. Re-hosting
-        the reset qubit on other free rails is not expressed here.
-        """
+    def reset(cls, op: Instruction) -> MultiRealizationOp:
         return MultiRealizationOp("reset", (cls.initialize(),))
 
     @classmethod
-    def erasure_check(cls, _op: Instruction) -> MultiRealizationOp:
-        """Logical erasure check → ZZ measurement of the rail pair, on one device edge.
-
-        ``ZZ = -1`` on both code states and ``+1`` on the vacuum, so the outcome
-        flags photon loss without reading the logical state: bit 1 is a photon,
-        bit 0 an erasure (``|00⟩``, or ``|11⟩``).
-        """
+    def erasure_check(cls, op: Instruction) -> MultiRealizationOp:
+        """ZZ of the rails: -1 on both code states, +1 once the photon is lost."""
         qc = QuantumCircuit(2, 1)
         qc.append(cls.CUSTOM_GATES["pauli_product_measurement"], [0, 1], [0])
         return MultiRealizationOp("erasure_check", (qc,))

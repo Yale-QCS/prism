@@ -1,9 +1,4 @@
-"""prism's stages, the passes that change IR, and ``build_pm``.
-
-``prism_stages`` is a ``MultiStagePassManager`` from ``DAGCircuit`` to ``DAGCircuit``,
-with the stages and passes the README lists. ``build_pm`` nests it in a
-``qiskit.transpiler.PassManager``, which converts the circuit to a DAG and back.
-"""
+"""prism's stages and the passes between ``DAGCircuit`` and ``MultiRealization``."""
 
 from __future__ import annotations
 
@@ -46,29 +41,22 @@ __all__ = [
 
 
 class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
-    """``DAGCircuit -> MultiRealization``: each logical operation becomes its encoding rule.
+    """Lower each logical qubit to its rails and each operation to its candidates.
 
-    Every logical qubit gets ``WIRES_PER_LOGICAL`` rails and the encoding's
-    preparation. A measurement writes rail 0 to its clbit ``c[i]`` and rail ``w``
-    to ``c_rail<w>[i]``, a register added per measured register. ``output_permutation`` starts
-    as the property set's ``logical_output_permutation`` (set by ``ElideLogicalPermutations``) on rails.
+    A measurement writes rail 0 to its clbit ``c[i]`` and rail ``w`` to ``c_rail<w>[i]``.
     """
 
     def __init__(self, enc: type[QubitEncoding]) -> None:
-        """Bind the encoding whose rules expand each operation."""
         super().__init__()
         self.enc = enc
 
     def run(self, passmanager_ir: DAGCircuit) -> MultiRealization:
-        """Expand the logical DAG; the result passes ``verify``."""
         dag, enc = passmanager_ir, self.enc
         wpl = enc.WIRES_PER_LOGICAL
         n = len(dag.qubits)
         logical = {q: i for i, q in enumerate(dag.qubits)}
         clbits = list(dag.clbits)
-        # Rail w of the measurement that writes clbit c goes to the partner of c
-        # in "<register>_rail<w>", one register per measured register, placed
-        # right after that register.
+        # Rail w of a measurement into clbit c writes c's partner in "<register>_rail<w>".
         measured = {node.cargs[0] for node in dag.op_nodes(Measure)}
         sources = [(r, f"{r.name}_", list(r)) for r in dag.cregs.values()]
         loose = [
@@ -128,23 +116,13 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
 
 
 class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
-    """``MultiRealization -> DAGCircuit``: materialize every choice on the physical qubits.
+    """Emit every chosen candidate, and the layout if the program is placed.
 
-    The only step that drops the candidate sets. Needs a choice on every
-    ``MultiRealizationOp``. An unplaced program is emitted on its rails, with
-    the elided ``output_permutation``, for the physical stage to lay out and
-    route. A placed one gets a rail-level layout: the
-    output's ``TranspileLayout`` has virtual qubit ``WIRES_PER_LOGICAL * i + w``
-    for rail ``w`` of logical qubit ``i``, ancillas after them, and the elided
-    ``output_permutation`` in its final layout.
+    In the layout, virtual qubit ``WIRES_PER_LOGICAL * i + w`` is rail ``w`` of
+    logical qubit ``i``, then the ancillas.
     """
 
     def run(self, passmanager_ir: MultiRealization) -> DAGCircuit:
-        """Verify, materialize, and publish the rail-level layout.
-
-        Raises:
-            TranspilerError: if the program has an undecided op or fails ``verify``.
-        """
         ir = passmanager_ir
         ir.verify()
         dag = circuit_to_dag(ir.to_circuit())
@@ -158,8 +136,6 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
         if ir.placement is None:
             return dag
         initial, final = ir.placement.initial, ir.placement.final
-        # The virtual circuit is the rail circuit: rail w of logical qubit i is
-        # virtual index wpl * i + w; free physical qubits become ancillas.
         ancillas = QuantumRegister(len(initial) - len(ir.rails), "ancilla")
         virtuals = ir.rails + list(ancillas)
         layout = Layout({q: initial[v] for v, q in enumerate(virtuals)})
@@ -170,18 +146,14 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
         ps["final_layout"] = Layout(
             {dag.qubits[initial[v]]: final[v] for v in range(len(initial))}
         )
-        # Qiskit's canonical form (the elided permutation folded into final_layout) for the stock passes.
+        # Fold the elided permutation into final_layout, as stock layout passes do.
         TranspileLayout.from_property_set(dag, ps).write_into_property_set(ps)
         return dag
 
     def update_status(
         self, state: PassManagerState, run_state: RunState
     ) -> PassManagerState:
-        """Forget completed passes, as ``TransformationPass`` does.
-
-        The physical stage's stock passes must rerun on the new DAG even if the
-        logical stage already ran them.
-        """
+        """Forget completed passes, as ``TransformationPass`` does, so stock passes rerun."""
         state = super().update_status(state, run_state)
         if run_state == RunState.SUCCESS:
             state.workflow_status.completed_passes.clear()
@@ -195,19 +167,9 @@ def prism_stages(
     seed: int = 42,
     budget: SearchBudget | None = None,
 ) -> MultiStagePassManager[DAGCircuit, DAGCircuit]:
-    """Prism's stages, compiling an ``enc``-encoded DAG onto ``coupling_map``.
+    """Prism's stages for ``enc`` on ``coupling_map``, a connected, undirected device graph.
 
-    Replace a stage before nesting, e.g. ``stages.multi_realization = [MyPass(), PrismRouting(...)]``,
-    then run ``PassManager([stages.to_flow_controller()])`` (what ``build_pm`` returns).
-
-    Args:
-        coupling_map: Connected device graph; edges are undirected.
-        enc: The qubit encoding class, e.g. ``DualRail``.
-        seed: Seed of the layout search and the physical stage.
-        budget: Search effort and objective; ``None`` uses ``SearchBudget()``.
-
-    Raises:
-        ValueError: if ``coupling_map`` is disconnected.
+    Replace a stage, then run ``PassManager([stages.to_flow_controller()])``.
     """
     routing = PrismRouting(coupling_map, seed=seed, budget=budget)
     return MultiStagePassManager(
@@ -226,13 +188,7 @@ def build_pm(
     seed: int = 42,
     budget: SearchBudget | None = None,
 ) -> PassManager:
-    """``PassManager`` compiling ``enc``-encoded circuits onto ``coupling_map``: ``prism_stages`` nested.
-
-    Read the property set afterwards from ``pm.property_set`` (``circuit_metrics``,
-    ``online_n_swaps``, ``logical_output_permutation``).
-    A callback receives the IR as ``dag``: a ``DAGCircuit`` or a ``MultiRealization``.
-    Arguments and errors are those of ``prism_stages``.
-    """
+    """``prism_stages`` in a ``PassManager``."""
     return PassManager(
         [prism_stages(coupling_map, enc, seed=seed, budget=budget).to_flow_controller()]
     )
@@ -244,5 +200,5 @@ def dualrail_pm(
     seed: int = 42,
     budget: SearchBudget | None = None,
 ) -> PassManager:
-    """``build_pm`` for the dual-rail encoding."""
+    """A ``PassManager`` compiling to dual-rail qubits on ``coupling_map``."""
     return build_pm(coupling_map, DualRail, seed=seed, budget=budget)

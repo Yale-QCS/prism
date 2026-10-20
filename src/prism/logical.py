@@ -53,17 +53,14 @@ def basic_logical_pm(
     eq_library: EquivalenceLibrary,
     reshape_passes: tuple[BasePass, ...] = (),
 ) -> PassManager:
-    """Standard cleanup, translate to ``enc.LOGICAL_ISA``, split ``if_else`` per qubit, elide SWAPs, merge 1q runs, drop diagonals before measures, measure early."""
+    """Translate to ``enc.LOGICAL_ISA`` and simplify, with stock passes where they exist."""
     isa_basis = sorted(enc.LOGICAL_ISA - NON_GATE_ISA_NAMES)
     return PassManager(
         [
             RemoveBarriers(),
             MCPrepare(),
-            # High-level gates (QFT, MCMT, ...) by their default plugins; mcx
-            # with one clean ancilla.
             HighLevelSynthesis(hls_config=HLSConfig(mcx=["1_clean_kg24"])),
             Decompose(["c-unitary", "unitary"]),
-            # Unroll every 3+-qubit gate but CCX (the equivalence library has CCX).
             Unroll3qOrMore(basis_gates=["ccx"]),
             *reshape_passes,
             BasisTranslator(
@@ -73,9 +70,7 @@ def basic_logical_pm(
             # Before layout a SWAP only relabels logical qubits.
             ElideLogicalPermutations(),
             Optimize1qGatesDecomposition(basis=isa_basis),
-            # A diagonal gate right before a final measurement does not change its
-            # outcome; removing it here keeps routing from spending SWAPs on it. One
-            # sweep can expose another (rz after crz), hence the fixed point.
+            # Removing an rz can expose a crz before a measurement.
             DoWhileController(
                 [
                     RemoveDiagonalGatesBeforeMeasure(),
@@ -90,15 +85,13 @@ def basic_logical_pm(
 
 
 class MCPrepare(TransformationPass):
-    """Prepare multi-controlled gates for ``HighLevelSynthesis`` with ``mcx=["1_clean_kg24"]``.
+    """Rewrite ``mcphase(pi)`` as ``mcx`` and give ``mcx`` synthesis a clean ancilla.
 
-    Rewrites ``mcphase(pi)`` with 4+ controls as ``H_t . mcx . H_t`` (``mcphase``
-    has no synthesis plugin). If an ``mcx`` remains and no qubit is idle, adds one
-    clean ancilla qubit (register ``mcd_anc``) for the synthesis to share.
+    ``mcphase`` has no ancilla-using synthesis plugin. The ancilla is an idle
+    qubit if there is one, else a new register ``mcd_anc``.
     """
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Rewrite ``mcphase(pi)`` and add the ancilla if needed."""
         for node in dag.op_nodes(MCPhaseGate):
             n = node.op.num_ctrl_qubits
             if n >= 4 and _is_pi(float(node.op.params[0])):
@@ -115,15 +108,13 @@ class MCPrepare(TransformationPass):
 
 
 def _is_pi(theta: float) -> bool:
-    """``theta`` is ``pi`` modulo ``2 pi``."""
     return abs(abs((theta + np.pi) % (2 * np.pi) - np.pi) - np.pi) <= 1e-9
 
 
 class ElideLogicalPermutations(ElidePermutations):
-    """``ElidePermutations`` that also records ``logical_output_permutation`` in the property set."""
+    """``ElidePermutations`` that also sets ``property_set["logical_output_permutation"]``."""
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Remove logical permutation operations and record their net effect."""
         out_dag = super().run(dag)
         virtual_layout = self.property_set["virtual_permutation_layout"]
         self.property_set["logical_output_permutation"] = (
@@ -135,15 +126,9 @@ class ElideLogicalPermutations(ElidePermutations):
 
 
 class SplitIfElse(TransformationPass):
-    """Replace an ``if_else`` over several qubits by one ``if_else`` per qubit.
-
-    Exact when every block instruction acts on one qubit and writes no classical
-    bit: the per-qubit branches then commute and read the same condition. Other
-    ``if_else`` operations are left alone.
-    """
+    """Split an ``if_else`` of 1-qubit gates into one ``if_else`` per qubit."""
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Split every splittable multi-qubit ``if_else`` in ``dag``."""
         for node in dag.op_nodes(IfElseOp):
             op = node.op
             if op.num_qubits < 2 or not _splittable(op):
@@ -161,7 +146,6 @@ class SplitIfElse(TransformationPass):
 
 
 def _splittable(op: IfElseOp) -> bool:
-    """Every block instruction of ``op`` acts on one qubit and writes no classical bit."""
     return all(
         instr.operation.num_qubits == 1 and not instr.clbits
         for block in op.blocks
@@ -170,7 +154,6 @@ def _splittable(op: IfElseOp) -> bool:
 
 
 def _restrict(block: QuantumCircuit, i: int) -> QuantumCircuit:
-    """``block`` with only qubit ``i`` and the instructions on it; classical bits kept."""
     sub = QuantumCircuit([block.qubits[i]], *block.cregs)
     sub.add_bits([c for c in block.clbits if not block.find_bit(c).registers])
     for instr in block.data:
