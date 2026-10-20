@@ -60,8 +60,8 @@ With lookahead the two differ by the bug fix above.
 `mod.rs` is local: it replaces upstream `mod.rs`, which registers upstream's Python functions,
 and omits upstream `layout.rs`, which imports the private `passes::disjoint_layout`. prism's
 layout loop is `../prism_routing/layout.rs`. `lib.rs` maps the upstream `crate::` imports onto
-`qiskit_transpiler` and allows, for this module only, the lints from `Cargo.toml` that upstream
-code trips. Vendored files keep upstream formatting; the patched lines are `rustfmt`-formatted.
+`qiskit_transpiler` and allows dead code in this module, for the upstream items prism never
+calls. Vendored files keep upstream formatting; the patched lines are `rustfmt`-formatted.
 
 ## Reproduce
 
