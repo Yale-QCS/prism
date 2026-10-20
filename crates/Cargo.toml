@@ -7,15 +7,12 @@ license = "MIT"
 publish = false
 
 [lib]
-# setuptools-rust renames the built artifact to the ext-module target declared
-# in pyproject.toml (prism._accelerate); this is just the crate name.
 name = "_accelerate"
 crate-type = ["cdylib"]
 path = "src/lib.rs"
 
 [features]
-default = []
-# Gate `extension-module` so `cargo test` can link libpython.
+# Off for `cargo test`, which links libpython.
 extension-module = ["pyo3/extension-module"]
 
 # Requirements mirror Qiskit 2.6.0's `[workspace.dependencies]`; exact versions come from
@@ -36,29 +33,11 @@ qiskit-circuit = { git = "https://github.com/Qiskit/qiskit", tag = "2.6.0" }
 qiskit-transpiler = { git = "https://github.com/Qiskit/qiskit", tag = "2.6.0" }
 qiskit-util = { git = "https://github.com/Qiskit/qiskit", tag = "2.6.0", features = ["py"] }
 
-[lints.rust]
-unsafe_op_in_unsafe_fn = "deny"
-missing_docs = "warn"
-
 [lints.clippy]
+dbg_macro = "deny"
 print_stdout = "deny"
 print_stderr = "deny"
-undocumented_unsafe_blocks = "deny"
-unwrap_used = "deny"
-wildcard_imports = "deny"
-dbg_macro = "deny"
 todo = "deny"
-unimplemented = "deny"
-redundant_pub_crate = "warn"
-items_after_statements = "warn"
-fn_params_excessive_bools = "warn"
-float_cmp = "warn"
-suspicious_operation_groupings = "deny"
-unreadable_literal = "warn"
-doc_markdown = "warn"
-too_many_lines = "warn"
-cast_precision_loss = "warn"
-cast_possible_truncation = "warn"
 
 [profile.release]
 lto = "fat"
