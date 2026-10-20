@@ -35,9 +35,9 @@ print(pm.property_set["circuit_metrics"])
 CircuitMetrics(swaps=0, depth=6, active_gates=13, size=18)
 ```
 
-![The input circuit](docs/quickstart_input.png)
+![The input circuit](https://raw.githubusercontent.com/evmckinney9/prism/main/docs/quickstart_input.png)
 
-![The compiled circuit](docs/quickstart_output.png)
+![The compiled circuit](https://raw.githubusercontent.com/evmckinney9/prism/main/docs/quickstart_output.png)
 
 Rails `q<i>_0` and `q<i>_1` carry logical qubit `i`.
 Qubit 0 has nothing but its first `crz` before its measurement, so it is measured first and that `crz` becomes an `rz` conditioned on the bit of the control rail; the second `crz` stays.

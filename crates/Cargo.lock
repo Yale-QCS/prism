@@ -1794,7 +1794,7 @@ dependencies = [
 
 [[package]]
 name = "prism_accelerate"
-version = "0.1.0"
+version = "0.1.0-rc1"
 dependencies = [
  "hashbrown 0.15.5",
  "ndarray",

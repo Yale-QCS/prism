@@ -12,17 +12,21 @@ jobs:
   check_version:
     name: Verify tag matches package version
     runs-on: ubuntu-latest
+    outputs:
+      prerelease: ${{ steps.check.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v7
       - name: Check version consistency
+        id: check
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           PKG=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
-          if [[ ! "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || [ "$TAG" != "$PKG" ]; then
-            echo "::error::Tag v$TAG must be a stable version matching pyproject.toml version $PKG"
+          if [[ ! "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+)?$ ]] || [ "$TAG" != "$PKG" ]; then
+            echo "::error::Tag v$TAG must be a release or pre-release (a, b, rc) matching pyproject.toml version $PKG"
             exit 1
           fi
           echo "Version $PKG matches tag v$TAG"
+          [[ "$TAG" =~ (a|b|rc) ]] && echo "prerelease=true" >> "$GITHUB_OUTPUT" || echo "prerelease=false" >> "$GITHUB_OUTPUT"
 
   build_wheels:
     needs: check_version
@@ -33,6 +37,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
+          - ubuntu-24.04-arm
           - windows-latest
           - macos-14
     env:
@@ -40,11 +45,14 @@ jobs:
       CIBW_SKIP: "pp* *-win32 *-musllinux* *_i686"
       CIBW_BEFORE_ALL_LINUX: "curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain 1.97"
       CIBW_ENVIRONMENT_LINUX: 'PATH="$HOME/.cargo/bin:$PATH"'
+      CIBW_ARCHS_MACOS: "arm64 x86_64"
       CIBW_TEST_EXTRAS: test
       CIBW_TEST_COMMAND: python -m pytest {project}/tests
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.97
+        with:
+          targets: ${{ runner.os == 'macOS' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: crates
@@ -80,7 +88,7 @@ jobs:
 
   release:
     name: GitHub Release (draft)
-    needs: [build_wheels, build_sdist]
+    needs: [check_version, build_wheels, build_sdist]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -99,5 +107,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           draft: true
+          prerelease: ${{ needs.check_version.outputs.prerelease }}
           files: dist/*
           body_path: CHANGELOG.tmp
