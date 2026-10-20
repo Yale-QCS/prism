@@ -6,4 +6,4 @@ from prism.encodings import ErasureCheck
 from prism.pipeline import SearchBudget, dualrail_pm
 
 __all__ = ["ErasureCheck", "SearchBudget", "dualrail_pm"]
-__version__ = version("prism-compiler")
+__version__ = version("prism-qc")

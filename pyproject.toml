@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel", "setuptools_rust"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "prism-compiler"
+name = "prism-qc"
 description = "A Qiskit transpiler for dual-rail qubits that binds each gate's realization at routing time."
 version = "0.1.0rc1"
 authors = [{ name = "Evan McKinney", email = "evmckinney9@gmail.com" }]
@@ -43,7 +43,7 @@ Issues = "https://github.com/evmckinney9/prism/issues"
 viz = ["matplotlib", "pylatexenc"]
 format = ["pre-commit", "ruff"]
 test = ["pytest"]
-dev = ["prism-compiler[format,test]"]
+dev = ["prism-qc[format,test]"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

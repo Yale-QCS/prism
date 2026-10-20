@@ -7,7 +7,7 @@ PRISM is a Qiskit transpiler for dual-rail qubits, where each logical qubit is a
 A logical gate then has several physical realizations on different rails; PRISM keeps all of them through lowering and picks one per gate while routing.
 
 ```bash
-pip install git+https://github.com/evmckinney9/prism  # needs a Rust toolchain
+pip install --pre prism-qc
 ```
 
 ## Quickstart
