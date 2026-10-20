@@ -18,7 +18,7 @@ default = []
 # Gate `extension-module` so `cargo test` can link libpython.
 extension-module = ["pyo3/extension-module"]
 
-# Requirements mirror Qiskit 2.6.0rc1's `[workspace.dependencies]`; exact versions come from
+# Requirements mirror Qiskit 2.6.0's `[workspace.dependencies]`; exact versions come from
 # `Cargo.lock`, which is seeded from Qiskit's own lockfile at the same tag (see README).
 [dependencies]
 pyo3 = { version = "0.29", features = ["abi3-py310", "smallvec", "hashbrown", "indexmap", "num-complex", "num-bigint", "py-clone"] }
@@ -32,9 +32,9 @@ rayon-cond = "0.4"
 rustworkx-core = "0.18"
 thiserror = "2.0"
 
-qiskit-circuit = { git = "https://github.com/Qiskit/qiskit", tag = "2.6.0rc1" }
-qiskit-transpiler = { git = "https://github.com/Qiskit/qiskit", tag = "2.6.0rc1" }
-qiskit-util = { git = "https://github.com/Qiskit/qiskit", tag = "2.6.0rc1", features = ["py"] }
+qiskit-circuit = { git = "https://github.com/Qiskit/qiskit", tag = "2.6.0" }
+qiskit-transpiler = { git = "https://github.com/Qiskit/qiskit", tag = "2.6.0" }
+qiskit-util = { git = "https://github.com/Qiskit/qiskit", tag = "2.6.0", features = ["py"] }
 
 [lints.rust]
 unsafe_op_in_unsafe_fn = "deny"

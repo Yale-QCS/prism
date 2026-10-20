@@ -1959,8 +1959,8 @@ dependencies = [
 
 [[package]]
 name = "qiskit-circuit"
-version = "2.6.0-rc1"
-source = "git+https://github.com/Qiskit/qiskit?tag=2.6.0rc1#0a86474ae6bbf43ce44e1ef2b87164044913df7a"
+version = "2.6.0"
+source = "git+https://github.com/Qiskit/qiskit?tag=2.6.0#65094a013073e4bda53c2b341056ab9ade0eb1bd"
 dependencies = [
  "ahash",
  "approx",
@@ -1997,8 +1997,8 @@ dependencies = [
 
 [[package]]
 name = "qiskit-quantum-info"
-version = "2.6.0-rc1"
-source = "git+https://github.com/Qiskit/qiskit?tag=2.6.0rc1#0a86474ae6bbf43ce44e1ef2b87164044913df7a"
+version = "2.6.0"
+source = "git+https://github.com/Qiskit/qiskit?tag=2.6.0#65094a013073e4bda53c2b341056ab9ade0eb1bd"
 dependencies = [
  "approx",
  "bytemuck",
@@ -2024,8 +2024,8 @@ dependencies = [
 
 [[package]]
 name = "qiskit-synthesis"
-version = "2.6.0-rc1"
-source = "git+https://github.com/Qiskit/qiskit?tag=2.6.0rc1#0a86474ae6bbf43ce44e1ef2b87164044913df7a"
+version = "2.6.0"
+source = "git+https://github.com/Qiskit/qiskit?tag=2.6.0#65094a013073e4bda53c2b341056ab9ade0eb1bd"
 dependencies = [
  "approx",
  "binrw",
@@ -2057,8 +2057,8 @@ dependencies = [
 
 [[package]]
 name = "qiskit-transpiler"
-version = "2.6.0-rc1"
-source = "git+https://github.com/Qiskit/qiskit?tag=2.6.0rc1#0a86474ae6bbf43ce44e1ef2b87164044913df7a"
+version = "2.6.0"
+source = "git+https://github.com/Qiskit/qiskit?tag=2.6.0#65094a013073e4bda53c2b341056ab9ade0eb1bd"
 dependencies = [
  "anyhow",
  "approx",
@@ -2090,8 +2090,8 @@ dependencies = [
 
 [[package]]
 name = "qiskit-util"
-version = "2.6.0-rc1"
-source = "git+https://github.com/Qiskit/qiskit?tag=2.6.0rc1#0a86474ae6bbf43ce44e1ef2b87164044913df7a"
+version = "2.6.0"
+source = "git+https://github.com/Qiskit/qiskit?tag=2.6.0#65094a013073e4bda53c2b341056ab9ade0eb1bd"
 dependencies = [
  "foldhash 0.2.0",
  "indexmap",

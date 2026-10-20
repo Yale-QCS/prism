@@ -4,7 +4,7 @@ Rust extension module backing prism's routing, exposed to Python as `prism._acce
 
 ## Layout
 
-- [`src/sabre/`](src/sabre/): Qiskit's Sabre router, vendored from Qiskit 2.6.0rc1 with a small
+- [`src/sabre/`](src/sabre/): Qiskit's Sabre router, vendored from Qiskit 2.6.0 with a small
   local patch. Its [README](src/sabre/README.md) lists the upstream files, the patch, and how to
   reproduce, update and remove the copy.
 - [`src/prism_routing/`](src/prism_routing/): prism's code. `route_ext.rs` holds the

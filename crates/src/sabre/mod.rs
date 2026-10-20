@@ -1,5 +1,5 @@
 //! Qiskit's Sabre router, vendored from `crates/transpiler/src/passes/sabre/` at Qiskit
-//! 2.6.0rc1 with `local.patch` applied.  See `README.md`.
+//! 2.6.0 with `local.patch` applied.  See `README.md`.
 //!
 //! This file is local: it replaces upstream `mod.rs`, omits upstream `layout.rs`, and registers
 //! prism's Python API instead of upstream's.

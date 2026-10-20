@@ -1,7 +1,7 @@
 # Vendored Qiskit Sabre
 
-Qiskit's Sabre router, copied from Qiskit tag `2.6.0rc1`, revision
-[`0a86474a`](https://github.com/Qiskit/qiskit/tree/0a86474ae6bbf43ce44e1ef2b87164044913df7a)
+Qiskit's Sabre router, copied from Qiskit tag `2.6.0`, revision
+[`65094a01`](https://github.com/Qiskit/qiskit/tree/65094a013073e4bda53c2b341056ab9ade0eb1bd)
 (Apache 2.0, Copyright IBM). The router is private to `qiskit-transpiler`, and prism adds a node
 kind to its closed `InteractionKind` enum and hooks to its private routing state, so it cannot be
 used as a library dependency. Public types (`NLayout`, qubit newtypes, `Neighbors`, `Target`) come
@@ -34,7 +34,7 @@ New items in the patch carry a `PRISM:` comment. The patch:
 
 One hunk of the patch is a bug fix, not a hook, and is a deliberate deviation from upstream:
 `State::update_route`'s delta update of the lookahead layers (`route.rs`, the `for num_layer`
-loop). Upstream (2.5 to 2.6.0rc1) loses gates from lookahead layers 1 and deeper in two ways:
+loop). Upstream (2.5 to 2.6.0) loses gates from lookahead layers 1 and deeper in two ways:
 
 - **Dropped successor.** A gate is lost from layer k when its last predecessor to be satisfied
   was routed in the same update while another of its predecessors is still in layer k-1.
@@ -69,7 +69,7 @@ From this directory, with a Qiskit Git repository that contains the revision:
 
 ```sh
 qiskit=/path/to/qiskit
-rev=0a86474ae6bbf43ce44e1ef2b87164044913df7a
+rev=65094a013073e4bda53c2b341056ab9ade0eb1bd
 out=$(mktemp -d)
 mkdir -p "$out/src/sabre"
 for f in dag heuristic layer route vec_map; do
