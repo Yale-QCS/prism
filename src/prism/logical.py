@@ -163,20 +163,15 @@ def _restrict(block: QuantumCircuit, i: int) -> QuantumCircuit:
 
 
 class EarlyMeasurement(TransformationPass):
-    """Measure each qubit before its diagonal tail, which becomes classical control.
+    """Measure a qubit before the ``rz`` and ``crz`` gates on it, which become classical control.
 
-    A Z measurement commutes with ``rz`` and ``crz`` on its qubit (Rovara,
-    Burgholzer and Wille, arXiv:2511.22712), so a measurement with a diagonal
-    gate behind it moves to just after the last other operation on its qubit or
-    its clbit. The qubit is then in a known basis state: an ``rz`` on it is a
-    phase and goes, a ``crz`` it controls becomes ``rz`` on the target if its bit
-    is 1, a ``crz`` it is the target of becomes ``rz(±θ/2)`` on the control, and
-    a ``crz`` between two measured qubits goes. The phases dropped are global
-    within each measurement branch. Routing then spends no SWAP on these gates.
+    A Z measurement commutes with diagonal gates (Rovara, Burgholzer and Wille,
+    arXiv:2511.22712). Once measured, the qubit is in a basis state: an ``rz`` on
+    it is a phase, a ``crz`` it controls becomes ``if c: rz`` on the target, and a
+    ``crz`` it targets becomes ``rz(±θ/2)`` on the control, chosen by its bit.
     """
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Move the measurements in ``dag`` early and rewrite the gates they pass."""
         nodes = list(dag.topological_op_nodes())
         pending: dict[Qubit, int] = {}  # qubit -> the measurement that reads it later
         reach: dict[int, int] = {}  # measurement -> the op it follows (-1: the start)
@@ -222,11 +217,7 @@ class EarlyMeasurement(TransformationPass):
 def _classical_rz(
     node: DAGOpNode, measured: dict[Qubit, DAGOpNode]
 ) -> tuple[IfElseOp, Qubit, Clbit] | None:
-    """The ``crz`` in ``node`` with one qubit measured, as an ``rz`` conditioned on its bit.
-
-    ``measured`` maps each measured qubit of ``node`` to its measurement. ``None``
-    for an ``rz`` or a ``crz`` with both qubits measured: a phase.
-    """
+    """``node`` as an ``rz`` conditioned on the measured qubit's bit; ``None`` if it is only a phase."""
     if len(measured) == len(node.qargs):
         return None
     (theta,) = node.op.params

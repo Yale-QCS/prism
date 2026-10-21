@@ -1,8 +1,4 @@
-"""``MultiRealization -> MultiRealization`` passes of the ``multi_realization`` stage.
-
-``PrismRouting`` (``prism.routing``) is the stage's required pass; the passes here
-run before or after it.
-"""
+"""``multi_realization`` passes that run before and after ``PrismRouting``."""
 
 from __future__ import annotations
 
@@ -35,18 +31,12 @@ __all__ = ["ElideRailExchanges", "RetimeDiagonals"]
 
 
 class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):
-    """Drop every op that only permutes its qubit's rails, and relabel the rails after it.
+    """Drop ops that only permute one qubit's rails, such as dual-rail X, and relabel the rails.
 
-    The rail-level ``ElideLogicalPermutations``: in dual rail, logical X (and
-    ``rx(pi)``) is the exchange of the two rails. An op is elided when every
-    candidate is the same permutation of the rails of one logical qubit, up to
-    global phase. Later instructions, measurements included, act on the
-    relabelled rails, and the net permutation goes into ``output_permutation``,
-    hence into the output's final layout. Runs before routing.
+    The net permutation goes into ``output_permutation``, and so into the final layout.
     """
 
     def run(self, passmanager_ir: MultiRealization) -> MultiRealization:
-        """Elide the rail permutations of the unplaced ``passmanager_ir``."""
         ir = passmanager_ir
         if ir.placement is not None:
             raise TranspilerError("ElideRailExchanges runs before routing")
@@ -75,10 +65,7 @@ class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):
 
 
 def _rail_permutation(op: MultiRealizationOp, wpl: int) -> tuple[int, ...] | None:
-    """The ``PermutationGate`` pattern every candidate equals up to global phase, or ``None``.
-
-    Only for an op on one logical qubit, with no clbits, whose candidates are unitary.
-    """
+    """The rail permutation every candidate equals up to global phase, if any."""
     if op.diagonal or op.num_qubits != wpl or op.num_clbits:
         return None
     try:
@@ -92,17 +79,14 @@ def _rail_permutation(op: MultiRealizationOp, wpl: int) -> tuple[int, ...] | Non
     return perms.pop() if len(perms) == 1 else None
 
 
-#: One gate as depth counts it: the wires it orders, and 1 unless it is free.
+#: The wires a gate orders, and its depth weight (0 if free).
 Gate = tuple[tuple["Hashable", ...], int]
-#: A candidate's gates as ``Gate`` s on its local wires: qubit indices, clbit indices, weight.
+#: A candidate's gates on its local wires: qubit indices, clbit indices, weight.
 Template = tuple[tuple[tuple[int, ...], tuple[int, ...], int], ...]
 
 
 def _template(real: QuantumCircuit) -> Template:
-    """The gates of candidate ``real`` on its local wires.
-
-    Free one-qubit gates neither take a layer nor order wires, so they are left out.
-    """
+    """The gates of candidate ``real``, without free 1-qubit gates, which neither take time nor order wires."""
     return tuple(
         (
             tuple(real.find_bit(q).index for q in ci.qubits),
@@ -117,12 +101,7 @@ def _template(real: QuantumCircuit) -> Template:
 def _times(
     program: Sequence[Sequence[Gate]],
 ) -> tuple[list[dict], list[dict], list[bool], int]:
-    """Heads and tails of each instruction of ``program``, and its depth.
-
-    Per instruction: the time each of its wires is free after it (ASAP), the
-    longest path from each of its wires to the end, and whether one of its gates
-    is on a critical path. The depth is ``CircuitMetrics.depth``.
-    """
+    """Per instruction its wire end times, wire tails and criticality; then the depth."""
     ends, tails, crit = [], [{}] * len(program), [False] * len(program)
     end: dict = {}
     starts = []
@@ -153,13 +132,7 @@ def _list_schedule(
     movable: set[int],
     vpreds: dict[int, list[int]],
 ) -> list[int]:
-    """An order of ``data`` by critical-path list scheduling, as ``RescheduleCommutingDiagonals``.
-
-    Diagonal ``MultiRealizationOp`` s commute on their physical wires: the
-    ``movable`` ones on their gate's two qubits, the others on all their rails.
-    ``vpreds`` adds the dependencies on virtual wires. Routing SWAPs keep their
-    order, so the layout after ``t`` SWAPs is unchanged.
-    """
+    """``list_schedule`` of ``data``, keeping routing SWAPs in order and the ``vpreds`` dependencies."""
     wires = [
         {x for ws, _ in gates[k] for x in ws}
         if k in movable
@@ -192,7 +165,7 @@ def _is_swap(ins: MultiRealizationInstruction) -> bool:
 
 @dataclass
 class _Schedule:
-    """An order of the instructions, with the physical qubits, choice and gates of each."""
+    """An instruction order with the physical qubits, choice and gates of each instruction."""
 
     order: list[int]
     qubits: list[tuple[int, ...]]
@@ -213,26 +186,16 @@ class _Analysis(NamedTuple):
 
 
 class RetimeDiagonals(GenericPass[MultiRealization, MultiRealization]):
-    """Move diagonal ``MultiRealizationOp`` s off the critical path, across routing SWAPs.
+    """Move diagonal two-qubit ops off the critical path, across routing SWAPs.
 
-    Reads a placed program. Routing SWAPs, the other ops, the order of the
-    SWAPs and the placement stay. A diagonal op whose every candidate is one
-    two-qubit gate (plus free one-qubit gates) may move to any slot between its
-    predecessors and successors under ``commuting_predecessors`` on virtual
-    wires, at the physical qubits its rails occupy there, with a candidate whose
-    gate sits on a device edge.
-
-    The search is critical-path reinsertion with heads and tails, as in
-    job-shop local search. With the ASAP head and the tail (longest path to the
-    end) of each op, a critical diagonal op is reinserted at the (slot,
-    candidate) of the least path ``head + 1 + tail`` through it, which is exact
-    for one move; the move is kept if (depth, number of critical ops) drops.
-    It runs from two starts, the routed order and a critical-path list
-    schedule of it, and keeps the shallower. Depth is ``CircuitMetrics.depth``.
+    Routing SWAPs and the placement stay. A critical diagonal op moves to the
+    slot and candidate with the shortest path through it, as in job-shop local
+    search, while the depth or the number of critical ops drops. The search
+    starts from the routed order and from a list schedule of it, and keeps the
+    shallower result.
     """
 
     def run(self, passmanager_ir: MultiRealization) -> MultiRealization:
-        """Retime the diagonal ops; the result passes ``verify``."""
         ir = passmanager_ir
         if ir.placement is None:
             raise TranspilerError(
@@ -255,13 +218,13 @@ class RetimeDiagonals(GenericPass[MultiRealization, MultiRealization]):
 
 
 class _Retime:
-    """One ``RetimeDiagonals`` run: the placed program's fixed facts, and the local search."""
+    """The local search of one ``RetimeDiagonals`` run."""
 
     def __init__(self, ir: MultiRealization) -> None:
         self.data = data = ir.data
         self.edges = ir.placement.edges
         self.swap = [_is_swap(ins) for ins in data]
-        # The layout (v2p) after t routing SWAPs, and the virtual wires of each instruction.
+        # The layout after t routing SWAPs, and each instruction's virtual wires.
         v2p = list(ir.placement.initial)
         p2v = [0] * len(v2p)
         for v, p in enumerate(v2p):
@@ -303,10 +266,7 @@ class _Retime:
         }
 
     def schedule(self, order: list[int]) -> _Schedule:
-        """``order`` with the routed choices, each movable op on the rails' qubits at its slot.
-
-        A movable op crosses only SWAPs off its gate's qubits, so its gates stay.
-        """
+        """``order`` with the routed choices, each movable op on its rails' qubits at its slot."""
         qubits = [ins.qubits for ins in self.data]
         t = 0
         for k in order:
@@ -318,7 +278,6 @@ class _Retime:
         return _Schedule(order, qubits, choice, gates)
 
     def gates(self, k: int, qubits: Sequence[int], r: int | None) -> tuple[Gate, ...]:
-        """The gates of instruction ``k`` on physical ``qubits`` with choice ``r``."""
         ins, templates = self.data[k], self.templates[k]
         if templates is None:
             return (((*qubits, *ins.clbits), 0 if is_free(ins.operation) else 1),)
@@ -328,7 +287,6 @@ class _Retime:
         )
 
     def analyse(self, sch: _Schedule) -> _Analysis:
-        """``_times`` of ``sch``, and where each of its ops sits."""
         ends, tails, crit, depth = _times([sch.gates[k] for k in sch.order])
         on_wire: dict = {}
         for j, e in enumerate(ends):
@@ -343,12 +301,11 @@ class _Retime:
     def best_slot(
         self, sch: _Schedule, i: int, a: _Analysis
     ) -> tuple[int, int, tuple[int, ...], int]:
-        """``(path, slot, qubits, choice)`` of the least path through ``sch.order[i]``, moved."""
+        """``(path, slot, qubits, choice)`` of the shortest path through ``sch.order[i]`` when moved."""
         k = sch.order[i]
         lo = max((a.pos[p] for p in self.preds[k]), default=-1) + 1
         hi = min((a.pos[s] for s in self.succs[k]), default=len(sch.order))
         best = None
-        # ponytail: scans every slot of the window, O(window * candidates * log n) per move
         for j in range(lo, hi + 1):
             qubits = tuple(self.layouts[a.n_swaps[j]][v] for v in self.virt[k])
             for r in range(len(self.templates[k])):
@@ -356,7 +313,7 @@ class _Retime:
                 if ws not in self.edges:
                     continue
                 head = tail = 0
-                for x in ws:  # the neighbours of slot j on wire x, other than k itself
+                for x in ws:  # neighbours of slot j on wire x, skipping k itself
                     lst = a.on_wire.get(x, ())
                     b = bisect_left(lst, j)
                     p = b - 1 - (b > 0 and lst[b - 1] == i)
@@ -370,7 +327,7 @@ class _Retime:
         return best
 
     def polish(self, sch: _Schedule) -> _Analysis:
-        """Reinsert critical diagonal ops of ``sch`` while (depth, critical ops) drops."""
+        """Move critical ops of ``sch`` while (depth, critical ops) drops."""
         a = self.analyse(sch)
         tried: set[int] = set()
         while True:

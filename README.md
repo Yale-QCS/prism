@@ -40,9 +40,9 @@ CircuitMetrics(swaps=0, depth=6, active_gates=13, size=18)
 ![The compiled circuit](https://raw.githubusercontent.com/evmckinney9/prism/main/docs/quickstart_output.png)
 
 Rails `q<i>_0` and `q<i>_1` carry logical qubit `i`.
-Qubit 0 has nothing but its first `crz` before its measurement, so it is measured first and that `crz` becomes an `rz` conditioned on the bit of the control rail; the second `crz` stays.
+`EarlyMeasurement` measures qubit 0 right after its first `crz`, which becomes an `rz` conditioned on its bit.
 A measurement writes rail 0, the logical bit, to `c[i]` and rail 1 to `c_rail1[i]`; both 0 means the photon was lost.
-`budget=SearchBudget(objective="depth")` keeps the shallowest route found instead of the one with the fewest SWAPs; `objective=w`, a number, keeps the least `swaps + w·depth`.
+`dualrail_pm(..., budget=SearchBudget(objective="depth"))` prefers depth over SWAPs.
 
 ## Gate set
 
@@ -51,35 +51,35 @@ A measurement writes rail 0, the logical bit, to `c[i]` and rail 1 to `c_rail1[i
 | `rz(θ)` | `rz(θ)` on rail 0 |
 | `rx(θ)` | `rswap(θ)`, the exponential SWAP of the two rails |
 | `x` | `swap` of the two rails |
-| `crz(θ)` | `crz(±θ)` between any rail of the control and any rail of the target, plus `rz` for an open control: four candidates |
+| `crz(θ)` | `crz(±θ)` from either rail of the control to either rail of the target: four candidates |
 | `swap` | none: the logical stage relabels the qubits |
 | `measure` | `measure` on both rails |
 | `reset`, and preparation | `Initialize("10")` on the two rails |
-| `ErasureCheck` | `PauliProductMeasurement(Pauli("ZZ"))` on the two rails: 1 if the photon is there, and the logical state is undisturbed |
+| `ErasureCheck` | `PauliProductMeasurement(Pauli("ZZ"))` on the two rails: 1 if the photon is there, without disturbing the logical state |
 | `if_else` | `if_else` on the qubit's rails |
 
-The physical `Target` allows `crz`, `swap`, `rswap`, `initialize` and the ZZ check only on device edges, so preparation and erasure checks are local, and no Qiskit pass can produce an operation that leaves the code space.
+The physical `Target` allows the two-rail operations only on device edges, so no stock pass can leave the code space. No gate moves across an `ErasureCheck`.
 
 Limits:
 
 - The coupling map must be connected, with at least two physical qubits per logical qubit.
 - `if_else` is the only control flow; its blocks hold single-qubit gates and no measurement.
-- A multi-controlled X with three or more controls uses an idle qubit as a clean ancilla, or adds one (register `mcd_anc`) if none is idle, which needs far fewer gates.
+- A multi-controlled X with three or more controls uses an idle qubit as a clean ancilla, or adds one (register `mcd_anc`).
 - Barriers are dropped.
 
 ## Pipeline
 
+`prism.pipeline.prism_stages(coupling_map, DualRail)` is a `MultiStagePassManager`:
+
 | Stage | IR | Passes |
 | --- | --- | --- |
-| `logical` | `DAGCircuit` | stock passes to the logical gate set, with a dual-rail equivalence library, then `EarlyMeasurement`: each qubit is measured before the `rz` and `crz` behind its measurement, which become `rz` conditioned on its bit, so routing spends no SWAP on them |
-| `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | each operation becomes its candidates |
-| `multi_realization` | `MultiRealization` | prism's own passes (`prism.passes`): `ElideRailExchanges` drops logical X as a relabelling of its rails, then `PrismRouting` places the program and makes a choice per operation, then `RetimeDiagonals` moves diagonal operations off the critical path, across routing SWAPs |
-| `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | the choices become gates; the layout is written |
-| `physical` | `DAGCircuit` | stock cleanups over the dual-rail `Target`, and stock layout and routing for whatever `multi_realization` left unplaced or unrouted, then `CommutativeOptimization` merges the `crz` runs on each edge, with a barrier on each side of every erasure check so that no gate crosses it, then `RescheduleCommutingDiagonals` reorders commuting diagonal gates for depth and `RecordCircuitMetrics` records the metrics |
+| `logical` | `DAGCircuit` | stock passes and a dual-rail equivalence library to the logical gate set, then `EarlyMeasurement` |
+| `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | each operation becomes a `MultiRealizationOp` with its candidates |
+| `multi_realization` | `MultiRealization` | `ElideRailExchanges`, `PrismRouting` (layout, routing and a `choice` per op), `RetimeDiagonals` |
+| `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | each choice becomes gates, with the layout |
+| `physical` | `DAGCircuit` | stock cleanups, stock layout and routing of unrouted operations, `CommutativeOptimization`, `RescheduleCommutingDiagonals` |
 
-`prism.pipeline.prism_stages(cmap, DualRail)` returns these stages as a `MultiStagePassManager`; `dualrail_pm` nests them in a `PassManager`.
-In a `MultiRealization`, each logical operation is a `MultiRealizationOp` with its `candidates` and a `choice`; only the `multi_realization_to_dag` stage turns them into gates.
-Any pass that sets a `choice` on every op is a complete `multi_realization` stage; if none places the program, the physical stage lays it out and routes it with stock Qiskit:
+Any pass that sets every `choice` is a complete `multi_realization` stage. The physical stage then lays out and routes with stock Qiskit:
 
 ```python
 import random

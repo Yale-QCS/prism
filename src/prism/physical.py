@@ -1,4 +1,4 @@
-"""Physical stage over ``enc.PHYSICAL_ISA``: stock cleanups, layout and routing, then prism's passes."""
+"""The physical stage: stock passes over ``enc.PHYSICAL_ISA``, then prism's."""
 
 from __future__ import annotations
 
@@ -32,17 +32,13 @@ if TYPE_CHECKING:
 
 
 class FenceErasureChecks(TransformationPass):
-    """Put a ``Barrier`` on each side of every erasure check (``pauli_product_measurement``).
+    """Put a barrier on each side of every erasure check, so that no gate crosses it.
 
-    The user places each check, so no gate may cross it. Qiskit's commutation
-    checker finds that the ZZ check commutes with ``rz`` and ``crz``, so
-    ``CommutativeOptimization`` would merge gates across it; a barrier commutes
-    with nothing. The logical stage removes barriers, so ``RemoveBarriers``
-    after the commutation passes removes only these.
+    The ZZ check commutes with ``rz`` and ``crz``, so ``CommutativeOptimization``
+    would otherwise merge gates across a check the user placed.
     """
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Fence each check of ``dag`` on its qubits."""
         for node in dag.named_nodes("pauli_product_measurement"):
             block = DAGCircuit()
             block.add_qubits(node.qargs)
@@ -56,17 +52,9 @@ class FenceErasureChecks(TransformationPass):
 
 
 class RescheduleCommutingDiagonals(TransformationPass):
-    """Critical-path list scheduling over a dependency graph where diagonal gates commute.
-
-    Routing emits gates in commit order. Physical diagonal gates on shared
-    rails commute, so the emitted order is one of many; this pass re-emits the
-    circuit in the order of ``list_schedule`` over the commutation-relaxed
-    dependency graph. List scheduling is a heuristic: it usually shortens the
-    circuit but does not guarantee it.
-    """
+    """Reorder commuting diagonal gates by critical-path list scheduling, for depth."""
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Re-emit ``dag`` in a depth-minimizing order that respects the relaxed dependencies."""
         nodes = list(dag.topological_op_nodes())
         wires = [(*node.qargs, *node.cargs) for node in nodes]
         preds = commuting_predecessors(
@@ -80,7 +68,6 @@ class RescheduleCommutingDiagonals(TransformationPass):
 
 
 def _physical_target(enc: type[QubitEncoding], coupling_map: CouplingMap) -> Target:
-    """``enc.PHYSICAL_ISA`` on each qubit or edge, plus measure and ``if_else``."""
     target = Target.from_configuration(
         basis_gates=sorted(enc.PHYSICAL_ISA | {"measure"}),
         custom_name_mapping=enc.CUSTOM_GATES,
@@ -96,16 +83,12 @@ def physical_pm(
     *,
     seed: int = 42,
 ) -> PassManager:
-    """The physical stage: stock cleanups, layout and routing for what is left, then prism's passes.
-
-    An unplaced program gets the stock trivial layout; ``SabreSwap`` routes only
-    if ``CheckMap`` finds a gate off the device edges.
-    """
+    """Stock cleanups, stock layout and routing for whatever is unplaced or off the edges, then prism's passes."""
     target = _physical_target(enc, coupling_map)
     return PassManager(
         [
             FenceErasureChecks(),
-            # The passes of the stock O3 init stage that act on this ISA.
+            # The stock O3 init passes that apply to this ISA.
             RemoveDiagonalGatesBeforeMeasure(),
             RemoveIdentityEquivalent(),
             InverseCancellation(),

@@ -1,11 +1,7 @@
-"""Dual-rail logical stage: the equivalence library and the Margolus pass.
+"""The dual-rail logical stage's equivalence library and passes.
 
-Under dual-rail, RX is expensive (an RSWAP) and RZ is free. Qiskit's session
-library leaks RX onto control wires, because ``BasisTranslator`` translates each
-gate on its own. These templates keep every RX on the target wire.
-
-Identities used: ``cx(c,t) = H_t . S_c . CRz(pi) . H_t``, ``H = Rz.Rx.Rz``,
-``U(theta,phi,lam) = Rz.Rx.Rz``, ``P(a) = Rz(a)``.
+In dual rail an RX is an RSWAP and an RZ is free. The session library puts RX
+on control wires; these templates keep every RX on the target.
 """
 
 from __future__ import annotations
@@ -197,7 +193,6 @@ class RTOFGate(Gate):
     """Margolus relative-phase Toffoli: ``CCX(a, b, t) . D``, ``D = diag(1,1,1,-1,1,1,1,1)``. 3 CX."""
 
     def __init__(self) -> None:
-        """Create the 3-qubit ``rtof`` gate."""
         super().__init__("rtof", 3, [])
 
     def _define(self) -> None:
@@ -234,7 +229,6 @@ class MargolusPairOptimizer(TransformationPass):
     """
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Pair consecutive same-trio CCXs, earliest first."""
         qmap = {q: i for i, q in enumerate(dag.qubits)}
         nodes = list(dag.topological_op_nodes())
         by_trio: dict[frozenset, list[int]] = defaultdict(list)
@@ -259,17 +253,14 @@ class MargolusPairOptimizer(TransformationPass):
 
 
 class MinRXCliffords(CollectCliffords):
-    """Resynthesize each Clifford block by its fewest-``(rx, crz)`` form in ``isa``.
+    """Resynthesize each Clifford block with the fewest ``rx``, then ``crz``, in ``isa``.
 
-    Candidates are the block as given and the stock greedy and Aaronson-Gottesman
-    syntheses. Each ``rx`` is a rail meeting, so the score counts ``rx`` first.
-    A candidate that interacts a logical pair the block does not, or holds a SWAP
-    (elided later, so it relabels every later gate), is dropped: new pairs cost
-    routing more than the saved gates. The chosen form is inlined.
+    The candidates are the block itself and its greedy and Aaronson-Gottesman syntheses.
+    A synthesis that couples a new pair of qubits, or holds a SWAP, is skipped:
+    routing the new pair costs more than the gates saved.
     """
 
     def __init__(self, eq_library: EquivalenceLibrary, isa: list[str]) -> None:
-        """Collect blocks as stock ``CollectCliffords`` does; score them in ``isa``."""
         super().__init__()
         translate = PassManager(
             [BasisTranslator(eq_library, isa), Optimize1qGatesDecomposition(basis=isa)]
@@ -296,7 +287,6 @@ class MinRXCliffords(CollectCliffords):
         self.collapse_function = partial(collapse_to_operation, collapse_function=best)
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """Collapse every block, then inline the chosen forms."""
         dag = super().run(dag)
         for node in dag.op_nodes():
             if node.op.label == "min_rx_clifford":
