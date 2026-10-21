@@ -43,7 +43,7 @@ class MCPrepare(TransformationPass):
     def run(self, dag: DAGCircuit) -> DAGCircuit:
         for node in dag.op_nodes(MCPhaseGate):
             n = node.op.num_ctrl_qubits
-            if n >= 4 and _is_pi(float(node.op.params[0])):
+            if n >= 4 and abs(float(node.op.params[0]) % (2 * np.pi) - np.pi) <= 1e-9:
                 sub = QuantumCircuit(n + 1)
                 sub.h(n)
                 sub.append(MCXGate(n, ctrl_state=node.op.ctrl_state), range(n + 1))
@@ -54,10 +54,6 @@ class MCPrepare(TransformationPass):
         ):
             dag.add_qreg(AncillaRegister(1, name="mcd_anc"))
         return dag
-
-
-def _is_pi(theta: float) -> bool:
-    return abs(abs((theta + np.pi) % (2 * np.pi) - np.pi) - np.pi) <= 1e-9
 
 
 class ElideLogicalPermutations(ElidePermutations):
@@ -80,7 +76,11 @@ class SplitIfElse(TransformationPass):
     def run(self, dag: DAGCircuit) -> DAGCircuit:
         for node in dag.op_nodes(IfElseOp):
             op = node.op
-            if op.num_qubits < 2 or not _splittable(op):
+            if op.num_qubits < 2 or any(
+                instr.operation.num_qubits != 1 or instr.clbits
+                for block in op.blocks
+                for instr in block.data
+            ):
                 continue
             split = DAGCircuit()
             split.add_qubits(node.qargs)
@@ -92,14 +92,6 @@ class SplitIfElse(TransformationPass):
                 )
             dag.substitute_node_with_dag(node, split)
         return dag
-
-
-def _splittable(op: IfElseOp) -> bool:
-    return all(
-        instr.operation.num_qubits == 1 and not instr.clbits
-        for block in op.blocks
-        for instr in block.data
-    )
 
 
 def _restrict(block: QuantumCircuit, i: int) -> QuantumCircuit:
@@ -126,7 +118,7 @@ class EarlyMeasurement(TransformationPass):
         reach: dict[int, int] = {}  # measurement -> the op it follows (-1: the start)
         rewritten: dict[int, tuple[IfElseOp, Qubit, Clbit] | None] = {}
         moved: set[int] = set()
-        for k in range(len(nodes) - 1, -1, -1):
+        for k in reversed(range(len(nodes))):
             node = nodes[k]
             blocked = [q for q, m in pending.items() if nodes[m].cargs[0] in node.cargs]
             if node.name in ("rz", "crz") and (
