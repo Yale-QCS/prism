@@ -103,6 +103,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
 
     def run(self, passmanager_ir: MultiRealization) -> MultiRealization:
         ir = passmanager_ir
+        ir.verify()
         if ir.placement is not None:
             raise TranspilerError("PrismRouting got a program that is already placed")
         n_phys, n_virt = self.coupling_map.size(), len(ir.rails)

@@ -39,25 +39,7 @@ __all__ = [
     "list_schedule",
 ]
 
-DIAGONAL_GATES = frozenset(
-    {
-        "rz",
-        "crz",
-        "z",
-        "s",
-        "sdg",
-        "t",
-        "tdg",
-        "p",
-        "u1",
-        "id",
-        "cp",
-        "cz",
-        "rzz",
-        "cs",
-        "csdg",
-    }
-)
+DIAGONAL_GATES = frozenset("rz crz z s sdg t tdg p u1 id cp cz rzz cs csdg".split())
 
 
 def commuting_predecessors(

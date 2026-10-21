@@ -6,7 +6,6 @@ on control wires; these templates keep every RX on the target.
 
 from __future__ import annotations
 
-from collections import defaultdict
 from functools import partial
 
 import numpy as np
@@ -30,10 +29,10 @@ from qiskit.circuit.library import (
     iSwapGate,
 )
 from qiskit.converters import circuit_to_dag
-from qiskit.dagcircuit import DAGCircuit, DAGOpNode
+from qiskit.dagcircuit import DAGCircuit
 from qiskit.quantum_info import Clifford
 from qiskit.synthesis import synth_clifford_ag, synth_clifford_greedy
-from qiskit.transpiler import PassManager, TransformationPass
+from qiskit.transpiler import PassManager
 from qiskit.transpiler.passes import (
     BasisTranslator,
     CollectCliffords,
@@ -42,8 +41,6 @@ from qiskit.transpiler.passes import (
 from qiskit.transpiler.passes.optimization.collect_and_collapse import (
     collapse_to_operation,
 )
-
-from prism.ir import DIAGONAL_GATES
 
 
 def _h(qc: QuantumCircuit, q: int) -> None:
@@ -183,73 +180,9 @@ def equivalence_library() -> EquivalenceLibrary:
         _ryy(),
         _iswap(),
         _ccx(),
-        (RTOFGate(), RTOFGate().definition),
     ):
         lib.add_equivalence(gate, template)
     return lib
-
-
-class RTOFGate(Gate):
-    """Margolus relative-phase Toffoli: ``CCX(a, b, t) . D``, ``D = diag(1,1,1,-1,1,1,1,1)``. 3 CX."""
-
-    def __init__(self) -> None:
-        super().__init__("rtof", 3, [])
-
-    def _define(self) -> None:
-        qc = QuantumCircuit(3)
-        qc.ry(np.pi / 4, 2)
-        qc.cx(1, 2)
-        qc.ry(np.pi / 4, 2)
-        qc.cx(0, 2)
-        qc.ry(-np.pi / 4, 2)
-        qc.cx(1, 2)
-        qc.ry(-np.pi / 4, 2)
-        self.definition = qc
-
-
-# The gates that can reach MargolusPairOptimizer (3+-qubit gates are unrolled to
-# CCX before it) and commute with D: diagonal ones, and controlled-X-like ones
-# whose target is off the trio.
-_CONTROLLED_X_LIKE = frozenset({"cx", "cy", "ch", "ccx"})
-
-
-def _commutes_with_d(node: DAGOpNode, trio: set[int], qmap: dict) -> bool:
-    """``node`` commutes with the ``D`` factor on ``trio``; unknown gates do not."""
-    indices = [qmap[q] for q in node.qargs]
-    if not trio.intersection(indices) or node.op.name in DIAGONAL_GATES:
-        return True
-    return node.op.name in _CONTROLLED_X_LIKE and indices[-1] not in trio
-
-
-class MargolusPairOptimizer(TransformationPass):
-    """Replace two CCXs on the same qubits by RTOFs when everything between them commutes with ``D``.
-
-    Both ``D`` factors then cancel, so the rewrite is exact, and RTOF needs 3 CX
-    where CCX needs 6.
-    """
-
-    def run(self, dag: DAGCircuit) -> DAGCircuit:
-        qmap = {q: i for i, q in enumerate(dag.qubits)}
-        nodes = list(dag.topological_op_nodes())
-        by_trio: dict[frozenset, list[int]] = defaultdict(list)
-        for k, node in enumerate(nodes):
-            if node.op.name == "ccx":
-                by_trio[frozenset(qmap[q] for q in node.qargs)].append(k)
-        paired = []
-        for trio, positions in by_trio.items():
-            while len(positions) >= 2:
-                i, j = positions[:2]
-                if all(
-                    _commutes_with_d(nodes[k], set(trio), qmap) for k in range(i + 1, j)
-                ):
-                    paired += [i, j]
-                    positions = positions[2:]
-                else:
-                    positions = positions[1:]
-        rtof = RTOFGate()
-        for k in paired:
-            dag.substitute_node(nodes[k], rtof, inplace=True)
-        return dag
 
 
 class MinRXCliffords(CollectCliffords):

@@ -18,7 +18,6 @@ from qiskit.transpiler import PassManager
 
 from prism.encodings.base import QubitEncoding
 from prism.encodings.dualrail_logical import (
-    MargolusPairOptimizer,
     MinRXCliffords,
     equivalence_library,
 )
@@ -100,7 +99,6 @@ class DualRail(QubitEncoding):
             cls,
             eq_library=lib,
             reshape_passes=(
-                MargolusPairOptimizer(),
                 MinRXCliffords(lib, sorted(cls.LOGICAL_ISA - NON_GATE_ISA_NAMES)),
             ),
         )
