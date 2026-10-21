@@ -275,7 +275,8 @@ class MultiRealization(IR):
             else [QuantumRegister(self.num_wires, "q")]
         )
         out = QuantumCircuit(*qregs, *self.cregs)
-        out.add_bits([b for b in self.clbits if b not in set(out.clbits)])
+        registered = set(out.clbits)
+        out.add_bits([b for b in self.clbits if b not in registered])
         out.metadata = dict(self.metadata)
         wires = out.qubits
         for k, ins in enumerate(self.data):
