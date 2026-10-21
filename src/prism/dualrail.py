@@ -84,9 +84,8 @@ class ErasureCheck(Instruction):
         super().__init__("erasure_check", 1, 1, [])
 
 
-LOGICAL_ISA = frozenset(
-    {"x", "rx", "rz", "crz", "swap", "measure", "reset", "if_else", "erasure_check"}
-)
+LOGICAL_GATES = frozenset({"x", "rx", "rz", "crz", "swap"})
+LOGICAL_ISA = LOGICAL_GATES | {"measure", "reset", "if_else", "erasure_check"}
 PHYSICAL_ISA = frozenset(
     {"rz", "crz", "swap", "rswap", "initialize", "pauli_product_measurement"}
 )

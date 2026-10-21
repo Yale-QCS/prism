@@ -57,11 +57,7 @@ from prism.passes import (
 def logical_pm() -> PassManager:
     """Translate to ``dualrail.LOGICAL_ISA`` and simplify."""
     lib = dualrail.equivalence_library()
-    gates = sorted(
-        dualrail.LOGICAL_ISA
-        - CONTROL_FLOW_OP_NAMES
-        - {"measure", "reset", "erasure_check"}
-    )
+    gates = sorted(dualrail.LOGICAL_GATES)
     return PassManager(
         [
             RemoveBarriers(),
