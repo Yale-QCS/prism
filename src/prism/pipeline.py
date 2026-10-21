@@ -55,34 +55,7 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
         wpl = enc.WIRES_PER_LOGICAL
         n = len(dag.qubits)
         logical = {q: i for i, q in enumerate(dag.qubits)}
-        clbits = list(dag.clbits)
-        # Rail w of a measurement into clbit c writes c's partner in "<register>_rail<w>".
-        measured = {node.cargs[0] for node in dag.op_nodes(Measure)}
-        sources = [(r, f"{r.name}_", list(r)) for r in dag.cregs.values()]
-        loose = [
-            c for c in dag.clbits if c in measured and not dag.find_bit(c).registers
-        ]
-        if loose:
-            sources.append((None, "", loose))
-        names = {r.name for r in dag.cregs.values()}
-        cregs: list[ClassicalRegister] = []
-        partner: dict[tuple[Clbit, int], Clbit] = {}
-        for creg, prefix, bits in sources:
-            if creg is not None:
-                cregs.append(creg)
-                if not measured & set(bits):
-                    continue
-            for w in range(1, wpl):
-                name = f"{prefix}rail{w}"
-                while name in names:
-                    name += "_"
-                names.add(name)
-                reg = ClassicalRegister(len(bits), name)
-                cregs.append(reg)
-                clbits += list(reg)
-                for bit, p in zip(bits, reg):
-                    partner.setdefault((bit, w), p)
-
+        cregs, clbits, partner = _rail_registers(dag, wpl)
         data = []
         prep = enc.initialize()
         for i in range(n):
@@ -115,6 +88,39 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
         return ir
 
 
+def _rail_registers(
+    dag: DAGCircuit, wpl: int
+) -> tuple[list[ClassicalRegister], list[Clbit], dict[tuple[Clbit, int], Clbit]]:
+    """The registers and clbits with rail registers added, and each measured clbit's partner per rail.
+
+    Rail ``w`` of a measurement into clbit ``c`` writes ``c``'s partner in
+    ``<register>_rail<w>``, or in ``rail<w>`` for a clbit in no register.
+    """
+    measured = {node.cargs[0] for node in dag.op_nodes(Measure)}
+    sources = [(r, list(r), f"{r.name}_") for r in dag.cregs.values()]
+    loose = [c for c in dag.clbits if c in measured and not dag.find_bit(c).registers]
+    if loose:
+        sources.append((None, loose, ""))
+    names = set(dag.cregs)
+    cregs, clbits, partner = [], list(dag.clbits), {}
+    for creg, bits, prefix in sources:
+        if creg is not None:
+            cregs.append(creg)
+        if measured.isdisjoint(bits):
+            continue
+        for w in range(1, wpl):
+            name = f"{prefix}rail{w}"
+            while name in names:
+                name += "_"
+            names.add(name)
+            reg = ClassicalRegister(len(bits), name)
+            cregs.append(reg)
+            clbits += list(reg)
+            for bit, p in zip(bits, reg):
+                partner.setdefault((bit, w), p)
+    return cregs, clbits, partner
+
+
 class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
     """Emit every chosen candidate, and the layout if the program is placed.
 
@@ -127,22 +133,22 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
         ir.verify()
         dag = circuit_to_dag(ir.to_circuit())
         ps = self.property_set
-        ps["original_qubit_indices"] = {q: v for v, q in enumerate(ir.rails)}
         ps["num_input_qubits"] = len(ir.rails)
         # ElidePermutations' convention: qubit at the end -> its index at the start.
         ps["virtual_permutation_layout"] = Layout(
             dict(zip(ir.rails, ir.output_permutation))
         )
         if ir.placement is None:
+            ps["original_qubit_indices"] = {q: v for v, q in enumerate(ir.rails)}
             return dag
         initial, final = ir.placement.initial, ir.placement.final
         ancillas = QuantumRegister(len(initial) - len(ir.rails), "ancilla")
         virtuals = ir.rails + list(ancillas)
-        layout = Layout({q: initial[v] for v, q in enumerate(virtuals)})
+        ps["original_qubit_indices"] = {q: v for v, q in enumerate(virtuals)}
+        layout = Layout(dict(zip(virtuals, initial)))
         for reg in [*ir.qregs, ancillas]:
             layout.add_register(reg)
         ps["layout"] = layout
-        ps["original_qubit_indices"] = {q: v for v, q in enumerate(virtuals)}
         ps["final_layout"] = Layout(
             {dag.qubits[initial[v]]: final[v] for v in range(len(initial))}
         )
