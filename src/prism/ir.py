@@ -2,15 +2,15 @@
 
 An ordered list of instructions, each a Qiskit ``Operation`` or a
 ``MultiRealizationOp``: a logical operation with candidate realizations, of which
-a pass picks one (``choice``). Before ``placement`` is set, wire
-``WIRES_PER_LOGICAL * i + w`` is rail ``w`` of logical qubit ``i``; after, wires
-are physical qubits.
+a pass picks one (``choice``). Before ``placement`` is set, wire ``RAILS * i + w``
+is rail ``w`` of logical qubit ``i``; after, wires are physical qubits.
 """
 
 from __future__ import annotations
 
+from collections.abc import Collection, Hashable, Iterator, Sequence
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, NamedTuple, NoReturn
+from typing import Any, NamedTuple, NoReturn
 
 from qiskit.circuit import (
     ClassicalRegister,
@@ -24,20 +24,8 @@ from qiskit.circuit import (
 from qiskit.passmanager import IR
 from qiskit.transpiler import TranspilerError
 
-if TYPE_CHECKING:
-    from collections.abc import Collection, Hashable, Iterator, Sequence
-
-    from prism.encodings.base import QubitEncoding
-
-__all__ = [
-    "DIAGONAL_GATES",
-    "MultiRealization",
-    "MultiRealizationInstruction",
-    "MultiRealizationOp",
-    "Placement",
-    "commuting_predecessors",
-    "list_schedule",
-]
+#: Wires per logical qubit: a dual-rail qubit is a pair of rails.
+RAILS = 2
 
 DIAGONAL_GATES = frozenset("rz crz z s sdg t tdg p u1 id cp cz rzz cs csdg".split())
 
@@ -125,7 +113,7 @@ class MultiRealizationOp:
 
     Args:
         name: The logical operation's name.
-        candidates: Equal-width circuits; wire ``WIRES_PER_LOGICAL * k + w`` is
+        candidates: Equal-width circuits; wire ``RAILS * k + w`` is
             rail ``w`` of the op's ``k``-th qubit. Replace the tuple to drop
             candidates; never edit a circuit in place.
         default_index: The candidate used when the router has no preference.
@@ -218,7 +206,6 @@ class MultiRealization(IR):
     """A program whose operations may have several candidate realizations.
 
     Args:
-        enc: The qubit encoding.
         qregs: One register of rails per logical qubit.
         cregs: The input's classical registers, each followed by a register per
             other rail if it is measured.
@@ -229,7 +216,6 @@ class MultiRealization(IR):
         placement: Set by routing.
     """
 
-    enc: type[QubitEncoding]
     qregs: list[QuantumRegister]
     cregs: list[ClassicalRegister]
     clbits: list[Clbit]
@@ -275,11 +261,9 @@ class MultiRealization(IR):
 
     def verify(self) -> None:
         """Raise ``TranspilerError`` on the first broken invariant a pass may rely on."""
-        wpl = self.enc.WIRES_PER_LOGICAL
-        n_logical = len(self.qregs)
-        if any(reg.size != wpl for reg in self.qregs):
-            _fail(f"every logical qubit needs {wpl} rails")
-        if sorted(self.output_permutation) != list(range(wpl * n_logical)):
+        if any(reg.size != RAILS for reg in self.qregs):
+            _fail(f"every logical qubit needs {RAILS} rails")
+        if sorted(self.output_permutation) != list(range(len(self.rails))):
             _fail(f"output_permutation {self.output_permutation} is not a permutation")
         n = self.num_wires
         if self.placement is not None:

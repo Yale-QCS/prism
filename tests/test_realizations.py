@@ -9,7 +9,7 @@ from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import CRZGate, RXGate, RZGate, SwapGate, XGate
 from qiskit.quantum_info import Operator, Statevector
 
-from prism.encodings import DualRail
+from prism import dualrail
 
 
 def _code_space(k: int) -> np.ndarray:
@@ -24,19 +24,19 @@ def _code_space(k: int) -> np.ndarray:
 
 
 @pytest.mark.parametrize(
-    ("rule", "gate"),
+    "gate",
     [
-        (DualRail.crz, CRZGate(0.7)),
-        (DualRail.crz, CRZGate(-2.1)),
-        (DualRail.swap, SwapGate()),
-        (DualRail.x, XGate()),
-        (DualRail.rx, RXGate(0.7)),
-        (DualRail.rz, RZGate(0.7)),
+        CRZGate(0.7),
+        CRZGate(-2.1),
+        SwapGate(),
+        XGate(),
+        RXGate(0.7),
+        RZGate(0.7),
     ],
 )
-def test_every_candidate_implements_the_logical_gate(rule, gate):
+def test_every_candidate_implements_the_logical_gate(gate):
     """``V^dag U V`` equals the gate up to global phase; being unitary, ``U`` cannot leak."""
     v = _code_space(gate.num_qubits)
-    for candidate in rule(gate).candidates:
+    for candidate in dualrail.lower(gate).candidates:
         logical = v.conj().T @ Operator(candidate).data @ v
         assert Operator(logical).equiv(Operator(gate))

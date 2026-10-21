@@ -1,202 +1,146 @@
-"""prism's stages and the passes between ``DAGCircuit`` and ``MultiRealization``."""
+"""prism's pass managers: the stages, and ``dualrail_pm`` that runs them."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from qiskit.circuit import (
-    ClassicalRegister,
-    Clbit,
-    Measure,
-    QuantumRegister,
-)
-from qiskit.converters import circuit_to_dag
+from qiskit.circuit import IfElseOp
+from qiskit.circuit.controlflow import CONTROL_FLOW_OP_NAMES
 from qiskit.dagcircuit import DAGCircuit
-from qiskit.passmanager import GenericPass, MultiStagePassManager
-from qiskit.passmanager.compilation_status import PassManagerState, RunState
-from qiskit.transpiler import (
-    CouplingMap,
-    Layout,
-    PassManager,
-    TranspileLayout,
+from qiskit.passmanager import (
+    ConditionalController,
+    DoWhileController,
+    MultiStagePassManager,
+)
+from qiskit.transpiler import CouplingMap, PassManager, Target
+from qiskit.transpiler.passes import (
+    BasisTranslator,
+    CommutativeCancellation,
+    CommutativeOptimization,
+    ContractIdleWiresInControlFlow,
+    Decompose,
+    FixedPoint,
+    HighLevelSynthesis,
+    HLSConfig,
+    InverseCancellation,
+    Optimize1qGatesDecomposition,
+    RemoveBarriers,
+    RemoveDiagonalGatesBeforeMeasure,
+    RemoveIdentityEquivalent,
+    SabreSwap,
+    Size,
+    TrivialLayout,
+    Unroll3qOrMore,
+)
+from qiskit.transpiler.preset_passmanagers.common import (
+    generate_embed_passmanager,
+    generate_routing_passmanager,
 )
 
-from prism.encodings import DualRail
-from prism.ir import MultiRealization, MultiRealizationInstruction
-from prism.passes import ElideRailExchanges, RetimeDiagonals
-from prism.physical import physical_pm
-from prism.routing import PrismRouting, SearchBudget
+from prism import dualrail
+from prism.passes import (
+    DAGToMultiRealization,
+    EarlyMeasurement,
+    ElideLogicalPermutations,
+    ElideRailExchanges,
+    FenceErasureChecks,
+    MCPrepare,
+    MinRXCliffords,
+    MultiRealizationToDAG,
+    PrismRouting,
+    RecordCircuitMetrics,
+    RescheduleCommutingDiagonals,
+    RetimeDiagonals,
+    SearchBudget,
+    SplitIfElse,
+)
 
-if TYPE_CHECKING:
-    from prism.encodings.base import QubitEncoding
 
-__all__ = [
-    "DAGToMultiRealization",
-    "MultiRealizationToDAG",
-    "SearchBudget",
-    "build_pm",
-    "dualrail_pm",
-    "prism_stages",
-]
-
-
-class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
-    """Lower each logical qubit to its rails and each operation to its candidates.
-
-    A measurement writes rail 0 to its clbit ``c[i]`` and rail ``w`` to ``c_rail<w>[i]``.
-    """
-
-    def __init__(self, enc: type[QubitEncoding]) -> None:
-        super().__init__()
-        self.enc = enc
-
-    def run(self, passmanager_ir: DAGCircuit) -> MultiRealization:
-        dag, enc = passmanager_ir, self.enc
-        wpl = enc.WIRES_PER_LOGICAL
-        n = len(dag.qubits)
-        logical = {q: i for i, q in enumerate(dag.qubits)}
-        cregs, clbits, partner = _rail_registers(dag, wpl)
-        data = []
-        prep = enc.initialize()
-        for i in range(n):
-            for ci in prep.data:
-                rails = tuple(wpl * i + prep.find_bit(q).index for q in ci.qubits)
-                data.append(MultiRealizationInstruction(ci.operation, rails))
-        for node in dag.topological_op_nodes():
-            op = enc.lower(node.op, tuple(node.cargs))
-            rails = tuple(wpl * logical[q] + w for q in node.qargs for w in range(wpl))
-            if isinstance(node.op, Measure):
-                c = node.cargs[0]
-                cl = (c, *(partner[c, w] for w in range(1, wpl)))
-            else:
-                cl = tuple(node.cargs)
-            data.append(MultiRealizationInstruction(op, rails, cl))
-
-        perm = self.property_set["logical_output_permutation"] or range(n)
-        ir = MultiRealization(
-            enc=enc,
-            qregs=[QuantumRegister(wpl, f"q{i}") for i in range(n)],
-            cregs=cregs,
-            clbits=clbits,
-            data=data,
-            output_permutation=tuple(
-                wpl * perm[i] + w for i in range(n) for w in range(wpl)
+def logical_pm() -> PassManager:
+    """Translate to ``dualrail.LOGICAL_ISA`` and simplify."""
+    lib = dualrail.equivalence_library()
+    gates = sorted(
+        dualrail.LOGICAL_ISA
+        - CONTROL_FLOW_OP_NAMES
+        - {"measure", "reset", "erasure_check"}
+    )
+    return PassManager(
+        [
+            RemoveBarriers(),
+            MCPrepare(),
+            HighLevelSynthesis(hls_config=HLSConfig(mcx=["1_clean_kg24"])),
+            Decompose(["c-unitary", "unitary"]),
+            Unroll3qOrMore(basis_gates=["ccx"]),
+            MinRXCliffords(lib, gates),
+            BasisTranslator(lib, sorted(dualrail.LOGICAL_ISA | CONTROL_FLOW_OP_NAMES)),
+            SplitIfElse(),
+            # Before layout a SWAP only relabels logical qubits.
+            ElideLogicalPermutations(),
+            Optimize1qGatesDecomposition(basis=gates),
+            # Removing an rz can expose a crz before a measurement.
+            DoWhileController(
+                [
+                    RemoveDiagonalGatesBeforeMeasure(),
+                    Size(recurse=True),
+                    FixedPoint("size"),
+                ],
+                do_while=lambda property_set: not property_set["size_fixed_point"],
             ),
-            metadata=dict(dag.metadata or {}),
-        )
-        ir.verify()
-        return ir
+            EarlyMeasurement(),
+        ]
+    )
 
 
-def _rail_registers(
-    dag: DAGCircuit, wpl: int
-) -> tuple[list[ClassicalRegister], list[Clbit], dict[tuple[Clbit, int], Clbit]]:
-    """The registers and clbits with rail registers added, and each measured clbit's partner per rail.
-
-    Rail ``w`` of a measurement into clbit ``c`` writes ``c``'s partner in
-    ``<register>_rail<w>``, or in ``rail<w>`` for a clbit in no register.
-    """
-    measured = {node.cargs[0] for node in dag.op_nodes(Measure)}
-    sources = [(r, list(r), f"{r.name}_") for r in dag.cregs.values()]
-    loose = [c for c in dag.clbits if c in measured and not dag.find_bit(c).registers]
-    if loose:
-        sources.append((None, loose, ""))
-    names = set(dag.cregs)
-    cregs, clbits, partner = [], list(dag.clbits), {}
-    for creg, bits, prefix in sources:
-        if creg is not None:
-            cregs.append(creg)
-        if measured.isdisjoint(bits):
-            continue
-        for w in range(1, wpl):
-            name = f"{prefix}rail{w}"
-            while name in names:
-                name += "_"
-            names.add(name)
-            reg = ClassicalRegister(len(bits), name)
-            cregs.append(reg)
-            clbits += list(reg)
-            for bit, p in zip(bits, reg):
-                partner.setdefault((bit, w), p)
-    return cregs, clbits, partner
-
-
-class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
-    """Emit every chosen candidate, and the layout if the program is placed.
-
-    In the layout, virtual qubit ``WIRES_PER_LOGICAL * i + w`` is rail ``w`` of
-    logical qubit ``i``, then the ancillas.
-    """
-
-    def run(self, passmanager_ir: MultiRealization) -> DAGCircuit:
-        ir = passmanager_ir
-        ir.verify()
-        dag = circuit_to_dag(ir.to_circuit())
-        ps = self.property_set
-        ps["num_input_qubits"] = len(ir.rails)
-        # ElidePermutations' convention: qubit at the end -> its index at the start.
-        ps["virtual_permutation_layout"] = Layout(
-            dict(zip(ir.rails, ir.output_permutation))
-        )
-        if ir.placement is None:
-            ps["original_qubit_indices"] = {q: v for v, q in enumerate(ir.rails)}
-            return dag
-        initial, final = ir.placement.initial, ir.placement.final
-        ancillas = QuantumRegister(len(initial) - len(ir.rails), "ancilla")
-        virtuals = ir.rails + list(ancillas)
-        ps["original_qubit_indices"] = {q: v for v, q in enumerate(virtuals)}
-        layout = Layout(dict(zip(virtuals, initial)))
-        for reg in [*ir.qregs, ancillas]:
-            layout.add_register(reg)
-        ps["layout"] = layout
-        ps["final_layout"] = Layout(
-            {dag.qubits[initial[v]]: final[v] for v in range(len(initial))}
-        )
-        # Fold the elided permutation into final_layout, as stock layout passes do.
-        TranspileLayout.from_property_set(dag, ps).write_into_property_set(ps)
-        return dag
-
-    def update_status(
-        self, state: PassManagerState, run_state: RunState
-    ) -> PassManagerState:
-        """Forget completed passes, as ``TransformationPass`` does, so stock passes rerun."""
-        state = super().update_status(state, run_state)
-        if run_state == RunState.SUCCESS:
-            state.workflow_status.completed_passes.clear()
-        return state
+def physical_pm(coupling_map: CouplingMap, *, seed: int = 42) -> PassManager:
+    """Stock cleanups, stock layout and routing for whatever is unplaced or off the edges, then prism's passes."""
+    target = Target.from_configuration(
+        basis_gates=sorted(dualrail.PHYSICAL_ISA | {"measure"}),
+        custom_name_mapping=dualrail.CUSTOM_GATES,
+        coupling_map=coupling_map,
+    )
+    target.add_instruction(IfElseOp, name="if_else")
+    return PassManager(
+        [
+            FenceErasureChecks(),
+            # The stock O3 init passes that apply to this ISA.
+            RemoveDiagonalGatesBeforeMeasure(),
+            RemoveIdentityEquivalent(),
+            InverseCancellation(),
+            ContractIdleWiresInControlFlow(),
+            CommutativeCancellation(),
+            ConditionalController(
+                [
+                    TrivialLayout(target),
+                    *generate_embed_passmanager(target).to_flow_controller().tasks,
+                ],
+                condition=lambda ps: ps["layout"] is None,
+            ),
+            generate_routing_passmanager(
+                SabreSwap(target, heuristic="decay", seed=seed, trials=20), target
+            ).to_flow_controller(),
+            CommutativeOptimization(),
+            RemoveBarriers(),
+            RescheduleCommutingDiagonals(),
+            RecordCircuitMetrics(),
+        ]
+    )
 
 
 def prism_stages(
     coupling_map: CouplingMap,
-    enc: type[QubitEncoding],
     *,
     seed: int = 42,
     budget: SearchBudget | None = None,
 ) -> MultiStagePassManager[DAGCircuit, DAGCircuit]:
-    """Prism's stages for ``enc`` on ``coupling_map``, a connected, undirected device graph.
+    """Prism's stages on ``coupling_map``, a connected, undirected device graph.
 
     Replace a stage, then run ``PassManager([stages.to_flow_controller()])``.
     """
     routing = PrismRouting(coupling_map, seed=seed, budget=budget)
     return MultiStagePassManager(
-        logical=enc.logical_pm(),
-        dag_to_multi_realization=DAGToMultiRealization(enc),
+        logical=logical_pm(),
+        dag_to_multi_realization=DAGToMultiRealization(),
         multi_realization=[ElideRailExchanges(), routing, RetimeDiagonals()],
         multi_realization_to_dag=MultiRealizationToDAG(),
-        physical=physical_pm(routing.coupling_map, enc, seed=seed),
-    )
-
-
-def build_pm(
-    coupling_map: CouplingMap,
-    enc: type[QubitEncoding],
-    *,
-    seed: int = 42,
-    budget: SearchBudget | None = None,
-) -> PassManager:
-    """``prism_stages`` in a ``PassManager``."""
-    return PassManager(
-        [prism_stages(coupling_map, enc, seed=seed, budget=budget).to_flow_controller()]
+        physical=physical_pm(routing.coupling_map, seed=seed),
     )
 
 
@@ -206,5 +150,6 @@ def dualrail_pm(
     seed: int = 42,
     budget: SearchBudget | None = None,
 ) -> PassManager:
-    """A ``PassManager`` compiling to dual-rail qubits on ``coupling_map``."""
-    return build_pm(coupling_map, DualRail, seed=seed, budget=budget)
+    """A ``PassManager`` compiling circuits to dual-rail qubits on ``coupling_map``."""
+    stages = prism_stages(coupling_map, seed=seed, budget=budget)
+    return PassManager([stages.to_flow_controller()])

@@ -14,6 +14,7 @@ from qiskit.quantum_info import Operator
 from qiskit.transpiler import TranspilerError
 
 from prism.ir import (
+    RAILS,
     MultiRealization,
     MultiRealizationInstruction,
     MultiRealizationOp,
@@ -27,8 +28,6 @@ if TYPE_CHECKING:
 
     from qiskit.circuit import QuantumCircuit
 
-__all__ = ["ElideRailExchanges", "RetimeDiagonals"]
-
 
 class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):
     """Drop ops that only permute one qubit's rails, such as dual-rail X, and relabel the rails.
@@ -40,12 +39,11 @@ class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):
         ir = passmanager_ir
         if ir.placement is not None:
             raise TranspilerError("ElideRailExchanges runs before routing")
-        wpl = ir.enc.WIRES_PER_LOGICAL
         cur = list(range(len(ir.rails)))  # IR rail -> rail it now sits on
         data = []
         for ins in ir.data:
             perm = (
-                _rail_permutation(ins.operation, wpl)
+                _rail_permutation(ins.operation)
                 if isinstance(ins.operation, MultiRealizationOp)
                 else None
             )
@@ -64,16 +62,18 @@ class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):
         return ir
 
 
-def _rail_permutation(op: MultiRealizationOp, wpl: int) -> tuple[int, ...] | None:
+def _rail_permutation(op: MultiRealizationOp) -> tuple[int, ...] | None:
     """The rail permutation every candidate equals up to global phase, if any."""
-    if op.diagonal or op.num_qubits != wpl or op.num_clbits:
+    if op.diagonal or op.num_qubits != RAILS or op.num_clbits:
         return None
     try:
         ops = [Operator(qc) for qc in op.candidates]
     except (QiskitError, TypeError):  # non-unitary, control flow, or unbound
         return None
     perms = {
-        next((p for p in permutations(range(wpl)) if u.equiv(PermutationGate(p))), None)
+        next(
+            (p for p in permutations(range(RAILS)) if u.equiv(PermutationGate(p))), None
+        )
         for u in ops
     }
     return perms.pop() if len(perms) == 1 else None

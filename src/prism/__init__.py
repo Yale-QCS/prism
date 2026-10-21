@@ -2,8 +2,9 @@
 
 from importlib.metadata import version
 
-from prism.encodings import ErasureCheck
-from prism.pipeline import SearchBudget, dualrail_pm
+from prism.dualrail import ErasureCheck
+from prism.passes import SearchBudget
+from prism.pipeline import dualrail_pm, prism_stages
 
-__all__ = ["ErasureCheck", "SearchBudget", "dualrail_pm"]
+__all__ = ["ErasureCheck", "SearchBudget", "dualrail_pm", "prism_stages"]
 __version__ = version("prism-qc")

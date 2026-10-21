@@ -20,6 +20,7 @@ from qiskit.transpiler import CouplingMap, TranspilerError
 
 from prism._accelerate import dense_layout, prism_layout_and_routing
 from prism.ir import (
+    RAILS,
     MultiRealization,
     MultiRealizationInstruction,
     MultiRealizationOp,
@@ -27,8 +28,6 @@ from prism.ir import (
     commuting_predecessors,
 )
 from prism.metrics import is_free
-
-__all__ = ["Objective", "PrismRouting", "SearchBudget"]
 
 Objective = Literal["swaps", "depth"]
 
@@ -110,7 +109,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         if n_virt > n_phys:
             raise TranspilerError(
                 f"the circuit needs {n_virt} physical qubits ({len(ir.qregs)} logical "
-                f"x {ir.enc.WIRES_PER_LOGICAL} wires) but the coupling map has "
+                f"x {RAILS} rails) but the coupling map has "
                 f"{n_phys}. Use a larger coupling map or fewer qubits."
             )
         if n_through := sum(

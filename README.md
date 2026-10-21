@@ -69,7 +69,7 @@ Limits:
 
 ## Pipeline
 
-`prism.pipeline.prism_stages(coupling_map, DualRail)` is a `MultiStagePassManager`:
+`prism.prism_stages(coupling_map)` is a `MultiStagePassManager`. Its passes are in `prism.passes`:
 
 | Stage | IR | Passes |
 | --- | --- | --- |
@@ -86,9 +86,8 @@ import random
 
 from qiskit.passmanager import GenericPass
 from qiskit.transpiler import PassManager
-from prism.encodings import DualRail
+from prism import prism_stages
 from prism.ir import MultiRealization, MultiRealizationOp
-from prism.pipeline import prism_stages
 
 
 class RandomChoice(GenericPass[MultiRealization, MultiRealization]):
@@ -99,7 +98,7 @@ class RandomChoice(GenericPass[MultiRealization, MultiRealization]):
         return passmanager_ir
 
 
-stages = prism_stages(CouplingMap.from_line(6), DualRail)
+stages = prism_stages(CouplingMap.from_line(6))
 stages.multi_realization = [RandomChoice()]
 out = PassManager([stages.to_flow_controller()]).run(qc)
 ```

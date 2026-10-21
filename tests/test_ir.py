@@ -8,10 +8,9 @@ from qiskit.converters import circuit_to_dag
 from qiskit.transpiler import CouplingMap, PassManager, TranspilerError
 from qiskit.transpiler.passes import Size
 
-from prism.encodings import DualRail
 from prism.ir import MultiRealization, MultiRealizationOp
-from prism.pipeline import DAGToMultiRealization, prism_stages
-from prism.routing import PrismRouting
+from prism.passes import DAGToMultiRealization, PrismRouting
+from prism.pipeline import logical_pm, prism_stages
 
 
 def _bell() -> QuantumCircuit:
@@ -23,9 +22,9 @@ def _bell() -> QuantumCircuit:
 
 
 def _placed() -> MultiRealization:
-    ir = DAGToMultiRealization(DualRail).run(
+    ir = DAGToMultiRealization().run(
         circuit_to_dag(
-            DualRail.logical_pm().run(_bell().remove_final_measurements(inplace=False))
+            logical_pm().run(_bell().remove_final_measurements(inplace=False))
         )
     )
     placed = PrismRouting(CouplingMap.from_line(4), seed=0).run(ir)
@@ -52,7 +51,7 @@ def test_verify_rejects_a_choice_off_the_device_edges():
 
 
 def test_exit_needs_choices():
-    stages = prism_stages(CouplingMap.from_grid(2, 3), DualRail)
+    stages = prism_stages(CouplingMap.from_grid(2, 3))
     stages.multi_realization = []
     with pytest.raises(TranspilerError, match="has no realization choice"):
         PassManager([stages.to_flow_controller()]).run(_bell())
@@ -60,7 +59,7 @@ def test_exit_needs_choices():
 
 def test_ir_changing_passes_reset_completed_analyses():
     """An analysis equal to one that ran before an IR change runs again after it."""
-    stages = prism_stages(CouplingMap.from_grid(2, 3), DualRail)
+    stages = prism_stages(CouplingMap.from_grid(2, 3))
     stages.logical = [*stages.logical.to_flow_controller().tasks, Size()]
     stages.physical = [Size()]
     pm = PassManager([stages.to_flow_controller()])
@@ -73,9 +72,7 @@ def test_routing_takes_commuting_ops_left_with_one_pair():
     qc = QuantumCircuit(3)
     for theta, (a, b) in zip((0.3, 0.5, 0.7, 0.2), [(0, 1), (0, 1), (1, 2), (0, 1)]):
         qc.crz(theta, a, b)
-    ir = DAGToMultiRealization(DualRail).run(
-        circuit_to_dag(DualRail.logical_pm().run(qc))
-    )
+    ir = DAGToMultiRealization().run(circuit_to_dag(logical_pm().run(qc)))
     for k, ins in enumerate(ir.data):
         op = ins.operation
         if isinstance(op, MultiRealizationOp):

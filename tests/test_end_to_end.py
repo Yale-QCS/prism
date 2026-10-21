@@ -6,8 +6,7 @@ from qiskit.circuit.library import QFTGate
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap, TranspilerError
 
-from prism import ErasureCheck, dualrail_pm
-from prism.encodings import DualRail
+from prism import ErasureCheck, dualrail, dualrail_pm
 
 
 def _mixed() -> QuantumCircuit:
@@ -58,7 +57,7 @@ def test_output_is_physical_isa_on_device_edges(make, cmap):
     for ins in out.data:
         for block in getattr(ins.operation, "blocks", ()):
             ops |= set(block.count_ops())
-    assert ops <= DualRail.PHYSICAL_ISA | {"measure"}
+    assert ops <= dualrail.PHYSICAL_ISA | {"measure"}
 
 
 def _measure_in_if_else():

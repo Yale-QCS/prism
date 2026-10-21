@@ -1,20 +1,11 @@
-"""``CircuitMetrics`` and the pass that records them."""
+"""``CircuitMetrics``: the SWAP count and depth prism's routing ranks routes by."""
 
 from __future__ import annotations
 
+from collections.abc import Collection
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
-from qiskit.converters import dag_to_circuit
-from qiskit.transpiler import AnalysisPass
-
-if TYPE_CHECKING:
-    from collections.abc import Collection
-
-    from qiskit.circuit import Operation, QuantumCircuit
-    from qiskit.dagcircuit import DAGCircuit
-
-__all__ = ["CircuitMetrics", "RecordCircuitMetrics"]
+from qiskit.circuit import Operation, QuantumCircuit
 
 _FREE_GATES = frozenset({"rz", "u1", "p", "z", "initialize"})
 
@@ -51,10 +42,3 @@ class CircuitMetrics:
             active_gates=sum(not is_free(instr.operation) for instr in qc.data),
             size=qc.size(),
         )
-
-
-class RecordCircuitMetrics(AnalysisPass):
-    """Set ``property_set["circuit_metrics"]``."""
-
-    def run(self, dag: DAGCircuit) -> None:
-        self.property_set["circuit_metrics"] = CircuitMetrics.of(dag_to_circuit(dag))

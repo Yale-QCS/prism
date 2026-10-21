@@ -9,10 +9,8 @@ from qiskit.circuit.random import random_circuit
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap, PassManager
 
-from prism import dualrail_pm
-from prism.encodings import DualRail, QubitEncoding
-from prism.ir import MultiRealization, MultiRealizationOp
-from prism.pipeline import SearchBudget, build_pm, prism_stages
+from prism import SearchBudget, dualrail_pm, prism_stages
+from prism.ir import MultiRealization
 
 BUDGET = SearchBudget(layout_starts=4, refinement_iterations=2, swap_trials=4)
 
@@ -126,7 +124,7 @@ def test_op_the_router_passes_through_warns_and_stays_correct():
     qc.swap(0, 2)
     qc.crz(0.9, 2, 1)
     qc.rx(0.7, 0)
-    stages = prism_stages(CouplingMap.from_grid(2, 4), DualRail, seed=0, budget=BUDGET)
+    stages = prism_stages(CouplingMap.from_grid(2, 4), seed=0, budget=BUDGET)
     stages.logical = PassManager()
     with pytest.warns(UserWarning, match="passed 1 operation"):
         out = PassManager([stages.to_flow_controller()]).run(qc)
@@ -177,26 +175,6 @@ def _clbit_probabilities(qc: QuantumCircuit, clbits) -> dict[int, float]:
     return out
 
 
-class OneWire(QubitEncoding):
-    """Each logical qubit on one wire: any encoding with rules compiles."""
-
-    WIRES_PER_LOGICAL = 1
-    LOGICAL_ISA = frozenset({"rz", "sx", "x", "cz", "measure"})
-    PHYSICAL_ISA = frozenset({"rz", "sx", "x", "cz"})
-
-    @classmethod
-    def initialize(cls):
-        return QuantumCircuit(1)
-
-    @classmethod
-    def _as_is(cls, op):
-        qc = QuantumCircuit(op.num_qubits)
-        qc.append(op, qc.qubits)
-        return MultiRealizationOp(op.name, (qc,), diagonal=op.name in ("rz", "cz"))
-
-    rz = sx = x = cz = _as_is
-
-
 def _random_measured(mc: bool) -> QuantumCircuit:
     """Random circuit, an optional MCX, a logical SWAP and an X, then measured."""
     qc = random_circuit(4, 3, max_operands=2, seed=7)
@@ -227,17 +205,16 @@ def _semiclassical() -> QuantumCircuit:
 
 
 @pytest.mark.parametrize(
-    ("enc", "cmap", "qc"),
+    ("cmap", "qc"),
     [
-        (OneWire, CouplingMap.from_line(5), _random_measured(mc=False)),
         # MCX adds an ancilla qubit
-        (DualRail, CouplingMap.from_grid(3, 4), _random_measured(mc=True)),
-        (DualRail, CouplingMap.from_grid(2, 5), _semiclassical()),
+        (CouplingMap.from_grid(3, 4), _random_measured(mc=True)),
+        (CouplingMap.from_grid(2, 5), _semiclassical()),
     ],
 )
-def test_measured_distribution_matches_logical(enc, cmap, qc):
+def test_measured_distribution_matches_logical(cmap, qc):
     """Logical clbits keep the logical distribution, also where measurement became classical control."""
-    out = build_pm(cmap, enc=enc, seed=3).run(qc)
+    out = dualrail_pm(cmap, seed=3).run(qc)
     want = _clbit_probabilities(qc, qc.clbits)
     got = _clbit_probabilities(out, qc.clbits)  # logical clbits read rail 0
     assert got.keys() == want.keys()

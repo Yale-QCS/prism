@@ -1,87 +1,36 @@
-"""Logical stage: input circuit to ``enc.LOGICAL_ISA``."""
+"""Passes of the ``logical`` stage, on ``DAGCircuit``."""
 
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import TYPE_CHECKING
+from functools import partial
 
 import numpy as np
 from qiskit.circuit import (
     AncillaRegister,
+    Clbit,
+    EquivalenceLibrary,
+    Gate,
     IfElseOp,
     Measure,
     QuantumCircuit,
     Qubit,
 )
-from qiskit.circuit.controlflow import CONTROL_FLOW_OP_NAMES
 from qiskit.circuit.library import MCPhaseGate, MCXGate
 from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
-from qiskit.passmanager import DoWhileController
+from qiskit.quantum_info import Clifford
+from qiskit.synthesis import synth_clifford_ag, synth_clifford_greedy
 from qiskit.transpiler import PassManager, TransformationPass
 from qiskit.transpiler.passes import (
     BasisTranslator,
-    Decompose,
+    CollectCliffords,
     ElidePermutations,
-    FixedPoint,
-    HighLevelSynthesis,
-    HLSConfig,
     Optimize1qGatesDecomposition,
-    RemoveBarriers,
-    RemoveDiagonalGatesBeforeMeasure,
-    Size,
-    Unroll3qOrMore,
 )
-
-if TYPE_CHECKING:
-    from qiskit.circuit import Clbit, EquivalenceLibrary
-    from qiskit.transpiler import BasePass
-
-    from prism.encodings.base import QubitEncoding
-
-
-NON_GATE_ISA_NAMES: frozenset[str] = CONTROL_FLOW_OP_NAMES | {
-    "measure",
-    "reset",
-    "erasure_check",
-}
-
-
-def basic_logical_pm(
-    enc: type[QubitEncoding],
-    *,
-    eq_library: EquivalenceLibrary,
-    reshape_passes: tuple[BasePass, ...] = (),
-) -> PassManager:
-    """Translate to ``enc.LOGICAL_ISA`` and simplify."""
-    isa_basis = sorted(enc.LOGICAL_ISA - NON_GATE_ISA_NAMES)
-    return PassManager(
-        [
-            RemoveBarriers(),
-            MCPrepare(),
-            HighLevelSynthesis(hls_config=HLSConfig(mcx=["1_clean_kg24"])),
-            Decompose(["c-unitary", "unitary"]),
-            Unroll3qOrMore(basis_gates=["ccx"]),
-            *reshape_passes,
-            BasisTranslator(
-                eq_library, sorted(enc.LOGICAL_ISA | CONTROL_FLOW_OP_NAMES)
-            ),
-            SplitIfElse(),
-            # Before layout a SWAP only relabels logical qubits.
-            ElideLogicalPermutations(),
-            Optimize1qGatesDecomposition(basis=isa_basis),
-            # Removing an rz can expose a crz before a measurement.
-            DoWhileController(
-                [
-                    RemoveDiagonalGatesBeforeMeasure(),
-                    Size(recurse=True),
-                    FixedPoint("size"),
-                ],
-                do_while=lambda property_set: not property_set["size_fixed_point"],
-            ),
-            EarlyMeasurement(),
-        ]
-    )
+from qiskit.transpiler.passes.optimization.collect_and_collapse import (
+    collapse_to_operation,
+)
 
 
 class MCPrepare(TransformationPass):
@@ -232,3 +181,45 @@ def _classical_rz(
         block.rz(angle, qubit)
         blocks.append(block)
     return IfElseOp((bit, True), *blocks), qubit, bit
+
+
+class MinRXCliffords(CollectCliffords):
+    """Resynthesize each Clifford block with the fewest ``rx``, then ``crz``, in ``isa``.
+
+    The candidates are the block itself and its greedy and Aaronson-Gottesman syntheses.
+    A synthesis that couples a new pair of qubits, or holds a SWAP, is skipped:
+    routing the new pair costs more than the gates saved.
+    """
+
+    def __init__(self, eq_library: EquivalenceLibrary, isa: list[str]) -> None:
+        super().__init__()
+        translate = PassManager(
+            [BasisTranslator(eq_library, isa), Optimize1qGatesDecomposition(basis=isa)]
+        )
+
+        def score(qc: QuantumCircuit) -> tuple[int, int]:
+            ops = translate.run(qc).count_ops()
+            return ops.get("rx", 0), ops.get("crz", 0)
+
+        def pairs(qc: QuantumCircuit) -> set[frozenset]:
+            # A SWAP is elided into a relabelling of every later gate: never a subset.
+            return {
+                frozenset(ci.qubits) if ci.operation.name != "swap" else ci.qubits
+                for ci in qc.data
+                if len(ci.qubits) == 2
+            }
+
+        def best(block: QuantumCircuit) -> Gate:
+            cliff = Clifford(block)
+            cands = (block, synth_clifford_greedy(cliff), synth_clifford_ag(cliff))
+            qc = min((c for c in cands if pairs(c) <= pairs(block)), key=score)
+            return qc.to_gate(label="min_rx_clifford")
+
+        self.collapse_function = partial(collapse_to_operation, collapse_function=best)
+
+    def run(self, dag: DAGCircuit) -> DAGCircuit:
+        dag = super().run(dag)
+        for node in dag.op_nodes():
+            if node.op.label == "min_rx_clifford":
+                dag.substitute_node_with_dag(node, circuit_to_dag(node.op.definition))
+        return dag
