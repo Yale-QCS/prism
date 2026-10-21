@@ -26,11 +26,10 @@ def test_every_accessor_works_on_rails_and_ancillas():
     assert sorted(lay.routing_permutation()) == list(range(9))
     names = {reg.name for reg in lay.initial_layout.get_registers()}
     assert names == {"q0", "q1", "q2", "ancilla"}
+    # Virtual qubit 2i + w is rail w of q<i>.
     rails = lay.initial_virtual_layout(filter_ancillas=True)
     (q0,) = [reg for reg in lay.initial_layout.get_registers() if reg.name == "q0"]
-    assert [rails[p] for p in initial[:2]] == list(
-        q0
-    )  # virtual 2i + w is rail w of q<i>
+    assert [rails[p] for p in initial[:2]] == list(q0)
 
 
 def test_elided_logical_swap_is_in_the_final_layout():
