@@ -48,7 +48,6 @@ from prism.passes import (
     PrismRouting,
     RecordCircuitMetrics,
     RescheduleCommutingDiagonals,
-    RetimeDiagonals,
     SearchBudget,
     SplitIfElse,
 )
@@ -134,7 +133,7 @@ def prism_stages(
     return MultiStagePassManager(
         logical=logical_pm(),
         dag_to_multi_realization=DAGToMultiRealization(),
-        multi_realization=[ElideRailExchanges(), routing, RetimeDiagonals()],
+        multi_realization=[ElideRailExchanges(), routing],
         multi_realization_to_dag=MultiRealizationToDAG(),
         physical=physical_pm(routing.coupling_map, seed=seed),
     )

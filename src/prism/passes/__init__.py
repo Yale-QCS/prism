@@ -8,7 +8,7 @@ from prism.passes.logical import (
     SplitIfElse,
 )
 from prism.passes.lowering import DAGToMultiRealization, MultiRealizationToDAG
-from prism.passes.multi_realization import ElideRailExchanges, RetimeDiagonals
+from prism.passes.multi_realization import ElideRailExchanges
 from prism.passes.physical import (
     FenceErasureChecks,
     RecordCircuitMetrics,
@@ -28,7 +28,6 @@ __all__ = [
     "PrismRouting",
     "RecordCircuitMetrics",
     "RescheduleCommutingDiagonals",
-    "RetimeDiagonals",
     "SearchBudget",
     "SplitIfElse",
 ]

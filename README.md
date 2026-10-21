@@ -75,7 +75,7 @@ Limits:
 | --- | --- | --- |
 | `logical` | `DAGCircuit` | stock passes and a dual-rail equivalence library to the logical gate set, then `EarlyMeasurement` |
 | `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | each operation becomes a `MultiRealizationOp` with its candidates |
-| `multi_realization` | `MultiRealization` | `ElideRailExchanges`, `PrismRouting` (layout, routing and a `choice` per op), `RetimeDiagonals` |
+| `multi_realization` | `MultiRealization` | `ElideRailExchanges` and `PrismRouting` (layout, routing and a `choice` per op) |
 | `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | each choice becomes gates, with the layout |
 | `physical` | `DAGCircuit` | stock cleanups, stock layout and routing of unrouted operations, `CommutativeOptimization`, `RescheduleCommutingDiagonals` |
 
