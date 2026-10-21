@@ -13,7 +13,6 @@ from copy import deepcopy
 from dataclasses import dataclass, replace
 from typing import Literal, get_args
 
-from qiskit.circuit import Clbit, Operation
 from qiskit.circuit.library import SwapGate
 from qiskit.passmanager import GenericPass
 from qiskit.transpiler import CouplingMap, TranspilerError
@@ -100,8 +99,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         self.seed = seed
         self.budget = budget or SearchBudget()
 
-    def run(self, passmanager_ir: MultiRealization) -> MultiRealization:
-        ir = passmanager_ir
+    def run(self, ir: MultiRealization) -> MultiRealization:
         ir.verify()
         if ir.placement is not None:
             raise TranspilerError("PrismRouting got a program that is already placed")
@@ -167,7 +165,7 @@ def _routing_problem(ir: MultiRealization) -> list[tuple]:
     """Per instruction ``(default, predecessors, gates)``; ``gates[r]`` lists realization ``r``'s gates."""
     clbit_index = {bit: i for i, bit in enumerate(ir.clbits)}
 
-    def gate(op: Operation, qubits: tuple[int, ...], clbits: tuple[Clbit, ...]):
+    def gate(op, qubits, clbits):
         return (
             list(qubits),
             sorted({clbit_index[c] for c in clbits}),

@@ -84,11 +84,9 @@ class ErasureCheck(Instruction):
         super().__init__("erasure_check", 1, 1, [])
 
 
-#: Logical operations ``lower`` takes, which the logical stage translates to.
 LOGICAL_ISA = frozenset(
     {"x", "rx", "rz", "crz", "swap", "measure", "reset", "if_else", "erasure_check"}
 )
-#: Operations of the candidates, which the physical stage keeps.
 PHYSICAL_ISA = frozenset(
     {"rz", "crz", "swap", "rswap", "initialize", "pauli_product_measurement"}
 )
@@ -120,7 +118,6 @@ def lower(op: Instruction, clbits: tuple[Clbit, ...] = ()) -> MultiRealizationOp
 
 
 def _x(op: Instruction) -> MultiRealizationOp:
-    """Exchange the rails."""
     qc = QuantumCircuit(2)
     qc.swap(0, 1)
     return MultiRealizationOp("x", (qc,))
@@ -171,7 +168,6 @@ def _swap(op: Instruction) -> MultiRealizationOp:
 
 
 def _measure(op: Instruction) -> MultiRealizationOp:
-    """Measure both rails; rail ``w`` writes clbit ``w``."""
     qc = QuantumCircuit(RAILS, RAILS)
     qc.measure(range(RAILS), range(RAILS))
     return MultiRealizationOp("measure", (qc,))
@@ -189,7 +185,6 @@ def _erasure_check(op: Instruction) -> MultiRealizationOp:
 
 
 def _if_else(op: IfElseOp, clbits: tuple[Clbit, ...]) -> MultiRealizationOp:
-    """An ``if_else`` on one qubit's rails, its blocks lowered gate by gate."""
     if op.num_qubits > 1:
         raise TranspilerError(
             "dual rail lowers one if_else per qubit: every block instruction "
@@ -234,28 +229,22 @@ _RULES = {
 }
 
 
+# Target-side forms: each puts its one RX on the target, where it is an RSWAP.
+
+
 def _h(qc: QuantumCircuit, q: int) -> None:
-    """``H`` as ``Rz . Rx . Rz``: one RX."""
     qc.rz(np.pi / 2, q)
     qc.rx(np.pi / 2, q)
     qc.rz(np.pi / 2, q)
 
 
-def _u(
-    qc: QuantumCircuit,
-    theta: float | ParameterExpression,
-    phi: float | ParameterExpression,
-    lam: float | ParameterExpression,
-    q: int,
-) -> None:
-    """``U(theta, phi, lam)`` as ``Rz(lam - pi/2) . Rx(theta) . Rz(phi + pi/2)``."""
+def _u(qc: QuantumCircuit, theta, phi, lam, q: int) -> None:
     qc.rz(lam - np.pi / 2, q)
     qc.rx(theta, q)
     qc.rz(phi + np.pi / 2, q)
 
 
 def _cx(qc: QuantumCircuit, c: int, t: int) -> None:
-    """``CX(c, t) = H_t . S_c . CRz(pi) . H_t``, up to global phase."""
     _h(qc, t)
     qc.rz(np.pi / 2, c)
     qc.crz(np.pi, c, t)
@@ -263,114 +252,77 @@ def _cx(qc: QuantumCircuit, c: int, t: int) -> None:
 
 
 def _cz(qc: QuantumCircuit) -> None:
-    """``CZ(0, 1) = CRz(pi) . Rz(pi/2)_0``, up to global phase."""
     qc.crz(np.pi, 0, 1)
     qc.rz(np.pi / 2, 0)
 
 
-def _cu() -> tuple[CUGate, QuantumCircuit]:
-    """``CU`` as Qiskit's definition with each CX and U expanded target-side."""
-    theta, phi, lam, gamma = (Parameter(s) for s in ("θ", "φ", "λ", "γ"))
-    qc = QuantumCircuit(2)
-    qc.rz(gamma, 0)
-    qc.rz((lam + phi) / 2, 0)
-    qc.rz((lam - phi) / 2, 1)
-    _cx(qc, 0, 1)
-    _u(qc, -theta / 2, 0, -(lam + phi) / 2, 1)
-    _cx(qc, 0, 1)
-    _u(qc, theta / 2, phi, 0, 1)
-    return CUGate(theta, phi, lam, gamma), qc
-
-
-def _rzz() -> tuple[RZZGate, QuantumCircuit]:
-    """``RZZ(theta) = CRZ(-2 theta) . Rz(theta)_1``, up to global phase."""
-    theta = Parameter("θ")
-    qc = QuantumCircuit(2)
-    qc.crz(-2 * theta, 0, 1)
-    qc.rz(theta, 1)
-    return RZZGate(theta), qc
-
-
-def _cp() -> tuple[CPhaseGate, QuantumCircuit]:
-    """``CP(theta) = Rz(theta/2)_0 . CRZ(theta)``, up to global phase."""
-    theta = Parameter("θ")
-    qc = QuantumCircuit(2)
-    qc.rz(theta / 2, 0)
-    qc.crz(theta, 0, 1)
-    return CPhaseGate(theta), qc
-
-
-def _cs(gate: CSGate | CSdgGate, sign: int) -> tuple[Gate, QuantumCircuit]:
-    """``CS`` (``sign=1``) or ``CSdg`` (``sign=-1``) as ``CP(sign pi/2)``."""
-    qc = QuantumCircuit(2)
-    qc.rz(sign * np.pi / 4, 0)
-    qc.crz(sign * np.pi / 2, 0, 1)
-    return gate, qc
-
-
-def _rxx_body(qc: QuantumCircuit, theta: Parameter) -> None:
-    """``RXX(theta) = H_0 . CZ . RX(theta)_1 . CZ . H_0``, up to global phase. 3 RX."""
-    _h(qc, 0)
-    _cz(qc)
-    qc.rx(theta, 1)
-    _cz(qc)
-    _h(qc, 0)
-
-
-def _rxx() -> tuple[RXXGate, QuantumCircuit]:
-    """``RXX`` with 3 RX."""
-    theta = Parameter("θ")
-    qc = QuantumCircuit(2)
-    _rxx_body(qc, theta)
-    return RXXGate(theta), qc
-
-
-def _ryy() -> tuple[RYYGate, QuantumCircuit]:
-    """``RYY(theta) = (Sdg x Sdg) . RXX(theta) . (S x S)``, up to global phase. 3 RX."""
-    theta = Parameter("θ")
-    qc = QuantumCircuit(2)
-    qc.rz(-np.pi / 2, 0)
-    qc.rz(-np.pi / 2, 1)
-    _rxx_body(qc, theta)
-    qc.rz(np.pi / 2, 0)
-    qc.rz(np.pi / 2, 1)
-    return RYYGate(theta), qc
-
-
-def _iswap() -> tuple[iSwapGate, QuantumCircuit]:
-    """``iSwap = SWAP . RZZ(pi/2)``, up to global phase. No RX."""
-    qc = QuantumCircuit(2)
-    qc.swap(0, 1)
-    qc.rzz(np.pi / 2, 0, 1)
-    return iSwapGate(), qc
-
-
-def _ccx() -> tuple[CCXGate, QuantumCircuit]:
-    """``CCX(a,b,t) = H_t . CS(a,t) . CX(b,t) . CSdg(a,t) . CX(b,t) . CS(a,b) . H_t``. 4 RX after Opt1q."""
-    qc = QuantumCircuit(3)
-    qc.h(2)
-    qc.cs(0, 2)
-    qc.cx(1, 2)
-    qc.csdg(0, 2)
-    qc.cx(1, 2)
-    qc.cs(0, 1)
-    qc.h(2)
-    return CCXGate(), qc
-
-
 def equivalence_library() -> EquivalenceLibrary:
-    """The templates on top of the session library; ``BasisTranslator`` takes the shortest path."""
+    """The templates on top of the session library; ``BasisTranslator`` takes the shortest path.
+
+    Products are in circuit order and hold up to global phase.
+    """
+    theta, phi, lam, gamma = (Parameter(s) for s in "θφλγ")
+
+    # Qiskit's CU definition, with each CX and U target-side.
+    cu = QuantumCircuit(2)
+    cu.rz(gamma, 0)
+    cu.rz((lam + phi) / 2, 0)
+    cu.rz((lam - phi) / 2, 1)
+    _cx(cu, 0, 1)
+    _u(cu, -theta / 2, 0, -(lam + phi) / 2, 1)
+    _cx(cu, 0, 1)
+    _u(cu, theta / 2, phi, 0, 1)
+
+    # RZZ(θ) = CRZ(-2θ) . Rz(θ)_1
+    rzz = QuantumCircuit(2)
+    rzz.crz(-2 * theta, 0, 1)
+    rzz.rz(theta, 1)
+
+    # CP(θ) = Rz(θ/2)_0 . CRZ(θ), and CS = CP(π/2)
+    cp = QuantumCircuit(2)
+    cp.rz(theta / 2, 0)
+    cp.crz(theta, 0, 1)
+
+    # RXX(θ) = H_0 . CZ . Rx(θ)_1 . CZ . H_0: 3 RX
+    rxx = QuantumCircuit(2)
+    _h(rxx, 0)
+    _cz(rxx)
+    rxx.rx(theta, 1)
+    _cz(rxx)
+    _h(rxx, 0)
+
+    # RYY(θ) = (Sdg ⊗ Sdg) . RXX(θ) . (S ⊗ S)
+    ryy = QuantumCircuit(2)
+    ryy.rz(-np.pi / 2, [0, 1])
+    ryy.compose(rxx, inplace=True)
+    ryy.rz(np.pi / 2, [0, 1])
+
+    # iSwap = SWAP . RZZ(π/2): no RX
+    iswap = QuantumCircuit(2)
+    iswap.swap(0, 1)
+    iswap.rzz(np.pi / 2, 0, 1)
+
+    # CCX(a, b, t) = H_t . CS(a, t) . CX(b, t) . CSdg(a, t) . CX(b, t) . CS(a, b) . H_t
+    ccx = QuantumCircuit(3)
+    ccx.h(2)
+    ccx.cs(0, 2)
+    ccx.cx(1, 2)
+    ccx.csdg(0, 2)
+    ccx.cx(1, 2)
+    ccx.cs(0, 1)
+    ccx.h(2)
+
     lib = EquivalenceLibrary(base=SessionEquivalenceLibrary)
     for gate, template in (
-        _cu(),
-        _rzz(),
-        _cp(),
-        _cs(CSGate(), 1),
-        _cs(CSdgGate(), -1),
-        _rxx(),
-        _ryy(),
-        _iswap(),
-        _ccx(),
+        (CUGate(theta, phi, lam, gamma), cu),
+        (RZZGate(theta), rzz),
+        (CPhaseGate(theta), cp),
+        (CSGate(), cp.assign_parameters([np.pi / 2])),
+        (CSdgGate(), cp.assign_parameters([-np.pi / 2])),
+        (RXXGate(theta), rxx),
+        (RYYGate(theta), ryy),
+        (iSwapGate(), iswap),
+        (CCXGate(), ccx),
     ):
         lib.add_equivalence(gate, template)
     return lib
