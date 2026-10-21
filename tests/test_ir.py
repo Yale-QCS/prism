@@ -41,12 +41,8 @@ def test_verify_rejects_a_choice_off_the_device_edges():
         op = ins.operation
         if not isinstance(op, MultiRealizationOp):
             continue
-        for r, real in enumerate(op.candidates):
-            pairs = [
-                tuple(ins.qubits[real.find_bit(q).index] for q in ci.qubits)
-                for ci in real.data
-                if len(ci.qubits) == 2
-            ]
+        for r in range(len(op.candidates)):
+            pairs = [qs for _, qs, _ in ins.candidate_gates(r) if len(qs) == 2]
             if any(p not in edges for p in pairs):
                 placed.data[k] = ins._replace(operation=replace(op, choice=r))
                 with pytest.raises(TranspilerError, match="not a device edge"):

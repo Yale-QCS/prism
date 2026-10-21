@@ -25,7 +25,7 @@ from qiskit.passmanager import IR
 from qiskit.transpiler import TranspilerError
 
 if TYPE_CHECKING:
-    from collections.abc import Collection, Hashable, Sequence
+    from collections.abc import Collection, Hashable, Iterator, Sequence
 
     from prism.encodings.base import QubitEncoding
 
@@ -201,6 +201,25 @@ class MultiRealizationInstruction(NamedTuple):
     qubits: tuple[int, ...]
     clbits: tuple[Clbit, ...] = ()
 
+    @property
+    def diagonal(self) -> bool:
+        """The operation is a diagonal ``MultiRealizationOp``."""
+        return (
+            isinstance(self.operation, MultiRealizationOp) and self.operation.diagonal
+        )
+
+    def candidate_gates(
+        self, r: int
+    ) -> Iterator[tuple[Operation, tuple[int, ...], tuple[Clbit, ...]]]:
+        """``(operation, wires, clbits)`` of each gate of candidate ``r``, on this instruction's bits."""
+        real = self.operation.candidates[r]
+        for ci in real.data:
+            yield (
+                ci.operation,
+                tuple(self.qubits[real.find_bit(q).index] for q in ci.qubits),
+                tuple(self.clbits[real.find_bit(c).index] for c in ci.clbits),
+            )
+
 
 class Placement(NamedTuple):
     """Virtual wire ``v`` (rails, then ancillas) starts on ``initial[v]``, ends on ``final[v]``.
@@ -268,13 +287,8 @@ class MultiRealization(IR):
                 raise TranspilerError(
                     f"instruction {k} ({op.name}) has no realization choice"
                 )
-            real = op.candidates[op.choice]
-            for ci in real.data:
-                out.append(
-                    ci.operation,
-                    [wires[ins.qubits[real.find_bit(q).index]] for q in ci.qubits],
-                    [ins.clbits[real.find_bit(c).index] for c in ci.clbits],
-                )
+            for gate, qubits, clbits in ins.candidate_gates(op.choice):
+                out.append(gate, [wires[q] for q in qubits], clbits)
         return out
 
     def verify(self) -> None:
@@ -316,12 +330,8 @@ class MultiRealization(IR):
             except ValueError as e:
                 _fail(f"{where}: {e}")
             if op.choice is not None and op.single_edge:
-                real = op.candidates[op.choice]
-                for ci in real.data:
-                    if len(ci.qubits) == 2:
-                        pair = tuple(
-                            ins.qubits[real.find_bit(q).index] for q in ci.qubits
-                        )
+                for _, pair, _ in ins.candidate_gates(op.choice):
+                    if len(pair) == 2:
                         self._check_on_edge(pair, f"{where} choice {op.choice}")
             for r, real in enumerate(op.candidates):
                 for ci in real.data:

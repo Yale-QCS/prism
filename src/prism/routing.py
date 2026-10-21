@@ -130,10 +130,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             _routing_problem(ir),
             edge_list,
             n_phys,
-            [
-                (seed % (1 << 64), v2p)
-                for seed, v2p in self._starting_layouts(base_seed, edge_list, n_virt)
-            ],
+            self._starting_layouts(base_seed, edge_list, n_virt),
             self.budget.refinement_iterations,
             self.budget.swap_trials,
             self.budget.objective,
@@ -148,57 +145,49 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
     def _starting_layouts(
         self, base_seed: int, edges: list[tuple[int, int]], n_virt: int
     ) -> list[tuple[int, list[int]]]:
+        """``(seed, v2p)`` of the random, dense, identity and reverse starts."""
         n_phys = self.coupling_map.size()
-        starts = []
+        layouts = []
         for trial in range(self.budget.layout_starts):
             v2p = list(range(n_phys))
             random.Random(base_seed + trial).shuffle(v2p)
-            starts.append((base_seed + trial, v2p))
-        seed = base_seed + self.budget.layout_starts
-        return starts + [
-            (seed, dense_layout(edges, n_phys, n_virt)),
-            (seed + 1, list(range(n_phys))),
-            (seed + 2, list(reversed(range(n_phys)))),
+            layouts.append(v2p)
+        layouts += [
+            dense_layout(edges, n_phys, n_virt),
+            list(range(n_phys)),
+            list(reversed(range(n_phys))),
         ]
+        return [((base_seed + i) % (1 << 64), v2p) for i, v2p in enumerate(layouts)]
 
 
 def _routing_problem(ir: MultiRealization) -> list[tuple]:
     """Per instruction ``(default, predecessors, gates)``; ``gates[r]`` lists realization ``r``'s gates."""
     clbit_index = {bit: i for i, bit in enumerate(ir.clbits)}
 
-    def gate(op: Operation, qubits: list[int], clbits: list[Clbit]) -> tuple:
+    def gate(op: Operation, qubits: tuple[int, ...], clbits: tuple[Clbit, ...]):
         return (
-            qubits,
+            list(qubits),
             sorted({clbit_index[c] for c in clbits}),
             is_free(op),
             op.name == "swap",
         )
 
-    ops, wires, diagonal = [], [], []
+    ops, wires = [], []
     for ins in ir.data:
         op = ins.operation
         if isinstance(op, MultiRealizationOp):
             gates = [
-                [
-                    gate(
-                        ci.operation,
-                        [ins.qubits[real.find_bit(q).index] for q in ci.qubits],
-                        [ins.clbits[real.find_bit(c).index] for c in ci.clbits],
-                    )
-                    for ci in real.data
-                ]
-                for real in op.candidates
+                [gate(*g) for g in ins.candidate_gates(r)]
+                for r in range(len(op.candidates))
             ]
-            default, diag = op.default_index, op.diagonal
+            ops.append((op.default_index, gates))
         else:
-            gates = [[gate(op, list(ins.qubits), list(ins.clbits))]]
-            default, diag = 0, False
-        ops.append((default, gates))
+            gates = [[gate(op, ins.qubits, ins.clbits)]]
+            ops.append((0, gates))
         wires.append(
             {q for real in gates for g in real for q in g[0]} | set(ins.clbits)
         )
-        diagonal.append(diag)
-    preds = commuting_predecessors(wires, diagonal)
+    preds = commuting_predecessors(wires, [ins.diagonal for ins in ir.data])
     return [
         (default, sorted(deps), gates) for (default, gates), deps in zip(ops, preds)
     ]
