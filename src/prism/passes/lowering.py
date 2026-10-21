@@ -19,10 +19,8 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
     A measurement writes rail 0 to its clbit ``c[i]`` and rail ``w`` to ``c_rail<w>[i]``.
     """
 
-    def run(self, passmanager_ir: DAGCircuit) -> MultiRealization:
-        dag = passmanager_ir
-        n = len(dag.qubits)
-        logical = {q: i for i, q in enumerate(dag.qubits)}
+    def run(self, dag: DAGCircuit) -> MultiRealization:
+        n = dag.num_qubits()
         cregs, clbits, partner = _rail_registers(dag)
         data = []
         prep = dualrail.initialize()
@@ -33,7 +31,9 @@ class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):
         for node in dag.topological_op_nodes():
             op = dualrail.lower(node.op, tuple(node.cargs))
             rails = tuple(
-                RAILS * logical[q] + w for q in node.qargs for w in range(RAILS)
+                RAILS * dag.find_bit(q).index + w
+                for q in node.qargs
+                for w in range(RAILS)
             )
             if isinstance(node.op, Measure):
                 c = node.cargs[0]
@@ -97,8 +97,7 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
     logical qubit ``i``, then the ancillas.
     """
 
-    def run(self, passmanager_ir: MultiRealization) -> DAGCircuit:
-        ir = passmanager_ir
+    def run(self, ir: MultiRealization) -> DAGCircuit:
         ir.verify()
         dag = circuit_to_dag(ir.to_circuit())
         ps = self.property_set
@@ -107,20 +106,14 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
         ps["virtual_permutation_layout"] = Layout(
             dict(zip(ir.rails, ir.output_permutation))
         )
-        if ir.placement is None:
-            ps["original_qubit_indices"] = {q: v for v, q in enumerate(ir.rails)}
-            return dag
-        initial, final = ir.placement.initial, ir.placement.final
-        ancillas = QuantumRegister(len(initial) - len(ir.rails), "ancilla")
+        ancillas = QuantumRegister(ir.num_wires - len(ir.rails), "ancilla")
         virtuals = ir.rails + list(ancillas)
         ps["original_qubit_indices"] = {q: v for v, q in enumerate(virtuals)}
-        layout = Layout(dict(zip(virtuals, initial)))
-        for reg in [*ir.qregs, ancillas]:
-            layout.add_register(reg)
-        ps["layout"] = layout
-        ps["final_layout"] = Layout(
-            {dag.qubits[initial[v]]: final[v] for v in range(len(initial))}
-        )
+        if ir.placement is None:
+            return dag
+        initial, final = ir.placement.initial, ir.placement.final
+        ps["layout"] = Layout.from_intlist(initial, *ir.qregs, ancillas)
+        ps["final_layout"] = Layout({dag.qubits[p]: f for p, f in zip(initial, final)})
         # Fold the elided permutation into final_layout, as stock layout passes do.
         TranspileLayout.from_property_set(dag, ps).write_into_property_set(ps)
         return dag
