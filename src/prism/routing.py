@@ -53,11 +53,14 @@ class SearchBudget:
     objective: Objective | float = "swaps"
 
     def __post_init__(self) -> None:
-        if isinstance(self.objective, bool) or not (
-            self.objective in get_args(Objective)
-            or isinstance(self.objective, (int, float))
-            and 0 <= self.objective < math.inf
-        ):
+        obj = self.objective
+        named = isinstance(obj, str) and obj in get_args(Objective)
+        weight = (
+            isinstance(obj, (int, float))
+            and not isinstance(obj, bool)
+            and 0 <= obj < math.inf
+        )
+        if not (named or weight):
             raise ValueError(
                 f"objective must be one of {list(get_args(Objective))} or a finite "
                 f"depth weight >= 0, got {self.objective!r}"
