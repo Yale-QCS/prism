@@ -320,6 +320,6 @@ class _Retime:
                     a = new
                     tried.clear()
                     break
-                order, qubits[k], choice[k], gates[k] = saved
+                order[:], qubits[k], choice[k], gates[k] = saved
             else:
                 return a.depth, order, qubits, choice
