@@ -17,4 +17,4 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/), sub
 
 Bump `version` in `pyproject.toml` and push a matching `vX.Y.Z` (or `vX.Y.ZrcN`) tag.
 The [release workflow](workflows/release.yml) builds the wheels and sdist into a draft GitHub
-release; publishing the release uploads it to PyPI ([publish.yml](workflows/publish.yml)).
+release. Publishing the release uploads it to PyPI ([publish.yml](workflows/publish.yml)).

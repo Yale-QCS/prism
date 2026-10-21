@@ -61,7 +61,7 @@ With lookahead the two differ by the bug fix above.
 and omits upstream `layout.rs`, which imports the private `passes::disjoint_layout`. prism's
 layout loop is `../prism_routing/layout.rs`. `lib.rs` maps the upstream `crate::` imports onto
 `qiskit_transpiler` and allows dead code in this module, for the upstream items prism never
-calls. Vendored files keep upstream formatting; the patched lines are `rustfmt`-formatted.
+calls. Vendored files keep upstream formatting, and the patched lines are `rustfmt`-formatted.
 
 ## Reproduce
 

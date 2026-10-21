@@ -2,8 +2,8 @@
 
 Rust extension module behind prism's routing, imported as `prism._accelerate`.
 
-- [`src/sabre/`](src/sabre/): Qiskit 2.6.0's Sabre router, vendored with a small patch; see its
-  [README](src/sabre/README.md).
+- [`src/sabre/`](src/sabre/): Qiskit 2.6.0's Sabre router, vendored with a small patch
+  ([README](src/sabre/README.md)).
 - [`src/prism_routing/`](src/prism_routing/): prism's code. `layout.rs` is the Python entry point
   and layout search, `input.rs` builds the Sabre DAGs, `score.rs` ranks routes, `route_ext.rs`
   holds the multi-realization hooks compiled inside the vendored `route` module.
@@ -12,9 +12,9 @@ Build with `make rebuild`, or `PYO3_PYTHON=$(which python3) cargo build --locked
 
 ## Dependency pinning
 
-The Qiskit git dependencies only build against the versions Qiskit itself locks; a fresh
-resolution pulls newer, duplicated crates and fails inside `qiskit-circuit`. So `Cargo.lock` is
-seeded from Qiskit's `Cargo.lock` at the same tag and every build uses `--locked`. To move to a new
+The Qiskit git dependencies only build against the versions Qiskit itself locks. A fresh
+resolution pulls newer, duplicated crates and fails inside `qiskit-circuit`. So `Cargo.lock`
+starts as Qiskit's `Cargo.lock` at the same tag, and every build uses `--locked`. To move to a new
 Qiskit tag:
 
 ```sh
