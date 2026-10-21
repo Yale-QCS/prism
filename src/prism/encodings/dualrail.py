@@ -71,8 +71,6 @@ class ErasureCheck(Instruction):
 
 
 class DualRail(QubitEncoding):
-    """The dual-rail encoding."""
-
     WIRES_PER_LOGICAL: ClassVar[int] = 2
     LOGICAL_ISA: ClassVar[frozenset[str]] = frozenset(
         {"x", "rx", "rz", "crz", "swap", "measure", "reset", "if_else", "erasure_check"}

@@ -185,7 +185,6 @@ class MultiRealizationInstruction(NamedTuple):
 
     @property
     def diagonal(self) -> bool:
-        """The operation is a diagonal ``MultiRealizationOp``."""
         return (
             isinstance(self.operation, MultiRealizationOp) and self.operation.diagonal
         )

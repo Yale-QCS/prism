@@ -53,7 +53,7 @@ def basic_logical_pm(
     eq_library: EquivalenceLibrary,
     reshape_passes: tuple[BasePass, ...] = (),
 ) -> PassManager:
-    """Translate to ``enc.LOGICAL_ISA`` and simplify, with stock passes where they exist."""
+    """Translate to ``enc.LOGICAL_ISA`` and simplify."""
     isa_basis = sorted(enc.LOGICAL_ISA - NON_GATE_ISA_NAMES)
     return PassManager(
         [
