@@ -48,7 +48,5 @@ class RescheduleCommutingDiagonals(TransformationPass):
 
 
 class RecordCircuitMetrics(AnalysisPass):
-    """Set ``property_set["circuit_metrics"]``."""
-
     def run(self, dag: DAGCircuit) -> None:
         self.property_set["circuit_metrics"] = CircuitMetrics.of(dag_to_circuit(dag))
