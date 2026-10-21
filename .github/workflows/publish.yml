@@ -20,4 +20,4 @@ jobs:
           REPO: ${{ github.repository }}
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          attestations: false
+          packages-dir: dist/

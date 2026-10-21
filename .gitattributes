@@ -1,3 +1,6 @@
 * text=auto eol=lf
-*.png binary
-crates/Cargo.lock merge=binary linguist-generated
+*.py   text diff=python
+*.rs   text diff=rust
+*.toml text diff=toml
+*.png  binary
+crates/Cargo.lock text merge=binary linguist-generated

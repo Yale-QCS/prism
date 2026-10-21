@@ -1,6 +1,7 @@
 # Contributing
 
-Development needs Python 3.10+ and Rust 1.97.
+Development uses Python 3.12 and the Rust version in
+[rust-toolchain.toml](../rust-toolchain.toml), which rustup installs automatically.
 
 ```sh
 git clone https://github.com/evmckinney9/prism.git

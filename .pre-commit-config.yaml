@@ -1,3 +1,4 @@
+fail_fast: true
 default_install_hook_types: [pre-commit, commit-msg]
 
 repos:
@@ -27,6 +28,13 @@ repos:
     rev: v6.0.0
     hooks:
       - id: trailing-whitespace
-        exclude: ^crates/src/sabre/local\.patch$
+        args: [--markdown-linebreak-ext=md]
+        exclude: ^crates/src/sabre/local\.patch$  # patch context
       - id: end-of-file-fixer
         exclude: ^crates/src/sabre/local\.patch$
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: check-added-large-files
+        args: [--maxkb=2000]
+      - id: name-tests-test
+        args: [--pytest-test-first]

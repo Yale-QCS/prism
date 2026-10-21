@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "wheel", "setuptools_rust"]
+requires = ["setuptools>=77", "setuptools_rust"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -23,6 +23,9 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
 ]
 dependencies = ["qiskit~=2.6.0", "numpy"]
+
+[tool.setuptools]
+include-package-data = false
 
 [tool.distutils.bdist_wheel]
 py_limited_api = "cp310"
