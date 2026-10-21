@@ -9,10 +9,12 @@ from __future__ import annotations
 import math
 import random
 import warnings
+from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass, replace
 from typing import Literal, get_args
 
+from qiskit.circuit import Clbit, Operation, Qubit
 from qiskit.circuit.library import SwapGate
 from qiskit.passmanager import GenericPass
 from qiskit.transpiler import CouplingMap, TranspilerError
@@ -119,6 +121,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
                 f"PrismRouting passed {n_through} operation(s) through to the physical "
                 "stage: no candidate has its 2-qubit gates on one rail pair",
                 UserWarning,
+                stacklevel=2,
             )
         base_seed = (
             self.seed
@@ -165,7 +168,7 @@ def _routing_problem(ir: MultiRealization) -> list[tuple]:
     """Per instruction ``(default, predecessors, gates)``; ``gates[r]`` lists realization ``r``'s gates."""
     clbit_index = {bit: i for i, bit in enumerate(ir.clbits)}
 
-    def gate(op, qubits, clbits):
+    def gate(op: Operation, qubits: Iterable[Qubit], clbits: Iterable[Clbit]) -> tuple:
         return (
             list(qubits),
             sorted({clbit_index[c] for c in clbits}),
@@ -190,7 +193,8 @@ def _routing_problem(ir: MultiRealization) -> list[tuple]:
         )
     preds = commuting_predecessors(wires, [ins.diagonal for ins in ir.data])
     return [
-        (default, sorted(deps), gates) for (default, gates), deps in zip(ops, preds)
+        (default, sorted(deps), gates)
+        for (default, gates), deps in zip(ops, preds, strict=True)
     ]
 
 

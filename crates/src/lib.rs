@@ -5,8 +5,13 @@ use pyo3::prelude::*;
 pub(crate) use qiskit_transpiler::{TranspilerError, neighbors, target};
 
 mod prism_routing;
-// Upstream items that prism never calls; deleting them would grow `local.patch`.
-#[allow(dead_code)]
+// Upstream code: unused items and upstream style stay, since changing them would grow `local.patch`.
+#[allow(
+    dead_code,
+    clippy::unwrap_used,
+    clippy::wildcard_imports,
+    clippy::items_after_statements
+)]
 mod sabre;
 
 #[pymodule]

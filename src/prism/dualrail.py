@@ -47,7 +47,9 @@ class RSwapGate(Gate):
     def __init__(self, theta: float | ParameterExpression) -> None:
         super().__init__("rswap", 2, [theta])
 
-    def __array__(self, dtype=None, copy=None) -> np.ndarray:
+    def __array__(
+        self, dtype: np.dtype | None = None, copy: bool | None = None
+    ) -> np.ndarray:
         if copy is False:
             raise ValueError(
                 "unable to avoid copy while creating an array as requested"
@@ -237,7 +239,7 @@ def _h(qc: QuantumCircuit, q: int) -> None:
     qc.rz(np.pi / 2, q)
 
 
-def _u(qc: QuantumCircuit, theta, phi, lam, q: int) -> None:
+def _u(qc: QuantumCircuit, theta: float, phi: float, lam: float, q: int) -> None:
     qc.rz(lam - np.pi / 2, q)
     qc.rx(theta, q)
     qc.rz(phi + np.pi / 2, q)

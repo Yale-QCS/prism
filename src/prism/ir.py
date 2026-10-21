@@ -27,7 +27,25 @@ from qiskit.transpiler import TranspilerError
 #: Wires per logical qubit: a dual-rail qubit is a pair of rails.
 RAILS = 2
 
-DIAGONAL_GATES = frozenset("rz crz z s sdg t tdg p u1 id cp cz rzz cs csdg".split())
+DIAGONAL_GATES = frozenset(
+    {
+        "rz",
+        "crz",
+        "z",
+        "s",
+        "sdg",
+        "t",
+        "tdg",
+        "p",
+        "u1",
+        "id",
+        "cp",
+        "cz",
+        "rzz",
+        "cs",
+        "csdg",
+    }
+)
 
 
 def commuting_predecessors(
@@ -261,12 +279,14 @@ class MultiRealization(IR):
         if sorted(self.output_permutation) != list(range(len(self.rails))):
             _fail(f"output_permutation {self.output_permutation} is not a permutation")
         n = self.num_wires
-        if self.placement is not None:
-            if n < len(self.rails) or any(
+        if self.placement is not None and (
+            n < len(self.rails)
+            or any(
                 sorted(m) != list(range(n))
                 for m in (self.placement.initial, self.placement.final)
-            ):
-                _fail(f"placement is not a pair of permutations of {n} physical qubits")
+            )
+        ):
+            _fail(f"placement is not a pair of permutations of {n} physical qubits")
         clbits = set(self.clbits)
         for k, ins in enumerate(self.data):
             op = ins.operation

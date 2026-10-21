@@ -70,7 +70,9 @@ def test_ir_changing_passes_reset_completed_analyses():
 def test_routing_takes_commuting_ops_left_with_one_pair():
     """A pass may drop candidates: diagonal ops left on one rail pair still route."""
     qc = QuantumCircuit(3)
-    for theta, (a, b) in zip((0.3, 0.5, 0.7, 0.2), [(0, 1), (0, 1), (1, 2), (0, 1)]):
+    for theta, (a, b) in zip(
+        (0.3, 0.5, 0.7, 0.2), [(0, 1), (0, 1), (1, 2), (0, 1)], strict=True
+    ):
         qc.crz(theta, a, b)
     ir = DAGToMultiRealization().run(circuit_to_dag(logical_pm().run(qc)))
     for k, ins in enumerate(ir.data):

@@ -85,7 +85,7 @@ def _rail_registers(
             reg = ClassicalRegister(len(bits), name)
             cregs.append(reg)
             clbits += list(reg)
-            for bit, p in zip(bits, reg):
+            for bit, p in zip(bits, reg, strict=True):
                 partner.setdefault((bit, w), p)
     return cregs, clbits, partner
 
@@ -104,7 +104,7 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
         ps["num_input_qubits"] = len(ir.rails)
         # ElidePermutations' convention: qubit at the end -> its index at the start.
         ps["virtual_permutation_layout"] = Layout(
-            dict(zip(ir.rails, ir.output_permutation))
+            dict(zip(ir.rails, ir.output_permutation, strict=True))
         )
         ancillas = QuantumRegister(ir.num_wires - len(ir.rails), "ancilla")
         virtuals = ir.rails + list(ancillas)
@@ -113,7 +113,9 @@ class MultiRealizationToDAG(GenericPass[MultiRealization, DAGCircuit]):
             return dag
         initial, final = ir.placement.initial, ir.placement.final
         ps["layout"] = Layout.from_intlist(initial, *ir.qregs, ancillas)
-        ps["final_layout"] = Layout({dag.qubits[p]: f for p, f in zip(initial, final)})
+        ps["final_layout"] = Layout(
+            {dag.qubits[p]: f for p, f in zip(initial, final, strict=True)}
+        )
         # Fold the elided permutation into final_layout, as stock layout passes do.
         TranspileLayout.from_property_set(dag, ps).write_into_property_set(ps)
         return dag

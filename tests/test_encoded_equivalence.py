@@ -157,8 +157,8 @@ def _clbit_probabilities(qc: QuantumCircuit, clbits) -> dict[int, float]:
                     if not blocks:
                         taken.append(branch)
                         continue
-                    inner = dict(zip(blocks[0].qubits, ins.qubits))
-                    inner |= dict(zip(blocks[0].clbits, ins.clbits))
+                    inner = dict(zip(blocks[0].qubits, ins.qubits, strict=True))
+                    inner |= dict(zip(blocks[0].clbits, ins.clbits, strict=True))
                     inner = {k: wire[v] for k, v in inner.items()}
                     taken += run(blocks[0].data, [branch], inner)
                 branches = taken
