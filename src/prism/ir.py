@@ -70,7 +70,7 @@ def list_schedule(
         for p in ps:
             succs[p].append(k)
     cp = [0] * n
-    for k in range(n - 1, -1, -1):
+    for k in reversed(range(n)):
         cp[k] = weight[k] + max((cp[s] for s in succs[k]), default=0)
     missing = [len(ps) for ps in preds]
     release = [0] * n
@@ -112,7 +112,6 @@ class MultiRealizationOp:
     """A logical operation with candidate realizations.
 
     Args:
-        name: The logical operation's name.
         candidates: Equal-width circuits; wire ``RAILS * k + w`` is
             rail ``w`` of the op's ``k``-th qubit. Replace the tuple to drop
             candidates; never edit a circuit in place.
@@ -132,7 +131,6 @@ class MultiRealizationOp:
         self.check()
 
     def check(self) -> None:
-        """Raise ``ValueError`` if the fields are inconsistent."""
         if not self.candidates:
             raise ValueError(f"{self.name}: a MultiRealizationOp needs a candidate")
         widths = {(qc.num_qubits, qc.num_clbits) for qc in self.candidates}
@@ -209,10 +207,7 @@ class MultiRealization(IR):
         qregs: One register of rails per logical qubit.
         cregs: The input's classical registers, each followed by a register per
             other rail if it is measured.
-        clbits: Every classical bit.
-        data: The instructions, in execution order.
         output_permutation: Output rail ``v`` holds input rail ``output_permutation[v]``.
-        metadata: Circuit metadata.
         placement: Set by routing.
     """
 
@@ -295,6 +290,7 @@ class MultiRealization(IR):
                 op.check()
             except ValueError as e:
                 _fail(f"{where}: {e}")
+            # Routing leaves an op that fits no edge to the physical stage.
             if op.choice is not None and op.single_edge:
                 for _, pair, _ in ins.candidate_gates(op.choice):
                     if len(pair) == 2:
