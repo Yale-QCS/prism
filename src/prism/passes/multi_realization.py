@@ -1,12 +1,14 @@
-"""``multi_realization`` passes that run before and after ``PrismRouting``."""
+"""Passes on ``MultiRealization`` that run before and after ``PrismRouting``."""
 
 from __future__ import annotations
 
 from bisect import bisect_left
+from collections.abc import Hashable, Sequence
 from dataclasses import replace
 from itertools import permutations
-from typing import TYPE_CHECKING, NamedTuple
+from typing import NamedTuple
 
+from qiskit.circuit import Operation, QuantumCircuit
 from qiskit.circuit.library import PermutationGate
 from qiskit.exceptions import QiskitError
 from qiskit.passmanager import GenericPass
@@ -16,17 +18,11 @@ from qiskit.transpiler import TranspilerError
 from prism.ir import (
     RAILS,
     MultiRealization,
-    MultiRealizationInstruction,
     MultiRealizationOp,
     commuting_predecessors,
     list_schedule,
 )
 from prism.metrics import is_free
-
-if TYPE_CHECKING:
-    from collections.abc import Hashable, Sequence
-
-    from qiskit.circuit import QuantumCircuit
 
 
 class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):
@@ -35,25 +31,20 @@ class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):
     The net permutation goes into ``output_permutation``, and so into the final layout.
     """
 
-    def run(self, passmanager_ir: MultiRealization) -> MultiRealization:
-        ir = passmanager_ir
+    def run(self, ir: MultiRealization) -> MultiRealization:
         if ir.placement is not None:
             raise TranspilerError("ElideRailExchanges runs before routing")
         cur = list(range(len(ir.rails)))  # IR rail -> rail it now sits on
         data = []
         for ins in ir.data:
-            perm = (
-                _rail_permutation(ins.operation)
-                if isinstance(ins.operation, MultiRealizationOp)
-                else None
-            )
+            perm = _rail_permutation(ins.operation)
             if perm is None:
                 data.append(ins._replace(qubits=tuple(cur[q] for q in ins.qubits)))
-                continue
-            # Local wire k receives local wire perm[k]'s content.
-            moved = [cur[q] for q in ins.qubits]
-            for k, q in enumerate(ins.qubits):
-                cur[q] = moved[perm[k]]
+            else:
+                # Local wire k receives local wire perm[k]'s content.
+                moved = [cur[q] for q in ins.qubits]
+                for k, q in enumerate(ins.qubits):
+                    cur[q] = moved[perm[k]]
         out = list(ir.output_permutation)
         for r, c in enumerate(cur):
             out[c] = ir.output_permutation[r]
@@ -62,9 +53,14 @@ class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):
         return ir
 
 
-def _rail_permutation(op: MultiRealizationOp) -> tuple[int, ...] | None:
+def _rail_permutation(op: Operation | MultiRealizationOp) -> tuple[int, ...] | None:
     """The rail permutation every candidate equals up to global phase, if any."""
-    if op.diagonal or op.num_qubits != RAILS or op.num_clbits:
+    if (
+        not isinstance(op, MultiRealizationOp)
+        or op.diagonal
+        or op.num_qubits != RAILS
+        or op.num_clbits
+    ):
         return None
     try:
         ops = [Operator(qc) for qc in op.candidates]
@@ -79,9 +75,7 @@ def _rail_permutation(op: MultiRealizationOp) -> tuple[int, ...] | None:
     return perms.pop() if len(perms) == 1 else None
 
 
-def _template(
-    real: QuantumCircuit,
-) -> tuple[tuple[tuple[int, ...], tuple[int, ...], int], ...]:
+def _template(real: QuantumCircuit) -> tuple:
     """``(qubit indices, clbit indices, depth weight)`` per gate of ``real``.
 
     Free 1-qubit gates are left out: they neither take time nor order wires.
@@ -94,13 +88,6 @@ def _template(
         )
         for ci in real.data
         if len(ci.qubits) + len(ci.clbits) > 1 or not is_free(ci.operation)
-    )
-
-
-def _is_swap(ins: MultiRealizationInstruction) -> bool:
-    return (
-        not isinstance(ins.operation, MultiRealizationOp)
-        and ins.operation.name == "swap"
     )
 
 
@@ -129,8 +116,7 @@ class RetimeDiagonals(GenericPass[MultiRealization, MultiRealization]):
     shallower result.
     """
 
-    def run(self, passmanager_ir: MultiRealization) -> MultiRealization:
-        ir = passmanager_ir
+    def run(self, ir: MultiRealization) -> MultiRealization:
         if ir.placement is None:
             raise TranspilerError(
                 "RetimeDiagonals needs a placed program; run PrismRouting first"
@@ -138,7 +124,7 @@ class RetimeDiagonals(GenericPass[MultiRealization, MultiRealization]):
         search = _Retime(ir)
         routed = search.polish(range(len(ir.data)))
         listed = search.polish(search.list_schedule())
-        _, order, qubits, choice = min(routed, listed, key=lambda result: result[0])
+        _, order, qubits, choice = min(routed, listed, key=lambda r: r[0])
         out = []
         for k in order:
             ins = ir.data[k]
@@ -159,7 +145,11 @@ class _Retime:
     def __init__(self, ir: MultiRealization) -> None:
         self.data = data = ir.data
         self.edges = ir.placement.edges
-        self.swap = [_is_swap(ins) for ins in data]
+        self.swap = [
+            not isinstance(ins.operation, MultiRealizationOp)
+            and ins.operation.name == "swap"
+            for ins in data
+        ]
         # The layout after t routing SWAPs, and each instruction's virtual wires.
         v2p = list(ir.placement.initial)
         p2v = [0] * len(v2p)
@@ -197,7 +187,6 @@ class _Retime:
         }
 
     def gates(self, k: int, qubits: Sequence[int], r: int | None) -> tuple:
-        """Instruction ``k``'s gates with choice ``r`` on ``qubits``."""
         ins, templates = self.data[k], self.templates[k]
         if templates is None:
             return (((*qubits, *ins.clbits), 0 if is_free(ins.operation) else 1),)
@@ -270,9 +259,7 @@ class _Retime:
         pos = {k: j for j, k in enumerate(order)}
         return _Times(ends, tails, crit, depth, on_wire, n_swaps, pos)
 
-    def best_slot(
-        self, order: list[int], i: int, a: _Times
-    ) -> tuple[int, int, tuple[int, ...], int]:
+    def best_slot(self, order: list[int], i: int, a: _Times) -> tuple:
         """``(path, slot, qubits, choice)`` of the shortest path through ``order[i]`` when moved."""
         k = order[i]
         lo = max((a.pos[p] for p in self.preds[k]), default=-1) + 1
@@ -286,14 +273,14 @@ class _Retime:
                     continue
                 head = tail = 0
                 for x in ws:  # neighbours of slot j on wire x, skipping k itself
-                    lst = a.on_wire.get(x, ())
-                    b = bisect_left(lst, j)
-                    p = b - 1 - (b > 0 and lst[b - 1] == i)
+                    slots = a.on_wire.get(x, ())
+                    b = bisect_left(slots, j)
+                    p = b - 1 - (b > 0 and slots[b - 1] == i)
                     if p >= 0:
-                        head = max(head, a.ends[lst[p]][x])
-                    c = b + (b < len(lst) and lst[b] == i)
-                    if c < len(lst):
-                        tail = max(tail, a.tails[lst[c]][x])
+                        head = max(head, a.ends[slots[p]][x])
+                    c = b + (b < len(slots) and slots[b] == i)
+                    if c < len(slots):
+                        tail = max(tail, a.tails[slots[c]][x])
                 if best is None or head + w + tail < best[0]:
                     best = (head + w + tail, j, qubits, r)
         return best
@@ -312,14 +299,14 @@ class _Retime:
                 path, j, q, r = self.best_slot(order, i, a)
                 if path >= a.depth:
                     continue
-                saved = order[:], qubits[k], choice[k], gates[k]
-                order.insert(j - (j > i), order.pop(i))
-                qubits[k], choice[k], gates[k] = q, r, self.gates(k, q, r)
-                new = self.times(order, gates)
+                new_order, new_gates = order[:], gates[:]
+                new_order.insert(j - (j > i), new_order.pop(i))
+                new_gates[k] = self.gates(k, q, r)
+                new = self.times(new_order, new_gates)
                 if (new.depth, sum(new.crit)) < (a.depth, sum(a.crit)):
-                    a = new
+                    order, gates, a = new_order, new_gates, new
+                    qubits[k], choice[k] = q, r
                     tried.clear()
                     break
-                order[:], qubits[k], choice[k], gates[k] = saved
             else:
                 return a.depth, order, qubits, choice
