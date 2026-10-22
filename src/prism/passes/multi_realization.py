@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from itertools import permutations
-
 from qiskit.circuit import Operation
 from qiskit.circuit.library import PermutationGate
 from qiskit.exceptions import QiskitError
@@ -11,11 +9,7 @@ from qiskit.passmanager import GenericPass
 from qiskit.quantum_info import Operator
 from qiskit.transpiler import TranspilerError
 
-from prism.ir import (
-    RAILS,
-    MultiRealization,
-    MultiRealizationOp,
-)
+from prism.ir import RAILS, MultiRealization, MultiRealizationOp
 
 
 class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):
@@ -59,10 +53,7 @@ def _rail_permutation(op: Operation | MultiRealizationOp) -> tuple[int, ...] | N
         ops = [Operator(qc) for qc in op.candidates]
     except (QiskitError, TypeError):  # non-unitary, control flow, or unbound
         return None
-    perms = {
-        next(
-            (p for p in permutations(range(RAILS)) if u.equiv(PermutationGate(p))), None
-        )
-        for u in ops
-    }
-    return perms.pop() if len(perms) == 1 else None
+    for perm in ((1, 0), (0, 1)):
+        if all(u.equiv(PermutationGate(perm)) for u in ops):
+            return perm
+    return None
