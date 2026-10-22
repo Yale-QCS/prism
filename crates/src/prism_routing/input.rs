@@ -1,5 +1,6 @@
 //! The routing problem from Python as Sabre DAGs.
 
+use pyo3::prelude::*;
 use rustworkx_core::petgraph::prelude::*;
 
 use qiskit_circuit::VirtualQubit;
@@ -8,12 +9,27 @@ use super::score::Gate;
 use super::{VirtRealizations, single_edge};
 use crate::sabre::{InteractionKind, SabreDAG, SabreNode};
 
-/// One op in program order: `(default realization, earlier predecessors, gates of each
-/// realization)`.
-pub type Op = (u32, Vec<u32>, Vec<Vec<Gate>>);
+/// One op in program order.
+#[derive(FromPyObject)]
+pub struct Op {
+    /// The realization that routing falls back to.
+    pub default: u32,
+    /// The earlier ops that it must follow.
+    pub predecessors: Vec<u32>,
+    /// The gates of each realization.
+    pub gates: Vec<Vec<Gate>>,
+}
 
-/// One routed op: `(swaps applied just before it, op index, realization)`.
-pub type RoutedOp = (Vec<[u32; 2]>, usize, u32);
+/// One op of a route.
+#[pyclass(frozen, get_all)]
+pub struct RoutedOp {
+    /// The SWAPs, on physical qubits, applied just before the op.
+    pub swaps: Vec<[u32; 2]>,
+    /// The op's index in the input.
+    pub op: usize,
+    /// The realization it commits.
+    pub realization: u32,
+}
 
 /// The forward and reverse [`SabreDAG`]s of `ops` on `num_qubits` virtual qubits.
 ///
@@ -24,9 +40,9 @@ pub fn sabre_dags(ops: &[Op], num_qubits: u32) -> [SabreDAG; 2] {
     let mut kinds = Vec::with_capacity(ops.len());
     let mut edges = Vec::new();
     let mut last_two_q: Vec<Option<usize>> = vec![None; num_qubits as usize];
-    for (k, (default, preds, gates)) in ops.iter().enumerate() {
-        edges.extend(preds.iter().map(|&p| [p as usize, k]));
-        let realizations = realizations(gates);
+    for (k, op) in ops.iter().enumerate() {
+        edges.extend(op.predecessors.iter().map(|&p| [p as usize, k]));
+        let realizations = realizations(&op.gates);
         let ordered = |pair: &[VirtualQubit; 2]| {
             pair.iter()
                 .all(|q| last_two_q[q.index()].is_none_or(|j| precedes(ops, j, k)))
@@ -42,7 +58,7 @@ pub fn sabre_dags(ops: &[Op], num_qubits: u32) -> [SabreDAG; 2] {
         } else {
             kinds.push(InteractionKind::MultiTwoQ {
                 realizations,
-                default_realization: *default,
+                default_realization: op.default,
             });
         }
     }
@@ -81,7 +97,7 @@ fn precedes(ops: &[Op], j: usize, k: usize) -> bool {
     let mut seen = vec![false; k - j];
     let mut stack = vec![k];
     while let Some(n) = stack.pop() {
-        for &p in &ops[n].1 {
+        for &p in &ops[n].predecessors {
             let p = p as usize;
             if p == j {
                 return true;
@@ -103,7 +119,7 @@ fn realizations(gates: &[Vec<Gate>]) -> VirtRealizations {
         .iter()
         .map(|real| {
             real.iter()
-                .filter_map(|(qubits, ..)| <[u32; 2]>::try_from(qubits.as_slice()).ok())
+                .filter_map(|gate| <[u32; 2]>::try_from(gate.qubits.as_slice()).ok())
                 .map(|pair| pair.map(VirtualQubit::new))
                 .collect()
         })

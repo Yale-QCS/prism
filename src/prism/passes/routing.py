@@ -12,14 +12,14 @@ import warnings
 from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass, replace
-from typing import Literal, get_args
+from typing import Literal, NamedTuple, get_args
 
 from qiskit.circuit import Clbit, Operation, Qubit
 from qiskit.circuit.library import SwapGate
 from qiskit.passmanager import GenericPass
 from qiskit.transpiler import CouplingMap, TranspilerError
 
-from prism._accelerate import dense_layout, prism_layout_and_routing
+from prism._accelerate import RoutedOp, dense_layout, prism_layout_and_routing
 from prism.ir import (
     RAILS,
     MultiRealization,
@@ -139,7 +139,7 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             self.budget.swap_trials,
             self.budget.objective,
         )
-        self.property_set["online_n_swaps"] = sum(len(swaps) for swaps, _, _ in routed)
+        self.property_set["online_n_swaps"] = sum(len(step.swaps) for step in routed)
         return replace(
             ir,
             data=_replay(routed, ir.data, list(refined_v2p), n_phys),
@@ -164,12 +164,25 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         return [((base_seed + i) % (1 << 64), v2p) for i, v2p in enumerate(layouts)]
 
 
-def _routing_problem(ir: MultiRealization) -> list[tuple]:
-    """Per instruction ``(default, predecessors, gates)``; ``gates[r]`` lists realization ``r``'s gates."""
+class _Gate(NamedTuple):
+    qubits: list[int]
+    clbits: list[int]
+    free: bool
+    swap: bool
+
+
+class _Op(NamedTuple):
+    default: int
+    predecessors: list[int]
+    gates: list[list[_Gate]]  # per realization
+
+
+def _routing_problem(ir: MultiRealization) -> list[_Op]:
+    """The kernel's input: one ``_Op`` per instruction."""
     clbit_index = {bit: i for i, bit in enumerate(ir.clbits)}
 
-    def gate(op: Operation, qubits: Iterable[Qubit], clbits: Iterable[Clbit]) -> tuple:
-        return (
+    def gate(op: Operation, qubits: Iterable[Qubit], clbits: Iterable[Clbit]) -> _Gate:
+        return _Gate(
             list(qubits),
             sorted({clbit_index[c] for c in clbits}),
             is_free(op),
@@ -189,36 +202,36 @@ def _routing_problem(ir: MultiRealization) -> list[tuple]:
             gates = [[gate(op, ins.qubits, ins.clbits)]]
             ops.append((0, gates))
         wires.append(
-            {q for real in gates for g in real for q in g[0]} | set(ins.clbits)
+            {q for real in gates for g in real for q in g.qubits} | set(ins.clbits)
         )
     preds = commuting_predecessors(wires, [ins.diagonal for ins in ir.data])
     return [
-        (default, sorted(deps), gates)
+        _Op(default, sorted(deps), gates)
         for (default, gates), deps in zip(ops, preds, strict=True)
     ]
 
 
 def _replay(
-    routed: list[tuple[list[tuple[int, int]], int, int]],
+    routed: list[RoutedOp],
     data: list[MultiRealizationInstruction],
     v2p: list[int],
     n_phys: int,
 ) -> list[MultiRealizationInstruction]:
-    """Placed instructions from the kernel's route: per ``(swaps, k, r)``, the SWAPs, then instruction ``k`` with choice ``r``."""
+    """Placed instructions from the kernel's route: each step's SWAPs, then its instruction."""
     p2v = [0] * n_phys
     for v, p in enumerate(v2p):
         p2v[p] = v
     placed: list[MultiRealizationInstruction] = []
-    for swaps, k, r in routed:
-        for a, b in swaps:
+    for step in routed:
+        for a, b in step.swaps:
             placed.append(MultiRealizationInstruction(SwapGate(), (a, b)))
             v_a, v_b = p2v[a], p2v[b]
             v2p[v_a], v2p[v_b] = v2p[v_b], v2p[v_a]
             p2v[a], p2v[b] = p2v[b], p2v[a]
-        ins = data[k]
+        ins = data[step.op]
         op = ins.operation
         if isinstance(op, MultiRealizationOp):
-            op = replace(op, choice=r)
+            op = replace(op, choice=step.realization)
         placed.append(
             MultiRealizationInstruction(
                 op, tuple(v2p[v] for v in ins.qubits), ins.clbits

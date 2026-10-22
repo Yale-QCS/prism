@@ -319,13 +319,14 @@ pub fn routed_ops(result: &RoutingResult<'_>) -> Vec<RoutedOp> {
         .order
         .order
         .iter()
-        .map(|item| {
-            let swaps = item
+        .map(|item| RoutedOp {
+            swaps: item
                 .initial_swaps()
                 .iter()
                 .map(|s| s.map(|p| p.0))
-                .collect();
-            (swaps, item.node.index(), realization(&item.kind))
+                .collect(),
+            op: item.node.index(),
+            realization: realization(&item.kind),
         })
         .collect()
 }

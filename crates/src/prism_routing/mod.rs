@@ -64,8 +64,8 @@ pub fn dense_layout(edges: Vec<[u32; 2]>, num_qubits: u32, num_virtual: usize) -
             adjacency.view(),
             0,
             0,
-            false,
-            true,
+            /* use_error */ false,
+            /* symmetric_coupling_map */ true,
             no_errors.view(),
         );
         dense

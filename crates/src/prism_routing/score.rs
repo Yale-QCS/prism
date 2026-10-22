@@ -12,9 +12,18 @@ use qiskit_circuit::{PhysicalQubit, VirtualQubit};
 
 use super::input::{Op, RoutedOp};
 
-/// One gate: `(virtual qubits, clbits, free, is a swap)`.  `clbits` include those its condition
-/// reads, as `QuantumCircuit.depth` counts them.
-pub type Gate = (Vec<u32>, Vec<u32>, bool, bool);
+/// One gate of a realization.
+#[derive(FromPyObject)]
+pub struct Gate {
+    /// Virtual qubits.
+    pub qubits: Vec<u32>,
+    /// Clbits, including those its condition reads, as `QuantumCircuit.depth` counts them.
+    pub clbits: Vec<u32>,
+    /// Whether `prism.metrics.is_free` holds for it.
+    pub free: bool,
+    /// Whether it is a `swap`.
+    pub swap: bool,
+}
 
 /// `SearchBudget.objective`, validated in Python.
 #[derive(Clone, Copy)]
@@ -106,8 +115,8 @@ impl Metrics {
 /// The number of classical bits that the gates of `ops` use.
 pub fn num_clbits(ops: &[Op]) -> usize {
     ops.iter()
-        .flat_map(|(.., gates)| gates.iter().flatten())
-        .flat_map(|(_, clbits, ..)| clbits)
+        .flat_map(|op| op.gates.iter().flatten())
+        .flat_map(|gate| &gate.clbits)
         .map(|&c| c as usize + 1)
         .fold(0, usize::max)
 }
@@ -119,17 +128,25 @@ pub fn metrics(ops: &[Op], num_clbits: usize, routed: &[RoutedOp], layout: &NLay
     // Physical qubits, then clbits.
     let mut depths = vec![0; num_qubits + num_clbits];
     let mut metrics = Metrics::default();
-    for (swaps, k, r) in routed {
-        for &[a, b] in swaps {
+    for step in routed {
+        for &[a, b] in &step.swaps {
             let [a, b] = [a, b].map(PhysicalQubit::new);
-            metrics.add(&mut depths, [a.index(), b.index()].into_iter(), false, true);
+            let wires = [a.index(), b.index()].into_iter();
+            metrics.add(
+                &mut depths,
+                wires,
+                /* free */ false,
+                /* swap */ true,
+            );
             layout.swap_physical(a, b);
         }
-        let (.., gates) = &ops[*k];
-        for (qubits, clbits, free, swap) in &gates[*r as usize] {
-            let qubits = qubits.iter().map(|&v| layout[VirtualQubit::new(v)].index());
-            let clbits = clbits.iter().map(|&c| num_qubits + c as usize);
-            metrics.add(&mut depths, qubits.chain(clbits), *free, *swap);
+        for gate in &ops[step.op].gates[step.realization as usize] {
+            let qubits = gate
+                .qubits
+                .iter()
+                .map(|&v| layout[VirtualQubit::new(v)].index());
+            let clbits = gate.clbits.iter().map(|&c| num_qubits + c as usize);
+            metrics.add(&mut depths, qubits.chain(clbits), gate.free, gate.swap);
         }
     }
     metrics.depth = depths.into_iter().max().unwrap_or_default();

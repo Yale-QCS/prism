@@ -16,5 +16,11 @@ mod sabre;
 
 #[pymodule]
 fn _accelerate(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    sabre::register(m)
+    m.add_function(wrap_pyfunction!(prism_routing::dense_layout, m)?)?;
+    m.add_function(wrap_pyfunction!(
+        prism_routing::layout::prism_layout_and_routing,
+        m
+    )?)?;
+    m.add_class::<prism_routing::input::RoutedOp>()?;
+    Ok(())
 }
