@@ -12,6 +12,7 @@ import warnings
 from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass, replace
+from numbers import Integral
 from typing import Literal, NamedTuple, get_args
 
 from qiskit.circuit import Clbit, Operation, Qubit
@@ -66,7 +67,10 @@ class SearchBudget:
                 f"depth weight >= 0, got {self.objective!r}"
             )
         for name in ("layout_starts", "refinement_iterations", "swap_trials"):
-            if getattr(self, name) < 1:
+            value = getattr(self, name)
+            if not isinstance(value, Integral) or isinstance(value, bool):
+                raise TypeError(f"{name} must be an int, got {value!r}")
+            if value < 1:
                 raise ValueError(f"{name} must be >= 1, got {getattr(self, name)}")
 
 
@@ -93,6 +97,10 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
             raise TypeError(
                 f"coupling_map must be a CouplingMap, got {type(coupling_map).__name__}"
             )
+        if seed is not None and (
+            not isinstance(seed, Integral) or isinstance(seed, bool)
+        ):
+            raise TypeError(f"seed must be an int or None, got {seed!r}")
         if budget is not None and not isinstance(budget, SearchBudget):
             raise TypeError(
                 f"budget must be a SearchBudget, got {type(budget).__name__}"

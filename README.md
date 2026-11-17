@@ -50,17 +50,17 @@ A measurement into clbit `c[i]` writes rail 0, the logical bit, to `c[i]` and ra
 
 | Logical | Physical, on the qubit's rails |
 | --- | --- |
-| `rz(θ)` | `rz(θ)` on rail 0 |
+| `rz(θ)` | `rz(θ)` on rail 0, or `rz(-θ)` on rail 1 once the rails are relabelled |
 | `rx(θ)` | `rswap(θ)`, the exponential SWAP of the two rails |
-| `x` | none: the rails are relabelled |
-| `crz(θ)` | `crz(±θ)` from either rail of the control to either rail of the target: four candidates |
+| `x` | none: the rails are relabelled; inside `if_else`, a `swap` of the two rails |
+| `crz(θ)` | `crz(±θ)` from either rail of the control to either rail of the target, with an `rz` on the target for a rail-1 control: four candidates |
 | `swap` | none: the logical stage relabels the qubits |
 | `measure` | `measure` on both rails |
-| `reset`, and preparation | `Initialize("10")` on the two rails |
+| `reset`, and the initial state | `Initialize("10")` on the two rails; `initialize` and `prepare_state` are not supported |
 | `ErasureCheck` | `PauliProductMeasurement(Pauli("ZZ"))` on the two rails: 1 if the photon is there, without disturbing the logical state |
-| `if_else` | `if_else` on the qubit's rails; each block holds only one-qubit gates and no measurement |
+| `if_else` | `if_else` on the qubit's rails; each block holds only one-qubit operations and no `measure` |
 
-The physical `Target` allows the two-rail operations only on device edges, so no stock pass can leave the code space. No gate moves across an `ErasureCheck`.
+The physical `Target` allows the two-rail operations only on device edges, so no stock pass can leave the code space. No gate moves across an `ErasureCheck`. Barriers are dropped. Other control flow (`for_loop`, `while_loop`, `switch_case`) and `delay` are not supported. A multi-controlled X with three or more controls borrows an idle qubit as its ancilla, or adds one, so the circuit may need two more physical qubits.
 
 ## Pipeline
 
@@ -68,11 +68,11 @@ The physical `Target` allows the two-rail operations only on device edges, so no
 
 | Stage | IR | Passes |
 | --- | --- | --- |
-| `logical` | `DAGCircuit` | stock passes and a dual-rail equivalence library to the logical gate set, then `EarlyMeasurement` |
+| `logical` | `DAGCircuit` | stock passes, `MCPrepare`, `MinRXCliffords`, `SplitIfElse` and `ElideLogicalPermutations` to the logical gate set, then `EarlyMeasurement` |
 | `dag_to_multi_realization` | `DAGCircuit -> MultiRealization` | each operation becomes a `MultiRealizationOp` with its candidates |
 | `multi_realization` | `MultiRealization` | `ElideRailExchanges` and `PrismRouting` (layout, routing and a `choice` per op) |
 | `multi_realization_to_dag` | `MultiRealization -> DAGCircuit` | each choice becomes gates, with the layout |
-| `physical` | `DAGCircuit` | stock cleanups, stock layout and routing of unrouted operations, `CommutativeOptimization`, `RescheduleCommutingDiagonals`, `RecordCircuitMetrics` |
+| `physical` | `DAGCircuit` | `FenceErasureChecks`, stock cleanups, stock layout and routing of unrouted operations, `CommutativeOptimization`, `RescheduleCommutingDiagonals`, `RecordCircuitMetrics` |
 
 Any pass that sets every `choice` is a complete `multi_realization` stage. The physical stage then lays out and routes with stock Qiskit:
 
