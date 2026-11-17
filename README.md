@@ -103,7 +103,20 @@ stages.multi_realization = [RandomChoice()]
 out = PassManager([stages.to_flow_controller()]).run(qc)
 ```
 
-Citation: TODO, once the paper is out.
+## Paper and reproduction
+
+PRISM is described in *PRISM: A Logical–Physical Boundary Compiler for Dual-Rail Qubits* by Evan McKinney, Kun Liu, Harshvardhan K. Babla, Robert J. Schoelkopf, and Yongshan Ding (arXiv preprint, 2026).
+The branch [`revision-r3`](https://github.com/Yale-QCS/prism/tree/revision-r3) holds the code, scripts, and saved results that reproduce every figure and number in the paper; start with its `REPRODUCE.md`.
+Earlier versions of the work are on the branches `revision-r1`, `revision-r2`, and `revision-r2-artifact`.
+
+```bibtex
+@misc{mckinney_prism_2026,
+  title  = {{PRISM}: A Logical--Physical Boundary Compiler for Dual-Rail Qubits},
+  author = {McKinney, Evan and Liu, Kun and Babla, Harshvardhan K. and Schoelkopf, Robert J. and Ding, Yongshan},
+  year   = {2026},
+  note   = {arXiv preprint},
+}
+```
 
 > [!IMPORTANT]
 > This software is provided as-is with no guarantee of support or maintenance.
