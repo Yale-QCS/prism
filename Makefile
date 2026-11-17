@@ -9,7 +9,7 @@ else
 endif
 
 .DEFAULT_GOAL := help
-.PHONY: help init rebuild test format lint clean
+.PHONY: help init rebuild test format lint clean licenses
 
 help:  ## List targets
 	@awk 'BEGIN {FS = ":.*##"} /^[a-z]+:.*##/ {printf "  %-10s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -44,3 +44,6 @@ lint:  ## Check formatting, clippy, rustdoc and ruff without changing anything
 clean:  ## Remove build artifacts and caches
 	rm -rf build dist src/*.egg-info .pytest_cache .ruff_cache crates/target src/prism_qc/_accelerate*
 	find src tests -name __pycache__ -type d -prune -exec rm -rf {} +
+
+licenses:  ## Regenerate THIRD_PARTY_LICENSES from crates/Cargo.lock (needs `cargo install cargo-about --features cli`)
+	cd crates && cargo about generate --locked about.hbs -o ../THIRD_PARTY_LICENSES

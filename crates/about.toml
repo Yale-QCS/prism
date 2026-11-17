@@ -1,0 +1,23 @@
+# Licenses of the crates statically linked into prism_qc/_accelerate.
+accepted = [
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "MIT",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "BSL-1.0",
+    "MPL-2.0",
+]
+ignore-build-dependencies = true
+ignore-dev-dependencies = true
+
+# rustiq-core sets `license-file`, not `license`; its LICENSE.txt is the MIT text.
+[rustiq-core.clarify]
+license = "MIT"
+[[rustiq-core.clarify.files]]
+path = "LICENSE.txt"
+license = "MIT"
+checksum = "bc35483703ab8a794e381b07e4705b9c147f56515afed849e8f677188bda5c91"

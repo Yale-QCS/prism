@@ -1,4 +1,4 @@
 recursive-include tests *.py
-include crates/Cargo.toml crates/Cargo.lock crates/README.md
+include crates/Cargo.toml crates/Cargo.lock crates/README.md crates/about.toml crates/about.hbs
 recursive-include crates/src *.rs
 include crates/src/sabre/README.md crates/src/sabre/local.patch
