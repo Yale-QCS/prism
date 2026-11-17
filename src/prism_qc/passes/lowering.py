@@ -9,8 +9,8 @@ from qiskit.passmanager import GenericPass
 from qiskit.passmanager.compilation_status import PassManagerState, RunState
 from qiskit.transpiler import Layout, TranspileLayout
 
-from prism import dualrail
-from prism.ir import RAILS, MultiRealization, MultiRealizationInstruction
+from prism_qc import dualrail
+from prism_qc.ir import RAILS, MultiRealization, MultiRealizationInstruction
 
 
 class DAGToMultiRealization(GenericPass[DAGCircuit, MultiRealization]):

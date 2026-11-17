@@ -9,8 +9,8 @@ from qiskit.circuit.random import random_circuit
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap, PassManager
 
-from prism import SearchBudget, dualrail_pm, prism_stages
-from prism.ir import MultiRealization
+from prism_qc import SearchBudget, dualrail_pm, prism_stages
+from prism_qc.ir import MultiRealization
 
 BUDGET = SearchBudget(layout_starts=4, refinement_iterations=2, swap_trials=4)
 

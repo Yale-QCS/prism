@@ -7,8 +7,8 @@ from qiskit.converters import dag_to_circuit
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import AnalysisPass, TransformationPass
 
-from prism.ir import DIAGONAL_GATES, commuting_predecessors, list_schedule
-from prism.metrics import CircuitMetrics, is_free, only_ops
+from prism_qc.ir import DIAGONAL_GATES, commuting_predecessors, list_schedule
+from prism_qc.metrics import CircuitMetrics, is_free, only_ops
 
 
 class FenceErasureChecks(TransformationPass):

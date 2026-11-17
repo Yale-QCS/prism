@@ -1,6 +1,6 @@
 # `prism_accelerate`
 
-Rust extension module behind prism's routing, imported as `prism._accelerate`.
+Rust extension module behind prism's routing, imported as `prism_qc._accelerate`.
 
 - [`src/sabre/`](src/sabre/): Qiskit 2.6.0's Sabre router, vendored with a small patch
   ([README](src/sabre/README.md)).

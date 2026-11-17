@@ -38,7 +38,7 @@ from qiskit.circuit.library import (
 from qiskit.quantum_info import Pauli
 from qiskit.transpiler import TranspilerError
 
-from prism.ir import RAILS, MultiRealizationOp
+from prism_qc.ir import RAILS, MultiRealizationOp
 
 
 class RSwapGate(Gate):

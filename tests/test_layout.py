@@ -4,7 +4,7 @@ from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap
 
-from prism import dualrail_pm
+from prism_qc import dualrail_pm
 
 
 def _compile(qc: QuantumCircuit):

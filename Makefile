@@ -42,5 +42,5 @@ lint:  ## Check formatting, clippy, rustdoc and ruff without changing anything
 	$(VENV)/bin/ruff format --check
 
 clean:  ## Remove build artifacts and caches
-	rm -rf build dist src/*.egg-info .pytest_cache .ruff_cache crates/target src/prism/_accelerate*
+	rm -rf build dist src/*.egg-info .pytest_cache .ruff_cache crates/target src/prism_qc/_accelerate*
 	find src tests -name __pycache__ -type d -prune -exec rm -rf {} +

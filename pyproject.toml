@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=77", "setuptools_rust"]
+requires = ["setuptools>=77", "setuptools-rust>=1.7"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,8 @@ name = "prism-qc"
 description = "A Qiskit transpiler for dual-rail qubits that binds each gate's realization at routing time."
 version = "0.1.0rc1"
 authors = [{ name = "Evan McKinney", email = "evmckinney9@gmail.com" }]
-license = "MIT"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["quantum", "compiler", "qiskit", "dual-rail", "routing", "erasure-qubits"]
@@ -19,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Rust",
     "Topic :: Scientific/Engineering :: Physics",
 ]
@@ -32,13 +34,13 @@ py_limited_api = "cp310"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["prism", "prism.*"]
+include = ["prism_qc", "prism_qc.*"]
 namespaces = false
 
 [project.urls]
-Homepage = "https://github.com/evmckinney9/prism"
-Repository = "https://github.com/evmckinney9/prism"
-Issues = "https://github.com/evmckinney9/prism/issues"
+Homepage = "https://github.com/Yale-QCS/prism"
+Repository = "https://github.com/Yale-QCS/prism"
+Issues = "https://github.com/Yale-QCS/prism/issues"
 [project.optional-dependencies]
 format = ["pre-commit", "ruff"]
 test = ["pytest"]
@@ -70,7 +72,7 @@ ignore = [
 convention = "google"
 
 [[tool.setuptools-rust.ext-modules]]
-target = "prism._accelerate"
+target = "prism_qc._accelerate"
 path = "crates/Cargo.toml"
 binding = "PyO3"
 features = ["extension-module"]

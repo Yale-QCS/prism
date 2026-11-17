@@ -9,6 +9,8 @@
 // Any modifications or derivative works of this code must retain this
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
+//
+// Modified by Yale-QCS for prism (2026): see README.md and local.patch in this directory.
 
 use std::cmp::Ordering;
 use std::collections::VecDeque;

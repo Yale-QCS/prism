@@ -9,7 +9,7 @@ from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import CRZGate, RXGate, RZGate, SwapGate, XGate
 from qiskit.quantum_info import Operator, Statevector
 
-from prism import dualrail
+from prism_qc import dualrail
 
 
 def _code_space(k: int) -> np.ndarray:

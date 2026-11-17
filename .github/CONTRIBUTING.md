@@ -4,7 +4,7 @@ Development uses Python 3.12 and the Rust version in
 [rust-toolchain.toml](../rust-toolchain.toml), which rustup installs automatically.
 
 ```sh
-git clone https://github.com/evmckinney9/prism.git
+git clone https://github.com/Yale-QCS/prism.git
 cd prism
 make init   # .venv, editable install, git hooks
 make test   # rebuilds the Rust extension, runs Rust and Python tests

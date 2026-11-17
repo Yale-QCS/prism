@@ -35,8 +35,8 @@ from qiskit.transpiler.preset_passmanagers.common import (
     generate_routing_passmanager,
 )
 
-from prism import dualrail
-from prism.passes import (
+from prism_qc import dualrail
+from prism_qc.passes import (
     DAGToMultiRealization,
     EarlyMeasurement,
     ElideLogicalPermutations,
@@ -145,6 +145,20 @@ def dualrail_pm(
     seed: int = 42,
     budget: SearchBudget | None = None,
 ) -> PassManager:
-    """A ``PassManager`` compiling circuits to dual-rail qubits on ``coupling_map``."""
+    """A ``PassManager`` compiling circuits to dual-rail qubits on ``coupling_map``.
+
+    Args:
+        coupling_map: A connected device graph. Edge directions are ignored.
+        seed: Seed of the layout search and of the stock routing; equal seeds
+            give equal output.
+        budget: Search effort and objective of ``PrismRouting``.
+
+    The output has two physical qubits per logical qubit: rail ``w`` of logical
+    qubit ``i`` is virtual qubit ``2 * i + w`` of ``out.layout``. A measurement
+    into clbit ``c[i]`` writes rail 0 to ``c[i]`` and rail 1 to ``c_rail1[i]``,
+    a register added per measured register. After ``run``, ``property_set``
+    holds ``circuit_metrics`` (a ``CircuitMetrics``) and ``online_n_swaps``
+    (SWAPs inserted by ``PrismRouting``).
+    """
     stages = prism_stages(coupling_map, seed=seed, budget=budget)
     return PassManager([stages.to_flow_controller()])

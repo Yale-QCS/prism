@@ -19,8 +19,8 @@ from qiskit.circuit.library import SwapGate
 from qiskit.passmanager import GenericPass
 from qiskit.transpiler import CouplingMap, TranspilerError
 
-from prism._accelerate import RoutedOp, dense_layout, prism_layout_and_routing
-from prism.ir import (
+from prism_qc._accelerate import RoutedOp, dense_layout, prism_layout_and_routing
+from prism_qc.ir import (
     RAILS,
     MultiRealization,
     MultiRealizationInstruction,
@@ -28,7 +28,7 @@ from prism.ir import (
     Placement,
     commuting_predecessors,
 )
-from prism.metrics import is_free
+from prism_qc.metrics import is_free
 
 Objective = Literal["swaps", "depth"]
 
@@ -89,6 +89,14 @@ class PrismRouting(GenericPass[MultiRealization, MultiRealization]):
         seed: int | None = None,
         budget: SearchBudget | None = None,
     ) -> None:
+        if not isinstance(coupling_map, CouplingMap):
+            raise TypeError(
+                f"coupling_map must be a CouplingMap, got {type(coupling_map).__name__}"
+            )
+        if budget is not None and not isinstance(budget, SearchBudget):
+            raise TypeError(
+                f"budget must be a SearchBudget, got {type(budget).__name__}"
+            )
         if not coupling_map.is_connected():
             raise ValueError(
                 "coupling_map is disconnected; pass one of its connected_components()"

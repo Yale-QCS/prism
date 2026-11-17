@@ -6,7 +6,7 @@ from qiskit.circuit.library import QFTGate
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import CouplingMap, TranspilerError
 
-from prism import ErasureCheck, dualrail, dualrail_pm
+from prism_qc import ErasureCheck, dualrail, dualrail_pm
 
 
 def _mixed() -> QuantumCircuit:

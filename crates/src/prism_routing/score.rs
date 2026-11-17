@@ -1,6 +1,6 @@
 //! The metrics that rank routes, computed without building the routed circuit.
 //!
-//! [`metrics`] equals `prism.metrics.CircuitMetrics.of` of the circuit that Python replays from
+//! [`metrics`] equals `prism_qc.metrics.CircuitMetrics.of` of the circuit that Python replays from
 //! the route.  A routing SWAP is a non-free `swap` on its two qubits.
 
 use std::cmp::Ordering;
@@ -19,7 +19,7 @@ pub struct Gate {
     pub qubits: Vec<u32>,
     /// Clbits, including those its condition reads, as `QuantumCircuit.depth` counts them.
     pub clbits: Vec<u32>,
-    /// Whether `prism.metrics.is_free` holds for it.
+    /// Whether `prism_qc.metrics.is_free` holds for it.
     pub free: bool,
     /// Whether it is a `swap`.
     pub swap: bool,
@@ -79,7 +79,7 @@ impl Objective {
     }
 }
 
-/// `prism.metrics.CircuitMetrics` of a routed program.
+/// `prism_qc.metrics.CircuitMetrics` of a routed program.
 #[derive(Default)]
 pub struct Metrics {
     /// `swap` gates, routing SWAPs included.

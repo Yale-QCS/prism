@@ -1,0 +1,7 @@
+prism
+Copyright 2026 Yale-QCS
+
+This product includes software from Qiskit (https://github.com/Qiskit/qiskit),
+Copyright IBM, licensed under the Apache License, Version 2.0. The files in
+crates/src/sabre/ are copied from Qiskit 2.6.0; dag.rs and route.rs are modified,
+as described in crates/src/sabre/README.md and crates/src/sabre/local.patch.

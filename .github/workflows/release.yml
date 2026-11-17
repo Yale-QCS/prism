@@ -43,6 +43,8 @@ jobs:
       CIBW_SKIP: "*-win32 *-musllinux* *_i686"
       CIBW_BEFORE_ALL_LINUX: "curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain none"
       CIBW_ENVIRONMENT_LINUX: 'PATH="$HOME/.cargo/bin:$PATH"'
+      # rustc 1.97 targets macOS 10.12 at minimum; Qiskit 2.6 builds with the same.
+      CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.12
       CIBW_TEST_EXTRAS: test
       CIBW_TEST_COMMAND: python -m pytest {project}/tests
     steps:

@@ -8,9 +8,9 @@ from qiskit.converters import circuit_to_dag
 from qiskit.transpiler import CouplingMap, PassManager, TranspilerError
 from qiskit.transpiler.passes import Size
 
-from prism.ir import MultiRealization, MultiRealizationOp
-from prism.passes import DAGToMultiRealization, PrismRouting
-from prism.pipeline import logical_pm, prism_stages
+from prism_qc.ir import MultiRealization, MultiRealizationOp
+from prism_qc.passes import DAGToMultiRealization, PrismRouting
+from prism_qc.pipeline import logical_pm, prism_stages
 
 
 def _bell() -> QuantumCircuit:

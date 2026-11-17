@@ -9,7 +9,7 @@ from qiskit.passmanager import GenericPass
 from qiskit.quantum_info import Operator
 from qiskit.transpiler import TranspilerError
 
-from prism.ir import RAILS, MultiRealization, MultiRealizationOp
+from prism_qc.ir import RAILS, MultiRealization, MultiRealizationOp
 
 
 class ElideRailExchanges(GenericPass[MultiRealization, MultiRealization]):

@@ -19,6 +19,7 @@ from the `qiskit-circuit`, `qiskit-transpiler` and `qiskit-util` git dependencie
 [local.patch](local.patch) applied.
 New items in the patch carry a `PRISM:` comment. The patch:
 
+- `dag.rs`, `route.rs`: adds a modification notice to the license header.
 - `dag.rs`: adds the `InteractionKind::MultiTwoQ` variant (a node with alternative
   realizations, each a list of qubit pairs) and its arm in `SabreDAG::only_interactions`.
 - `route.rs`: declares `route_ext` (prism's code in `../prism_routing/route_ext.rs`) as a child
@@ -51,8 +52,7 @@ the defect most routing steps score a wrong lookahead layer (+8% router SWAPs at
 deeper lookahead stops helping). `Synchronize` and `ControlFlow` nodes have the same
 multi-layer jump; prism emits neither, so the hunk leaves them alone.
 
-Drop the hunk when upstream fixes the defect, then check that the regression gate
-(`tools/gate/gate.py check`) shows no change in SWAPs.
+Drop the hunk when upstream fixes the defect, then check that router SWAP counts do not change.
 
 With no `MultiTwoQ` node in the input and no lookahead, the patched router is the stock router.
 With lookahead the two differ by the bug fix above.
@@ -87,8 +87,7 @@ patch with `git diff --no-index` from the upstream files to this directory, with
 `a/src/sabre/<file>` and `b/src/sabre/<file>`. Update the git tags in `Cargo.toml` and reseed
 `Cargo.lock` from Qiskit's `Cargo.lock` at the same tag (see `crates/README.md`).
 
-To verify: run `make test`, `make lint`, and the regression gate
-(`tools/gate/gate.py check`); a gate difference must be reviewed and re-recorded.
+To verify: run `make test` and `make lint`, and compare router SWAP counts before and after.
 
 ## Removal
 
