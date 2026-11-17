@@ -60,13 +60,6 @@ A measurement writes rail 0, the logical bit, to `c[i]` and rail 1 to `c_rail1[i
 
 The physical `Target` allows the two-rail operations only on device edges, so no stock pass can leave the code space. No gate moves across an `ErasureCheck`.
 
-Limits:
-
-- The coupling map must be connected, with at least two physical qubits per logical qubit.
-- `if_else` is the only control flow; its blocks hold single-qubit gates and no measurement.
-- A multi-controlled X with three or more controls uses an idle qubit as a clean ancilla, or adds one (register `mcd_anc`).
-- Barriers are dropped.
-
 ## Pipeline
 
 `prism.prism_stages(coupling_map)` is a `MultiStagePassManager`. Its passes are in `prism.passes`:
@@ -101,13 +94,6 @@ class RandomChoice(GenericPass[MultiRealization, MultiRealization]):
 stages = prism_stages(CouplingMap.from_line(6))
 stages.multi_realization = [RandomChoice()]
 out = PassManager([stages.to_flow_controller()]).run(qc)
-```
-
-## Development
-
-```bash
-make init  # .venv, editable install, git hooks
-make test
 ```
 
 Citation: TODO, once the paper is out.
