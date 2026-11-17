@@ -10,8 +10,6 @@ A logical gate then has several physical realizations on different rails; PRISM 
 pip install --pre prism-qc
 ```
 
-Prebuilt wheels are available for Linux, macOS, and Windows. Building from source requires Rust 1.97 or later.
-
 ## Quickstart
 
 ```python
