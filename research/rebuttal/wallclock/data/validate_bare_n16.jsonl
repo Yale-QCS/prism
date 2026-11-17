@@ -1,0 +1,9 @@
+{"circuit": "dj", "width": 16, "point": "central cz 1e-3", "n_active": 16, "model": 0.708164130768364, "sim": 0.6874024602160815, "sim_se": 0.02862818197114211}
+{"circuit": "draper_qft_adder", "width": 16, "point": "central cz 1e-3", "n_active": 17, "model": 0.22255347524770966, "sim": 0.2470448563054073, "sim_se": 0.0250610748801552}
+{"circuit": "modular_adder", "width": 16, "point": "central cz 1e-3", "n_active": 16, "model": 0.31926607599910384, "sim": 0.2975702899977868, "sim_se": 0.025445823572185947}
+{"circuit": "qft", "width": 16, "point": "central cz 1e-3", "n_active": 16, "model": 0.16051519413238682, "sim": 0.15714224725986733, "sim_se": 0.020532194291162868}
+{"circuit": "qpeexact", "width": 16, "point": "central cz 1e-3", "n_active": 16, "model": 0.1099480267354362, "sim": 0.11188025157298401, "sim_se": 0.017286979496226214}
+{"circuit": "qpeinexact", "width": 16, "point": "central cz 1e-3", "n_active": 16, "model": 0.10146709522061094, "sim": 0.10722405069244734, "sim_se": 0.017447644754398712}
+{"circuit": "qftentangled", "width": 16, "point": "central cz 1e-3", "n_active": 16, "model": 0.10217512106394636, "sim": 0.09629370334434312, "sim_se": 0.017025377526196084}
+{"circuit": "ae", "width": 16, "point": "central cz 1e-3", "n_active": 16, "model": 0.07430347354099658, "sim": 0.09197583328636597, "sim_se": 0.016566997312715208}
+{"circuit": "vbe_ripple_carry_adder", "width": 16, "point": "central cz 1e-3", "n_active": 16, "model": 0.4860225362549882, "sim": 0.49579593755159823, "sim_se": 0.030662344496172195}

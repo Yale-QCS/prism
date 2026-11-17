@@ -1,0 +1,48 @@
+{"circuit": "dj", "width": 12, "point": "central cz 1e-3", "n_active": 12, "model": 0.8180604285281796, "sim": 0.8276148781394228, "sim_se": 0.011635836612156471}
+{"circuit": "dj", "width": 12, "point": "central cz 3e-3", "n_active": 12, "model": 0.7843473925561355, "sim": 0.7953887823279439, "sim_se": 0.012450650194901451}
+{"circuit": "dj", "width": 12, "point": "best corner", "n_active": 12, "model": 0.8719313496197967, "sim": 0.8813403923085952, "sim_se": 0.00997997500118561}
+{"circuit": "qaoa", "width": 12, "point": "central cz 1e-3", "n_active": 13, "model": 0.2238200866598024, "sim": 0.25123716014345276, "sim_se": 0.013141754863055966}
+{"circuit": "qaoa", "width": 12, "point": "central cz 3e-3", "n_active": 13, "model": 0.11804289321785484, "sim": 0.13048782217720817, "sim_se": 0.01016268507457575}
+{"circuit": "qaoa", "width": 12, "point": "best corner", "n_active": 13, "model": 0.26451706773924843, "sim": 0.27645283148370703, "sim_se": 0.013738935238747741}
+{"circuit": "draper_qft_adder", "width": 12, "point": "central cz 1e-3", "n_active": 12, "model": 0.4829922145283394, "sim": 0.5002231535469203, "sim_se": 0.014984957162330642}
+{"circuit": "draper_qft_adder", "width": 12, "point": "central cz 3e-3", "n_active": 12, "model": 0.3468242225381339, "sim": 0.3615840627902823, "sim_se": 0.014497165549990736}
+{"circuit": "draper_qft_adder", "width": 12, "point": "best corner", "n_active": 12, "model": 0.5033806980600809, "sim": 0.5148192110275158, "sim_se": 0.015237737461742012}
+{"circuit": "modular_adder", "width": 12, "point": "central cz 1e-3", "n_active": 12, "model": 0.5495290779810489, "sim": 0.5805528288131403, "sim_se": 0.014621998329932748}
+{"circuit": "modular_adder", "width": 12, "point": "central cz 3e-3", "n_active": 12, "model": 0.41177802863720153, "sim": 0.43530689043230164, "sim_se": 0.014855501349513653}
+{"circuit": "modular_adder", "width": 12, "point": "best corner", "n_active": 12, "model": 0.5657611043159407, "sim": 0.5800021869829771, "sim_se": 0.014811951134246243}
+{"circuit": "qft", "width": 12, "point": "central cz 1e-3", "n_active": 12, "model": 0.38829741717558974, "sim": 0.38484890370675917, "sim_se": 0.014197885614164612}
+{"circuit": "qft", "width": 12, "point": "central cz 3e-3", "n_active": 12, "model": 0.25308307102674904, "sim": 0.25537399307241937, "sim_se": 0.012703005847825216}
+{"circuit": "qft", "width": 12, "point": "best corner", "n_active": 12, "model": 0.43324496440272964, "sim": 0.4377668096004905, "sim_se": 0.014764626147369998}
+{"circuit": "qpeexact", "width": 12, "point": "central cz 1e-3", "n_active": 12, "model": 0.360326744262599, "sim": 0.3596420753180099, "sim_se": 0.014008664401138163}
+{"circuit": "qpeexact", "width": 12, "point": "central cz 3e-3", "n_active": 12, "model": 0.23579562966445483, "sim": 0.2499370667044373, "sim_se": 0.012678778400318303}
+{"circuit": "qpeexact", "width": 12, "point": "best corner", "n_active": 12, "model": 0.40073499537719437, "sim": 0.4191750330417777, "sim_se": 0.014711543540587638}
+{"circuit": "qpeinexact", "width": 12, "point": "central cz 1e-3", "n_active": 12, "model": 0.3320668259602727, "sim": 0.3373733244116993, "sim_se": 0.013465399087689223}
+{"circuit": "qpeinexact", "width": 12, "point": "central cz 3e-3", "n_active": 12, "model": 0.2142428532675267, "sim": 0.23634837154453808, "sim_se": 0.012062716702181356}
+{"circuit": "qpeinexact", "width": 12, "point": "best corner", "n_active": 12, "model": 0.3856520169393724, "sim": 0.38623842612981035, "sim_se": 0.014297660853449615}
+{"circuit": "qftentangled", "width": 12, "point": "central cz 1e-3", "n_active": 12, "model": 0.28784448255440925, "sim": 0.2992565528396761, "sim_se": 0.013513772146702073}
+{"circuit": "qftentangled", "width": 12, "point": "central cz 3e-3", "n_active": 12, "model": 0.16938814946820646, "sim": 0.17450558806710997, "sim_se": 0.011109510607889514}
+{"circuit": "qftentangled", "width": 12, "point": "best corner", "n_active": 12, "model": 0.3412828274308712, "sim": 0.33336155469336626, "sim_se": 0.014112005387679847}
+{"circuit": "bmw_quark_copula", "width": 12, "point": "central cz 1e-3", "n_active": 12, "model": 0.295557622783966, "sim": 0.3208659165702149, "sim_se": 0.01453499362605492}
+{"circuit": "bmw_quark_copula", "width": 12, "point": "central cz 3e-3", "n_active": 12, "model": 0.17200454012442445, "sim": 0.18648818836654013, "sim_se": 0.012093293434463932}
+{"circuit": "bmw_quark_copula", "width": 12, "point": "best corner", "n_active": 12, "model": 0.32371388177286753, "sim": 0.3336102661470237, "sim_se": 0.014703073120962933}
+{"circuit": "hhl", "width": 12, "point": "central cz 1e-3", "n_active": 12, "model": 0.10846424338051823, "sim": 0.11734347741840045, "sim_se": 0.00889991681947639}
+{"circuit": "hhl", "width": 12, "point": "central cz 3e-3", "n_active": 12, "model": 0.0454892039563072, "sim": 0.04640291879591818, "sim_se": 0.005472057488307433}
+{"circuit": "hhl", "width": 12, "point": "best corner", "n_active": 12, "model": 0.16211238103807327, "sim": 0.1689645340637717, "sim_se": 0.010840179444965986}
+{"circuit": "ae", "width": 12, "point": "central cz 1e-3", "n_active": 12, "model": 0.2584453351698535, "sim": 0.2725412172180795, "sim_se": 0.013129989460542398}
+{"circuit": "ae", "width": 12, "point": "central cz 3e-3", "n_active": 12, "model": 0.15358499834072864, "sim": 0.16477702280200912, "sim_se": 0.010891273290460364}
+{"circuit": "ae", "width": 12, "point": "best corner", "n_active": 12, "model": 0.3253456600076721, "sim": 0.3364232196233031, "sim_se": 0.014244980613673377}
+{"circuit": "cdkm_ripple_carry_adder", "width": 12, "point": "central cz 1e-3", "n_active": 14, "model": 0.6458440218441328, "sim": 0.7011225436783609, "sim_se": 0.013890722823736603}
+{"circuit": "cdkm_ripple_carry_adder", "width": 12, "point": "central cz 3e-3", "n_active": 14, "model": 0.5094943578283699, "sim": 0.5518498717495364, "sim_se": 0.015161948365884751}
+{"circuit": "cdkm_ripple_carry_adder", "width": 12, "point": "best corner", "n_active": 14, "model": 0.6282029178866669, "sim": 0.6437955272483822, "sim_se": 0.014714463796462832}
+{"circuit": "vbe_ripple_carry_adder", "width": 12, "point": "central cz 1e-3", "n_active": 11, "model": 0.6823730431177712, "sim": 0.7208626757907592, "sim_se": 0.013792941300895355}
+{"circuit": "vbe_ripple_carry_adder", "width": 12, "point": "central cz 3e-3", "n_active": 11, "model": 0.5851900805499847, "sim": 0.6121656933267757, "sim_se": 0.01504064968855746}
+{"circuit": "vbe_ripple_carry_adder", "width": 12, "point": "best corner", "n_active": 11, "model": 0.6986954427844171, "sim": 0.7141589353041801, "sim_se": 0.013986047915006647}
+{"circuit": "vqe_two_local", "width": 12, "point": "central cz 1e-3", "n_active": 12, "model": 0.17151613149269673, "sim": 0.17853382980041183, "sim_se": 0.010906411233005429}
+{"circuit": "vqe_two_local", "width": 12, "point": "central cz 3e-3", "n_active": 12, "model": 0.06238087911079515, "sim": 0.059336689590742155, "sim_se": 0.006640591481277806}
+{"circuit": "vqe_two_local", "width": 12, "point": "best corner", "n_active": 12, "model": 0.14422271525024002, "sim": 0.1391604361358828, "sim_se": 0.010233206434271612}
+{"circuit": "rg_qft_multiplier", "width": 12, "point": "central cz 1e-3", "n_active": 14, "model": 0.05046626130766918, "sim": 0.08886871223092838, "sim_se": 0.0074831290766276745}
+{"circuit": "rg_qft_multiplier", "width": 12, "point": "central cz 3e-3", "n_active": 14, "model": 0.011260284734720806, "sim": 0.023667603893039305, "sim_se": 0.003871192132935466}
+{"circuit": "rg_qft_multiplier", "width": 12, "point": "best corner", "n_active": 14, "model": 0.05658776968422762, "sim": 0.08413996354423126, "sim_se": 0.008045836698313097}
+{"circuit": "multiplier", "width": 12, "point": "central cz 1e-3", "n_active": 14, "model": 0.05046626130766918, "sim": 0.08886871223092838, "sim_se": 0.0074831290766276745}
+{"circuit": "multiplier", "width": 12, "point": "central cz 3e-3", "n_active": 14, "model": 0.011260284734720806, "sim": 0.023667603893039305, "sim_se": 0.003871192132935466}
+{"circuit": "multiplier", "width": 12, "point": "best corner", "n_active": 14, "model": 0.05658776968422762, "sim": 0.08413996354423126, "sim_se": 0.008045836698313097}

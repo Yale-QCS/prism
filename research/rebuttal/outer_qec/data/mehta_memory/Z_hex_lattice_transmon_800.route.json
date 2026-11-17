@@ -1,0 +1,10 @@
+{
+  "route": {
+    "variant": "original",
+    "transpiler_seed": 837,
+    "score": 0.9064518190904837,
+    "routing_swaps_before_native_optimization": 31
+  },
+  "source_sha256": "ec68f570700023a8e19bcb433dd93a5243a5e772e8e2a5d8d77b66166ca07d5a",
+  "qpy_sha256": "d7381cb2e37cf589815fba982c5a7b77b5bae75566928547975e43cf5f1767ea"
+}

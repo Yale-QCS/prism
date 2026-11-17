@@ -1,0 +1,1 @@
+{"check": "shared-channel-Pauli-twirl", "max_ptm_difference": 2.220446049250313e-16, "cz_errors": [0.001, 0.003], "calibrated_gate_errors": true, "density_matrix_circuits": 6, "validation_shots": 600000, "max_density_matrix_marginal_z": 1.578676708599171}

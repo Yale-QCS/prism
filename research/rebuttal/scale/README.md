@@ -1,0 +1,5 @@
+# scale: Greedy and PRISM from 8 to 32 logical qubits (G5, R2)
+
+`scale_lo.toml` (widths 8 to 16) and `scale_hi.toml` (20 to 32) split `configs/paper/scale.toml` in two. They compile the 16 core workloads at widths 8 to 32 with five seeds (0 to 400) on the grid and hex lattice. The run hit its time cap with `multiplier` compiled through 16 logical qubits and `rg_qft_multiplier` through 24, so `artifacts/paper/raw/scale.jsonl` (64f6245) holds 2120 of the 2240 planned rows. `scripts/paper/export_scaling.py` and `scripts/paper/export_device.py` read these rows and write the paper's scaling export and `paper_export/device/by_width.csv`.
+
+`losses_panel.py` plots the loss exponent, −ln P_keep, from the recalibrated model into `figures/`. This is not the expected number of photons lost. The ratio plot includes workload curves and a geometric mean with paired seed intervals; the absolute plot uses a logarithmic axis. These are research figures, not additional paper drafts. `HEADLINE.md` records the earlier analysis; the manuscript now reports shot overhead directly.

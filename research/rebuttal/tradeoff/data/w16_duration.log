@@ -1,0 +1,67 @@
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+[2] dj(n16) grid seed=0: 2 rows (0 failed) [4s]
+[4] dj(n16) hex_lattice seed=0: 2 rows (0 failed) [4s]
+[6] dj(n16) heavy_hex seed=0: 2 rows (0 failed) [4s]
+[8] qaoa(n16) grid seed=0: 2 rows (0 failed) [17s]
+[10] qaoa(n16) hex_lattice seed=0: 2 rows (0 failed) [20s]
+[12] qaoa(n16) heavy_hex seed=0: 2 rows (0 failed) [21s]
+[14] draper_qft_adder(n16) grid seed=0: 2 rows (0 failed) [21s]
+[16] draper_qft_adder(n16) hex_lattice seed=0: 2 rows (0 failed) [21s]
+[18] draper_qft_adder(n16) heavy_hex seed=0: 2 rows (0 failed) [21s]
+[20] modular_adder(n16) grid seed=0: 2 rows (0 failed) [23s]
+[22] modular_adder(n16) hex_lattice seed=0: 2 rows (0 failed) [26s]
+[24] modular_adder(n16) heavy_hex seed=0: 2 rows (0 failed) [28s]
+[26] qft(n16) grid seed=0: 2 rows (0 failed) [29s]
+[28] qft(n16) hex_lattice seed=0: 2 rows (0 failed) [32s]
+[30] qft(n16) heavy_hex seed=0: 2 rows (0 failed) [34s]
+[32] qpeexact(n16) grid seed=0: 2 rows (0 failed) [34s]
+[34] qpeexact(n16) hex_lattice seed=0: 2 rows (0 failed) [38s]
+[36] qpeexact(n16) heavy_hex seed=0: 2 rows (0 failed) [40s]
+[38] qpeinexact(n16) grid seed=0: 2 rows (0 failed) [40s]
+[40] qpeinexact(n16) hex_lattice seed=0: 2 rows (0 failed) [45s]
+[42] qpeinexact(n16) heavy_hex seed=0: 2 rows (0 failed) [48s]
+[44] qftentangled(n16) grid seed=0: 2 rows (0 failed) [49s]
+[46] qftentangled(n16) hex_lattice seed=0: 2 rows (0 failed) [55s]
+[48] qftentangled(n16) heavy_hex seed=0: 2 rows (0 failed) [58s]
+[50] bmw_quark_copula(n16) grid seed=0: 2 rows (0 failed) [72s]
+[52] bmw_quark_copula(n16) hex_lattice seed=0: 2 rows (0 failed) [81s]
+[54] bmw_quark_copula(n16) heavy_hex seed=0: 2 rows (0 failed) [86s]
+[56] hhl(n16) grid seed=0: 2 rows (0 failed) [86s]
+[58] hhl(n16) hex_lattice seed=0: 2 rows (0 failed) [86s]
+[60] hhl(n16) heavy_hex seed=0: 2 rows (0 failed) [86s]
+[62] ae(n16) grid seed=0: 2 rows (0 failed) [86s]
+[64] ae(n16) hex_lattice seed=0: 2 rows (0 failed) [86s]
+[66] ae(n16) heavy_hex seed=0: 2 rows (0 failed) [86s]
+[68] cdkm_ripple_carry_adder(n16) grid seed=0: 2 rows (0 failed) [86s]
+[70] cdkm_ripple_carry_adder(n16) hex_lattice seed=0: 2 rows (0 failed) [88s]
+[72] cdkm_ripple_carry_adder(n16) heavy_hex seed=0: 2 rows (0 failed) [90s]
+[74] vbe_ripple_carry_adder(n16) grid seed=0: 2 rows (0 failed) [93s]
+[76] vbe_ripple_carry_adder(n16) hex_lattice seed=0: 2 rows (0 failed) [94s]
+[78] vbe_ripple_carry_adder(n16) heavy_hex seed=0: 2 rows (0 failed) [96s]
+[80] vqe_two_local(n16) grid seed=0: 2 rows (0 failed) [148s]
+[82] vqe_two_local(n16) hex_lattice seed=0: 2 rows (0 failed) [157s]
+[84] vqe_two_local(n16) heavy_hex seed=0: 2 rows (0 failed) [163s]
+[86] rg_qft_multiplier(n16) grid seed=0: 2 rows (0 failed) [201s]
+[88] rg_qft_multiplier(n16) hex_lattice seed=0: 2 rows (0 failed) [215s]
+[90] rg_qft_multiplier(n16) heavy_hex seed=0: 2 rows (0 failed) [227s]
+[92] multiplier(n16) grid seed=0: 2 rows (0 failed) [227s]
+[94] multiplier(n16) hex_lattice seed=0: 2 rows (0 failed) [227s]
+[96] multiplier(n16) heavy_hex seed=0: 2 rows (0 failed) [232s]
+done: 96 new rows -> artifacts/paper/raw/../../../research/rebuttal/tradeoff/data/w16_duration.jsonl

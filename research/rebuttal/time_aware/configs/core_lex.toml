@@ -1,0 +1,44 @@
+# R4 lexicographic follow-up: core with distance primary and wait as tie-break (research/rebuttal/time_aware/README.md).
+# Core comparison: Greedy and PRISM, 20 seeds, grid, hex and heavy-hex, n = 8.
+experiment_id = "ta_core_lex"
+objective = "error"
+heuristic_config = "qiskit_sabre"
+tie_break = "load"
+layout_starts = 40
+refinement_iterations = 16
+prism_swap_trials = 40
+widths = [8]
+# Seeds are 100 apart: a run's random layout starts use seeds base..base+42,
+# so closer seeds share starts and are not independent.
+seeds = [
+  0, 100, 200, 300, 400,
+  500, 600, 700, 800, 900,
+  1000, 1100, 1200, 1300, 1400,
+  1500, 1600, 1700, 1800, 1900,
+]
+topologies = ["grid", "hex_lattice", "heavy_hex"]
+arms = [
+  "greedy",
+  "prism",
+]
+circuits = [
+  "dj",
+  "qaoa",
+  "draper_qft_adder",
+  "modular_adder",
+  "qft",
+  "qpeexact",
+  "qpeinexact",
+  "qftentangled",
+  "bmw_quark_copula",
+  "hhl",
+  "ae",
+  "cdkm_ripple_carry_adder",
+  "vbe_ripple_carry_adder",
+  "vqe_two_local",
+  "rg_qft_multiplier",
+  "multiplier",
+]
+reschedule = true
+wait_scale = 1.0
+wait_mode = "lexicographic"

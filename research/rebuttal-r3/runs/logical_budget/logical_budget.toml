@@ -1,0 +1,39 @@
+# Logical-SABRE at Greedy/PRISM's search budget (revision 3, R1): the cells of configs/paper/logical.toml,
+# with the quotient-graph SabreLayout at 40 random starts (plus dense, identity, reverse), 16 forward-backward
+# iterations and 40 swap trials. Nothing else differs from configs/paper/logical.toml.
+# Logical-SABRE context arm on the core cells.
+experiment_id = "logical_budget"
+layout_starts = 40
+refinement_iterations = 16
+prism_swap_trials = 40
+objective = "error"
+reschedule = true
+widths = [8]
+# Seeds are 100 apart: a run's random layout starts use seeds base..base+42,
+# so closer seeds share starts and are not independent.
+seeds = [
+  0, 100, 200, 300, 400,
+  500, 600, 700, 800, 900,
+  1000, 1100, 1200, 1300, 1400,
+  1500, 1600, 1700, 1800, 1900,
+]
+topologies = ["grid", "hex_lattice", "heavy_hex"]
+arms = ["logical"]
+circuits = [
+  "dj",
+  "qaoa",
+  "draper_qft_adder",
+  "modular_adder",
+  "qft",
+  "qpeexact",
+  "qpeinexact",
+  "qftentangled",
+  "bmw_quark_copula",
+  "hhl",
+  "ae",
+  "cdkm_ripple_carry_adder",
+  "vbe_ripple_carry_adder",
+  "vqe_two_local",
+  "rg_qft_multiplier",
+  "multiplier",
+]

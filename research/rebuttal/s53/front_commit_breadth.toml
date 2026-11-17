@@ -1,0 +1,44 @@
+# §5.3 re-run (s53/README.md): configs/paper/breadth.toml plus qf21 and bv, only the prism_front_commit arm, load tie-break.
+experiment_id = "s53_front_commit"
+objective = "error"
+reschedule = true
+heuristic_config = "qiskit_sabre"
+tie_break = "load"
+layout_starts = 40
+refinement_iterations = 16
+prism_swap_trials = 40
+widths = []
+# Seeds are 100 apart: a run's random layout starts use seeds base..base+42,
+# so closer seeds share starts and are not independent.
+seeds = [
+  0, 100, 200, 300, 400,
+  500, 600, 700, 800, 900,
+  1000, 1100, 1200, 1300, 1400,
+  1500, 1600, 1700, 1800, 1900,
+]
+topologies = ["grid", "hex_lattice", "heavy_hex"]
+arms = [
+  "prism_front_commit",
+]
+circuits = [
+  "sat",
+  "seca",
+  "multiply",
+  "gcm_h6",
+  "qec9xz",
+  "qram",
+  "knn",
+  "qf21",
+  "bv",
+]
+
+[circuit_widths]
+sat = [11]
+seca = [11]
+multiply = [13]
+gcm_h6 = [13]
+qec9xz = [17]
+qram = [20]
+knn = [25]
+qf21 = [15]
+bv = [19]

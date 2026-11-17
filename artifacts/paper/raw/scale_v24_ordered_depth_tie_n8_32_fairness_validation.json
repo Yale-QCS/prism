@@ -1,0 +1,17 @@
+{
+  "input": "artifacts/paper/raw/scale_v24_ordered_depth_tie_n8_32.jsonl",
+  "config": "configs/paper/scale_v24_ordered_depth_tie_n8_32.toml",
+  "n_rows": 2240,
+  "n_success": 2240,
+  "n_fail": 0,
+  "code_git_shas": [
+    "5db5e0d8b38fc52a53eb382a6822b5ddae95ab05"
+  ],
+  "source_fingerprints": [
+    "dfc943c007635148"
+  ],
+  "n_missing_vs_grid": 0,
+  "missing": [],
+  "errors": [],
+  "valid": true
+}

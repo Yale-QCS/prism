@@ -1,0 +1,36 @@
+96 exhaustive distribution checks and 24 single-fault limits passed
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+Completed X grid greedy
+Completed X grid prism
+Completed X hex_lattice greedy
+Completed X hex_lattice prism
+Completed Z grid greedy
+Completed Z grid prism
+Completed Z hex_lattice greedy
+Completed Z hex_lattice prism
+X grid p= 0.003
+greedy hidden % 2.145318720985138 flags % 0.046775 flag gain 45.86464395478649
+prism hidden % 1.8705701034710482 flags % 0.0379875 flag gain 49.2417269752168
+X grid p= 0.01
+greedy hidden % 12.3085789861096 flags % 0.8205124999999999 flag gain 15.001086499120492
+prism hidden % 10.877701118438662 flags % 0.6406 flag gain 16.98048878932042
+X hex_lattice p= 0.003
+greedy hidden % 2.5947073396334432 flags % 0.06434999999999999 flag gain 40.32179237969609
+prism hidden % 2.1349152400498164 flags % 0.0476875 flag gain 44.76886479789916
+X hex_lattice p= 0.01
+greedy hidden % 14.505226120396863 flags % 1.151625 flag gain 12.595442197240304
+prism hidden % 12.137435053147641 flags % 0.7994125000000001 flag gain 15.182943790780904
+Z grid p= 0.003
+greedy hidden % 2.065365531470681 flags % 0.044024999999999995 flag gain 46.91347033437096
+prism hidden % 1.8451046923836114 flags % 0.03665 flag gain 50.343920665309994
+Z grid p= 0.01
+greedy hidden % 12.08126369104306 flags % 0.7640625 flag gain 15.81187885944286
+prism hidden % 10.705070986062967 flags % 0.607175 flag gain 17.6309482209626
+Z hex_lattice p= 0.003
+greedy hidden % 2.649722137173558 flags % 0.06503750000000001 flag gain 40.74145127308949
+prism hidden % 2.123199815210295 flags % 0.0463375 flag gain 45.820335909582845
+Z hex_lattice p= 0.01
+greedy hidden % 15.040892475295767 flags % 1.1784125 flag gain 12.763690537308255
+prism hidden % 12.049870778489721 flags % 0.7681250000000001 flag gain 15.68738262455944
+Validated 160 routes; 1600000 direct circuit samples; max audit |z| 2.1262037379773515

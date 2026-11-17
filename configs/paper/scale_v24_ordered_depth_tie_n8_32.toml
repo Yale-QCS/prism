@@ -1,0 +1,36 @@
+# Five-seed scaling experiment for the adopted paper configuration.
+prespec = "artifacts/paper/audits/scale_v24_ordered_depth_tie_n8_32/PRESPEC.md"
+prespec_revision = 1
+experiment_id = "scale_v24_ordered_depth_tie_n8_32"
+objective = "swaps"
+heuristic_config = "qiskit_sabre"
+tie_break = "load"
+layout_starts = 40
+refinement_iterations = 16
+prism_swap_trials = 40
+trace = "summary"
+widths = [8, 12, 16, 20, 24, 28, 32]
+seeds = [42, 7, 123, 1001, 2002]
+topologies = ["grid", "hex_lattice"]
+arms = [
+  "greedy_early_commit",
+  "prism_retained_set",
+]
+circuits = [
+  "dj",
+  "qaoa",
+  "draper_qft_adder",
+  "modular_adder",
+  "qft",
+  "qpeexact",
+  "qpeinexact",
+  "qftentangled",
+  "bmw_quark_copula",
+  "hhl",
+  "ae",
+  "cdkm_ripple_carry_adder",
+  "full_adder",
+  "vqe_two_local",
+  "rg_qft_multiplier",
+  "multiplier",
+]

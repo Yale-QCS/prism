@@ -1,0 +1,36 @@
+# Core comparison: Greedy and PRISM, 20 seeds, grid and hex, n = 8.
+experiment_id = "depth_window2"
+objective = "depth"
+heuristic_config = "qiskit_sabre"
+tie_break = "load"
+layout_starts = 40
+refinement_iterations = 16
+prism_swap_trials = 40
+widths = [8]
+seeds = [0, 1, 2]
+topologies = ["grid", "hex_lattice"]
+arms = [
+  "greedy",
+  "prism",
+]
+circuits = [
+  "dj",
+  "qaoa",
+  "draper_qft_adder",
+  "modular_adder",
+  "qft",
+  "qpeexact",
+  "qpeinexact",
+  "qftentangled",
+  "bmw_quark_copula",
+  "hhl",
+  "ae",
+  "cdkm_ripple_carry_adder",
+  "full_adder",
+  "vqe_two_local",
+  "rg_qft_multiplier",
+  "multiplier",
+]
+
+commute_diagonal = true
+reschedule = true

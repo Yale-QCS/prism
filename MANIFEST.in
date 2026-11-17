@@ -1,0 +1,3 @@
+recursive-include tests *.py
+include crates/Cargo.toml crates/Cargo.lock crates/README.md
+recursive-include crates/src *.rs

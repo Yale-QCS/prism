@@ -1,0 +1,80 @@
+{"circuit": "dj", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.9039780006072046, "sim": 0.9042515465910436, "sim_se": 0.0}
+{"circuit": "dj", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.8860425175130591, "sim": 0.8864036841852039, "sim_se": 0.0}
+{"circuit": "dj", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.8257620601787788, "sim": 0.8265520535373929, "sim_se": 0.0}
+{"circuit": "dj", "width": 8, "point": "best corner", "n_active": 8, "model": 0.934298846182567, "sim": 0.9344055599927377, "sim_se": 0.0}
+{"circuit": "dj", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.8205704235155467, "sim": 0.8213867717582395, "sim_se": 0.0}
+{"circuit": "qaoa", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.628003716351808, "sim": 0.6300150536741466, "sim_se": 0.0}
+{"circuit": "qaoa", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.5105243121889114, "sim": 0.5135309798625401, "sim_se": 0.0}
+{"circuit": "qaoa", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.2463119003483812, "sim": 0.25235927468597597, "sim_se": 0.0}
+{"circuit": "qaoa", "width": 8, "point": "best corner", "n_active": 8, "model": 0.6488795216800942, "sim": 0.6501216865864948, "sim_se": 0.0}
+{"circuit": "qaoa", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.45658680331351187, "sim": 0.4604188441219598, "sim_se": 0.0}
+{"circuit": "draper_qft_adder", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.7458357612837517, "sim": 0.7482828380423054, "sim_se": 0.0}
+{"circuit": "draper_qft_adder", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.6558320276038972, "sim": 0.6603028744142707, "sim_se": 0.0}
+{"circuit": "draper_qft_adder", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.41724795704335876, "sim": 0.4299456839905329, "sim_se": 0.0}
+{"circuit": "draper_qft_adder", "width": 8, "point": "best corner", "n_active": 8, "model": 0.7591197534240958, "sim": 0.7611635204163071, "sim_se": 0.0}
+{"circuit": "draper_qft_adder", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.5908271152037434, "sim": 0.5963252638957205, "sim_se": 0.0}
+{"circuit": "modular_adder", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.7668591798505155, "sim": 0.7689642165498263, "sim_se": 0.0}
+{"circuit": "modular_adder", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.6664882951576009, "sim": 0.6700055683697437, "sim_se": 0.0}
+{"circuit": "modular_adder", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.40700061621627576, "sim": 0.41604528783308625, "sim_se": 0.0}
+{"circuit": "modular_adder", "width": 8, "point": "best corner", "n_active": 8, "model": 0.7599899831302557, "sim": 0.761518532501654, "sim_se": 0.0}
+{"circuit": "modular_adder", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.6209766480476538, "sim": 0.6257318044084599, "sim_se": 0.0}
+{"circuit": "qft", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.682660310924959, "sim": 0.6863792827244607, "sim_se": 0.0}
+{"circuit": "qft", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.5749671039791351, "sim": 0.5808580725593809, "sim_se": 0.0}
+{"circuit": "qft", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.3143888118306117, "sim": 0.3271402551057669, "sim_se": 0.0}
+{"circuit": "qft", "width": 8, "point": "best corner", "n_active": 8, "model": 0.7167277580041694, "sim": 0.7188403725784513, "sim_se": 0.0}
+{"circuit": "qft", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.5649664260502437, "sim": 0.5711214479308051, "sim_se": 0.0}
+{"circuit": "qpeexact", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.6664927756042814, "sim": 0.6698504715970295, "sim_se": 0.0}
+{"circuit": "qpeexact", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.5598460246197414, "sim": 0.5650050794943239, "sim_se": 0.0}
+{"circuit": "qpeexact", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.3032201779095608, "sim": 0.3140839607023563, "sim_se": 0.0}
+{"circuit": "qpeexact", "width": 8, "point": "best corner", "n_active": 8, "model": 0.6859815630818399, "sim": 0.6881445764854384, "sim_se": 0.0}
+{"circuit": "qpeexact", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.48748356886182703, "sim": 0.49425853982501744, "sim_se": 0.0}
+{"circuit": "qpeinexact", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.6507522747235073, "sim": 0.6538978760239539, "sim_se": 0.0}
+{"circuit": "qpeinexact", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.542632407077646, "sim": 0.5475390950935962, "sim_se": 0.0}
+{"circuit": "qpeinexact", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.2863931839176662, "sim": 0.2968686279795237, "sim_se": 0.0}
+{"circuit": "qpeinexact", "width": 8, "point": "best corner", "n_active": 8, "model": 0.6746157978617028, "sim": 0.6766919331674938, "sim_se": 0.0}
+{"circuit": "qpeinexact", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.4719116540175435, "sim": 0.4780772767007889, "sim_se": 0.0}
+{"circuit": "qftentangled", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.5713239305316103, "sim": 0.5767592615091359, "sim_se": 0.0}
+{"circuit": "qftentangled", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.45396264655401675, "sim": 0.4621055464927838, "sim_se": 0.0}
+{"circuit": "qftentangled", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.20214487146794433, "sim": 0.21743182441059644, "sim_se": 0.0}
+{"circuit": "qftentangled", "width": 8, "point": "best corner", "n_active": 8, "model": 0.6242321274079697, "sim": 0.6279020503503824, "sim_se": 0.0}
+{"circuit": "qftentangled", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.4238217821509552, "sim": 0.43391480119877496, "sim_se": 0.0}
+{"circuit": "bmw_quark_copula", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.6761306376823857, "sim": 0.6771394421500891, "sim_se": 0.0}
+{"circuit": "bmw_quark_copula", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.5571901239966339, "sim": 0.5587712849554016, "sim_se": 0.0}
+{"circuit": "bmw_quark_copula", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.28200222013233256, "sim": 0.28543539197098095, "sim_se": 0.0}
+{"circuit": "bmw_quark_copula", "width": 8, "point": "best corner", "n_active": 8, "model": 0.6701502314867812, "sim": 0.670849688357568, "sim_se": 0.0}
+{"circuit": "bmw_quark_copula", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.5016131117302212, "sim": 0.5036791481921276, "sim_se": 0.0}
+{"circuit": "hhl", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.4587107584645874, "sim": 0.4653093115619796, "sim_se": 0.0}
+{"circuit": "hhl", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.33318959300638906, "sim": 0.34213010590724435, "sim_se": 0.0}
+{"circuit": "hhl", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.10821956963037827, "sim": 0.1209576049875898, "sim_se": 0.0}
+{"circuit": "hhl", "width": 8, "point": "best corner", "n_active": 8, "model": 0.5109084253511789, "sim": 0.5150558189430385, "sim_se": 0.0}
+{"circuit": "hhl", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.28426407492644645, "sim": 0.2945179319319213, "sim_se": 0.0}
+{"circuit": "ae", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.6051062459376054, "sim": 0.6089137590304337, "sim_se": 0.0}
+{"circuit": "ae", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.494543588988119, "sim": 0.5002703480595208, "sim_se": 0.0}
+{"circuit": "ae", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.24315209362271, "sim": 0.25437172182221757, "sim_se": 0.0}
+{"circuit": "ae", "width": 8, "point": "best corner", "n_active": 8, "model": 0.642753202076304, "sim": 0.6452093986089302, "sim_se": 0.0}
+{"circuit": "ae", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.4247733442998181, "sim": 0.43183512512246924, "sim_se": 0.0}
+{"circuit": "cdkm_ripple_carry_adder", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.798912818494567, "sim": 0.8010135248712487, "sim_se": 0.0}
+{"circuit": "cdkm_ripple_carry_adder", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.6888029140497538, "sim": 0.6929648576708284, "sim_se": 0.0}
+{"circuit": "cdkm_ripple_carry_adder", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.4089381810596879, "sim": 0.4210276022950693, "sim_se": 0.0}
+{"circuit": "cdkm_ripple_carry_adder", "width": 8, "point": "best corner", "n_active": 8, "model": 0.7554029469764585, "sim": 0.7576541538933602, "sim_se": 0.0}
+{"circuit": "cdkm_ripple_carry_adder", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.6400091870700635, "sim": 0.6460125640101417, "sim_se": 0.0}
+{"circuit": "vbe_ripple_carry_adder", "width": 8, "point": "central cz 1e-3", "n_active": 7, "model": 0.7983234721997119, "sim": 0.8000576147068692, "sim_se": 0.0}
+{"circuit": "vbe_ripple_carry_adder", "width": 8, "point": "central cz 3e-3", "n_active": 7, "model": 0.7265631920209975, "sim": 0.7296130110145234, "sim_se": 0.0}
+{"circuit": "vbe_ripple_carry_adder", "width": 8, "point": "central cz 1e-2", "n_active": 7, "model": 0.5217411582680175, "sim": 0.5305654508734057, "sim_se": 0.0}
+{"circuit": "vbe_ripple_carry_adder", "width": 8, "point": "best corner", "n_active": 7, "model": 0.8037921776905255, "sim": 0.8052601663150721, "sim_se": 0.0}
+{"circuit": "vbe_ripple_carry_adder", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 7, "model": 0.6461697000351908, "sim": 0.6510233476898092, "sim_se": 0.0}
+{"circuit": "vqe_two_local", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.43082170193787406, "sim": 0.43501388603807606, "sim_se": 0.0}
+{"circuit": "vqe_two_local", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.2790673135503573, "sim": 0.2852151221891993, "sim_se": 0.0}
+{"circuit": "vqe_two_local", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.06056299912913561, "sim": 0.06899137058541929, "sim_se": 0.0}
+{"circuit": "vqe_two_local", "width": 8, "point": "best corner", "n_active": 8, "model": 0.4210170239265138, "sim": 0.42449577086468393, "sim_se": 0.0}
+{"circuit": "vqe_two_local", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.22538477976663754, "sim": 0.23213929761751817, "sim_se": 0.0}
+{"circuit": "rg_qft_multiplier", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.49176888317386536, "sim": 0.5068216031537435, "sim_se": 0.0}
+{"circuit": "rg_qft_multiplier", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.3196245382136916, "sim": 0.34058053841434366, "sim_se": 0.0}
+{"circuit": "rg_qft_multiplier", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.070266434203649, "sim": 0.09454472316728305, "sim_se": 0.0}
+{"circuit": "rg_qft_multiplier", "width": 8, "point": "best corner", "n_active": 8, "model": 0.4448795667697902, "sim": 0.4566561619703356, "sim_se": 0.0}
+{"circuit": "rg_qft_multiplier", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.2863148371897025, "sim": 0.312987429963804, "sim_se": 0.0}
+{"circuit": "multiplier", "width": 8, "point": "central cz 1e-3", "n_active": 8, "model": 0.49176888317386536, "sim": 0.5068216031537435, "sim_se": 0.0}
+{"circuit": "multiplier", "width": 8, "point": "central cz 3e-3", "n_active": 8, "model": 0.3196245382136916, "sim": 0.34058053841434366, "sim_se": 0.0}
+{"circuit": "multiplier", "width": 8, "point": "central cz 1e-2", "n_active": 8, "model": 0.070266434203649, "sim": 0.09454472316728305, "sim_se": 0.0}
+{"circuit": "multiplier", "width": 8, "point": "best corner", "n_active": 8, "model": 0.4448795667697902, "sim": 0.4566561619703356, "sim_se": 0.0}
+{"circuit": "multiplier", "width": 8, "point": "t1 68, readout 1.63e-2", "n_active": 8, "model": 0.2863148371897025, "sim": 0.312987429963804, "sim_se": 0.0}

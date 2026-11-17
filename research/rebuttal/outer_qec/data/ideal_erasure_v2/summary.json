@@ -1,0 +1,2665 @@
+{
+  "cells": 240,
+  "samples": 240000000,
+  "checked_fault_columns": 156146,
+  "seeds": [
+    0,
+    100,
+    200,
+    300,
+    400,
+    500,
+    600,
+    700,
+    800,
+    900,
+    1000,
+    1100,
+    1200,
+    1300,
+    1400,
+    1500,
+    1600,
+    1700,
+    1800,
+    1900
+  ],
+  "shots_per_cell": 200000,
+  "probabilities": [
+    0.0001,
+    0.0003,
+    0.001,
+    0.003,
+    0.01
+  ],
+  "logical_error_definition": "Optimal guessing error = P_ambiguous / 2 for one logical bit under uniform heralded replacement",
+  "compiler_trees": {
+    "6324f9705279e1e4c5e04017927c4034321535a7": [
+      "b1ebb6859797d47fea3ba5ef4493834dff84eda6",
+      "0b0bcd6692d2d8c2d396107f9296827d4833c0f8"
+    ],
+    "0acfdc30e053b53f2cdbe428cc0bfcfbd3869b29": [
+      "b1ebb6859797d47fea3ba5ef4493834dff84eda6",
+      "0b0bcd6692d2d8c2d396107f9296827d4833c0f8"
+    ],
+    "d7f65240af6c568e2273a3428c0c6075f3ba7f30": [
+      "b1ebb6859797d47fea3ba5ef4493834dff84eda6",
+      "0b0bcd6692d2d8c2d396107f9296827d4833c0f8"
+    ]
+  },
+  "row_sha256": {
+    "X_grid_logical_0.json": "f1d79093e5c9aa1e3b635fd2144ec65f44812f53169c0f1925334049234985a1",
+    "X_grid_logical_100.json": "50fd3283fa49cfb3d2a6f9aa7ab05e28137a41943c849a36fd53894dcf0f834b",
+    "X_grid_logical_200.json": "28607ba7aadd67160283dae7e6a9648c2bdd7d2782387a992fd906e002a9b1c7",
+    "X_grid_logical_300.json": "c2263f14bf55377c9c6f5aa0100d57e039e4f9c0431bf7b4c41f032dac090d42",
+    "X_grid_logical_400.json": "211f5cd40dc0ad4e553d91eb7ce30c1dd0c1bd99de760d440ec0e11d2e9e4c3b",
+    "X_grid_logical_500.json": "5c43d060922b9f56aa1cd87e07a3f84115d348f0761b3e2bd73d8ad8b848a0b6",
+    "X_grid_logical_600.json": "bab1ce953c897e115446558f8d16564de8eb95b457672b8f3fe7608ee79952f7",
+    "X_grid_logical_700.json": "98e93b667343cd88442758b958bafbb07cf164c9f52d71367d959e8d1eadb6c5",
+    "X_grid_logical_800.json": "da53f5c10f68d636471e6a94060e55208e0f6fe8f36751274c0411ce7022e14f",
+    "X_grid_logical_900.json": "17e7e5af7f3c25a60789fabbb6e7b00ce3cc1271a87b4e83130dc9d038ddd4c0",
+    "X_grid_logical_1000.json": "0f4a31ccff0ce8e6d9e3b38f43e1be5f0c887722eb41fa4a99461bb52ae48c14",
+    "X_grid_logical_1100.json": "5274c1dece673e64668926be5ab6eaa5687e686e75fb09c0f77a82a2bd2fb22f",
+    "X_grid_logical_1200.json": "21941319049252a3da00448704e757338d2ab42704c7efbd1a316ceb4a3a001a",
+    "X_grid_logical_1300.json": "4f80224ab7aef0ad428067fc359922b90b1b157901f9d720021409d334e6c6c5",
+    "X_grid_logical_1400.json": "e281747c48aa9307141e5146d34b29bfa625432e7d19b97b7e2ecfb943cca772",
+    "X_grid_logical_1500.json": "680c0912312df2aca8b36f0645a7418d7bce5252314693367041878dc47f3e9b",
+    "X_grid_logical_1600.json": "ca15016541e58cc77e3d43c161bcb97d25801c1af5e373f911691fcf2e776ccb",
+    "X_grid_logical_1700.json": "16eae8da6ce2aeb2899c2ad08c3166f88299b731c8f5b3fe333eb79b901e95c9",
+    "X_grid_logical_1800.json": "8974459e953adc7c6118ba8df390ffab2417c72454fe238e791356dbb05879a6",
+    "X_grid_logical_1900.json": "c6903bdde22fb95da27900d40d1b81518c30fe296c955499b02a4fdfaf60d7fe",
+    "X_grid_greedy_0.json": "f3701a5e72907bb45065515637228136df6f38593d68dfd10d9d64e55c1effff",
+    "X_grid_greedy_100.json": "5f22a257fb87063d5c6233154ae64086fac1e4f4223e693cd1424d7a297d1d47",
+    "X_grid_greedy_200.json": "1db634bda541bd66b56420c6d615bf675af2245b81db6bfbd88b3da206e50ba5",
+    "X_grid_greedy_300.json": "b6c42a50d3286e9d1872df2f25b50b1b1dd074bf3a6b3d27895cb3e2c3314a64",
+    "X_grid_greedy_400.json": "95b065e9fd1560b52660f2ff9fa95ce35f6359954c6e458ec6b35dbfe119b25d",
+    "X_grid_greedy_500.json": "2fb2d2b921d7adbcc07e03ce6484b84616fc9dd9f95b2960241bf9cc8aad266e",
+    "X_grid_greedy_600.json": "3941ca26e060cec8f110d0910fd7828c0b3b48ad9a9b18b91f6ae6ed03e5c0bf",
+    "X_grid_greedy_700.json": "f3e2da98faf429a180375538eea194f5901cfc50d956b6db74ea626449943da0",
+    "X_grid_greedy_800.json": "584e7142033cd660b08067c38c57a3c00ece6d683679634047931d2df4666b62",
+    "X_grid_greedy_900.json": "dd06bebb756a280916938c5717c7cf0e6c5a8df2cbc662d962eaa4e7d01f5ed6",
+    "X_grid_greedy_1000.json": "263c9b782238a1fc54ccc02f193b7acfb4db3ce3ea351573e92aaf5d6d4a4039",
+    "X_grid_greedy_1100.json": "3d1f97bfef4746cc334be3e2e821b8dff0344b1066b1205704e727157693fabd",
+    "X_grid_greedy_1200.json": "ed665fc2cd45a702847d053589269b4212ad07c434faad977f41a5fa508097c6",
+    "X_grid_greedy_1300.json": "efc3b0c27874500994cbae6412eb566eb78a5d25d600c44de78e8f5248a3d318",
+    "X_grid_greedy_1400.json": "2516a72c34bfb8e668f95e645cbec0840e73ef03f0cdc644ec3729afe406e2e9",
+    "X_grid_greedy_1500.json": "6378eaf2356b980ee02f8685e0dd54b3dc7c6663eb2f85172b531a020d25ff25",
+    "X_grid_greedy_1600.json": "18b14103d99bfe8afed30839f06e26d18d285ca5ba5d394df9c58b6dd1c44cf6",
+    "X_grid_greedy_1700.json": "a1177ee7ee0eae2b0ba846aec23389d3b250080e1d71d883117f468d6f089331",
+    "X_grid_greedy_1800.json": "5fb0a4088f3e3a653d4b63e186372ffdf375b2411e854b80c432b2fc491a9b88",
+    "X_grid_greedy_1900.json": "d8919ae58d2e3b4c8b12675ee64ee3f483d6a3c3a89b7038aa7b5bf9037520c1",
+    "X_grid_prism_0.json": "936be36af134889ac110460f6fb2b42458c0e88060a0ade50c80d65318e1c567",
+    "X_grid_prism_100.json": "77dd25a542646e48b670cc51ed62ecc07fba776b5c1dc406b14e68c9a00a31fe",
+    "X_grid_prism_200.json": "6622bea258a15fc14135e6a4eb1957831a6dabf31edb48454c76f3ff9756d426",
+    "X_grid_prism_300.json": "69234b3263a3bce1bc6c1210dff69af0dda4b586fa24823657f0b4bec69d483a",
+    "X_grid_prism_400.json": "3616008008c2274f02e19d8563b5cbcae2065b886318a5200b1392bcf1933a96",
+    "X_grid_prism_500.json": "d3500f036d64cbc08324ab06ee659385a0226e1668fdd533dbc2fb8bd42f9ca1",
+    "X_grid_prism_600.json": "aff29820b4460e184868b77308e56b9d616da60bd5271f2b7ca731655ba7d15d",
+    "X_grid_prism_700.json": "80b02a1fca33623a10efe19d19d0abfb307c18d1d5044a158492b0430cfa9229",
+    "X_grid_prism_800.json": "6f202949698456f6bb811c4c0af483aab0a854961da7ac03e99e7d8a28ad33f8",
+    "X_grid_prism_900.json": "6c41ddaa577d37f839d396d6081f92108daffc03977f0b8c4de8448a8317369d",
+    "X_grid_prism_1000.json": "303e759a825d2192af5030a111a273afd8aa2203aeb724b13c37def9afa065ee",
+    "X_grid_prism_1100.json": "a93e99e5943e2646c58ec60b8c8df6410a4768cc54d50de49f0fd84d7bd8c278",
+    "X_grid_prism_1200.json": "f034ecf12ccf4341183dc382adcc12f1ebc73ad96fbe71ce9a4ce78e308e7e40",
+    "X_grid_prism_1300.json": "dfed64d4b8787d83848be33d121f7b5745ad74699a1ea643764e07f3605bc548",
+    "X_grid_prism_1400.json": "1d2d2bf237af37e252471749a64daa3bbf8ee1502a7f7f964a6c14646347a276",
+    "X_grid_prism_1500.json": "c0818bbbd87f9bb1f818d5af3d7bca402f581123511060a6ef5c0affa93136ca",
+    "X_grid_prism_1600.json": "60f3005f5256edd3d061eaa5022ffdcb95b76958faa50fc7b61be2ae51ff4957",
+    "X_grid_prism_1700.json": "1eb1b1a093bd89766871520c285eaad10ee29abbbce71cac5d33330705ca2c17",
+    "X_grid_prism_1800.json": "8d0c61a5b1e1c63ece92e1278a1be96c5f6d82454bcd315bb31e875fc19790af",
+    "X_grid_prism_1900.json": "78bebce32257e6e81fa8e39b3667ee1eed0771a9385ce07b4c9f3bcc2a3542c0",
+    "X_hex_lattice_logical_0.json": "69437ad57e8751fb7f7dfe2acde09f4b70d0cb788d961d8de4f04dfd242a2858",
+    "X_hex_lattice_logical_100.json": "5fb881f86afc74582dec7f43ea4ffeed7b24dd06fbde37a459ad880b245136b0",
+    "X_hex_lattice_logical_200.json": "ff4ceb413caf0156b12e00842978250c38b58206a16633af97334e3fd2beb423",
+    "X_hex_lattice_logical_300.json": "6d15be109164a45235a894fa4c6705f92adab1f1ac2a872708a6be7ea7b173d9",
+    "X_hex_lattice_logical_400.json": "1adfa5de96d900afc0efc5dfdd399879c4e521f48c1cc933c0d00429ab281d9c",
+    "X_hex_lattice_logical_500.json": "928af67c199618c885d1bc923392eb4c197532c3726525bb07b005a401c82d6d",
+    "X_hex_lattice_logical_600.json": "264d75b79deca71494f50399d38deeca8a22a7c1acb677a9b600b413cfbcff24",
+    "X_hex_lattice_logical_700.json": "e44d433f117377224d7c1779a5aa7cdbeabf400b7b649a3bc66344bdd23ff03e",
+    "X_hex_lattice_logical_800.json": "5e153f0244fd03dae54784ea4d05f4d5b3830605a88657ba4a4609a0721f8d97",
+    "X_hex_lattice_logical_900.json": "08cf5f72273036518c0499ea6ba3f304b6d91ea2491b2b11dd51864d35145bde",
+    "X_hex_lattice_logical_1000.json": "303016cad83705bccd500616573b274594630cc3f4b2ba9a81146ffb1d849d45",
+    "X_hex_lattice_logical_1100.json": "bc6d9a457566ac7d56521a33a33dc920625d4880ca6cebf4c626582ce01f2b97",
+    "X_hex_lattice_logical_1200.json": "4ffdad4d56142189745e4b56b2f75846566b40f76ae310e94735167b3419cd99",
+    "X_hex_lattice_logical_1300.json": "210d7f9685c3aa94e373f284d908108555966e4eb01fb61edc4d95c9b337fdd5",
+    "X_hex_lattice_logical_1400.json": "86cb6a08676858234dc1d7057d22e15bfd420b4cbd117df17d421c7c70830638",
+    "X_hex_lattice_logical_1500.json": "4811bef4ffa38435352c26644f7a9acef121f06fb8b266fc1d692a4f42a2db84",
+    "X_hex_lattice_logical_1600.json": "309fd8c7eb9076ebc77498926dd682639426e8a0e7724a4bbca54a6816bcdeae",
+    "X_hex_lattice_logical_1700.json": "0a267eeaee7f39806edf6bc4c9c7de621a751159c6eafdee4cecb65bdb24c301",
+    "X_hex_lattice_logical_1800.json": "b1cdc4572baff9001c4e12f607e7c80a14b4205058f2f445092b74684bd30f12",
+    "X_hex_lattice_logical_1900.json": "6918d9815214814b0193f91fc2c70902165d114c6e909e30e26b0640508440f3",
+    "X_hex_lattice_greedy_0.json": "c25acc933ba62e9b47702361eb560ad51330e78359472d8404f79e937cb16d06",
+    "X_hex_lattice_greedy_100.json": "bb1589ee6f1d072ea2f784aea9c3c97d672f1312e3480fc9b6b8eba6ab33f7cc",
+    "X_hex_lattice_greedy_200.json": "f00f54d87ae58ec938e0f74fc5fac05c918180c2ab457e6b6f1a8c0cb735e8dd",
+    "X_hex_lattice_greedy_300.json": "987614737d56d717b766c81a1e34c5094b05967fa38a27bf315e46c5ee49cd00",
+    "X_hex_lattice_greedy_400.json": "142d4b22205a4b6667b5007fb40205f8310afcc3b9bca5b1ce7f49f30350fbe8",
+    "X_hex_lattice_greedy_500.json": "966342286b900e4942f2ce81bbb52d33ddeb3d3fb0e4894645c14bc03721e9cd",
+    "X_hex_lattice_greedy_600.json": "0fb20b5a688cb4e1ef676772de914b084cf1894464a8e509093aad76083d08d3",
+    "X_hex_lattice_greedy_700.json": "ceb25351017ffe2e76212ef84bfc3ea1f4b5bf095c4d394d5b746ed968725982",
+    "X_hex_lattice_greedy_800.json": "3b0741b5744f980f8cb2f6d1d3e16a194f484017d97020fe109e90adee7ce472",
+    "X_hex_lattice_greedy_900.json": "d2777b22361e68592b941195b9ae9153d090bb953fdd045b75e1be8b7b8d2c6a",
+    "X_hex_lattice_greedy_1000.json": "73ff0e98f662548f25dbdc34bc13fc9bbfbfe4a276cde6fb75300a41b154a47b",
+    "X_hex_lattice_greedy_1100.json": "32bbd0e2eab181f63dd840264ecad8f7d27e78a3fd1a4fdd7e5e15b541c55568",
+    "X_hex_lattice_greedy_1200.json": "acfabe2126e5fca8e4c40d8414d56268dbc51b4a259832ec9066209c1fc49cfb",
+    "X_hex_lattice_greedy_1300.json": "bfaf70d15c84f8786370741cc819f18618277b8133a44e111280f0ba3df4a8f3",
+    "X_hex_lattice_greedy_1400.json": "b39aa8659f5cd0039e6c7e1bcc4a2b14ce038ba310875891fd634af085f69756",
+    "X_hex_lattice_greedy_1500.json": "0fc9ead79c16638fe9c7bbc85c572f588de676164d870975f7356fd3fa54206c",
+    "X_hex_lattice_greedy_1600.json": "089e6808f9b6ece7e0ee15e08e8c80dafef6f0712520be61b0d9789170110bce",
+    "X_hex_lattice_greedy_1700.json": "291b6ff99fffbfd7913535d031a6f205afa959bfdfa6ab4dc8273c29688b77d5",
+    "X_hex_lattice_greedy_1800.json": "6136041c825e5f4f0126b7ae29ae5535d6140f143dd798eb772fd436bf789756",
+    "X_hex_lattice_greedy_1900.json": "788353c71bb74034ba5759a56be0d9a48351d1d73acedc1fc7da89e236c89558",
+    "X_hex_lattice_prism_0.json": "ed2d63f83ece898b3dfde38494b03347f6ae2d47ed7e1df66ded447e1f798c94",
+    "X_hex_lattice_prism_100.json": "fff17cbf983d9dd548c855d3cb11fe32b97f5e63a8918009338a688db00f454f",
+    "X_hex_lattice_prism_200.json": "5e8cad0df968fe198b04ded9c8b73f3c1910afc3dcfe6c062b73aa8c27f6a4b6",
+    "X_hex_lattice_prism_300.json": "fb5151d685172b87d6b60b1f5f40283409dd5f5563f47ded732d3d07e411a887",
+    "X_hex_lattice_prism_400.json": "2f930e5133842269b8baba6b79b8cb1bcec64b2e1370d8d3f356affbcb628b09",
+    "X_hex_lattice_prism_500.json": "e429655195abfb725ec98fcfb487924fe592355d123fd7c4e5d79fa9f9f6bb4f",
+    "X_hex_lattice_prism_600.json": "e718e2570e72d72d3425662960d3115ee1170f61ca16959458facf4ab9c9d7fb",
+    "X_hex_lattice_prism_700.json": "4e00931c6f2a9240672c6cfe13404a7ba67ca6364f3e8305ad3f64d892c1f114",
+    "X_hex_lattice_prism_800.json": "66a9a321f424104d096d46be01690eefa7fedcaff5f2372319f58ba6c1e07d97",
+    "X_hex_lattice_prism_900.json": "0e4adc30317f15c842dfad434b1b2d7675e593f7e5fea85ac8fbf31086325f9b",
+    "X_hex_lattice_prism_1000.json": "4a788485881ebe0261fcd2c99cdd5d62952a9455bd5c8517f22efe94e255ab71",
+    "X_hex_lattice_prism_1100.json": "08d41678a459219a19b4a8709ce9a0c158aa7d48146be8e4af7d829ab6467064",
+    "X_hex_lattice_prism_1200.json": "098329c83431d2112312f02435965842825d1f44aa2b1c019788bef206e9ecf4",
+    "X_hex_lattice_prism_1300.json": "982167d6021705cd19429caeff4c68ee6fc7fb2bd9208a4fe3309032572fb9a5",
+    "X_hex_lattice_prism_1400.json": "136cf31bda81080786387835a76657d8b91e9cc650b9e86c146fedbfc7a7bd28",
+    "X_hex_lattice_prism_1500.json": "5f8fde7b1ec02717556c9e2087a9711aa74aa95788393f06b3845175a7bb1e13",
+    "X_hex_lattice_prism_1600.json": "602ad9331f1f53c72cbe2452f64d014081ed199cf9497c73320e5f9a26cb7d80",
+    "X_hex_lattice_prism_1700.json": "02a914ab4dd48994635249c1441dfaa58103208b96e9278a3adf9b012aab3cc6",
+    "X_hex_lattice_prism_1800.json": "e9c6fdaa3666b5d083b087a202e297fedb94dde6714433581a459ebd87921193",
+    "X_hex_lattice_prism_1900.json": "c0e29dd0c72bbedff496adb7bc5d2e3ee2d36fdb711ef4b614bdd53daa9d391e",
+    "Z_grid_logical_0.json": "9a50f6a5d18d7d37942c7e231d7e44af913e181b228286384b84d5048957d72c",
+    "Z_grid_logical_100.json": "ae757ce042d54dd860d1fd038e8cc2ea3ddaf4cfc1a39c37d372c128b89e417f",
+    "Z_grid_logical_200.json": "ffca70e93186b26f53582edb58271ae44a3ef14ce8d4dda3f102d7f3afd54dbe",
+    "Z_grid_logical_300.json": "1a103cf03ea3f8e2095fcb16bbd830c10f4442f8eca9ea22f6ea355819c7a069",
+    "Z_grid_logical_400.json": "e75c429cc66f70a678e50347d7ddd77e5af080b067d2af6b51218792ffa87811",
+    "Z_grid_logical_500.json": "19944c21983cf4df122bee3c3d02827efa272736bb002c1cebf84d86d7554ecd",
+    "Z_grid_logical_600.json": "58e266290393a0113145b4c23cf331b6eeec053c7c8ca534f7841b80143047ad",
+    "Z_grid_logical_700.json": "d979e56eb71ddae91f923666102c197df6ba9599dfc1e5209feb9ca28f723a0f",
+    "Z_grid_logical_800.json": "2a70b7a3c912907b71cdf09efe929d2d0c60406eb986b5e02836225ddb160126",
+    "Z_grid_logical_900.json": "3364b6b8da73c9197a02bb2698944e1fb9263162469cb4182bb357be34577731",
+    "Z_grid_logical_1000.json": "d426dcbc31bc1cfd744632104fbb10c1ae5adabffc2b178da23d7cb8e3593bde",
+    "Z_grid_logical_1100.json": "bd5b371386d0da2079f5c008147a17fffd09cc29989bec193845939470356ec4",
+    "Z_grid_logical_1200.json": "dfefbbd4f1645de65730c5ca96c9ebd405416d52b875a72f28fb4ddba1a19bf2",
+    "Z_grid_logical_1300.json": "0cd8545fb041c38a9eee026f4c16ca7c903f4074b7bdc0425693c84de5feafc9",
+    "Z_grid_logical_1400.json": "cf7d66d679e3475a069768f3c73642b497ef106b3e1cc7eb9cef4026b2870f29",
+    "Z_grid_logical_1500.json": "d68fed0cb55e0ba9118f7c2550dc91672eac7afa77532df09dd4f425d0f11617",
+    "Z_grid_logical_1600.json": "c2708f3e0a7cb72826cf2f384762610579f53cc837c94c5524cd67f905aeb5f2",
+    "Z_grid_logical_1700.json": "83801e128bf1a6607d4f622b7cf7c624949a3d900a8c696fe5acca9787445a3e",
+    "Z_grid_logical_1800.json": "273bf96feb47d8e7130bd860efde30d652c23b499290dfa293518e51d5933ef1",
+    "Z_grid_logical_1900.json": "8e4b02904989167df1635412e52b0b3c98ffc53f2784b2ccc0b178cb2d91ce17",
+    "Z_grid_greedy_0.json": "066a10fb05789fb696a98e17f99f77132a47c1d163d2d11dbd9c57440d21f361",
+    "Z_grid_greedy_100.json": "59f6cc98d51d5992608a4e48a848648ba813dbc7d9b91830dcb183ca3027014e",
+    "Z_grid_greedy_200.json": "2b1cfaa8d26687a8fe3d78708ec2895ab802e82599158d3dad45cb7ba28dd2d0",
+    "Z_grid_greedy_300.json": "242cc388ab371bd2f131dfa67321a9af7e48d32e1621c7e6b298b1a78453a78d",
+    "Z_grid_greedy_400.json": "798d4254330a43c80fee4813aa32584448beb927fc553d773ec7c36b15b4de84",
+    "Z_grid_greedy_500.json": "2d7310179714846db33048522b70e64db349b181297acd05b10c8a0b9609d587",
+    "Z_grid_greedy_600.json": "77b2f5b5c3a46ee3024bfe76a45c2bc7a1518057a9b1674c9607ed209e020271",
+    "Z_grid_greedy_700.json": "f58f6919d2304ac016b89d6eabfd6c535894d62ca8880bf2aaf28cbc8a7d882d",
+    "Z_grid_greedy_800.json": "3d8836250adac233998a936814bd018b6ba08c6fcc4fa3086003d837cdca810c",
+    "Z_grid_greedy_900.json": "8fd5b52348143c08721983828e5fdbae134c15621d40796caf08902d118e678e",
+    "Z_grid_greedy_1000.json": "e367049a2635754f9bc6a98014768dd6f3fe477ff296e4003557a6c5e06af48d",
+    "Z_grid_greedy_1100.json": "281c577de56af3ddbd1b71702141149db4f1f8baa7337aaa2f0172281cc69337",
+    "Z_grid_greedy_1200.json": "6f5695ed3f03d50283f3ecbe7ec0d048596a22111ea3edaf6d852a5d1d2ef968",
+    "Z_grid_greedy_1300.json": "df09ba8b5e6aaea5a1201d02f9802ba83e67cd44e699f8b0d7a475ceb5ad8828",
+    "Z_grid_greedy_1400.json": "0ac75d84ff8a0beb558dc655a1cb43c95727b1f241a7c4d3059acc559a32f417",
+    "Z_grid_greedy_1500.json": "00d9a03973791f69fc3d61006bfcbd8534a14b1848857b39a76e97d002e81746",
+    "Z_grid_greedy_1600.json": "593d31321c50c485523155d407bf1153a029244d46ac3d6f628c98c515c6ce67",
+    "Z_grid_greedy_1700.json": "9dc493115ab883afc1f3df361c74ad003bdd40fc1f396b461f2af5e14ec79b0c",
+    "Z_grid_greedy_1800.json": "7a290cb436ded3632c4023566974b826e236b8d8030f570f1bf679bde52f61bd",
+    "Z_grid_greedy_1900.json": "eeda89624fe65b2d150722d95459fe145f6af12ef02ca51a4a125afead8db291",
+    "Z_grid_prism_0.json": "32c1b43e387eb3247981f4d5d369f78708cf27de6edb5666c69e9351b9492647",
+    "Z_grid_prism_100.json": "320b5f97cb82b9f14245d4a14fc27fe3b42b0638de21182c2427c3c33fabbe42",
+    "Z_grid_prism_200.json": "18e71f1d5bc18275395ffd903888d7d19d53aed0f0cc0aead4a6e28983d7dc0e",
+    "Z_grid_prism_300.json": "bfc2834eb479c7aa74e7038c97e97867f17c4717b827461f7687764274d04905",
+    "Z_grid_prism_400.json": "a59c8846069d007a8c6f592f632ec7ac28766dbd9f3b2b6e975d84de4cc20fa8",
+    "Z_grid_prism_500.json": "9e6644a51e42b80fe4cd5313fc5142532f90b552f1240ef12db85ec9487f1241",
+    "Z_grid_prism_600.json": "706dfc3e692d248f2b19626143ddc773fb37ec567ef0c40c3f68e0550eead800",
+    "Z_grid_prism_700.json": "0c66d509d89898bfe252572630fd0d6168c4360f094105443c05c6932aedff31",
+    "Z_grid_prism_800.json": "be49320b5a213c8ca8ffd0b026939f740ae19fe2074838e54602ffcd1a79cf6e",
+    "Z_grid_prism_900.json": "9ae18a14cc87ac933ae64f4eb330d04b6622334fa07ef1251b8be1ff2f91bc77",
+    "Z_grid_prism_1000.json": "784afcc3a8eca2ac048163c5f0a61cb61d6b4b67732a02ddfe6408cf971c63f1",
+    "Z_grid_prism_1100.json": "1a58a86a9fc8dd4bf84ced5e587afbc8c41b6b89bee29c49f0893ff17ab3a416",
+    "Z_grid_prism_1200.json": "329b67405fdb2de8b7e30bd0b8370efaacf19facc250013e8048491307c5d3b0",
+    "Z_grid_prism_1300.json": "88225f02943c5306f793a7dfec5a05beef34df041de29e7521aea9b88ce9972a",
+    "Z_grid_prism_1400.json": "be38884442844a5a1b8d2bbe3cc9415e166a6976baa002d21c5bab5ddf990488",
+    "Z_grid_prism_1500.json": "9e56673aba7f44c748142a7de5e1bb81c1215de992eb069eca999a2a07a80864",
+    "Z_grid_prism_1600.json": "17901b1ec5ee333e984f49b7c6a13edf6c1512ddbeb82dbe640712acbc902b70",
+    "Z_grid_prism_1700.json": "8e846d2a426040f2b501bd1f565dd80ef4d72538a609d2795ac5cee52f2a43a3",
+    "Z_grid_prism_1800.json": "37723c29469911b29da095d679ac65caa2db7af71194e982819809ec3a75c0b6",
+    "Z_grid_prism_1900.json": "fe2b028b24785d98fd08b541996572d3447610b7742c8d98f4b6d21e10267657",
+    "Z_hex_lattice_logical_0.json": "ca6aa8167d108afebf02cac162d623d4f95a734a99496914f060ce5c8a190877",
+    "Z_hex_lattice_logical_100.json": "f0a8afd8d602c1a5d49365909e79dccf3c9c01032239d8521c7a2cb372519163",
+    "Z_hex_lattice_logical_200.json": "e5747d7863ab026a930e7f0ac57fcfc8f5675735fb496ae695b9cc1933da1938",
+    "Z_hex_lattice_logical_300.json": "baf214359e354ca81526845ad73d9147b1361322a98cc528260aac9ad42b9b1b",
+    "Z_hex_lattice_logical_400.json": "abfb0c4c2861147802c4e1dc517cbd3b3cbf8a42086553b855a43a72c3c432ca",
+    "Z_hex_lattice_logical_500.json": "7ff1db993a597426fe90c6e83210e8d9452e02e444596a3b862debb7b3c1a384",
+    "Z_hex_lattice_logical_600.json": "871026a65e4613d80a1571726df5d3a4ecbe4cdd352223c4a3a6750515493ddc",
+    "Z_hex_lattice_logical_700.json": "8a4396b612201a87a94d6cc5443a5ba5077c1ce03a767162c2af33763da21874",
+    "Z_hex_lattice_logical_800.json": "c786a0228771008c0037b28a5f8d9db6979c816f7cf586aaa629ccac43d3220c",
+    "Z_hex_lattice_logical_900.json": "2d1431f7b78cfcf65ea671c4ff7dc7775d9a82560be9103fdc05d789917ca556",
+    "Z_hex_lattice_logical_1000.json": "49f3cd3eda8f5701fcf3269ca79fc5d16b30a61c6e8ff9b6922e3aaf3de0d814",
+    "Z_hex_lattice_logical_1100.json": "e235c61db3b945b4416e3b0569a9d8e2d354a9cc6f23b856530063d44e716ee5",
+    "Z_hex_lattice_logical_1200.json": "b60e3db33a4a371b3e02965bfe05b6f9ccbce4ac1fe1abed9c3d14b46cdcde6f",
+    "Z_hex_lattice_logical_1300.json": "9b7f286b3b6ae1e959fd1b7600f9eddcbdd189cab506c500767cddd67f5c047f",
+    "Z_hex_lattice_logical_1400.json": "8d48b3ef93562400037374ff53198ec55e0636fdf24a4dca725cf3ee6dab4621",
+    "Z_hex_lattice_logical_1500.json": "dec3b04fd611ed2bc8b6cf91f919422f2c1954a0db42859f27c45b6ab043d384",
+    "Z_hex_lattice_logical_1600.json": "f1a28aba85df67ed71570c43017ee89a682f154cc4e5f11729d9734cef8fa34c",
+    "Z_hex_lattice_logical_1700.json": "f5761998d7c420d4c121e9785709ee1215d825660a597c6c9af85ddcc3568293",
+    "Z_hex_lattice_logical_1800.json": "09d7832bbd828b89f0e8c4c8b9a44a460a2bc1b1ff617ec870f40daa14a0f44a",
+    "Z_hex_lattice_logical_1900.json": "7fea1bf61c5297e65daccaae5af7b0e02b075f4e8e487b1f85901928c4ca30ec",
+    "Z_hex_lattice_greedy_0.json": "98d09245deaff3e263417061e5493259ef6439c9a9deec948540de396d2edfae",
+    "Z_hex_lattice_greedy_100.json": "9459829b334d22d08792ad5ecc0ca5a6d0b6fc29742ad83a99a2570f0df30fb6",
+    "Z_hex_lattice_greedy_200.json": "fa8f758a6335e79c5461afa7bbee721efacae8b141015f129172c69d044ce8ea",
+    "Z_hex_lattice_greedy_300.json": "7248b6239b72d5ddfe9b18c966b39650be56d625328063c3d195d34ca4f36ce4",
+    "Z_hex_lattice_greedy_400.json": "4619d0e37a4394657d50b4331981da83e21ee52095bc0f62a4109a73b2d1f75a",
+    "Z_hex_lattice_greedy_500.json": "b0109f7602d5bf633f011d30c4fcdd4f56f62b481cc2ba21e265b6e03bf76d1e",
+    "Z_hex_lattice_greedy_600.json": "d5db49863ed9a7792f199a8f2b163f9947b1abd5965c7385468f2603be32634f",
+    "Z_hex_lattice_greedy_700.json": "967820c1691b07cad09a553baabadb242b68dbd19d2e6aa6e55b7f2290836c7c",
+    "Z_hex_lattice_greedy_800.json": "50ad708820aacbea101eaa57d8b5c15cc16fbb402405eb12d70d6c05b1bd7c66",
+    "Z_hex_lattice_greedy_900.json": "67622617a7bfe83593c91ba1edff09eb2143dfd2660c1868b8b0de061ad03275",
+    "Z_hex_lattice_greedy_1000.json": "0ee168bc4e43ba563deaa0877846caa31633e13c069d5708189855afa72aa1cf",
+    "Z_hex_lattice_greedy_1100.json": "f23360dfb4b3f74af273ecc58034e8e07a1004b66bd7bdbcbea6d64354ee4c05",
+    "Z_hex_lattice_greedy_1200.json": "3dfced101649963ddd7f3daca1f8a34296bb13ceea6a6bbb416038d9803527ce",
+    "Z_hex_lattice_greedy_1300.json": "e3ba5c01e0b46cbac127784f97b6a5f754c0a9796cffa308bd2164ef1c42bcf8",
+    "Z_hex_lattice_greedy_1400.json": "c74a3e1f61e9e69a8c26764fbe43826d39bdcf7da1ce5c92b427d74a84846bb6",
+    "Z_hex_lattice_greedy_1500.json": "f9efdd3a5ba638cbea7d513e04483bcbd1bf670f4efb0beb941d2244d6d73bad",
+    "Z_hex_lattice_greedy_1600.json": "ec00f841677070e7e6ac4506eb59987f7275af570ced7652bde59e6262dcd97d",
+    "Z_hex_lattice_greedy_1700.json": "516c3deb8be4efb6a0ea07ba7dc9512647e02c231d6a1ba76580a5bea2d2e43e",
+    "Z_hex_lattice_greedy_1800.json": "d4e0c3640469c16eeb277307e6ed78a522fabada917d79bcef8a415a862ccdbf",
+    "Z_hex_lattice_greedy_1900.json": "8f0f7d0dacb4e17830f65c2d669645fc389698bcebc7e5ea312777c6662dd603",
+    "Z_hex_lattice_prism_0.json": "7b805a6a001ef08bfdec8e85487072c8acdb5071487e54c2dcd4734462f10c2a",
+    "Z_hex_lattice_prism_100.json": "5353bd69b3ecc479460dc556142ed6ea759abb51855938e49e5a13379c80553c",
+    "Z_hex_lattice_prism_200.json": "59184bc5090785b7a60e2e8b48fa0078ffe33c13ef9eb022efe3f6da0c3d536d",
+    "Z_hex_lattice_prism_300.json": "ab64862210e0e1e042e003e459a6ae00ac0b7310fbaf14cb24c3650951243e1e",
+    "Z_hex_lattice_prism_400.json": "646a8c2cd2169473a68c2b514f924874f3f2158826e0cdb08488e9a8bfe4eb17",
+    "Z_hex_lattice_prism_500.json": "0ded51c6c71e4b4fa352d824070a7d27310a0a14f874ac0c1524455570353011",
+    "Z_hex_lattice_prism_600.json": "57917208a2ed045ad9a6336205ae944950851b7d242cc6b8307118b69148dd06",
+    "Z_hex_lattice_prism_700.json": "5c958ca304b14d3dfd8d4173d306ef11d4a5f21aa1c67156757c111f1b0e8913",
+    "Z_hex_lattice_prism_800.json": "a3e1a271431a6bda877b79cb0e4cddd56877caa63f98495e57dfc2b8e3996c58",
+    "Z_hex_lattice_prism_900.json": "4879c3fde218059bcda484ac5f761a6b3a26b388a1eb58c15fb40721ef007969",
+    "Z_hex_lattice_prism_1000.json": "12192d8508f24e4b33a82079b90a78567566962f9a084b2158df3c811fd9a3ca",
+    "Z_hex_lattice_prism_1100.json": "7d205246eb442e1f23ff6f0fa4d089e371c6abc8d77bbc9afc1ad3923b5ba8f3",
+    "Z_hex_lattice_prism_1200.json": "11f2af2161a74535c739ae46bea26b4ac060882e9e0d4977b00d55e17315192d",
+    "Z_hex_lattice_prism_1300.json": "97c002b904f26df0cd62bae2373de736075f7205fa8ea200fd3c1085c9b5fd12",
+    "Z_hex_lattice_prism_1400.json": "43f7d9184c557f771304d5f7708c19637796c8a2b9ced50b821a974511c1da14",
+    "Z_hex_lattice_prism_1500.json": "339729fda087ea6d09cec591f6c213793d59e17d1627eb649960f1352a5a82ea",
+    "Z_hex_lattice_prism_1600.json": "d6db096ebc9f3fbeaf1e6b5005bfe376a33f1965cc87f8e56fbfdd756051abb9",
+    "Z_hex_lattice_prism_1700.json": "e650e2aa35f85fbf114b4df37474099f25f390c7925a9c5ac40d8628bdf1f08e",
+    "Z_hex_lattice_prism_1800.json": "2c88bd2c0dcd122c657f94271d0c25a452d60e4c79ae69090c467c66a2aa9816",
+    "Z_hex_lattice_prism_1900.json": "2f75871d669e7364c0a8b35cabb5808718403eff9066185daf9265a520d0fa4b"
+  },
+  "analysis_sha256": [
+    "d8f89904d88c92f7c505cea91687c87528993e5adea290745717cb18f4d7d62c"
+  ],
+  "source_hashes": {
+    "qec_circuits.py": [
+      "c0dfda28b1ab412c601db1e9b2b178ba84cab9d19feaa9c3728853130d5c8bf0"
+    ],
+    "route.py": [
+      "0e4420afebb0b0e2899958bbc14f534aad6708d10253dca80f915bf951f6e91a"
+    ],
+    "to_stim.py": [
+      "c59245dd503a72dc0c7d42b7ef88cc82e3f7e5dc8ab99afbc2b5f21420ca5647"
+    ],
+    "erasure_pilot.py": [
+      "0866f12a0d95823fb429bcc9eef14d91e3195570f7ddf2280b15146c3f3daa8a",
+      "6d8a2fd27c6a7a4a85aba451a7c8e7379f978ac44dd81f1bd2cd1fbb5b4fbc38",
+      "d1832ebdbe4ab73742cd2fb827dff9b26dc7fa87f8600791c5e82d7edfecfa49"
+    ]
+  },
+  "results": [
+    {
+      "basis": "X",
+      "topo": "grid",
+      "p": 0.0001,
+      "probability": {
+        "logical": 5e-07,
+        "greedy": 7.5e-07,
+        "prism": 2.5e-07
+      },
+      "logical_error_probability": {
+        "logical": 2.5e-07,
+        "greedy": 3.75e-07,
+        "prism": 1.25e-07
+      },
+      "counts": {
+        "logical": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "greedy": [
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "prism": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "prism_reduction": null,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.14693118412895234,
+      "exact_pair_seed_bootstrap_95": [
+        0.017981575375648595,
+        0.2554535948575705
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 43.5,
+          "active_duration": 11815.0,
+          "n_sites": 309.0,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 96.15
+        },
+        "greedy": {
+          "swaps": 43.95,
+          "active_duration": 11970.0,
+          "n_sites": 303.75,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 80.65
+        },
+        "prism": {
+          "swaps": 30.9,
+          "active_duration": 10130.0,
+          "n_sites": 280.2,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 68.8
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "grid",
+      "p": 0.0003,
+      "probability": {
+        "logical": 7.75e-06,
+        "greedy": 7e-06,
+        "prism": 7e-06
+      },
+      "logical_error_probability": {
+        "logical": 3.875e-06,
+        "greedy": 3.5e-06,
+        "prism": 3.5e-06
+      },
+      "counts": {
+        "logical": [
+          2,
+          0,
+          1,
+          3,
+          0,
+          0,
+          5,
+          1,
+          8,
+          1,
+          0,
+          0,
+          1,
+          1,
+          2,
+          0,
+          1,
+          1,
+          3,
+          1
+        ],
+        "greedy": [
+          1,
+          3,
+          2,
+          0,
+          1,
+          1,
+          2,
+          0,
+          3,
+          0,
+          2,
+          0,
+          2,
+          0,
+          0,
+          5,
+          2,
+          2,
+          2,
+          0
+        ],
+        "prism": [
+          2,
+          1,
+          1,
+          2,
+          1,
+          0,
+          4,
+          1,
+          2,
+          0,
+          1,
+          0,
+          4,
+          3,
+          0,
+          4,
+          1,
+          0,
+          1,
+          0
+        ]
+      },
+      "prism_reduction": null,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.14693118412895234,
+      "exact_pair_seed_bootstrap_95": [
+        0.017981575375648595,
+        0.2554535948575705
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 43.5,
+          "active_duration": 11815.0,
+          "n_sites": 309.0,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 96.15
+        },
+        "greedy": {
+          "swaps": 43.95,
+          "active_duration": 11970.0,
+          "n_sites": 303.75,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 80.65
+        },
+        "prism": {
+          "swaps": 30.9,
+          "active_duration": 10130.0,
+          "n_sites": 280.2,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 68.8
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "grid",
+      "p": 0.001,
+      "probability": {
+        "logical": 0.0001065,
+        "greedy": 9.275e-05,
+        "prism": 6.825e-05
+      },
+      "logical_error_probability": {
+        "logical": 5.325e-05,
+        "greedy": 4.6375e-05,
+        "prism": 3.4125e-05
+      },
+      "counts": {
+        "logical": [
+          26,
+          18,
+          22,
+          15,
+          27,
+          20,
+          21,
+          19,
+          25,
+          26,
+          20,
+          30,
+          14,
+          15,
+          16,
+          28,
+          14,
+          28,
+          24,
+          18
+        ],
+        "greedy": [
+          13,
+          23,
+          32,
+          22,
+          26,
+          12,
+          10,
+          19,
+          18,
+          15,
+          14,
+          16,
+          18,
+          28,
+          12,
+          20,
+          24,
+          15,
+          21,
+          13
+        ],
+        "prism": [
+          17,
+          9,
+          11,
+          12,
+          13,
+          14,
+          20,
+          12,
+          10,
+          7,
+          17,
+          21,
+          8,
+          15,
+          8,
+          21,
+          20,
+          18,
+          7,
+          13
+        ]
+      },
+      "prism_reduction": 0.26415094339622647,
+      "seed_bootstrap_95": [
+        0.08333333333333337,
+        0.40862944162436543
+      ],
+      "fixed_routes_mc_95": [
+        0.1396768762466325,
+        0.3706157382561647
+      ],
+      "exact_pair_reduction": 0.14693118412895234,
+      "exact_pair_seed_bootstrap_95": [
+        0.017981575375648595,
+        0.2554535948575705
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 43.5,
+          "active_duration": 11815.0,
+          "n_sites": 309.0,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 96.15
+        },
+        "greedy": {
+          "swaps": 43.95,
+          "active_duration": 11970.0,
+          "n_sites": 303.75,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 80.65
+        },
+        "prism": {
+          "swaps": 30.9,
+          "active_duration": 10130.0,
+          "n_sites": 280.2,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 68.8
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "grid",
+      "p": 0.003,
+      "probability": {
+        "logical": 0.00109675,
+        "greedy": 0.0009355,
+        "prism": 0.00075975
+      },
+      "logical_error_probability": {
+        "logical": 0.000548375,
+        "greedy": 0.00046775,
+        "prism": 0.000379875
+      },
+      "counts": {
+        "logical": [
+          247,
+          215,
+          213,
+          234,
+          184,
+          230,
+          259,
+          195,
+          220,
+          194,
+          252,
+          237,
+          213,
+          194,
+          223,
+          262,
+          187,
+          192,
+          237,
+          199
+        ],
+        "greedy": [
+          134,
+          225,
+          236,
+          218,
+          216,
+          184,
+          124,
+          170,
+          210,
+          166,
+          225,
+          169,
+          208,
+          209,
+          178,
+          205,
+          201,
+          138,
+          177,
+          149
+        ],
+        "prism": [
+          125,
+          126,
+          168,
+          164,
+          134,
+          133,
+          194,
+          152,
+          171,
+          129,
+          159,
+          177,
+          114,
+          158,
+          146,
+          257,
+          206,
+          116,
+          112,
+          98
+        ]
+      },
+      "prism_reduction": 0.18786745056119725,
+      "seed_bootstrap_95": [
+        0.08603013036416633,
+        0.2723213302748125
+      ],
+      "fixed_routes_mc_95": [
+        0.14807027654919058,
+        0.22580553336445197
+      ],
+      "exact_pair_reduction": 0.14693118412895234,
+      "exact_pair_seed_bootstrap_95": [
+        0.017981575375648595,
+        0.2554535948575705
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 43.5,
+          "active_duration": 11815.0,
+          "n_sites": 309.0,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 96.15
+        },
+        "greedy": {
+          "swaps": 43.95,
+          "active_duration": 11970.0,
+          "n_sites": 303.75,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 80.65
+        },
+        "prism": {
+          "swaps": 30.9,
+          "active_duration": 10130.0,
+          "n_sites": 280.2,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 68.8
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "grid",
+      "p": 0.01,
+      "probability": {
+        "logical": 0.01722175,
+        "greedy": 0.01641025,
+        "prism": 0.012812
+      },
+      "logical_error_probability": {
+        "logical": 0.008610875,
+        "greedy": 0.008205125,
+        "prism": 0.006406
+      },
+      "counts": {
+        "logical": [
+          3202,
+          3355,
+          3643,
+          3858,
+          3216,
+          3750,
+          3825,
+          3024,
+          3701,
+          3144,
+          3548,
+          3544,
+          3565,
+          3035,
+          3455,
+          3789,
+          3481,
+          2970,
+          3750,
+          3032
+        ],
+        "greedy": [
+          2957,
+          3459,
+          3730,
+          3440,
+          3646,
+          3802,
+          2660,
+          2809,
+          3609,
+          2756,
+          3820,
+          2737,
+          4122,
+          3431,
+          3257,
+          3193,
+          3204,
+          2950,
+          3284,
+          2775
+        ],
+        "prism": [
+          2404,
+          2412,
+          2554,
+          2810,
+          2378,
+          2454,
+          3092,
+          2420,
+          2560,
+          2032,
+          2729,
+          2796,
+          2077,
+          2634,
+          2679,
+          3990,
+          3179,
+          1957,
+          1939,
+          2152
+        ]
+      },
+      "prism_reduction": 0.21926844502673637,
+      "seed_bootstrap_95": [
+        0.13561191941230305,
+        0.29160299208060536
+      ],
+      "fixed_routes_mc_95": [
+        0.21026341608761367,
+        0.22817079346726454
+      ],
+      "exact_pair_reduction": 0.14693118412895234,
+      "exact_pair_seed_bootstrap_95": [
+        0.017981575375648595,
+        0.2554535948575705
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 43.5,
+          "active_duration": 11815.0,
+          "n_sites": 309.0,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 96.15
+        },
+        "greedy": {
+          "swaps": 43.95,
+          "active_duration": 11970.0,
+          "n_sites": 303.75,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 80.65
+        },
+        "prism": {
+          "swaps": 30.9,
+          "active_duration": 10130.0,
+          "n_sites": 280.2,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 68.8
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "hex_lattice",
+      "p": 0.0001,
+      "probability": {
+        "logical": 2.5e-06,
+        "greedy": 1.25e-06,
+        "prism": 1e-06
+      },
+      "logical_error_probability": {
+        "logical": 1.25e-06,
+        "greedy": 6.25e-07,
+        "prism": 5e-07
+      },
+      "counts": {
+        "logical": [
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          1,
+          1,
+          1,
+          0,
+          2,
+          0,
+          1,
+          0
+        ],
+        "greedy": [
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "prism": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "prism_reduction": null,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.2413793103448275,
+      "exact_pair_seed_bootstrap_95": [
+        0.13633793188240775,
+        0.338611963415307
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 91.6,
+          "active_duration": 15390.0,
+          "n_sites": 397.05,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 161.4
+        },
+        "greedy": {
+          "swaps": 69.1,
+          "active_duration": 13365.0,
+          "n_sites": 348.0,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 107.3
+        },
+        "prism": {
+          "swaps": 48.15,
+          "active_duration": 10580.0,
+          "n_sites": 312.85,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 81.4
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "hex_lattice",
+      "p": 0.0003,
+      "probability": {
+        "logical": 1.7e-05,
+        "greedy": 1.025e-05,
+        "prism": 8.25e-06
+      },
+      "logical_error_probability": {
+        "logical": 8.5e-06,
+        "greedy": 5.125e-06,
+        "prism": 4.125e-06
+      },
+      "counts": {
+        "logical": [
+          3,
+          3,
+          3,
+          0,
+          5,
+          6,
+          1,
+          2,
+          3,
+          1,
+          1,
+          4,
+          4,
+          5,
+          2,
+          4,
+          3,
+          6,
+          6,
+          6
+        ],
+        "greedy": [
+          0,
+          3,
+          1,
+          2,
+          3,
+          1,
+          2,
+          3,
+          2,
+          1,
+          3,
+          4,
+          3,
+          2,
+          3,
+          0,
+          2,
+          3,
+          1,
+          2
+        ],
+        "prism": [
+          2,
+          0,
+          3,
+          2,
+          0,
+          3,
+          2,
+          1,
+          0,
+          2,
+          2,
+          0,
+          1,
+          0,
+          2,
+          4,
+          1,
+          3,
+          1,
+          4
+        ]
+      },
+      "prism_reduction": null,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.2413793103448275,
+      "exact_pair_seed_bootstrap_95": [
+        0.13633793188240775,
+        0.338611963415307
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 91.6,
+          "active_duration": 15390.0,
+          "n_sites": 397.05,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 161.4
+        },
+        "greedy": {
+          "swaps": 69.1,
+          "active_duration": 13365.0,
+          "n_sites": 348.0,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 107.3
+        },
+        "prism": {
+          "swaps": 48.15,
+          "active_duration": 10580.0,
+          "n_sites": 312.85,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 81.4
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "hex_lattice",
+      "p": 0.001,
+      "probability": {
+        "logical": 0.000174,
+        "greedy": 0.00012725,
+        "prism": 9.475e-05
+      },
+      "logical_error_probability": {
+        "logical": 8.7e-05,
+        "greedy": 6.3625e-05,
+        "prism": 4.7375e-05
+      },
+      "counts": {
+        "logical": [
+          28,
+          23,
+          33,
+          53,
+          62,
+          40,
+          27,
+          44,
+          38,
+          34,
+          32,
+          26,
+          27,
+          30,
+          37,
+          30,
+          23,
+          32,
+          55,
+          22
+        ],
+        "greedy": [
+          19,
+          30,
+          26,
+          28,
+          32,
+          20,
+          25,
+          28,
+          20,
+          20,
+          28,
+          35,
+          30,
+          21,
+          27,
+          40,
+          22,
+          22,
+          20,
+          16
+        ],
+        "prism": [
+          32,
+          19,
+          16,
+          17,
+          17,
+          21,
+          27,
+          23,
+          14,
+          18,
+          16,
+          19,
+          13,
+          14,
+          23,
+          17,
+          20,
+          13,
+          23,
+          17
+        ]
+      },
+      "prism_reduction": 0.2554027504911591,
+      "seed_bootstrap_95": [
+        0.12040671191890323,
+        0.36331943323468713
+      ],
+      "fixed_routes_mc_95": [
+        0.14950789312426038,
+        0.34811262856654024
+      ],
+      "exact_pair_reduction": 0.2413793103448275,
+      "exact_pair_seed_bootstrap_95": [
+        0.13633793188240775,
+        0.338611963415307
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 91.6,
+          "active_duration": 15390.0,
+          "n_sites": 397.05,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 161.4
+        },
+        "greedy": {
+          "swaps": 69.1,
+          "active_duration": 13365.0,
+          "n_sites": 348.0,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 107.3
+        },
+        "prism": {
+          "swaps": 48.15,
+          "active_duration": 10580.0,
+          "n_sites": 312.85,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 81.4
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "hex_lattice",
+      "p": 0.003,
+      "probability": {
+        "logical": 0.00181775,
+        "greedy": 0.001287,
+        "prism": 0.00095375
+      },
+      "logical_error_probability": {
+        "logical": 0.000908875,
+        "greedy": 0.0006435,
+        "prism": 0.000476875
+      },
+      "counts": {
+        "logical": [
+          305,
+          318,
+          373,
+          480,
+          488,
+          400,
+          370,
+          361,
+          422,
+          428,
+          322,
+          392,
+          343,
+          320,
+          332,
+          324,
+          256,
+          380,
+          384,
+          273
+        ],
+        "greedy": [
+          217,
+          230,
+          272,
+          248,
+          338,
+          208,
+          306,
+          212,
+          293,
+          249,
+          199,
+          290,
+          375,
+          231,
+          234,
+          316,
+          197,
+          226,
+          210,
+          297
+        ],
+        "prism": [
+          275,
+          233,
+          160,
+          223,
+          146,
+          167,
+          215,
+          175,
+          147,
+          180,
+          170,
+          256,
+          137,
+          205,
+          192,
+          191,
+          165,
+          153,
+          191,
+          234
+        ]
+      },
+      "prism_reduction": 0.258935508935509,
+      "seed_bootstrap_95": [
+        0.16122946191873935,
+        0.35213578488369696
+      ],
+      "fixed_routes_mc_95": [
+        0.22726580716406408,
+        0.2893072611408666
+      ],
+      "exact_pair_reduction": 0.2413793103448275,
+      "exact_pair_seed_bootstrap_95": [
+        0.13633793188240775,
+        0.338611963415307
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 91.6,
+          "active_duration": 15390.0,
+          "n_sites": 397.05,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 161.4
+        },
+        "greedy": {
+          "swaps": 69.1,
+          "active_duration": 13365.0,
+          "n_sites": 348.0,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 107.3
+        },
+        "prism": {
+          "swaps": 48.15,
+          "active_duration": 10580.0,
+          "n_sites": 312.85,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 81.4
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "hex_lattice",
+      "p": 0.01,
+      "probability": {
+        "logical": 0.03111375,
+        "greedy": 0.0230325,
+        "prism": 0.01598825
+      },
+      "logical_error_probability": {
+        "logical": 0.015556875,
+        "greedy": 0.01151625,
+        "prism": 0.007994125
+      },
+      "counts": {
+        "logical": [
+          5008,
+          5442,
+          6884,
+          8377,
+          8114,
+          6605,
+          6131,
+          5339,
+          8410,
+          7596,
+          6178,
+          5879,
+          7452,
+          5382,
+          5227,
+          5465,
+          4255,
+          5712,
+          5978,
+          5021
+        ],
+        "greedy": [
+          4095,
+          3941,
+          4985,
+          3854,
+          5387,
+          4361,
+          5309,
+          3647,
+          5748,
+          4538,
+          3399,
+          4674,
+          6289,
+          5017,
+          3978,
+          5080,
+          3680,
+          3862,
+          4238,
+          6048
+        ],
+        "prism": [
+          4324,
+          3547,
+          2940,
+          3508,
+          3013,
+          2744,
+          3785,
+          3286,
+          2855,
+          2991,
+          2886,
+          3307,
+          2756,
+          3442,
+          3088,
+          3225,
+          3301,
+          2617,
+          3097,
+          3241
+        ]
+      },
+      "prism_reduction": 0.30583957451427335,
+      "seed_bootstrap_95": [
+        0.23220876213124883,
+        0.37286750787170164
+      ],
+      "fixed_routes_mc_95": [
+        0.29887012440231875,
+        0.31273974611371036
+      ],
+      "exact_pair_reduction": 0.2413793103448275,
+      "exact_pair_seed_bootstrap_95": [
+        0.13633793188240775,
+        0.338611963415307
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 91.6,
+          "active_duration": 15390.0,
+          "n_sites": 397.05,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 161.4
+        },
+        "greedy": {
+          "swaps": 69.1,
+          "active_duration": 13365.0,
+          "n_sites": 348.0,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 107.3
+        },
+        "prism": {
+          "swaps": 48.15,
+          "active_duration": 10580.0,
+          "n_sites": 312.85,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 81.4
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "grid",
+      "p": 0.0001,
+      "probability": {
+        "logical": 7.5e-07,
+        "greedy": 0.0,
+        "prism": 5e-07
+      },
+      "logical_error_probability": {
+        "logical": 3.75e-07,
+        "greedy": 0.0,
+        "prism": 2.5e-07
+      },
+      "counts": {
+        "logical": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        "greedy": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "prism": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "prism_reduction": null,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.1375905200789994,
+      "exact_pair_seed_bootstrap_95": [
+        0.02658770204078165,
+        0.23436709491521504
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 39.9,
+          "active_duration": 11485.0,
+          "n_sites": 301.8,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 86.45
+        },
+        "greedy": {
+          "swaps": 45.4,
+          "active_duration": 12405.0,
+          "n_sites": 306.55,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 75.95
+        },
+        "prism": {
+          "swaps": 30.2,
+          "active_duration": 9850.0,
+          "n_sites": 279.15,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 65.5
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "grid",
+      "p": 0.0003,
+      "probability": {
+        "logical": 7.5e-06,
+        "greedy": 6e-06,
+        "prism": 6.75e-06
+      },
+      "logical_error_probability": {
+        "logical": 3.75e-06,
+        "greedy": 3e-06,
+        "prism": 3.375e-06
+      },
+      "counts": {
+        "logical": [
+          1,
+          2,
+          0,
+          3,
+          3,
+          0,
+          3,
+          4,
+          0,
+          2,
+          0,
+          1,
+          0,
+          2,
+          1,
+          2,
+          2,
+          3,
+          1,
+          0
+        ],
+        "greedy": [
+          2,
+          0,
+          0,
+          1,
+          1,
+          1,
+          2,
+          1,
+          4,
+          1,
+          0,
+          1,
+          2,
+          2,
+          1,
+          2,
+          1,
+          2,
+          0,
+          0
+        ],
+        "prism": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          0,
+          2,
+          0,
+          3,
+          3,
+          1,
+          1,
+          4,
+          0,
+          2,
+          2,
+          3,
+          0,
+          0,
+          0
+        ]
+      },
+      "prism_reduction": null,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.1375905200789994,
+      "exact_pair_seed_bootstrap_95": [
+        0.02658770204078165,
+        0.23436709491521504
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 39.9,
+          "active_duration": 11485.0,
+          "n_sites": 301.8,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 86.45
+        },
+        "greedy": {
+          "swaps": 45.4,
+          "active_duration": 12405.0,
+          "n_sites": 306.55,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 75.95
+        },
+        "prism": {
+          "swaps": 30.2,
+          "active_duration": 9850.0,
+          "n_sites": 279.15,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 65.5
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "grid",
+      "p": 0.001,
+      "probability": {
+        "logical": 9.475e-05,
+        "greedy": 8.425e-05,
+        "prism": 7.2e-05
+      },
+      "logical_error_probability": {
+        "logical": 4.7375e-05,
+        "greedy": 4.2125e-05,
+        "prism": 3.6e-05
+      },
+      "counts": {
+        "logical": [
+          28,
+          14,
+          18,
+          19,
+          21,
+          22,
+          26,
+          20,
+          23,
+          16,
+          18,
+          12,
+          19,
+          17,
+          20,
+          20,
+          12,
+          19,
+          15,
+          20
+        ],
+        "greedy": [
+          8,
+          17,
+          20,
+          22,
+          11,
+          24,
+          16,
+          19,
+          20,
+          16,
+          18,
+          13,
+          20,
+          16,
+          15,
+          22,
+          6,
+          25,
+          11,
+          18
+        ],
+        "prism": [
+          16,
+          15,
+          10,
+          10,
+          13,
+          12,
+          26,
+          18,
+          15,
+          9,
+          12,
+          13,
+          18,
+          9,
+          22,
+          18,
+          19,
+          17,
+          8,
+          8
+        ]
+      },
+      "prism_reduction": 0.1454005934718101,
+      "seed_bootstrap_95": [
+        -0.05414204589056874,
+        0.29597701149425293
+      ],
+      "fixed_routes_mc_95": [
+        -0.00015497761123151044,
+        0.26977302319418783
+      ],
+      "exact_pair_reduction": 0.1375905200789994,
+      "exact_pair_seed_bootstrap_95": [
+        0.02658770204078165,
+        0.23436709491521504
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 39.9,
+          "active_duration": 11485.0,
+          "n_sites": 301.8,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 86.45
+        },
+        "greedy": {
+          "swaps": 45.4,
+          "active_duration": 12405.0,
+          "n_sites": 306.55,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 75.95
+        },
+        "prism": {
+          "swaps": 30.2,
+          "active_duration": 9850.0,
+          "n_sites": 279.15,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 65.5
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "grid",
+      "p": 0.003,
+      "probability": {
+        "logical": 0.00097925,
+        "greedy": 0.0008805,
+        "prism": 0.000733
+      },
+      "logical_error_probability": {
+        "logical": 0.000489625,
+        "greedy": 0.00044025,
+        "prism": 0.0003665
+      },
+      "counts": {
+        "logical": [
+          260,
+          159,
+          200,
+          196,
+          193,
+          221,
+          228,
+          238,
+          214,
+          229,
+          177,
+          160,
+          213,
+          157,
+          213,
+          167,
+          145,
+          222,
+          160,
+          165
+        ],
+        "greedy": [
+          149,
+          201,
+          225,
+          198,
+          156,
+          214,
+          166,
+          193,
+          195,
+          188,
+          158,
+          153,
+          225,
+          144,
+          105,
+          148,
+          145,
+          196,
+          138,
+          225
+        ],
+        "prism": [
+          161,
+          145,
+          110,
+          136,
+          139,
+          95,
+          186,
+          132,
+          184,
+          158,
+          129,
+          128,
+          160,
+          134,
+          173,
+          194,
+          138,
+          169,
+          119,
+          142
+        ]
+      },
+      "prism_reduction": 0.1675184554230551,
+      "seed_bootstrap_95": [
+        0.056284622662631754,
+        0.26462103289993993
+      ],
+      "fixed_routes_mc_95": [
+        0.1257288620841237,
+        0.20731053330517268
+      ],
+      "exact_pair_reduction": 0.1375905200789994,
+      "exact_pair_seed_bootstrap_95": [
+        0.02658770204078165,
+        0.23436709491521504
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 39.9,
+          "active_duration": 11485.0,
+          "n_sites": 301.8,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 86.45
+        },
+        "greedy": {
+          "swaps": 45.4,
+          "active_duration": 12405.0,
+          "n_sites": 306.55,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 75.95
+        },
+        "prism": {
+          "swaps": 30.2,
+          "active_duration": 9850.0,
+          "n_sites": 279.15,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 65.5
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "grid",
+      "p": 0.01,
+      "probability": {
+        "logical": 0.01539875,
+        "greedy": 0.01528125,
+        "prism": 0.0121435
+      },
+      "logical_error_probability": {
+        "logical": 0.007699375,
+        "greedy": 0.007640625,
+        "prism": 0.00607175
+      },
+      "counts": {
+        "logical": [
+          3233,
+          2817,
+          3324,
+          2892,
+          3020,
+          3213,
+          3260,
+          3721,
+          3144,
+          3327,
+          2951,
+          2785,
+          3194,
+          3089,
+          3335,
+          2823,
+          2634,
+          3472,
+          2736,
+          2625
+        ],
+        "greedy": [
+          2656,
+          3453,
+          3635,
+          3313,
+          2569,
+          3978,
+          3199,
+          3607,
+          3116,
+          3124,
+          2760,
+          2643,
+          3174,
+          2925,
+          2154,
+          2512,
+          2587,
+          3591,
+          2531,
+          3598
+        ],
+        "prism": [
+          2872,
+          2529,
+          2571,
+          2370,
+          2388,
+          1966,
+          2884,
+          2283,
+          2867,
+          2267,
+          2266,
+          2182,
+          2839,
+          2092,
+          2920,
+          2524,
+          2328,
+          2289,
+          2219,
+          1918
+        ]
+      },
+      "prism_reduction": 0.20533333333333337,
+      "seed_bootstrap_95": [
+        0.11996851728947577,
+        0.28064191018472584
+      ],
+      "fixed_routes_mc_95": [
+        0.19587566949849955,
+        0.21467976137810352
+      ],
+      "exact_pair_reduction": 0.1375905200789994,
+      "exact_pair_seed_bootstrap_95": [
+        0.02658770204078165,
+        0.23436709491521504
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 39.9,
+          "active_duration": 11485.0,
+          "n_sites": 301.8,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 86.45
+        },
+        "greedy": {
+          "swaps": 45.4,
+          "active_duration": 12405.0,
+          "n_sites": 306.55,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 75.95
+        },
+        "prism": {
+          "swaps": 30.2,
+          "active_duration": 9850.0,
+          "n_sites": 279.15,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 65.5
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "hex_lattice",
+      "p": 0.0001,
+      "probability": {
+        "logical": 5e-07,
+        "greedy": 7.5e-07,
+        "prism": 7.5e-07
+      },
+      "logical_error_probability": {
+        "logical": 2.5e-07,
+        "greedy": 3.75e-07,
+        "prism": 3.75e-07
+      },
+      "counts": {
+        "logical": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "greedy": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "prism": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "prism_reduction": null,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.2469194312796208,
+      "exact_pair_seed_bootstrap_95": [
+        0.10406731450645836,
+        0.37352911944215655
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 88.1,
+          "active_duration": 16225.0,
+          "n_sites": 389.9,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 144.45
+        },
+        "greedy": {
+          "swaps": 77.8,
+          "active_duration": 13585.0,
+          "n_sites": 363.75,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 105.5
+        },
+        "prism": {
+          "swaps": 47.55,
+          "active_duration": 10545.0,
+          "n_sites": 311.65,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 79.45
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "hex_lattice",
+      "p": 0.0003,
+      "probability": {
+        "logical": 1.425e-05,
+        "greedy": 1.05e-05,
+        "prism": 7e-06
+      },
+      "logical_error_probability": {
+        "logical": 7.125e-06,
+        "greedy": 5.25e-06,
+        "prism": 3.5e-06
+      },
+      "counts": {
+        "logical": [
+          4,
+          3,
+          4,
+          1,
+          1,
+          3,
+          7,
+          3,
+          12,
+          0,
+          2,
+          3,
+          3,
+          2,
+          2,
+          0,
+          3,
+          1,
+          1,
+          2
+        ],
+        "greedy": [
+          1,
+          1,
+          0,
+          1,
+          2,
+          1,
+          1,
+          6,
+          2,
+          3,
+          1,
+          3,
+          1,
+          3,
+          2,
+          2,
+          1,
+          2,
+          5,
+          4
+        ],
+        "prism": [
+          1,
+          2,
+          4,
+          0,
+          2,
+          1,
+          1,
+          0,
+          2,
+          6,
+          1,
+          1,
+          1,
+          2,
+          3,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "prism_reduction": null,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.2469194312796208,
+      "exact_pair_seed_bootstrap_95": [
+        0.10406731450645836,
+        0.37352911944215655
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 88.1,
+          "active_duration": 16225.0,
+          "n_sites": 389.9,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 144.45
+        },
+        "greedy": {
+          "swaps": 77.8,
+          "active_duration": 13585.0,
+          "n_sites": 363.75,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 105.5
+        },
+        "prism": {
+          "swaps": 47.55,
+          "active_duration": 10545.0,
+          "n_sites": 311.65,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 79.45
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "hex_lattice",
+      "p": 0.001,
+      "probability": {
+        "logical": 0.000147,
+        "greedy": 0.0001145,
+        "prism": 9.05e-05
+      },
+      "logical_error_probability": {
+        "logical": 7.35e-05,
+        "greedy": 5.725e-05,
+        "prism": 4.525e-05
+      },
+      "counts": {
+        "logical": [
+          36,
+          31,
+          29,
+          26,
+          17,
+          37,
+          45,
+          28,
+          47,
+          22,
+          24,
+          29,
+          20,
+          16,
+          36,
+          19,
+          41,
+          32,
+          17,
+          36
+        ],
+        "greedy": [
+          20,
+          15,
+          20,
+          21,
+          20,
+          27,
+          26,
+          36,
+          23,
+          11,
+          25,
+          17,
+          24,
+          21,
+          19,
+          20,
+          14,
+          25,
+          40,
+          34
+        ],
+        "prism": [
+          12,
+          19,
+          21,
+          23,
+          26,
+          9,
+          22,
+          18,
+          17,
+          13,
+          18,
+          12,
+          20,
+          23,
+          22,
+          18,
+          24,
+          24,
+          9,
+          12
+        ]
+      },
+      "prism_reduction": 0.20960698689956336,
+      "seed_bootstrap_95": [
+        0.0330788804071247,
+        0.3665340517628733
+      ],
+      "fixed_routes_mc_95": [
+        0.09279998281004642,
+        0.31137444519340196
+      ],
+      "exact_pair_reduction": 0.2469194312796208,
+      "exact_pair_seed_bootstrap_95": [
+        0.10406731450645836,
+        0.37352911944215655
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 88.1,
+          "active_duration": 16225.0,
+          "n_sites": 389.9,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 144.45
+        },
+        "greedy": {
+          "swaps": 77.8,
+          "active_duration": 13585.0,
+          "n_sites": 363.75,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 105.5
+        },
+        "prism": {
+          "swaps": 47.55,
+          "active_duration": 10545.0,
+          "n_sites": 311.65,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 79.45
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "hex_lattice",
+      "p": 0.003,
+      "probability": {
+        "logical": 0.001658,
+        "greedy": 0.00130075,
+        "prism": 0.00092675
+      },
+      "logical_error_probability": {
+        "logical": 0.000829,
+        "greedy": 0.000650375,
+        "prism": 0.000463375
+      },
+      "counts": {
+        "logical": [
+          410,
+          342,
+          315,
+          243,
+          247,
+          456,
+          498,
+          333,
+          554,
+          327,
+          231,
+          437,
+          251,
+          218,
+          369,
+          258,
+          297,
+          302,
+          223,
+          321
+        ],
+        "greedy": [
+          197,
+          179,
+          220,
+          186,
+          194,
+          352,
+          249,
+          403,
+          232,
+          220,
+          226,
+          229,
+          264,
+          223,
+          350,
+          229,
+          182,
+          368,
+          375,
+          325
+        ],
+        "prism": [
+          157,
+          162,
+          189,
+          158,
+          207,
+          125,
+          209,
+          178,
+          196,
+          199,
+          216,
+          186,
+          218,
+          223,
+          212,
+          170,
+          223,
+          210,
+          136,
+          133
+        ]
+      },
+      "prism_reduction": 0.2875264270613108,
+      "seed_bootstrap_95": [
+        0.16945763231805414,
+        0.3930862542692112
+      ],
+      "fixed_routes_mc_95": [
+        0.2568889583577332,
+        0.316900754140067
+      ],
+      "exact_pair_reduction": 0.2469194312796208,
+      "exact_pair_seed_bootstrap_95": [
+        0.10406731450645836,
+        0.37352911944215655
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 88.1,
+          "active_duration": 16225.0,
+          "n_sites": 389.9,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 144.45
+        },
+        "greedy": {
+          "swaps": 77.8,
+          "active_duration": 13585.0,
+          "n_sites": 363.75,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 105.5
+        },
+        "prism": {
+          "swaps": 47.55,
+          "active_duration": 10545.0,
+          "n_sites": 311.65,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 79.45
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "hex_lattice",
+      "p": 0.01,
+      "probability": {
+        "logical": 0.0279485,
+        "greedy": 0.02356825,
+        "prism": 0.0153625
+      },
+      "logical_error_probability": {
+        "logical": 0.01397425,
+        "greedy": 0.011784125,
+        "prism": 0.00768125
+      },
+      "counts": {
+        "logical": [
+          7667,
+          5713,
+          5987,
+          4416,
+          4861,
+          7314,
+          6868,
+          6023,
+          7437,
+          5579,
+          4370,
+          6784,
+          4875,
+          4020,
+          6013,
+          4747,
+          5985,
+          4902,
+          3838,
+          4395
+        ],
+        "greedy": [
+          3882,
+          3593,
+          5116,
+          3536,
+          2932,
+          5753,
+          4749,
+          6618,
+          3519,
+          3727,
+          3909,
+          4773,
+          4634,
+          3533,
+          7201,
+          4250,
+          3824,
+          6391,
+          6395,
+          5938
+        ],
+        "prism": [
+          2969,
+          2802,
+          3400,
+          2822,
+          3252,
+          2128,
+          3241,
+          3026,
+          2688,
+          3211,
+          3860,
+          2818,
+          3526,
+          3361,
+          3312,
+          3025,
+          3620,
+          3609,
+          2500,
+          2280
+        ]
+      },
+      "prism_reduction": 0.3481696774261984,
+      "seed_bootstrap_95": [
+        0.24880325588600735,
+        0.43403690727361516
+      ],
+      "fixed_routes_mc_95": [
+        0.3415773404087571,
+        0.35469600986934613
+      ],
+      "exact_pair_reduction": 0.2469194312796208,
+      "exact_pair_seed_bootstrap_95": [
+        0.10406731450645836,
+        0.37352911944215655
+      ],
+      "mean_cost": {
+        "logical": {
+          "swaps": 88.1,
+          "active_duration": 16225.0,
+          "n_sites": 389.9,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 144.45
+        },
+        "greedy": {
+          "swaps": 77.8,
+          "active_duration": 13585.0,
+          "n_sites": 363.75,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 105.5
+        },
+        "prism": {
+          "swaps": 47.55,
+          "active_duration": 10545.0,
+          "n_sites": 311.65,
+          "ambiguous_singles": 0.0,
+          "ambiguous_pairs": 79.45
+        }
+      }
+    }
+  ]
+}

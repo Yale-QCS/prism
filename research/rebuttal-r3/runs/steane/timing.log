@@ -1,0 +1,16 @@
+timing ok: readout X greedy seed 0, 506 sites, 25 flags, 0 sites whose missed loss is flagged at the next readout
+timing ok: readout X prism seed 0, 448 sites, 25 flags, 0 sites whose missed loss is flagged at the next readout
+timing ok: readout Z greedy seed 0, 494 sites, 25 flags, 0 sites whose missed loss is flagged at the next readout
+timing ok: readout Z prism seed 0, 459 sites, 25 flags, 0 sites whose missed loss is flagged at the next readout
+timing ok: checks X greedy seed 0, 481 sites, 39 flags, 145 sites whose missed loss is flagged at the next readout
+timing ok: checks X prism seed 0, 443 sites, 39 flags, 130 sites whose missed loss is flagged at the next readout
+timing ok: checks Z greedy seed 0, 502 sites, 39 flags, 169 sites whose missed loss is flagged at the next readout
+timing ok: checks Z prism seed 0, 502 sites, 39 flags, 169 sites whose missed loss is flagged at the next readout
+timing ok: checks3 X greedy seed 0, 598 sites, 46 flags, 298 sites whose missed loss is flagged at the next readout
+timing ok: checks3 X prism seed 0, 487 sites, 46 flags, 228 sites whose missed loss is flagged at the next readout
+timing ok: checks3 Z greedy seed 0, 521 sites, 46 flags, 263 sites whose missed loss is flagged at the next readout
+timing ok: checks3 Z prism seed 0, 487 sites, 46 flags, 224 sites whose missed loss is flagged at the next readout
+channels ok: checks X greedy seed 0: fp=1 flags exactly the 14 checks with no detector flip; fn=0.5 flag rates [0.5, 0.25, 0.25] on each data pair, one flag per shot
+channels ok: checks Z greedy seed 0: fp=1 flags exactly the 14 checks with no detector flip; fn=0.5 flag rates [0.5, 0.25, 0.25] on each data pair, one flag per shot
+channels ok: checks3 X greedy seed 0: fp=1 flags exactly the 21 checks with no detector flip; fn=0.5 flag rates [0.5, 0.25, 0.125, 0.125] on each data pair, one flag per shot
+channels ok: checks3 Z greedy seed 0: fp=1 flags exactly the 21 checks with no detector flip; fn=0.5 flag rates [0.5, 0.25, 0.125, 0.125] on each data pair, one flag per shot

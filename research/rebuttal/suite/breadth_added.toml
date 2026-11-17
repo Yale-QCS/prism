@@ -1,0 +1,30 @@
+# The three QASMBench circuits that the mechanical selection rule adds to the suite
+# (suite/README.md), with the breadth settings. Rows append to breadth.jsonl.
+experiment_id = "breadth"
+objective = "error"
+reschedule = true
+heuristic_config = "qiskit_sabre"
+tie_break = "load"
+layout_starts = 40
+refinement_iterations = 16
+prism_swap_trials = 40
+widths = []
+# Seeds are 100 apart: a run's random layout starts use seeds base..base+42,
+# so closer seeds share starts and are not independent.
+seeds = [
+  0, 100, 200, 300, 400,
+  500, 600, 700, 800, 900,
+  1000, 1100, 1200, 1300, 1400,
+  1500, 1600, 1700, 1800, 1900,
+]
+topologies = ["grid", "hex_lattice", "heavy_hex"]
+arms = [
+  "greedy",
+  "prism",
+]
+circuits = ["cc", "qf21", "bv"]
+
+[circuit_widths]
+cc = [12]
+qf21 = [15]
+bv = [19]

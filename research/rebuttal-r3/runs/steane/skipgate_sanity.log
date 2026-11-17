@@ -1,0 +1,36 @@
+pauli ok: readout X greedy seed 0: 20 fixed Z patterns equal the XOR of Stim's columns; 20x residual rates match compile_detector_sampler on 44 bits (max |diff| 0.0055)
+pauli ok: readout Z greedy seed 0: 20 fixed Z patterns equal the XOR of Stim's columns; 20x residual rates match compile_detector_sampler on 44 bits (max |diff| 0.0048)
+pauli ok: checks X greedy seed 0: 20 fixed Z patterns equal the XOR of Stim's columns; 20x residual rates match compile_detector_sampler on 44 bits (max |diff| 0.0056)
+pauli ok: checks Z greedy seed 0: 20 fixed Z patterns equal the XOR of Stim's columns; 20x residual rates match compile_detector_sampler on 44 bits (max |diff| 0.0053)
+pauli ok: checks3 X greedy seed 0: 20 fixed Z patterns equal the XOR of Stim's columns; 20x residual rates match compile_detector_sampler on 44 bits (max |diff| 0.0044)
+pauli ok: checks3 Z greedy seed 0: 20 fixed Z patterns equal the XOR of Stim's columns; 20x residual rates match compile_detector_sampler on 44 bits (max |diff| 0.0052)
+skip ok: readout X greedy seed 0: 36 certain losses match Stim on the circuit with the pair's events removed (same affine span and bit rates; 34 small supports pattern by pattern; 2000 shots each) and lie in the envelope; 22 of them differ from erase-and-keep-gates
+skip ok: readout Z prism seed 0: 36 certain losses match Stim on the circuit with the pair's events removed (same affine span and bit rates; 36 small supports pattern by pattern; 2000 shots each) and lie in the envelope; 18 of them differ from erase-and-keep-gates
+skip ok: checks Z greedy seed 0: 29 certain losses match Stim on the circuit with the pair's events removed (same affine span and bit rates; 29 small supports pattern by pattern; 2000 shots each) and lie in the envelope; 18 of them differ from erase-and-keep-gates
+skip ok: checks3 X prism seed 0: 24 certain losses match Stim on the circuit with the pair's events removed (same affine span and bit rates; 23 small supports pattern by pattern; 2000 shots each) and lie in the envelope; 12 of them differ from erase-and-keep-gates
+two ok: readout X greedy seed 0: 8 pairs of certain losses before a shared CR_z match Stim with both pairs' events removed (same affine span, 2000 shots)
+two ok: readout Z prism seed 0: 8 pairs of certain losses before a shared CR_z match Stim with both pairs' events removed (same affine span, 2000 shots)
+two ok: checks Z greedy seed 0: 8 pairs of certain losses before a shared CR_z match Stim with both pairs' events removed (same affine span, 2000 shots)
+two ok: checks3 X prism seed 0: 8 pairs of certain losses before a shared CR_z match Stim with both pairs' events removed (same affine span, 2000 shots)
+outside ok: control lost before both CR_z: tableau loop and leakysim (conditioned fix channel) give the same 2 patterns at equal rates; partner flip rate 0.000 (hand: 0.0)
+outside ok: control lost between the CR_z: tableau loop and leakysim (conditioned fix channel) give the same 4 patterns at equal rates; partner flip rate 0.497 (hand: 0.5)
+outside ok: target lost: intact control's Y readout flips at 0.513 (hand: 1/2); leakysim, which keeps the lowering's S on the control, flips it at 1.000 (hand: 1)
+outside ok: a false flag resets the pair (Bell parity flips at 0.497, hand 1/2); without one nothing fires; a loss the check misses is flagged at the readout only (parity flips at 0.502, hand 1/2)
+timing ok: readout X greedy seed 0: 506 sites
+timing ok: readout Z greedy seed 0: 494 sites
+timing ok: checks X greedy seed 0: 481 sites
+timing ok: checks Z greedy seed 0: 502 sites
+timing ok: checks3 X greedy seed 0: 598 sites
+timing ok: checks3 Z greedy seed 0: 521 sites
+off ok: readout X greedy, 20 seeds
+off ok: readout X prism, 20 seeds
+off ok: readout Z greedy, 20 seeds
+off ok: readout Z prism, 20 seeds
+off ok: checks X greedy, 20 seeds
+off ok: checks X prism, 20 seeds
+off ok: checks Z greedy, 20 seeds
+off ok: checks Z prism, 20 seeds
+off ok: checks3 X greedy, 20 seeds
+off ok: checks3 X prism, 20 seeds
+off ok: checks3 Z greedy, 20 seeds
+off ok: checks3 Z prism, 20 seeds

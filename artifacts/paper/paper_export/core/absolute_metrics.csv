@@ -1,0 +1,13 @@
+topology,metric,strategy,mean
+grid,router_inserted_swaps,logical,40.30625
+grid,router_inserted_swaps,greedy,21.73125
+grid,router_inserted_swaps,prism,14.921875
+hex_lattice,router_inserted_swaps,logical,56.465625
+hex_lattice,router_inserted_swaps,greedy,33.6625
+hex_lattice,router_inserted_swaps,prism,24.903125000000003
+grid,physical_depth,logical,65.271875
+grid,physical_depth,greedy,59.037499999999994
+grid,physical_depth,prism,51.690625
+hex_lattice,physical_depth,logical,73.04375
+hex_lattice,physical_depth,greedy,59.324999999999996
+hex_lattice,physical_depth,prism,54.63125

@@ -1,0 +1,6 @@
+# Exact oracle (scripts/paper/oracle.py) over its built-in catalog: optimal SWAPs with four
+# realizations per CR_z against one, next to Greedy and PRISM (best of the seeds), for
+# reviewer A Q2 (myopia) and reviewer D (a second, non-SABRE router over the same sets).
+output_jsonl = "research/rebuttal/oracle/data/oracle.jsonl"
+timeout_s = 600.0
+compiler_seeds = [0, 100, 200]

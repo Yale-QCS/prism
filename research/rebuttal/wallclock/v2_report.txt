@@ -1,0 +1,335 @@
+
+n = 8: simulated / Eq. 2 proxy infidelity over 480 rows: median 0.60, range 0.10 to 0.99, above 1 in 0
+
+n = 8 (MEHTA; 16 workloads, grid and hex_lattice, seeds [0, 100, 200, 300, 400])
+  PRISM / Greedy
+    1/P_keep       0.9714 [0.9701, 0.9728]
+    duration       0.9338 [0.9288, 0.9397]
+    1 - F          0.9600 [0.9513, 0.9666]
+    proxy 1 - F    0.9563 [0.9533, 0.9599]
+    idle part      0.9840 [0.9827, 0.9855]
+    erasure part   0.9872 [0.9862, 0.9884]
+    duration only  0.9743 [0.9729, 0.9757]
+    share of ln(1/P_keep ratio) from idle part     0.56 [0.50, 0.61]
+    share of ln(1/P_keep ratio) from erasure part  0.44 [0.40, 0.49]
+    share of ln(1/P_keep ratio) from duration only 0.90 [0.83, 0.97]
+  PRISM / Logical-SABRE
+    1/P_keep       0.8694 [0.8633, 0.8775]
+    duration       0.7279 [0.7131, 0.7439]
+    1 - F          0.8389 [0.8288, 0.8515]
+    proxy 1 - F    0.8291 [0.8212, 0.8383]
+    idle part      0.9001 [0.8933, 0.9075]
+    erasure part   0.9659 [0.9644, 0.9674]
+    duration only  0.8792 [0.8725, 0.8885]
+    share of ln(1/P_keep ratio) from idle part     0.75 [0.68, 0.83]
+    share of ln(1/P_keep ratio) from erasure part  0.25 [0.23, 0.27]
+    share of ln(1/P_keep ratio) from duration only 0.92 [0.84, 1.01]
+
+  n = 8, grid: per workload, baseline P_keep and baseline / PRISM expected losses (-ln P_keep) and shots
+    Greedy        ae                           P_keep  6.22e-01  losses   0.48 /   0.46  shots  1.011
+    Greedy        bmw_quark_copula             P_keep  6.41e-01  losses   0.44 /   0.42  shots  1.021
+    Greedy        cdkm_ripple_carry_adder      P_keep  5.57e-01  losses   0.58 /   0.58  shots  1.006
+    Greedy        dj                           P_keep  9.25e-01  losses   0.08 /   0.08  shots  1.000
+    Greedy        draper_qft_adder             P_keep  8.08e-01  losses   0.21 /   0.20  shots  1.009
+    Greedy        hhl                          P_keep  6.07e-01  losses   0.50 /   0.47  shots  1.027
+    Greedy        modular_adder                P_keep  4.78e-01  losses   0.74 /   0.74  shots  0.998
+    Greedy        multiplier                   P_keep  3.81e-01  losses   0.96 /   0.85  shots  1.118
+    Greedy        qaoa                         P_keep  8.02e-01  losses   0.22 /   0.20  shots  1.022
+    Greedy        qft                          P_keep  7.73e-01  losses   0.26 /   0.25  shots  1.009
+    Greedy        qftentangled                 P_keep  7.09e-01  losses   0.34 /   0.32  shots  1.025
+    Greedy        qpeexact                     P_keep  7.58e-01  losses   0.28 /   0.27  shots  1.012
+    Greedy        qpeinexact                   P_keep  7.58e-01  losses   0.28 /   0.27  shots  1.012
+    Greedy        rg_qft_multiplier            P_keep  3.94e-01  losses   0.93 /   0.86  shots  1.079
+    Greedy        vbe_ripple_carry_adder       P_keep  6.84e-01  losses   0.38 /   0.38  shots  0.999
+    Greedy        vqe_two_local                P_keep  4.41e-01  losses   0.82 /   0.76  shots  1.062
+    Logical-SABRE ae                           P_keep  5.82e-01  losses   0.54 /   0.46  shots  1.080
+    Logical-SABRE bmw_quark_copula             P_keep  5.84e-01  losses   0.53 /   0.42  shots  1.121
+    Logical-SABRE cdkm_ripple_carry_adder      P_keep  5.20e-01  losses   0.65 /   0.58  shots  1.077
+    Logical-SABRE dj                           P_keep  9.13e-01  losses   0.09 /   0.08  shots  1.014
+    Logical-SABRE draper_qft_adder             P_keep  7.65e-01  losses   0.27 /   0.20  shots  1.067
+    Logical-SABRE hhl                          P_keep  5.16e-01  losses   0.66 /   0.47  shots  1.208
+    Logical-SABRE modular_adder                P_keep  4.48e-01  losses   0.80 /   0.74  shots  1.066
+    Logical-SABRE multiplier                   P_keep  2.61e-01  losses   1.34 /   0.85  shots  1.631
+    Logical-SABRE qaoa                         P_keep  7.41e-01  losses   0.30 /   0.20  shots  1.106
+    Logical-SABRE qft                          P_keep  7.25e-01  losses   0.32 /   0.25  shots  1.075
+    Logical-SABRE qftentangled                 P_keep  6.61e-01  losses   0.41 /   0.32  shots  1.099
+    Logical-SABRE qpeexact                     P_keep  7.18e-01  losses   0.33 /   0.27  shots  1.068
+    Logical-SABRE qpeinexact                   P_keep  7.18e-01  losses   0.33 /   0.27  shots  1.068
+    Logical-SABRE rg_qft_multiplier            P_keep  2.64e-01  losses   1.33 /   0.86  shots  1.611
+    Logical-SABRE vbe_ripple_carry_adder       P_keep  6.37e-01  losses   0.45 /   0.38  shots  1.073
+    Logical-SABRE vqe_two_local                P_keep  3.53e-01  losses   1.04 /   0.76  shots  1.326
+  n = 8, grid, PRISM against Greedy
+    expected losses reduced 4.6% [3.9%, 5.4%], fewer on 14/16 workloads
+    on 16 workloads with Greedy P_keep >= 0.01: shots 1.025 [1.020, 1.029], median 1.012, max 1.118; 1 - F 1.032 [1.025, 1.039]; simulated / proxy 1 - F median 0.60
+  n = 8, grid, PRISM against Logical-SABRE
+    expected losses reduced 22.6% [21.4%, 23.6%], fewer on 16/16 workloads
+    on 16 workloads with Logical-SABRE P_keep >= 0.01: shots 1.156 [1.140, 1.164], median 1.078, max 1.631; 1 - F 1.193 [1.181, 1.205]; simulated / proxy 1 - F median 0.60
+
+  n = 8, hex_lattice: per workload, baseline P_keep and baseline / PRISM expected losses (-ln P_keep) and shots
+    Greedy        ae                           P_keep  6.05e-01  losses   0.50 /   0.48  shots  1.023
+    Greedy        bmw_quark_copula             P_keep  6.23e-01  losses   0.47 /   0.45  shots  1.027
+    Greedy        cdkm_ripple_carry_adder      P_keep  5.60e-01  losses   0.58 /   0.58  shots  1.002
+    Greedy        dj                           P_keep  9.21e-01  losses   0.08 /   0.08  shots  1.001
+    Greedy        draper_qft_adder             P_keep  7.92e-01  losses   0.23 /   0.21  shots  1.018
+    Greedy        hhl                          P_keep  5.73e-01  losses   0.56 /   0.51  shots  1.047
+    Greedy        modular_adder                P_keep  4.70e-01  losses   0.76 /   0.75  shots  1.008
+    Greedy        multiplier                   P_keep  3.46e-01  losses   1.06 /   0.92  shots  1.147
+    Greedy        qaoa                         P_keep  7.90e-01  losses   0.24 /   0.23  shots  1.006
+    Greedy        qft                          P_keep  7.57e-01  losses   0.28 /   0.26  shots  1.014
+    Greedy        qftentangled                 P_keep  6.92e-01  losses   0.37 /   0.34  shots  1.024
+    Greedy        qpeexact                     P_keep  7.38e-01  losses   0.30 /   0.29  shots  1.013
+    Greedy        qpeinexact                   P_keep  7.38e-01  losses   0.30 /   0.29  shots  1.013
+    Greedy        rg_qft_multiplier            P_keep  3.58e-01  losses   1.03 /   0.91  shots  1.124
+    Greedy        vbe_ripple_carry_adder       P_keep  6.77e-01  losses   0.39 /   0.38  shots  1.006
+    Greedy        vqe_two_local                P_keep  4.18e-01  losses   0.87 /   0.80  shots  1.078
+    Logical-SABRE ae                           P_keep  5.81e-01  losses   0.54 /   0.48  shots  1.067
+    Logical-SABRE bmw_quark_copula             P_keep  5.89e-01  losses   0.53 /   0.45  shots  1.086
+    Logical-SABRE cdkm_ripple_carry_adder      P_keep  5.27e-01  losses   0.64 /   0.58  shots  1.066
+    Logical-SABRE dj                           P_keep  9.13e-01  losses   0.09 /   0.08  shots  1.010
+    Logical-SABRE draper_qft_adder             P_keep  7.51e-01  losses   0.29 /   0.21  shots  1.075
+    Logical-SABRE hhl                          P_keep  4.94e-01  losses   0.70 /   0.51  shots  1.214
+    Logical-SABRE modular_adder                P_keep  4.39e-01  losses   0.82 /   0.75  shots  1.078
+    Logical-SABRE multiplier                   P_keep  2.72e-01  losses   1.30 /   0.92  shots  1.460
+    Logical-SABRE qaoa                         P_keep  7.20e-01  losses   0.33 /   0.23  shots  1.103
+    Logical-SABRE qft                          P_keep  7.06e-01  losses   0.35 /   0.26  shots  1.088
+    Logical-SABRE qftentangled                 P_keep  6.49e-01  losses   0.43 /   0.34  shots  1.093
+    Logical-SABRE qpeexact                     P_keep  7.01e-01  losses   0.36 /   0.29  shots  1.067
+    Logical-SABRE qpeinexact                   P_keep  7.01e-01  losses   0.36 /   0.29  shots  1.067
+    Logical-SABRE rg_qft_multiplier            P_keep  2.70e-01  losses   1.31 /   0.91  shots  1.488
+    Logical-SABRE vbe_ripple_carry_adder       P_keep  6.41e-01  losses   0.44 /   0.38  shots  1.062
+    Logical-SABRE vqe_two_local                P_keep  3.14e-01  losses   1.16 /   0.80  shots  1.437
+  n = 8, hex_lattice, PRISM against Greedy
+    expected losses reduced 5.4% [5.0%, 5.6%], fewer on 16/16 workloads
+    on 16 workloads with Greedy P_keep >= 0.01: shots 1.034 [1.031, 1.035], median 1.016, max 1.147; 1 - F 1.051 [1.030, 1.069]; simulated / proxy 1 - F median 0.61
+  n = 8, hex_lattice, PRISM against Logical-SABRE
+    expected losses reduced 20.7% [19.1%, 22.2%], fewer on 16/16 workloads
+    on 16 workloads with Logical-SABRE P_keep >= 0.01: shots 1.145 [1.137, 1.154], median 1.082, max 1.488; 1 - F 1.191 [1.158, 1.225]; simulated / proxy 1 - F median 0.60
+
+n = 12: simulated / Eq. 2 proxy infidelity over 480 rows: median 0.61, range 0.05 to 1.26, above 1 in 60
+
+n = 12 (MEHTA; 16 workloads, grid and hex_lattice, seeds [0, 100, 200, 300, 400])
+  PRISM / Greedy
+    1/P_keep       0.8540 [0.8493, 0.8598]
+    duration       0.9041 [0.9008, 0.9082]
+    1 - F          0.9331 [0.9012, 0.9853]
+    proxy 1 - F    0.9362 [0.9347, 0.9379]
+    idle part      0.8970 [0.8921, 0.9038]
+    erasure part   0.9521 [0.9509, 0.9532]
+    duration only  0.8646 [0.8578, 0.8732]
+    share of ln(1/P_keep ratio) from idle part     0.69 [0.64, 0.74]
+    share of ln(1/P_keep ratio) from erasure part  0.31 [0.30, 0.33]
+    share of ln(1/P_keep ratio) from duration only 0.92 [0.85, 0.99]
+  PRISM / Logical-SABRE
+    1/P_keep       0.5368 [0.5312, 0.5435]
+    duration       0.6778 [0.6695, 0.6870]
+    1 - F          0.8020 [0.7814, 0.8216]
+    proxy 1 - F    0.7884 [0.7829, 0.7940]
+    idle part      0.6149 [0.6095, 0.6230]
+    erasure part   0.8798 [0.8770, 0.8822]
+    duration only  0.5639 [0.5576, 0.5713]
+    share of ln(1/P_keep ratio) from idle part     0.78 [0.76, 0.80]
+    share of ln(1/P_keep ratio) from erasure part  0.21 [0.20, 0.21]
+    share of ln(1/P_keep ratio) from duration only 0.92 [0.89, 0.95]
+
+  n = 12, grid: per workload, baseline P_keep and baseline / PRISM expected losses (-ln P_keep) and shots
+    Greedy        ae                           P_keep  2.89e-01  losses   1.24 /   1.19  shots  1.049
+    Greedy        bmw_quark_copula             P_keep  2.72e-01  losses   1.30 /   1.24  shots  1.061
+    Greedy        cdkm_ripple_carry_adder      P_keep  2.44e-01  losses   1.41 /   1.39  shots  1.018
+    Greedy        dj                           P_keep  8.44e-01  losses   0.17 /   0.17  shots  1.002
+    Greedy        draper_qft_adder             P_keep  5.43e-01  losses   0.61 /   0.56  shots  1.055
+    Greedy        hhl                          P_keep  2.29e-01  losses   1.48 /   1.37  shots  1.106
+    Greedy        modular_adder                P_keep  1.69e-01  losses   1.78 /   1.74  shots  1.040
+    Greedy        multiplier                   P_keep  1.12e-02  losses   4.49 /   3.86  shots  1.879
+    Greedy        qaoa                         P_keep  4.92e-01  losses   0.71 /   0.64  shots  1.070
+    Greedy        qft                          P_keep  4.93e-01  losses   0.71 /   0.66  shots  1.052
+    Greedy        qftentangled                 P_keep  4.12e-01  losses   0.89 /   0.81  shots  1.083
+    Greedy        qpeexact                     P_keep  4.63e-01  losses   0.77 /   0.70  shots  1.074
+    Greedy        qpeinexact                   P_keep  4.50e-01  losses   0.80 /   0.72  shots  1.078
+    Greedy        rg_qft_multiplier            P_keep  1.00e-02  losses   4.60 /   3.76  shots  2.307
+    Greedy        vbe_ripple_carry_adder       P_keep  4.68e-01  losses   0.76 /   0.76  shots  1.005
+    Greedy        vqe_two_local                P_keep  1.03e-01  losses   2.27 /   2.03  shots  1.268
+    Logical-SABRE ae                           P_keep  2.51e-01  losses   1.38 /   1.19  shots  1.209
+    Logical-SABRE bmw_quark_copula             P_keep  1.69e-01  losses   1.73 /   1.24  shots  1.708
+    Logical-SABRE cdkm_ripple_carry_adder      P_keep  1.96e-01  losses   1.63 /   1.39  shots  1.269
+    Logical-SABRE dj                           P_keep  8.05e-01  losses   0.22 /   0.17  shots  1.051
+    Logical-SABRE draper_qft_adder             P_keep  4.41e-01  losses   0.82 /   0.56  shots  1.300
+    Logical-SABRE hhl                          P_keep  1.51e-01  losses   1.89 /   1.37  shots  1.678
+    Logical-SABRE modular_adder                P_keep  1.45e-01  losses   1.93 /   1.74  shots  1.214
+    Logical-SABRE multiplier                   P_keep  2.34e-03  losses   6.04 /   3.86  shots  9.008
+    Logical-SABRE qaoa                         P_keep  4.04e-01  losses   0.91 /   0.64  shots  1.306
+    Logical-SABRE qft                          P_keep  4.13e-01  losses   0.88 /   0.66  shots  1.256
+    Logical-SABRE qftentangled                 P_keep  3.45e-01  losses   1.06 /   0.81  shots  1.293
+    Logical-SABRE qpeexact                     P_keep  3.94e-01  losses   0.93 /   0.70  shots  1.261
+    Logical-SABRE qpeinexact                   P_keep  3.73e-01  losses   0.99 /   0.72  shots  1.302
+    Logical-SABRE rg_qft_multiplier            P_keep  2.47e-03  losses   5.99 /   3.76  shots  9.389
+    Logical-SABRE vbe_ripple_carry_adder       P_keep  3.98e-01  losses   0.92 /   0.76  shots  1.182
+    Logical-SABRE vqe_two_local                P_keep  8.05e-02  losses   2.48 /   2.03  shots  1.629
+  n = 12, grid, PRISM against Greedy
+    expected losses reduced 7.4% [7.0%, 7.8%], fewer on 16/16 workloads
+    on 16 workloads with Greedy P_keep >= 0.01: shots 1.160 [1.153, 1.168], median 1.066, max 2.307; 1 - F 1.051 [0.979, 1.113] (interval includes 1: not significant); simulated / proxy 1 - F median 0.63
+  n = 12, grid, PRISM against Logical-SABRE
+    expected losses reduced 24.7% [23.1%, 25.9%], fewer on 16/16 workloads
+    on 14 workloads with Logical-SABRE P_keep >= 0.01: shots 1.320 [1.271, 1.368], median 1.281, max 1.708; 1 - F 1.164 [1.139, 1.189]; simulated / proxy 1 - F median 0.69
+
+  n = 12, hex_lattice: per workload, baseline P_keep and baseline / PRISM expected losses (-ln P_keep) and shots
+    Greedy        ae                           P_keep  2.71e-01  losses   1.30 /   1.22  shots  1.085
+    Greedy        bmw_quark_copula             P_keep  2.45e-01  losses   1.41 /   1.29  shots  1.125
+    Greedy        cdkm_ripple_carry_adder      P_keep  2.50e-01  losses   1.39 /   1.38  shots  1.011
+    Greedy        dj                           P_keep  8.34e-01  losses   0.18 /   0.18  shots  1.002
+    Greedy        draper_qft_adder             P_keep  5.13e-01  losses   0.67 /   0.59  shots  1.077
+    Greedy        hhl                          P_keep  1.92e-01  losses   1.65 /   1.48  shots  1.179
+    Greedy        modular_adder                P_keep  1.53e-01  losses   1.88 /   1.81  shots  1.070
+    Greedy        multiplier                   P_keep  7.32e-03  losses   4.91 /   4.15  shots  2.136
+    Greedy        qaoa                         P_keep  4.48e-01  losses   0.80 /   0.70  shots  1.108
+    Greedy        qft                          P_keep  4.64e-01  losses   0.77 /   0.69  shots  1.076
+    Greedy        qftentangled                 P_keep  3.76e-01  losses   0.98 /   0.89  shots  1.093
+    Greedy        qpeexact                     P_keep  4.45e-01  losses   0.81 /   0.74  shots  1.070
+    Greedy        qpeinexact                   P_keep  4.33e-01  losses   0.84 /   0.78  shots  1.061
+    Greedy        rg_qft_multiplier            P_keep  8.29e-03  losses   4.79 /   4.12  shots  1.955
+    Greedy        vbe_ripple_carry_adder       P_keep  4.53e-01  losses   0.79 /   0.78  shots  1.018
+    Greedy        vqe_two_local                P_keep  8.75e-02  losses   2.44 /   2.13  shots  1.354
+    Logical-SABRE ae                           P_keep  2.05e-01  losses   1.58 /   1.22  shots  1.435
+    Logical-SABRE bmw_quark_copula             P_keep  1.43e-01  losses   1.93 /   1.29  shots  1.930
+    Logical-SABRE cdkm_ripple_carry_adder      P_keep  1.99e-01  losses   1.61 /   1.38  shots  1.266
+    Logical-SABRE dj                           P_keep  7.82e-01  losses   0.25 /   0.18  shots  1.070
+    Logical-SABRE draper_qft_adder             P_keep  3.74e-01  losses   0.98 /   0.59  shots  1.478
+    Logical-SABRE hhl                          P_keep  1.01e-01  losses   2.29 /   1.48  shots  2.258
+    Logical-SABRE modular_adder                P_keep  1.38e-01  losses   1.98 /   1.81  shots  1.187
+    Logical-SABRE multiplier                   P_keep  1.03e-03  losses   6.85 /   4.15  shots 15.180
+    Logical-SABRE qaoa                         P_keep  3.30e-01  losses   1.11 /   0.70  shots  1.505
+    Logical-SABRE qft                          P_keep  3.66e-01  losses   1.00 /   0.69  shots  1.366
+    Logical-SABRE qftentangled                 P_keep  2.87e-01  losses   1.24 /   0.89  shots  1.431
+    Logical-SABRE qpeexact                     P_keep  3.34e-01  losses   1.10 /   0.74  shots  1.428
+    Logical-SABRE qpeinexact                   P_keep  3.14e-01  losses   1.16 /   0.78  shots  1.464
+    Logical-SABRE rg_qft_multiplier            P_keep  1.04e-03  losses   6.83 /   4.12  shots 15.659
+    Logical-SABRE vbe_ripple_carry_adder       P_keep  3.68e-01  losses   1.00 /   0.78  shots  1.252
+    Logical-SABRE vqe_two_local                P_keep  4.74e-02  losses   3.03 /   2.13  shots  2.500
+  n = 12, hex_lattice, PRISM against Greedy
+    expected losses reduced 8.4% [8.1%, 8.6%], fewer on 16/16 workloads
+    on 14 workloads with Greedy P_keep >= 0.01: shots 1.092 [1.088, 1.097], median 1.077, max 1.354; 1 - F 1.093 [1.041, 1.139]; simulated / proxy 1 - F median 0.65
+  n = 12, hex_lattice, PRISM against Logical-SABRE
+    expected losses reduced 30.1% [29.4%, 30.6%], fewer on 16/16 workloads
+    on 14 workloads with Logical-SABRE P_keep >= 0.01: shots 1.498 [1.460, 1.528], median 1.433, max 2.500; 1 - F 1.347 [1.301, 1.391]; simulated / proxy 1 - F median 0.64
+
+n = 16: simulated / Eq. 2 proxy infidelity over 480 rows: median 0.60, range 0.06 to 1.20, above 1 in 31
+
+n = 16 (MEHTA; 16 workloads, grid and hex_lattice, seeds [0, 100, 200, 300, 400])
+  PRISM / Greedy
+    1/P_keep       0.6166 [0.6041, 0.6296]
+    duration       0.8750 [0.8711, 0.8789]
+    1 - F          0.9277 [0.9077, 0.9457]
+    proxy 1 - F    0.9235 [0.9212, 0.9257]
+    idle part      0.6941 [0.6810, 0.7088]
+    erasure part   0.8923 [0.8897, 0.8964]
+    duration only  0.6315 [0.6175, 0.6457]
+    share of ln(1/P_keep ratio) from idle part     0.76 [0.70, 0.81]
+    share of ln(1/P_keep ratio) from erasure part  0.24 [0.22, 0.25]
+    share of ln(1/P_keep ratio) from duration only 0.95 [0.89, 1.01]
+  PRISM / Logical-SABRE
+    1/P_keep       0.1829 [0.1738, 0.1995]
+    duration       0.6982 [0.6896, 0.7055]
+    1 - F          0.8268 [0.8125, 0.8456]
+    proxy 1 - F    0.8138 [0.8089, 0.8184]
+    idle part      0.2659 [0.2527, 0.2844]
+    erasure part   0.7253 [0.7217, 0.7294]
+    duration only  0.2084 [0.1979, 0.2269]
+    share of ln(1/P_keep ratio) from idle part     0.78 [0.73, 0.83]
+    share of ln(1/P_keep ratio) from erasure part  0.19 [0.18, 0.20]
+    share of ln(1/P_keep ratio) from duration only 0.92 [0.87, 0.98]
+
+  n = 16, grid: per workload, baseline P_keep and baseline / PRISM expected losses (-ln P_keep) and shots
+    Greedy        ae                           P_keep  8.16e-02  losses   2.50 /   2.30  shots  1.227
+    Greedy        bmw_quark_copula             P_keep  5.21e-02  losses   2.95 /   2.74  shots  1.242
+    Greedy        cdkm_ripple_carry_adder      P_keep  7.46e-02  losses   2.60 /   2.53  shots  1.064
+    Greedy        dj                           P_keep  7.45e-01  losses   0.29 /   0.29  shots  1.004
+    Greedy        draper_qft_adder             P_keep  2.72e-01  losses   1.30 /   1.15  shots  1.162
+    Greedy        hhl                          P_keep  4.04e-02  losses   3.21 /   2.86  shots  1.412
+    Greedy        modular_adder                P_keep  3.74e-02  losses   3.29 /   3.20  shots  1.094
+    Greedy        multiplier                   P_keep  1.49e-06  losses  13.40 /  11.42  shots  7.124
+    Greedy        qaoa                         P_keep  2.52e-01  losses   1.38 /   1.16  shots  1.242
+    Greedy        qft                          P_keep  2.29e-01  losses   1.47 /   1.30  shots  1.197
+    Greedy        qftentangled                 P_keep  1.58e-01  losses   1.84 /   1.63  shots  1.236
+    Greedy        qpeexact                     P_keep  1.88e-01  losses   1.67 /   1.48  shots  1.206
+    Greedy        qpeinexact                   P_keep  1.88e-01  losses   1.67 /   1.48  shots  1.206
+    Greedy        rg_qft_multiplier            P_keep  1.30e-06  losses  13.54 /  11.45  shots  8.110
+    Greedy        vbe_ripple_carry_adder       P_keep  1.41e-01  losses   1.96 /   1.92  shots  1.040
+    Greedy        vqe_two_local                P_keep  8.38e-03  losses   4.78 /   4.12  shots  1.937
+    Logical-SABRE ae                           P_keep  5.99e-02  losses   2.81 /   2.30  shots  1.672
+    Logical-SABRE bmw_quark_copula             P_keep  2.67e-02  losses   3.51 /   2.74  shots  2.425
+    Logical-SABRE cdkm_ripple_carry_adder      P_keep  4.86e-02  losses   3.02 /   2.53  shots  1.632
+    Logical-SABRE dj                           P_keep  7.17e-01  losses   0.33 /   0.29  shots  1.043
+    Logical-SABRE draper_qft_adder             P_keep  1.92e-01  losses   1.64 /   1.15  shots  1.645
+    Logical-SABRE hhl                          P_keep  2.18e-02  losses   3.82 /   2.86  shots  2.615
+    Logical-SABRE modular_adder                P_keep  2.66e-02  losses   3.63 /   3.20  shots  1.538
+    Logical-SABRE multiplier                   P_keep  1.49e-08  losses  17.98 /  11.42  shots 712.221
+    Logical-SABRE qaoa                         P_keep  1.60e-01  losses   1.82 /   1.16  shots  1.959
+    Logical-SABRE qft                          P_keep  1.74e-01  losses   1.73 /   1.30  shots  1.573
+    Logical-SABRE qftentangled                 P_keep  1.38e-01  losses   1.98 /   1.63  shots  1.419
+    Logical-SABRE qpeexact                     P_keep  1.40e-01  losses   1.96 /   1.48  shots  1.624
+    Logical-SABRE qpeinexact                   P_keep  1.40e-01  losses   1.96 /   1.48  shots  1.624
+    Logical-SABRE rg_qft_multiplier            P_keep  7.09e-09  losses  18.66 /  11.45  shots 1490.681
+    Logical-SABRE vbe_ripple_carry_adder       P_keep  1.03e-01  losses   2.27 /   1.92  shots  1.428
+    Logical-SABRE vqe_two_local                P_keep  8.11e-03  losses   4.81 /   4.12  shots  2.001
+  n = 16, grid, PRISM against Greedy
+    expected losses reduced 9.6% [9.4%, 9.9%], fewer on 16/16 workloads
+    on 13 workloads with Greedy P_keep >= 0.01: shots 1.175 [1.167, 1.182], median 1.206, max 1.412; 1 - F 1.063 [1.036, 1.087]; simulated / proxy 1 - F median 0.62
+  n = 16, grid, PRISM against Logical-SABRE
+    expected losses reduced 23.5% [22.4%, 25.2%], fewer on 16/16 workloads
+    on 13 workloads with Logical-SABRE P_keep >= 0.01: shots 1.664 [1.577, 1.776], median 1.624, max 2.615; 1 - F 1.191 [1.159, 1.229]; simulated / proxy 1 - F median 0.65
+
+  n = 16, hex_lattice: per workload, baseline P_keep and baseline / PRISM expected losses (-ln P_keep) and shots
+    Greedy        ae                           P_keep  7.05e-02  losses   2.65 /   2.38  shots  1.308
+    Greedy        bmw_quark_copula             P_keep  3.97e-02  losses   3.22 /   2.92  shots  1.352
+    Greedy        cdkm_ripple_carry_adder      P_keep  6.94e-02  losses   2.67 /   2.51  shots  1.171
+    Greedy        dj                           P_keep  7.20e-01  losses   0.33 /   0.32  shots  1.011
+    Greedy        draper_qft_adder             P_keep  2.54e-01  losses   1.37 /   1.19  shots  1.195
+    Greedy        hhl                          P_keep  2.99e-02  losses   3.50 /   2.94  shots  1.759
+    Greedy        modular_adder                P_keep  3.08e-02  losses   3.48 /   3.34  shots  1.151
+    Greedy        multiplier                   P_keep  4.58e-07  losses  14.56 /  12.47  shots  8.200
+    Greedy        qaoa                         P_keep  2.28e-01  losses   1.48 /   1.29  shots  1.201
+    Greedy        qft                          P_keep  2.00e-01  losses   1.61 /   1.39  shots  1.243
+    Greedy        qftentangled                 P_keep  1.39e-01  losses   1.97 /   1.74  shots  1.261
+    Greedy        qpeexact                     P_keep  1.70e-01  losses   1.77 /   1.58  shots  1.216
+    Greedy        qpeinexact                   P_keep  1.70e-01  losses   1.77 /   1.58  shots  1.216
+    Greedy        rg_qft_multiplier            P_keep  3.33e-07  losses  14.84 /  12.27  shots 13.646
+    Greedy        vbe_ripple_carry_adder       P_keep  1.22e-01  losses   2.10 /   1.98  shots  1.132
+    Greedy        vqe_two_local                P_keep  5.98e-03  losses   5.12 /   4.33  shots  2.181
+    Logical-SABRE ae                           P_keep  4.62e-02  losses   3.07 /   2.38  shots  1.995
+    Logical-SABRE bmw_quark_copula             P_keep  2.23e-02  losses   3.66 /   2.92  shots  2.413
+    Logical-SABRE cdkm_ripple_carry_adder      P_keep  4.71e-02  losses   3.05 /   2.51  shots  1.726
+    Logical-SABRE dj                           P_keep  6.72e-01  losses   0.40 /   0.32  shots  1.082
+    Logical-SABRE draper_qft_adder             P_keep  1.35e-01  losses   1.99 /   1.19  shots  2.244
+    Logical-SABRE hhl                          P_keep  9.45e-03  losses   4.63 /   2.94  shots  5.568
+    Logical-SABRE modular_adder                P_keep  1.99e-02  losses   3.89 /   3.34  shots  1.775
+    Logical-SABRE multiplier                   P_keep  4.83e-10  losses  20.92 /  12.47  shots 7787.104
+    Logical-SABRE qaoa                         P_keep  9.83e-02  losses   2.30 /   1.29  shots  2.787
+    Logical-SABRE qft                          P_keep  1.20e-01  losses   2.10 /   1.39  shots  2.072
+    Logical-SABRE qftentangled                 P_keep  9.02e-02  losses   2.40 /   1.74  shots  1.949
+    Logical-SABRE qpeexact                     P_keep  1.10e-01  losses   2.20 /   1.58  shots  1.885
+    Logical-SABRE qpeinexact                   P_keep  1.10e-01  losses   2.20 /   1.58  shots  1.885
+    Logical-SABRE rg_qft_multiplier            P_keep  5.17e-10  losses  21.12 /  12.27  shots 8773.869
+    Logical-SABRE vbe_ripple_carry_adder       P_keep  9.43e-02  losses   2.36 /   1.98  shots  1.470
+    Logical-SABRE vqe_two_local                P_keep  1.98e-03  losses   6.19 /   4.33  shots  6.595
+  n = 16, hex_lattice, PRISM against Greedy
+    expected losses reduced 11.0% [10.5%, 11.5%], fewer on 16/16 workloads
+    on 13 workloads with Greedy P_keep >= 0.01: shots 1.237 [1.223, 1.254], median 1.216, max 1.759; 1 - F 1.089 [1.047, 1.138]; simulated / proxy 1 - F median 0.63
+  n = 16, hex_lattice, PRISM against Logical-SABRE
+    expected losses reduced 29.5% [28.7%, 30.4%], fewer on 16/16 workloads
+    on 12 workloads with Logical-SABRE P_keep >= 0.01: shots 1.892 [1.781, 1.954], median 1.917, max 2.787; 1 - F 1.233 [1.177, 1.303]; simulated / proxy 1 - F median 0.60
+
+H1 sweep at n = 8, PRISM / Greedy [95% paired seed interval]; PRISM's absolute P_keep and 1 - F
+  default                    1  1/P_keep 0.971 [0.970, 0.973]  duration 0.934 [0.929, 0.939]  1 - F 0.960 [0.952, 0.967]  losses reduced 5.0% [4.7%, 5.2%]  P_keep 0.634  1-F 0.0202
+  beamsplitter_time_x      0.5  1/P_keep 0.975 [0.974, 0.976]  duration 0.945 [0.939, 0.950]  1 - F 0.966 [0.958, 0.971]  losses reduced 4.7% [4.3%, 5.0%]  P_keep 0.650  1-F 0.0190
+  beamsplitter_time_x        2  1/P_keep 0.964 [0.960, 0.968]  duration 0.924 [0.919, 0.930]  1 - F 0.952 [0.942, 0.963]  losses reduced 5.4% [4.8%, 5.8%]  P_keep 0.599  1-F 0.0229
+  coherence_ms             1.5  1/P_keep 0.971 [0.970, 0.973]  duration 0.934 [0.929, 0.940]  1 - F 0.957 [0.948, 0.964]  losses reduced 5.0% [4.7%, 5.2%]  P_keep 0.634  1-F 0.0243
+  coherence_ms             3.1  1/P_keep 0.971 [0.970, 0.973]  duration 0.934 [0.929, 0.940]  1 - F 0.963 [0.955, 0.969]  losses reduced 5.0% [4.7%, 5.2%]  P_keep 0.634  1-F 0.0175
+  coherence_ms               4  1/P_keep 0.971 [0.970, 0.973]  duration 0.934 [0.929, 0.940]  1 - F 0.965 [0.958, 0.970]  losses reduced 5.0% [4.7%, 5.2%]  P_keep 0.634  1-F 0.0161
+  coherence_ms             4.8  1/P_keep 0.971 [0.970, 0.973]  duration 0.934 [0.929, 0.940]  1 - F 0.966 [0.960, 0.972]  losses reduced 5.0% [4.7%, 5.2%]  P_keep 0.634  1-F 0.0152
+  erasure_x                0.5  1/P_keep 0.978 [0.976, 0.979]  duration 0.934 [0.929, 0.939]  1 - F 0.960 [0.952, 0.967]  losses reduced 5.7% [5.4%, 5.9%]  P_keep 0.728  1-F 0.0202
+  erasure_x                  2  1/P_keep 0.959 [0.957, 0.961]  duration 0.934 [0.929, 0.940]  1 - F 0.960 [0.953, 0.967]  losses reduced 4.5% [4.1%, 4.7%]  P_keep 0.479  1-F 0.0202
+  residual_x               0.3  1/P_keep 0.971 [0.970, 0.973]  duration 0.934 [0.929, 0.939]  1 - F 0.949 [0.938, 0.959]  losses reduced 5.0% [4.7%, 5.2%]  P_keep 0.634  1-F 0.0125
+  residual_x                 3  1/P_keep 0.971 [0.970, 0.973]  duration 0.934 [0.929, 0.940]  1 - F 0.969 [0.963, 0.974]  losses reduced 5.0% [4.7%, 5.2%]  P_keep 0.634  1-F 0.0414
+  t1_us                    100  1/P_keep 0.931 [0.927, 0.936]  duration 0.934 [0.929, 0.939]  1 - F 0.960 [0.952, 0.967]  losses reduced 6.4% [6.0%, 6.6%]  P_keep 0.402  1-F 0.0202
+  t1_us                    231  1/P_keep 0.963 [0.961, 0.965]  duration 0.934 [0.929, 0.940]  1 - F 0.960 [0.953, 0.967]  losses reduced 5.4% [5.1%, 5.7%]  P_keep 0.575  1-F 0.0202
+  t1_us                    652  1/P_keep 0.979 [0.978, 0.980]  duration 0.934 [0.929, 0.940]  1 - F 0.960 [0.953, 0.967]  losses reduced 4.5% [4.2%, 4.8%]  P_keep 0.687  1-F 0.0202
+  t1_us                   2000  1/P_keep 0.984 [0.983, 0.986]  duration 0.934 [0.929, 0.940]  1 - F 0.960 [0.951, 0.967]  losses reduced 4.0% [3.7%, 4.2%]  P_keep 0.733  1-F 0.0202

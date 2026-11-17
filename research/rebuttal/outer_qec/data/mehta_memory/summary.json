@@ -1,0 +1,827 @@
+{
+  "protocol": "mehta-memory-v2",
+  "device": {
+    "name": "mehta_idle",
+    "t1": 356.51217142473047,
+    "dephasing": 0.0002291666666666667,
+    "durations": {
+      "crz": 0.5,
+      "rswap": 0.2,
+      "swap": 0.2,
+      "x": 0.2,
+      "rx": 0.2,
+      "rz": 0.0
+    },
+    "pauli_z": {
+      "crz": [
+        0.00039,
+        0.00011
+      ],
+      "rswap": [
+        9.9e-05
+      ],
+      "swap": [
+        9.9e-05
+      ],
+      "rx": [
+        9.9e-05
+      ]
+    },
+    "depolarizing": {},
+    "loss": {},
+    "erasure": {
+      "crz": [
+        0.004,
+        0.00096
+      ],
+      "rswap": [
+        0.000724,
+        0.000724
+      ],
+      "swap": [
+        0.000724,
+        0.000724
+      ],
+      "rx": [
+        0.000724,
+        0.000724
+      ]
+    },
+    "idle_dephasing": true
+  },
+  "budget": {
+    "heuristic_config": "qiskit_sabre",
+    "tie_break": "load",
+    "layout_starts": 40,
+    "refinement_iterations": 16,
+    "prism_swap_trials": 40
+  },
+  "versions": {
+    "qiskit": "2.4.1",
+    "qldpc": "0.4.1",
+    "stim": "1.16.0",
+    "ldpc": "2.4.1"
+  },
+  "source_sha256": {
+    "research/rebuttal/outer_qec/mehta_memory.py": "c2c60e6a167b5e124ca08187716d03ecd772377e6ace0b14f89905695d813c6b",
+    "research/rebuttal/outer_qec/erasure_pilot.py": "5525b1a61f83fa63b987dc5df4c389a322555acb0ab2edfb7961fb55bfb281e6",
+    "research/rebuttal/outer_qec/to_stim.py": "c59245dd503a72dc0c7d42b7ef88cc82e3f7e5dc8ab99afbc2b5f21420ca5647",
+    "research/rebuttal/outer_qec/route.py": "0e4420afebb0b0e2899958bbc14f534aad6708d10253dca80f915bf951f6e91a",
+    "research/rebuttal/outer_qec/qec_circuits.py": "c0dfda28b1ab412c601db1e9b2b178ba84cab9d19feaa9c3728853130d5c8bf0",
+    "research/rebuttal/wallclock/sim.py": "55b48e3474b965ca03d0fcef9e2f7d03b0ae4fc38364b9b8911a23d2b19444f4",
+    "src/marabbecca/lowering/commit.py": "eb4a64a02362550b51bbb481086f3a3f11d0fa61d574c36f740f8f7f3e257b07",
+    "src/marabbecca/lowering/commit_policies/prism_routing.py": "d2cd3b7acbbffdff4fda0498fc304fe26a8499a51fc7686a14af9856d80863bb",
+    "src/marabbecca/staged_pms.py": "9b572af52a8cf3dde4b5cec192dcd48b3b80cda2b566c8120dbcfabd981a748c"
+  },
+  "bootstrap_seed": 745,
+  "bootstrap_replicates": 20000,
+  "groups": [
+    {
+      "basis": "X",
+      "topo": "grid",
+      "greedy": {
+        "errors": 878,
+        "shots": 1000000,
+        "logical_error": 0.0008780000000000001,
+        "interval": [
+          0.0008060000000000001,
+          0.0009530000000000001
+        ],
+        "mean_swaps": 45.25,
+        "mean_duration_us": 12.059999999999997,
+        "mean_score": 0.6711582093924653,
+        "fraction_with_erasure": 0.457498
+      },
+      "prism": {
+        "errors": 695,
+        "shots": 1000000,
+        "logical_error": 0.000695,
+        "interval": [
+          0.000634,
+          0.0007530000000000001
+        ],
+        "mean_swaps": 30.8,
+        "mean_duration_us": 10.23,
+        "mean_score": 0.6125285991887897,
+        "fraction_with_erasure": 0.42639
+      },
+      "absolute_reduction": 0.0001830000000000001,
+      "absolute_reduction_interval": [
+        9.099999999999994e-05,
+        0.00028499999999999977
+      ],
+      "relative_reduction": 0.2084282460136675,
+      "relative_reduction_interval": [
+        0.10975533726658972,
+        0.304256369387402
+      ],
+      "seeds_lower_equal_higher": [
+        17,
+        0,
+        3
+      ],
+      "transmon_0.001": {
+        "errors": 11429,
+        "shots": 1000000,
+        "logical_error": 0.011429,
+        "interval": [
+          0.011141000000000002,
+          0.011711999999999998
+        ],
+        "mean_duration_us": 2.715949999999997,
+        "mean_native_cz": 128.4,
+        "mean_routing_swaps_before_native_optimization": 18.8
+      },
+      "transmon_0.003": {
+        "errors": 32636,
+        "shots": 1000000,
+        "logical_error": 0.032636,
+        "interval": [
+          0.031692,
+          0.03345602500000001
+        ],
+        "mean_duration_us": 2.715949999999997,
+        "mean_native_cz": 128.4,
+        "mean_routing_swaps_before_native_optimization": 18.8
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "hex_lattice",
+      "greedy": {
+        "errors": 971,
+        "shots": 1000000,
+        "logical_error": 0.0009709999999999999,
+        "interval": [
+          0.000891,
+          0.0010529999999999997
+        ],
+        "mean_swaps": 70.15,
+        "mean_duration_us": 13.374999999999995,
+        "mean_score": 0.7250945933844306,
+        "fraction_with_erasure": 0.483337
+      },
+      "prism": {
+        "errors": 749,
+        "shots": 1000000,
+        "logical_error": 0.000749,
+        "interval": [
+          0.000673,
+          0.000822
+        ],
+        "mean_swaps": 47.75,
+        "mean_duration_us": 10.694999999999999,
+        "mean_score": 0.6335693656839888,
+        "fraction_with_erasure": 0.438387
+      },
+      "absolute_reduction": 0.00022199999999999987,
+      "absolute_reduction_interval": [
+        0.0001349999999999998,
+        0.0003169999999999998
+      ],
+      "relative_reduction": 0.2286302780638516,
+      "relative_reduction_interval": [
+        0.145926909102299,
+        0.31262857750277145
+      ],
+      "seeds_lower_equal_higher": [
+        17,
+        1,
+        2
+      ],
+      "transmon_0.001": {
+        "errors": 21724,
+        "shots": 1000000,
+        "logical_error": 0.021724,
+        "interval": [
+          0.020274999999999998,
+          0.023436025000000003
+        ],
+        "mean_duration_us": 3.837799999999993,
+        "mean_native_cz": 166.25,
+        "mean_routing_swaps_before_native_optimization": 31.75
+      },
+      "transmon_0.003": {
+        "errors": 56250,
+        "shots": 1000000,
+        "logical_error": 0.05625,
+        "interval": [
+          0.053609,
+          0.05913605
+        ],
+        "mean_duration_us": 3.837799999999993,
+        "mean_native_cz": 166.25,
+        "mean_routing_swaps_before_native_optimization": 31.75
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "grid",
+      "greedy": {
+        "errors": 820,
+        "shots": 1000000,
+        "logical_error": 0.0008200000000000001,
+        "interval": [
+          0.0007450000000000001,
+          0.000897
+        ],
+        "mean_swaps": 46.85,
+        "mean_duration_us": 12.494999999999996,
+        "mean_score": 0.6777314584370446,
+        "fraction_with_erasure": 0.461536
+      },
+      "prism": {
+        "errors": 641,
+        "shots": 1000000,
+        "logical_error": 0.0006410000000000001,
+        "interval": [
+          0.000593,
+          0.000694
+        ],
+        "mean_swaps": 30.2,
+        "mean_duration_us": 9.870000000000001,
+        "mean_score": 0.6000342923680585,
+        "fraction_with_erasure": 0.419367
+      },
+      "absolute_reduction": 0.00017900000000000001,
+      "absolute_reduction_interval": [
+        9.699999999999986e-05,
+        0.00026099999999999984
+      ],
+      "relative_reduction": 0.21829268292682924,
+      "relative_reduction_interval": [
+        0.12621169846099467,
+        0.2966396292004633
+      ],
+      "seeds_lower_equal_higher": [
+        18,
+        0,
+        2
+      ],
+      "transmon_0.001": {
+        "errors": 10623,
+        "shots": 1000000,
+        "logical_error": 0.010622999999999999,
+        "interval": [
+          0.010304974999999997,
+          0.010994
+        ],
+        "mean_duration_us": 2.7125499999999976,
+        "mean_native_cz": 128.1,
+        "mean_routing_swaps_before_native_optimization": 18.7
+      },
+      "transmon_0.003": {
+        "errors": 31605,
+        "shots": 1000000,
+        "logical_error": 0.031604999999999994,
+        "interval": [
+          0.03077,
+          0.03234702500000001
+        ],
+        "mean_duration_us": 2.7125499999999976,
+        "mean_native_cz": 128.1,
+        "mean_routing_swaps_before_native_optimization": 18.7
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "hex_lattice",
+      "greedy": {
+        "errors": 965,
+        "shots": 1000000,
+        "logical_error": 0.000965,
+        "interval": [
+          0.0008810000000000001,
+          0.0010530000000000001
+        ],
+        "mean_swaps": 78.5,
+        "mean_duration_us": 13.594999999999994,
+        "mean_score": 0.7336358940444343,
+        "fraction_with_erasure": 0.488258
+      },
+      "prism": {
+        "errors": 649,
+        "shots": 1000000,
+        "logical_error": 0.0006490000000000001,
+        "interval": [
+          0.000595,
+          0.0007040000000000001
+        ],
+        "mean_swaps": 48.9,
+        "mean_duration_us": 10.524999999999999,
+        "mean_score": 0.6279957671257825,
+        "fraction_with_erasure": 0.434698
+      },
+      "absolute_reduction": 0.000316,
+      "absolute_reduction_interval": [
+        0.00022000000000000014,
+        0.00042100000000000004
+      ],
+      "relative_reduction": 0.32746113989637304,
+      "relative_reduction_interval": [
+        0.24577112180691638,
+        0.4071235019878737
+      ],
+      "seeds_lower_equal_higher": [
+        19,
+        1,
+        0
+      ],
+      "transmon_0.001": {
+        "errors": 20526,
+        "shots": 1000000,
+        "logical_error": 0.020526,
+        "interval": [
+          0.019527000000000003,
+          0.021723025
+        ],
+        "mean_duration_us": 3.7741999999999933,
+        "mean_native_cz": 164.8,
+        "mean_routing_swaps_before_native_optimization": 31.0
+      },
+      "transmon_0.003": {
+        "errors": 52801,
+        "shots": 1000000,
+        "logical_error": 0.05280099999999999,
+        "interval": [
+          0.051050975,
+          0.054845025
+        ],
+        "mean_duration_us": 3.7741999999999933,
+        "mean_native_cz": 164.8,
+        "mean_routing_swaps_before_native_optimization": 31.0
+      }
+    }
+  ],
+  "total_shots": 8000000,
+  "total_comparison_shots": 16000000,
+  "checked_fault_columns": 119998,
+  "single_residual_faults_checked": 52741,
+  "decoder_validation": [
+    {
+      "cell": "X_grid_greedy_0",
+      "mixed_shots": 100000,
+      "max_marginal_z": 1.7737681389355673,
+      "row_sha256": "b06622e987ab2f95bb8a7faeb7df33c27729063a0686be6555844bf91c76f7d3",
+      "erasure_only_shots": 10000,
+      "ambiguous": 8,
+      "erasure_only_errors": 7,
+      "errors_on_recoverable_patterns": 0,
+      "single_residual_locations_failed": 0,
+      "single_residual_first_order_sum": 0.0
+    },
+    {
+      "cell": "X_grid_prism_0",
+      "mixed_shots": 100000,
+      "max_marginal_z": 3.285436183571333,
+      "row_sha256": "40e748045772b5ef762a174113ba0ebd7cdb465fc4188bf418c7d4c79367f222",
+      "erasure_only_shots": 10000,
+      "ambiguous": 7,
+      "erasure_only_errors": 4,
+      "errors_on_recoverable_patterns": 0,
+      "single_residual_locations_failed": 0,
+      "single_residual_first_order_sum": 0.0
+    },
+    {
+      "cell": "X_hex_lattice_greedy_0",
+      "mixed_shots": 100000,
+      "max_marginal_z": 1.9065180876311323,
+      "row_sha256": "24dde9d432076f04944fd48b12980d5cbe78fd8cb9c034e6c8a596ed945577a4",
+      "erasure_only_shots": 10000,
+      "ambiguous": 8,
+      "erasure_only_errors": 2,
+      "errors_on_recoverable_patterns": 0,
+      "single_residual_locations_failed": 0,
+      "single_residual_first_order_sum": 0.0
+    },
+    {
+      "cell": "X_hex_lattice_prism_0",
+      "mixed_shots": 100000,
+      "max_marginal_z": 2.0055318502522184,
+      "row_sha256": "79bfa53a48c760a82556017f93b6c0846b14a0ae7a4fffeb2e19422d13c016ba",
+      "erasure_only_shots": 10000,
+      "ambiguous": 8,
+      "erasure_only_errors": 4,
+      "errors_on_recoverable_patterns": 0,
+      "single_residual_locations_failed": 0,
+      "single_residual_first_order_sum": 0.0
+    },
+    {
+      "cell": "Z_grid_greedy_0",
+      "mixed_shots": 100000,
+      "max_marginal_z": 2.5706231595455282,
+      "row_sha256": "cce1432bfe43d66132fd26aedb3d155c602fe7c9bbc52b4b93baa7d62a114e78",
+      "erasure_only_shots": 10000,
+      "ambiguous": 7,
+      "erasure_only_errors": 2,
+      "errors_on_recoverable_patterns": 0,
+      "single_residual_locations_failed": 0,
+      "single_residual_first_order_sum": 0.0
+    },
+    {
+      "cell": "Z_grid_prism_0",
+      "mixed_shots": 100000,
+      "max_marginal_z": 4.2393233969633295,
+      "row_sha256": "2c09335bf8e58f58f385b0f7e9a3be7e59ee38d6fc371a33e6fdf5920843eef0",
+      "erasure_only_shots": 10000,
+      "ambiguous": 5,
+      "erasure_only_errors": 4,
+      "errors_on_recoverable_patterns": 0,
+      "single_residual_locations_failed": 0,
+      "single_residual_first_order_sum": 0.0
+    },
+    {
+      "cell": "Z_hex_lattice_greedy_0",
+      "mixed_shots": 100000,
+      "max_marginal_z": 1.5308311826001284,
+      "row_sha256": "c55c3b15f2e843144615ff87be248d8d2a369cdd09f30cd91a5b7893caea8d37",
+      "erasure_only_shots": 10000,
+      "ambiguous": 6,
+      "erasure_only_errors": 3,
+      "errors_on_recoverable_patterns": 0,
+      "single_residual_locations_failed": 0,
+      "single_residual_first_order_sum": 0.0
+    },
+    {
+      "cell": "Z_hex_lattice_prism_0",
+      "mixed_shots": 100000,
+      "max_marginal_z": 2.0888386672841577,
+      "row_sha256": "69dddc20a4461be8d4bba16f0d73d5be334ec9b9a2af61dd2bfe7bc99a19ce31",
+      "erasure_only_shots": 10000,
+      "ambiguous": 10,
+      "erasure_only_errors": 4,
+      "errors_on_recoverable_patterns": 0,
+      "single_residual_locations_failed": 0,
+      "single_residual_first_order_sum": 0.0
+    }
+  ],
+  "transmon_control": {
+    "rows": 80,
+    "total_shots": 8000000,
+    "decoder_validation": [
+      {
+        "cell": "X_grid_transmon_0",
+        "cz_error": 0.001,
+        "row_sha256": "ef339cb5f51927fa4f390b7f069d6f30af8442758805c457f1f8c89b87107685",
+        "validation_shots": 100000,
+        "max_marginal_z": 2.4490947143099926,
+        "dem_mechanisms": 315,
+        "ambiguous_dem_mechanisms": 36,
+        "single_mechanisms_failed": 22,
+        "unambiguous_single_mechanisms_failed": 4,
+        "single_mechanism_failure_sum": 0.005243036484497322,
+        "optimal_decoder_failure_probability": 0.010272768277651872,
+        "observed_library_decoder_failure_probability": 0.01128
+      },
+      {
+        "cell": "X_grid_transmon_0",
+        "cz_error": 0.003,
+        "row_sha256": "ef339cb5f51927fa4f390b7f069d6f30af8442758805c457f1f8c89b87107685",
+        "validation_shots": 100000,
+        "max_marginal_z": 2.863519747753192,
+        "dem_mechanisms": 315,
+        "ambiguous_dem_mechanisms": 36,
+        "single_mechanisms_failed": 18,
+        "unambiguous_single_mechanisms_failed": 0,
+        "single_mechanism_failure_sum": 0.015173361711565879,
+        "optimal_decoder_failure_probability": 0.03248318189844822,
+        "observed_library_decoder_failure_probability": 0.03452
+      },
+      {
+        "cell": "X_hex_lattice_transmon_0",
+        "cz_error": 0.001,
+        "row_sha256": "ff86ab0c08c24b431488a4fb0f0792bfb5b04547ef1d5519ec17cd56b8cc4090",
+        "validation_shots": 100000,
+        "max_marginal_z": 3.0324160946081755,
+        "dem_mechanisms": 367,
+        "ambiguous_dem_mechanisms": 48,
+        "single_mechanisms_failed": 24,
+        "unambiguous_single_mechanisms_failed": 0,
+        "single_mechanism_failure_sum": 0.015042726114556725,
+        "optimal_decoder_failure_probability": 0.025367234487318983,
+        "observed_library_decoder_failure_probability": 0.0253
+      },
+      {
+        "cell": "X_hex_lattice_transmon_0",
+        "cz_error": 0.003,
+        "row_sha256": "ff86ab0c08c24b431488a4fb0f0792bfb5b04547ef1d5519ec17cd56b8cc4090",
+        "validation_shots": 100000,
+        "max_marginal_z": 1.6715103795140127,
+        "dem_mechanisms": 367,
+        "ambiguous_dem_mechanisms": 48,
+        "single_mechanisms_failed": 24,
+        "unambiguous_single_mechanisms_failed": 0,
+        "single_mechanism_failure_sum": 0.03529709054279378,
+        "optimal_decoder_failure_probability": 0.06191867412668163,
+        "observed_library_decoder_failure_probability": 0.06456
+      },
+      {
+        "cell": "Z_grid_transmon_0",
+        "cz_error": 0.001,
+        "row_sha256": "c25a6eebdcfbd263ebf64138c304699db48e113aaa68dcdace19b063083af8b4",
+        "validation_shots": 100000,
+        "max_marginal_z": 1.5536754208049994,
+        "dem_mechanisms": 300,
+        "ambiguous_dem_mechanisms": 30,
+        "single_mechanisms_failed": 19,
+        "unambiguous_single_mechanisms_failed": 4,
+        "single_mechanism_failure_sum": 0.005661621858982696,
+        "optimal_decoder_failure_probability": 0.009664813887078327,
+        "observed_library_decoder_failure_probability": 0.01084
+      },
+      {
+        "cell": "Z_grid_transmon_0",
+        "cz_error": 0.003,
+        "row_sha256": "c25a6eebdcfbd263ebf64138c304699db48e113aaa68dcdace19b063083af8b4",
+        "validation_shots": 100000,
+        "max_marginal_z": 1.674025242973163,
+        "dem_mechanisms": 300,
+        "ambiguous_dem_mechanisms": 30,
+        "single_mechanisms_failed": 15,
+        "unambiguous_single_mechanisms_failed": 0,
+        "single_mechanism_failure_sum": 0.01371893099172199,
+        "optimal_decoder_failure_probability": 0.0275369595619422,
+        "observed_library_decoder_failure_probability": 0.02848
+      },
+      {
+        "cell": "Z_hex_lattice_transmon_0",
+        "cz_error": 0.001,
+        "row_sha256": "b87236d95d2e26ea2328cd923472cdb7f4438127459dcc2e90a3347121bcd788",
+        "validation_shots": 100000,
+        "max_marginal_z": 2.0452703273980086,
+        "dem_mechanisms": 353,
+        "ambiguous_dem_mechanisms": 44,
+        "single_mechanisms_failed": 23,
+        "unambiguous_single_mechanisms_failed": 1,
+        "single_mechanism_failure_sum": 0.016198521319910363,
+        "optimal_decoder_failure_probability": 0.02522797033388992,
+        "observed_library_decoder_failure_probability": 0.0264
+      },
+      {
+        "cell": "Z_hex_lattice_transmon_0",
+        "cz_error": 0.003,
+        "row_sha256": "b87236d95d2e26ea2328cd923472cdb7f4438127459dcc2e90a3347121bcd788",
+        "validation_shots": 100000,
+        "max_marginal_z": 2.3274873673522722,
+        "dem_mechanisms": 353,
+        "ambiguous_dem_mechanisms": 44,
+        "single_mechanisms_failed": 22,
+        "unambiguous_single_mechanisms_failed": 0,
+        "single_mechanism_failure_sum": 0.03526150364283866,
+        "optimal_decoder_failure_probability": 0.06107804201796488,
+        "observed_library_decoder_failure_probability": 0.06312
+      }
+    ],
+    "source_sha256": {
+      "research/rebuttal/outer_qec/bare_memory.py": "ec68f570700023a8e19bcb433dd93a5243a5e772e8e2a5d8d77b66166ca07d5a",
+      "research/rebuttal/outer_qec/mehta_memory.py": "c2c60e6a167b5e124ca08187716d03ecd772377e6ace0b14f89905695d813c6b",
+      "research/rebuttal/wallclock/bare_report.py": "cce518dd2496beadb838d007978b0713ff982052c76ce22c742971eac948c6e2",
+      "research/rebuttal/wallclock/bare.py": "6dcdeef8b0f3f151b4a44b8e8fe071ebf577adc05101b510d7b9ab858d139d01",
+      "research/rebuttal/wallclock/sim.py": "55b48e3474b965ca03d0fcef9e2f7d03b0ae4fc38364b9b8911a23d2b19444f4",
+      "research/rebuttal/outer_qec/qec_circuits.py": "c0dfda28b1ab412c601db1e9b2b178ba84cab9d19feaa9c3728853130d5c8bf0",
+      "research/rebuttal/outer_qec/erasure_pilot.py": "5525b1a61f83fa63b987dc5df4c389a322555acb0ab2edfb7961fb55bfb281e6"
+    }
+  },
+  "input_sha256": {
+    "X_grid_greedy_0.json": "b06622e987ab2f95bb8a7faeb7df33c27729063a0686be6555844bf91c76f7d3",
+    "X_grid_greedy_100.json": "e763b5e418a69bd836c2a18dc7da02487eef2cbc9850d342bd1498007f357c82",
+    "X_grid_greedy_200.json": "f25f484cebaf2581a65b0c81741d769c7ad490cc8b4116821ad1504f7d138634",
+    "X_grid_greedy_300.json": "150d7d7f4277b331391a51244f9146312f866d7e30ba6be6f3e9a9ee534d3c86",
+    "X_grid_greedy_400.json": "a006fa48cf7a98a4c7d58c396fb20fe350a9e317cbede90bb51157fa20261f07",
+    "X_grid_greedy_500.json": "f5b40395ef400137400b9bd9a0430840163491a05d422aa9d75b02af9a149f53",
+    "X_grid_greedy_600.json": "c8a894104b834c7dc620e5191a8073cdeeba7014d85c3a95a63364402b15584c",
+    "X_grid_greedy_700.json": "806e68c7b0244fbfb3a10c01a2f82bc6959d5b9642c910b8863bc90749a2e6d9",
+    "X_grid_greedy_800.json": "efaa699f4afe509ad6a1468b6c5d69f1e30bcb2f1375d939386594774861b920",
+    "X_grid_greedy_900.json": "635b22a70aefcc1725b455f7b180af884ddea049cd45c3b6edfb42032e69c65d",
+    "X_grid_greedy_1000.json": "70a08a33332e1624c7ef00f169a4650734eca7d0b812a4f22f543a3792270489",
+    "X_grid_greedy_1100.json": "fa4374dbe103df25255a92724898ac0ef970fc820e6dee0185cde6f557c0d17c",
+    "X_grid_greedy_1200.json": "1d8e51b1e22527cd5d2b92ee1c1f9833938676606a62a071b77ac28887f3aac7",
+    "X_grid_greedy_1300.json": "26d8a964582d2085e8e8f42abe51251a8988086c27776a9879008178f6a72d87",
+    "X_grid_greedy_1400.json": "ce2c8f26030a2ed1775f2cca62d08a9fe2daabf45f52b25cc2d419e50a946143",
+    "X_grid_greedy_1500.json": "d19ece69c3c4e20126dcbc98613712d13485be4170911e4b565e196db809ee03",
+    "X_grid_greedy_1600.json": "4cbcc38547fecd8c65250ef8acac32251461d07987aab2c4d61639617c944f6e",
+    "X_grid_greedy_1700.json": "82ba3608364a49e467e116cb3e370b67fba88b07b86e9c06c9b1d20631bcad21",
+    "X_grid_greedy_1800.json": "ae754e20699e50579916de7370979f58359ca72a6d737b62dcebc21df598adfc",
+    "X_grid_greedy_1900.json": "ba38d3fccfcd4ada51b84e671199a89a14eb25681aef30552f8b5eda06e1d129",
+    "X_grid_prism_0.json": "40e748045772b5ef762a174113ba0ebd7cdb465fc4188bf418c7d4c79367f222",
+    "X_grid_prism_100.json": "beb4400517911c48f22cdd3013a14786e42bc3968b64fb571e226fcbd1ad4e96",
+    "X_grid_prism_200.json": "4edaef34cfc4bd0ab3363c09ec8be278bd22c53a3d9e2f026c80eebf683ead3f",
+    "X_grid_prism_300.json": "8a347e9e1c0633396cbe1bb8b69e42b0780215a6411fe1195c4835fdbdb80db1",
+    "X_grid_prism_400.json": "8a24b6a5b7922da54042a55d6490279a8d90051e993cad50dff6a015f8a80d9e",
+    "X_grid_prism_500.json": "f71dda6fba9b0139bef92fbb25b7beb449835ab93416b8e9b6fd827948673bb0",
+    "X_grid_prism_600.json": "a3b8dd4bd9fb054bff3f954b7f74a5c460193ecc72caa6a50823ce483ca2a277",
+    "X_grid_prism_700.json": "1eb3608fda573a7da4e9f749c6cf5c1a75012ff6873877b9f6b3e163a7fa4744",
+    "X_grid_prism_800.json": "eb391439f560b02c39c7380c21c69d18293fc6270dd5bb294ec5b8106423f8e7",
+    "X_grid_prism_900.json": "c278560ebb57fb7597c35483cdf3136be060abce61c0139c46d2f74485b645bb",
+    "X_grid_prism_1000.json": "4c32c3d3fc78a7b34da6fcc54c45b55f8890e7f02cd03522cff28aa9388d2168",
+    "X_grid_prism_1100.json": "98e8ce462fa07a0cdf5928e61cf1512c5fb692f07f288e37cb925e8c6cffaad3",
+    "X_grid_prism_1200.json": "edc67237977d0aaa54ece0cf21bfb9e863be88516adf36b7919985870a8d9c64",
+    "X_grid_prism_1300.json": "3e06b0a9857ec8725c889578cc502bd943d8f8c8bb0777744f463f2f12cd7ade",
+    "X_grid_prism_1400.json": "07a4de29b074f8e7a7aa519430d2eb8448657f25a22d109d61e6a70c46d79c7d",
+    "X_grid_prism_1500.json": "a48eb0d2af18861b5ef4c52d6807246957af9f35cf9b148e46930bea0db0a09e",
+    "X_grid_prism_1600.json": "97c60c05a7034d04adf2210d13229b3feba6c66564ab3b86d37cbb64057402af",
+    "X_grid_prism_1700.json": "6896f2e8b01b81b773d8b9a36594e8f54af805c8d45c73379448bd1740b6f407",
+    "X_grid_prism_1800.json": "29a4d7a12a95d335b8e3b0cc2bf072f4ee252f9aef13823a8001045eb8cd65d4",
+    "X_grid_prism_1900.json": "508aaae7049f5ec6ec5bf7ee552385a7ea4776cb126466b6124f0f4c60331272",
+    "X_hex_lattice_greedy_0.json": "24dde9d432076f04944fd48b12980d5cbe78fd8cb9c034e6c8a596ed945577a4",
+    "X_hex_lattice_greedy_100.json": "d270003df8d78b6b4e220be0c202fde34ac2d65f8bef552eacbbd3c358e4172d",
+    "X_hex_lattice_greedy_200.json": "88a3fbfde4160b965ffbda30b4d5f824b1b9a148670a90cb068ada899e68659d",
+    "X_hex_lattice_greedy_300.json": "facaa3921c31299fe0bd4e181660984a0e0bb90d469dcd8009cd43f18601b349",
+    "X_hex_lattice_greedy_400.json": "5af315871fc0bad748759bf348af97eb7d3791b07dc6677177b09f90beb0ff42",
+    "X_hex_lattice_greedy_500.json": "0fdd75a420c995286ebb978ab089999af9100e6f37b7d41d9d8366c14ac07672",
+    "X_hex_lattice_greedy_600.json": "b49f8f4f36587894ac25ec7def1d4d9ef2f445425310c211779ecae71642b5a4",
+    "X_hex_lattice_greedy_700.json": "fc9b3c573b51e19cb3f3635a6fe72f113593904b7c9e4a78ba87a82520c39df1",
+    "X_hex_lattice_greedy_800.json": "9fe74c6795e2df01e95215e755dd74de08651e4d54ea0a5e8a5b3300c4c994a6",
+    "X_hex_lattice_greedy_900.json": "cb845fa6776accc52fbc4648414fdc19d117a6c1badcbdaf4af91bce70a4371a",
+    "X_hex_lattice_greedy_1000.json": "1d17a00ce0c3cb573140c70c0f18ae7788036bf601b17339b5f0f5eb640d4c2e",
+    "X_hex_lattice_greedy_1100.json": "f64562d71529515008eb764afb8a87ab8b976e0b3f593e6e13fb02b6e02b16c7",
+    "X_hex_lattice_greedy_1200.json": "87f182d2fe637b95d1ad93cabbbbd4845385990e0ca5a8e6b9bb5294798da7fe",
+    "X_hex_lattice_greedy_1300.json": "e368fe24db7630bdb50acaf70487cbda0e9dd4675f83c30aedee85b06fa0a3df",
+    "X_hex_lattice_greedy_1400.json": "2a0af9dd2069f1edcd75de731458b4aaa5976e224ddaed45ee12a544671b63ec",
+    "X_hex_lattice_greedy_1500.json": "bf3cc4f6c3aef605ccbf6ba1fca58729a3d4ba36b491b40cc373ac5e927634dd",
+    "X_hex_lattice_greedy_1600.json": "a89ffdb75d97d8cf677f2ae2eb5b7f136344e0993e0d0f25394fcd86e4e4837f",
+    "X_hex_lattice_greedy_1700.json": "fb198879313496ad6cabdbca0be375532ded3ba5621b363a37d9848d2d3db5e9",
+    "X_hex_lattice_greedy_1800.json": "c7090d11c5b66c1a8bf1a9ad8ceb7edbddbf1935732701ba7345cbb33e484b8a",
+    "X_hex_lattice_greedy_1900.json": "529c59d3c6446a4f8f91443fa9075aa3a5776366fad18d281af0625d505717fa",
+    "X_hex_lattice_prism_0.json": "79bfa53a48c760a82556017f93b6c0846b14a0ae7a4fffeb2e19422d13c016ba",
+    "X_hex_lattice_prism_100.json": "4d10df92abbee66edbf55c02deaecff6085e2f4325dd72e36cfd06e396e3bdad",
+    "X_hex_lattice_prism_200.json": "1106de81521950940f2fbab6b1516980ee524a066666bbc97740680b15659ade",
+    "X_hex_lattice_prism_300.json": "32da985cea0d181e823fe0e2198d4d34aaf2f5214ae5db4ee918f87e2f433a9f",
+    "X_hex_lattice_prism_400.json": "341aca20086d10af4430635d1d042724832cca7e80040efc6cf4ce512070123e",
+    "X_hex_lattice_prism_500.json": "c1861b85bbc79bfffda44b924472f6b66fb57288a7b937bac5a0e6c11c54fd8f",
+    "X_hex_lattice_prism_600.json": "5a5d20981622c0effa47a72b4631d09539d686fa4fa3ac6fd542eb0c3dbfbf03",
+    "X_hex_lattice_prism_700.json": "1203e0e400b55a50c0b9981f8e814ba2bc7eabace7acf580c498cc65d3b779df",
+    "X_hex_lattice_prism_800.json": "37dcda90a34613a7968d38c1d194e9c6fdca94ffcfe5e00e0205c7719d07fcb2",
+    "X_hex_lattice_prism_900.json": "622f995816bd0f2f72d050e329443d956531f7df8c09f105ccffe18be1e9ae01",
+    "X_hex_lattice_prism_1000.json": "551c08290eaef255e23eb77b8c5f7d0fea9b75e1e32dfcdebb5ac13042e5f1a4",
+    "X_hex_lattice_prism_1100.json": "3d49ac04c9432aafb2fa1bf2dfc2674ac1856f6e21f3d44d6ab20324edb77155",
+    "X_hex_lattice_prism_1200.json": "c28d4f69a9b04edf9833627217f99136d3462c0b2a9c971a901686519ef2cbfc",
+    "X_hex_lattice_prism_1300.json": "418f3f51a3e83c1ecd66b8915e27c92beaaddeadda4d9bbb51ddb01818191028",
+    "X_hex_lattice_prism_1400.json": "ff1a12368704912fe0fe7370ec7bb725c3a6b5d8283c4efd2814e8fd76280fa6",
+    "X_hex_lattice_prism_1500.json": "83f6dd5463b942872ada1da2e1c8742af92b3eae93ae483e157b240ff7712a78",
+    "X_hex_lattice_prism_1600.json": "b33e7f6ee9612e39b3cc8c1b55e73c75024b08c8d1c9e14a279e2d341d49df37",
+    "X_hex_lattice_prism_1700.json": "c9702fdcb2a7f4515ee734abb75f0ece5c631542a99c3d38169e8c7c71b8bf4b",
+    "X_hex_lattice_prism_1800.json": "db9ff59ea1270e12e37e2d8716dfc03deb53c5bf7cf5c110af5bfcf6505c8602",
+    "X_hex_lattice_prism_1900.json": "167e2d308a56efbde0d8eb06db49a43eb0372117bd094ea9bb23eed89045a13e",
+    "Z_grid_greedy_0.json": "cce1432bfe43d66132fd26aedb3d155c602fe7c9bbc52b4b93baa7d62a114e78",
+    "Z_grid_greedy_100.json": "022c89697074f8b1bc6d9510b3b0520b491415d262e2109978a4bd3acf4b09bc",
+    "Z_grid_greedy_200.json": "ec6f7e254ad9ff88f8fc8033627e62923033bcfa1b29f8ca58c6728bdc03ea31",
+    "Z_grid_greedy_300.json": "7ba452b0017606868720974d4281ff5757f7b49ebaf780855fac3120b82a842a",
+    "Z_grid_greedy_400.json": "7101e71e336e2db4b3a50b62e6322292fb789bc8241c5be8c88ba16360df8335",
+    "Z_grid_greedy_500.json": "ee4830ab12c38519737cac9669bade76ec636cea84acd23f0964e2522fa5db9a",
+    "Z_grid_greedy_600.json": "320010b33366225a5e97dffb3b110ee86d7fc5bf78f1f0b426ef26768ac512cd",
+    "Z_grid_greedy_700.json": "c2c4e47f7fb4eb43c96d53ead412a096c493c1a4546aba454b630496a87ed783",
+    "Z_grid_greedy_800.json": "2955bd4ad729b4ad20800904ad713342b28aea9ea2e170fecb90515fadf50ea6",
+    "Z_grid_greedy_900.json": "3b533b71501c23cf1f5e303dd99971a4a8e8e606af40fcc5f545580f4ed5e954",
+    "Z_grid_greedy_1000.json": "d6fff676f6d2f83cd60be1bf0543de9f7e5100fabb9cd9c756bd96c3d7d09485",
+    "Z_grid_greedy_1100.json": "3e8da7d0e489c13e45e010bd6654456b2b37b0b88acf6a02ebd9f57a8253e3ec",
+    "Z_grid_greedy_1200.json": "61a8c64adca187cbd7c9a65aca369a19e33360696ad45b633b108be5db4bba8e",
+    "Z_grid_greedy_1300.json": "07e7271d7eaed4dccc0427d5cdb562257d24114bdaa866c6ba90418b8f9c3ea2",
+    "Z_grid_greedy_1400.json": "af64f879e2981eb511007b4000bd65b6971fab8a6c59798a90351e9079576649",
+    "Z_grid_greedy_1500.json": "1135f6469b24ecdc4ffd0c001779008b49d8ec296cde27694597f2cec11e2e34",
+    "Z_grid_greedy_1600.json": "97add6f669573d7fe27558a2b301f344da811f5bd980260dae45721f454c98f0",
+    "Z_grid_greedy_1700.json": "43a93b7b6ef34b0d0643a0a718cdfd4470a808d3392103e626b1d70c24811a73",
+    "Z_grid_greedy_1800.json": "03538d18d098022251e55b02fd516d6cbdfcba37fb82d1fee65c4be1e68635c4",
+    "Z_grid_greedy_1900.json": "a7123a7ab48552cc9ecda65e67f94193303a3bb6c988ec5fcfeb26a56d287c8f",
+    "Z_grid_prism_0.json": "2c09335bf8e58f58f385b0f7e9a3be7e59ee38d6fc371a33e6fdf5920843eef0",
+    "Z_grid_prism_100.json": "4745d7eb194fb6e7f17bee10cb4dbf321b3986bb0030d386529fa6b390299c86",
+    "Z_grid_prism_200.json": "7beee69337c240d24f4d8f52d6946f7fa19706d5cdd7bba5ffb51e349dd25b99",
+    "Z_grid_prism_300.json": "eb26036c57f011e321616e0dd283f36c81d4ed8d75c4b335e75763e17e7dd11f",
+    "Z_grid_prism_400.json": "b387878ea3ff80b72c63a2603a8823d410c51e01d404f693e67ee07480504849",
+    "Z_grid_prism_500.json": "ca45abe194502f6aea952f9b01e1af542728ab8419af777c51157551e16e56b4",
+    "Z_grid_prism_600.json": "15d30665e0ee254e661ed7d1797b6e8960c073d5b9ba1c5580060e0128c9a1d5",
+    "Z_grid_prism_700.json": "bf9b9c58108d5c218814c9228d1b79a7e2cdef96d0e759e715614e6451b7d556",
+    "Z_grid_prism_800.json": "0ee20c9031b246164c312b24eaf03881680197972c684c5f71df19226b2557d5",
+    "Z_grid_prism_900.json": "82024ed7b87d209ea8bcddcdddaa68d7f0f614f8737a01dd2b6bcda085600f2c",
+    "Z_grid_prism_1000.json": "595402df1a6f688727c75406bac7a1efebead9cb79540fe504fb687eb77ace98",
+    "Z_grid_prism_1100.json": "e8746b4eafc545daa79964038b718ab42e9c178e1d3575834492d6a9b8d3e932",
+    "Z_grid_prism_1200.json": "2f8ee178dd9c56259435ff3605d32193c899eb9c90b38c693d1ebbb5a77acd24",
+    "Z_grid_prism_1300.json": "99489884ba58c9752cd1013c61eeaec7cc0a1774b37a7dd317d7b0ac70b7df53",
+    "Z_grid_prism_1400.json": "7b287be8c63e9f2835ad71c10a85891bb0b1c4de0da512d5ecd8f9e683738ece",
+    "Z_grid_prism_1500.json": "7b06d36149d8da934f4c0b4370a3c0ab20247287299cdffdb0e6ed3d8ea5d082",
+    "Z_grid_prism_1600.json": "9bfed324c46f8c8805c0775c26ef2691c920a9dc67ae8216e8b1a84d2f1030a7",
+    "Z_grid_prism_1700.json": "6439ad13344c511e87c0f3361be70f4014f0cf7e032c55582f8238b6c8ba2831",
+    "Z_grid_prism_1800.json": "63affda759541cc0f11d4006b171fd6b27c061f33d133d3fec046482f67e9284",
+    "Z_grid_prism_1900.json": "729c4439d03c728aac085b28122f6ebe1b989f0ef61df5ef0eeaf3c5ee62e623",
+    "Z_hex_lattice_greedy_0.json": "c55c3b15f2e843144615ff87be248d8d2a369cdd09f30cd91a5b7893caea8d37",
+    "Z_hex_lattice_greedy_100.json": "c6f46c9f9f311577f485a3004c184ef4c5d49ba190331f3618e68c74399900ba",
+    "Z_hex_lattice_greedy_200.json": "ea051e364d2a685f7ff44b1a99266f26815dea0b6f8f3cd803203f42b2118e66",
+    "Z_hex_lattice_greedy_300.json": "0aba0da21167f42b6f85331a53decf7afa1ecd1b6fd8e1dc92020b39d320daf4",
+    "Z_hex_lattice_greedy_400.json": "17c9aee49abb977a5a39396d1c9a65ad8387bc4941aafa0dac650a106e9128ca",
+    "Z_hex_lattice_greedy_500.json": "341ba3b7dab9685fdb6ffa0f1724e1171ca85774de4818fc05607d4fbe760f16",
+    "Z_hex_lattice_greedy_600.json": "3c8abc952b719592eed9c0027c71469c2e268c78eab5505b745242ca445b8aaf",
+    "Z_hex_lattice_greedy_700.json": "8d0694f30a27e0f78eac13e7504b893d05fac5b16199e53970fb7189cf67929b",
+    "Z_hex_lattice_greedy_800.json": "2ec05563874c7a31c757a1ac79b6548eb9278202fbcaf68a1591c3dba9ae9b86",
+    "Z_hex_lattice_greedy_900.json": "de3fa6e3078e455a25eb3327ba469d4cb65610c3696b847316bb988d9e54449a",
+    "Z_hex_lattice_greedy_1000.json": "b57cc5d3b87fd1fc06b0fdf40f763481a9cff7f1abd6cab80b4584ae3284a99e",
+    "Z_hex_lattice_greedy_1100.json": "fb2b6bc1d87e83ce73ae12f4510804fe9d0f295692804b7e165d30eb541c97bf",
+    "Z_hex_lattice_greedy_1200.json": "131a5b3a3965b0b88d501ad650794754cd3e2b4e47053b256764c90ff70b396a",
+    "Z_hex_lattice_greedy_1300.json": "87b21a61f09136e04bfeaaf3729d5bc63d9f909fba408d9e76340b202e4639b0",
+    "Z_hex_lattice_greedy_1400.json": "88af31a7145c2882810e1a17fdf134b8a71b0de8a8e0316db34bdce7325d37c5",
+    "Z_hex_lattice_greedy_1500.json": "505acd83b869797b9d87b3ab23a6763a0cfd1c0416addf97b7d3b2ee7fc0a0e3",
+    "Z_hex_lattice_greedy_1600.json": "7ee87a62606be5104b389260cf23d05cab052b64d400fd98c397e39107656b8d",
+    "Z_hex_lattice_greedy_1700.json": "b58b1bcd93a43efd961fffc403703d80bd26ba51271e50bcd41fc07e64a15116",
+    "Z_hex_lattice_greedy_1800.json": "07c8e35deb23832012edd27fd06f743dc123b230cdcbbe6e5981346b2c3d0bda",
+    "Z_hex_lattice_greedy_1900.json": "7c73454aaf3031449217e1db561b3e897fc56c91516a32c6bc0908fa28e11596",
+    "Z_hex_lattice_prism_0.json": "69dddc20a4461be8d4bba16f0d73d5be334ec9b9a2af61dd2bfe7bc99a19ce31",
+    "Z_hex_lattice_prism_100.json": "8854eefe6801ea27dadd68ccd85c20bc73727ecf157c6664bc48b1641b3a9f65",
+    "Z_hex_lattice_prism_200.json": "cabb1cd40ed1d6351dffc44bbf4ff19d0bf540fee82d634862ed3a77f7d4344a",
+    "Z_hex_lattice_prism_300.json": "29943497a0021f0fa5bbc86987a3fa7c456f40a49c5a5b72cfe11f60c24fbd7b",
+    "Z_hex_lattice_prism_400.json": "f31aa2965b2c13213e116aa873d49bf142cbe4f29c94a439b98ccccb2a0d3496",
+    "Z_hex_lattice_prism_500.json": "f0f7bc82577d66ae03a86893517e3fb3f876505e513302289ba59da8a47b0fec",
+    "Z_hex_lattice_prism_600.json": "39f500469979fa97efbc4e89fa197606a70925a8908248782c2e3d54040ecf75",
+    "Z_hex_lattice_prism_700.json": "1633682c88da85b1886923eb435cb95492b5567e22ec0bd29016e3f62a589182",
+    "Z_hex_lattice_prism_800.json": "051a8809d7676a9cd2d814d2b877c599f892acc2bdecf6734c847639d20466f3",
+    "Z_hex_lattice_prism_900.json": "e56ee3748c5f427b26b1919fcd0df878c8f133e6c5cf92afaf713fe9afab3151",
+    "Z_hex_lattice_prism_1000.json": "c4c6ef4ce3a330db853e8091a12c90672f57642473dfb50cbb2194ca0ab403d0",
+    "Z_hex_lattice_prism_1100.json": "0b97830753180a2e9a58ad67fb82c0ccc2c75934193a455858b55dbff9a14d77",
+    "Z_hex_lattice_prism_1200.json": "ddb7142dec6411172a99e434306969019a96234a4695a31e9cf81e5a433a0cfc",
+    "Z_hex_lattice_prism_1300.json": "7e38defe831fe1e2c7caaa8cb193817281902ed2fd1953f2446e6a4514ddd280",
+    "Z_hex_lattice_prism_1400.json": "114503572518498ef87fc9e7f0ad43f44ce3083cf827bcb723983c0c552aea2b",
+    "Z_hex_lattice_prism_1500.json": "8b8c1156c6e8f7aa103ac03c723f751b3c0c6a7eb26014384916cc6288d01f1b",
+    "Z_hex_lattice_prism_1600.json": "c1a8f85204f4e2dedf1a7530188d446fdb9d70e9d9c1e709a388c1628add9c3d",
+    "Z_hex_lattice_prism_1700.json": "05e4acd7a6c82f75346c50fbd8cb3a2533ff36c9492e45788b6138f9861dcb60",
+    "Z_hex_lattice_prism_1800.json": "a38764b7f029b125c45a00365a279ff18201d86338e8a708355548e6a458ae77",
+    "Z_hex_lattice_prism_1900.json": "bde920236f3399e901ef1e6d0cafde29e7c04ca6e38ef7d80ce78351b5b91164",
+    "X_grid_transmon_0.json": "ef339cb5f51927fa4f390b7f069d6f30af8442758805c457f1f8c89b87107685",
+    "X_grid_transmon_100.json": "8e4ac9460f265eac30e6fbbed17552f3ea40e9f9679f6714f822c7f85a61263f",
+    "X_grid_transmon_200.json": "2da221082a8b424e23f9ea146976a89be6419eb449f601aeb5c9b73b7892cf2b",
+    "X_grid_transmon_300.json": "6a9ded63e4ca174f273d8cd0fe2f4d880553c1be06919e426ae6ec81c9793daf",
+    "X_grid_transmon_400.json": "ae9adea489011986a789de9150bc7451a91a76f2d745c785fd93b11c80ae5495",
+    "X_grid_transmon_500.json": "2a9a4c54b063c020ae36177d745dcb46bf928c6c8cbd5cfb6fc8028ee8a1ce8d",
+    "X_grid_transmon_600.json": "ebb0c02086eeb487829375eb1a772a2d56870ffa8b4868806baaf29d9b611aef",
+    "X_grid_transmon_700.json": "ffcc65ed290161d7328766f0e6d4ddb444307b967b8f6e5c1dd8ee19649eec78",
+    "X_grid_transmon_800.json": "17c5984db7c59cce08b90e2751469a9b57ac59d93d15acf8f028cdd6451144f2",
+    "X_grid_transmon_900.json": "d10786b7b8bd8fac2aa9e579c0302049a52579a3f93a835300f57442982bf185",
+    "X_grid_transmon_1000.json": "0389571263f6a1e15d88862fa0a36d52ce71f2e714e71c8ca507685c590189ef",
+    "X_grid_transmon_1100.json": "daf27f25af92388273cd50c6e09d1cda1178250e8b4afef74bbb7858b33574a0",
+    "X_grid_transmon_1200.json": "ed889b75102fb8c074907927bde2f3826a32bf2f0a7846931fe4256a3741a0e9",
+    "X_grid_transmon_1300.json": "ab9d671236a8bfeb06803f0921695f3f1a303344e5fc983899370f3a92cdd397",
+    "X_grid_transmon_1400.json": "2b5b907245e2cfc1be980b12e19c213742c917fec81efe418446db64913dd70d",
+    "X_grid_transmon_1500.json": "4779c4a175ae0a3f4732355c2883e89ae1b185692e4497a819ee093b3165d710",
+    "X_grid_transmon_1600.json": "caf6b4cecc4843dddd7c6ab65464abf0139a27b3996b6996f54b999eec89c0fb",
+    "X_grid_transmon_1700.json": "ab4efb0b34d7393503f598df465cc47f077dea3b0c1c77ae5eb0d5061b8a6af7",
+    "X_grid_transmon_1800.json": "7b70e3229d08730da2da7911c16ec69929de169801612ef10a7e6727b848057d",
+    "X_grid_transmon_1900.json": "d4cdb8a20fcf92237eecd07342256532b2a2981ae2791dc314b413ebbb2da787",
+    "X_hex_lattice_transmon_0.json": "ff86ab0c08c24b431488a4fb0f0792bfb5b04547ef1d5519ec17cd56b8cc4090",
+    "X_hex_lattice_transmon_100.json": "a4c8f1696a3bf9676d60d53eced36d0dd90f76eb45b60996660538281cde292d",
+    "X_hex_lattice_transmon_200.json": "88652b334f0e7b541f144979af376a4d5b959ffb1bf69c3cc55ff9c5105c1f6e",
+    "X_hex_lattice_transmon_300.json": "eecc0a29418e7da76c67db1f09c353a0f0a935112e87d979968479893443a9eb",
+    "X_hex_lattice_transmon_400.json": "3ad3c57f924f085e057a50c0ea4182aca0ebefe3e814a2d38c52e2ee4ae61512",
+    "X_hex_lattice_transmon_500.json": "46b6d5d254c634030bed4e89f59608ea66cc6a616e38dc36f859911e12e5c330",
+    "X_hex_lattice_transmon_600.json": "913eda940ec25139606724f27241d5bbddd41746177c17db3bc75d27db54a7a5",
+    "X_hex_lattice_transmon_700.json": "b11f73ed2b8f1c1ed7cec8663eab28b6dd1343d635d2b2844fe6ff8560e5a36b",
+    "X_hex_lattice_transmon_800.json": "5807f3524029e673639e0cdd585f9de19040e7f907388c195bac8952c3ac4a78",
+    "X_hex_lattice_transmon_900.json": "3beca40ee66aee456ad57bb3596a2fda05e922ae5d69d015959568ad4620d4e9",
+    "X_hex_lattice_transmon_1000.json": "0f6f31092ecacbca04e4d828f957fdcb5cc591c48117dd36ad36b54d5f0e2c7f",
+    "X_hex_lattice_transmon_1100.json": "97a40e7f9f299b642e1623a41f4446c23687629f3252148c579cf41ed0c748f0",
+    "X_hex_lattice_transmon_1200.json": "5fdb3789afc4479575b2128d62e59813e6cb8926e3580f9f6470c7276b293963",
+    "X_hex_lattice_transmon_1300.json": "a14fa12b5a69f23e1548a868e234e7b9f406858874b226515a040496cebad845",
+    "X_hex_lattice_transmon_1400.json": "4c0e904906d457e1f5c23fa9ec0683cf6dba507d4b2a3c88600aa98f755e1a7a",
+    "X_hex_lattice_transmon_1500.json": "8ca210fd36e98abcf04d02dc3016663758e8adaa016c7cf34ce418d7d069e1b8",
+    "X_hex_lattice_transmon_1600.json": "e82d6def3fd94b732e600a13996424d303b4c8e6809ed261d59201158dc84f8b",
+    "X_hex_lattice_transmon_1700.json": "860d0a0ab27c6fbfbbcd0d30804f586d7118b0d47f068492cda01fd72cd66ff7",
+    "X_hex_lattice_transmon_1800.json": "20b945a4659a638d261af86128399e8374a8b01bdca1a6c3813cfed38239d848",
+    "X_hex_lattice_transmon_1900.json": "81e5dd383875bb64ebd044547d3c7f21b4fe2ca817025675aed3bca45d76d862",
+    "Z_grid_transmon_0.json": "c25a6eebdcfbd263ebf64138c304699db48e113aaa68dcdace19b063083af8b4",
+    "Z_grid_transmon_100.json": "6657cba65b0a92b242926dc3e53aba217c64e12c9ef93b9e60ed1ade46d44cf9",
+    "Z_grid_transmon_200.json": "9c48677ce9c18adfb8e43aba4661f17c08f4e58c05c11e6b79bb28e8d7de1888",
+    "Z_grid_transmon_300.json": "415ec7fbad5bc96e1d4299b1e56367766b007883e648e26dfc9e0a1ecde3b4bf",
+    "Z_grid_transmon_400.json": "719af2b2564f6325cf88cac400267ab9b299902fa6d0fcada5d0cbcb7b9b87c8",
+    "Z_grid_transmon_500.json": "8499a5a8dc019001181f26476fda7644612a96401467c0297176331212bd0558",
+    "Z_grid_transmon_600.json": "fc5497875d9207cae477307f3b5ffe10d980a82eed7be9fd88d11e6d4ebd0045",
+    "Z_grid_transmon_700.json": "bcf96d292d29ae20b66495d22a588f42649efa6d6f65b283796b8726ee3cd97e",
+    "Z_grid_transmon_800.json": "3eead422a4a9da6f684cfa09a870c916dbb8d4fd0a44ca05c86686d09915b16e",
+    "Z_grid_transmon_900.json": "758e4e8bc6fd918d02d71cfbd77deb597be0bae9c4b5012e5a2d4334778a6b8f",
+    "Z_grid_transmon_1000.json": "da4833fdf0587c4a2b357b655f76e80364040ea41ac986c58c3d18cb8e3630ec",
+    "Z_grid_transmon_1100.json": "bf4f7f043995e6d5c6072c410b4466ae0d046a39b0faa242492e723aa3b587cc",
+    "Z_grid_transmon_1200.json": "67aa093d5df8af39ffaa5eeca5ca8c61372aed8a085db6c6ab709061e457acf1",
+    "Z_grid_transmon_1300.json": "b52148815d2c3ee48bbf812441a6f6e093bdf91cea1793aa7b0d610db570f0f5",
+    "Z_grid_transmon_1400.json": "d9af7f3e2eea2e87d834af49f9a8f5c31a5a9759ed5233b586730c3365829838",
+    "Z_grid_transmon_1500.json": "df172d5f76bbc4cc4f7a49f505de7863633490d9f1fec93f1f9e71cab3a8ca9c",
+    "Z_grid_transmon_1600.json": "1624cece9d3511f5f6fe9bb0525820cbd8120a36d2a064dc9a1a518d464fe7c7",
+    "Z_grid_transmon_1700.json": "00f3ff2c9703e49daa6da64b17d7b34b1a7123ed41c5b2c91dd23a0c836e072e",
+    "Z_grid_transmon_1800.json": "d68b31fe48f0a46527edc76371e65e97f9e0ea2e211eb4ff9d47fe462979768d",
+    "Z_grid_transmon_1900.json": "d635b9dc1f2a60d787594b48ba963e7994b6900764a058bb92f04a0cc3178da3",
+    "Z_hex_lattice_transmon_0.json": "b87236d95d2e26ea2328cd923472cdb7f4438127459dcc2e90a3347121bcd788",
+    "Z_hex_lattice_transmon_100.json": "05d28ed56d2645dd1d920860bd1787f1dd19f24f9591d16a709eb9ffad038d1b",
+    "Z_hex_lattice_transmon_200.json": "8f29a6928cf2ed60cbe17cac39979839de623b2d94625e66fbcc05b60fa8e95d",
+    "Z_hex_lattice_transmon_300.json": "97f30668cac0680d097bcc2538d68ee2c4e2ab52a6b45db35f5199b921355477",
+    "Z_hex_lattice_transmon_400.json": "f0b23855d97d1dc61122a31dcf81f10f0dd6efe84b681b94bf958af1ec2960cf",
+    "Z_hex_lattice_transmon_500.json": "d16458ba4b41323e3a0c8d812a7591f2571241d8d39c6498ff18c9c1cac2ea97",
+    "Z_hex_lattice_transmon_600.json": "5e9a8894397f8587f936532dc0bbc30da42334c3f6d9944944b91060cafcbc76",
+    "Z_hex_lattice_transmon_700.json": "4d32f339d760486ee436e7a58c8b876c29400f3b50de0824bae9f0d4c3fddd7f",
+    "Z_hex_lattice_transmon_800.json": "c97edfa88d2596d4b591414fbe3e72a68c8da70c917a7881c6d1cf991a16a4cf",
+    "Z_hex_lattice_transmon_900.json": "261d9d48138e209d881bd9e3591e41ef2cb41a201f039f0e90f662932e78709e",
+    "Z_hex_lattice_transmon_1000.json": "5571cd804f2429c10154371548b7e2108368162fb01a5dbab6ffdbde4bc9fdcc",
+    "Z_hex_lattice_transmon_1100.json": "0a3b951fd39ad0fa55e2b16665c230b1e05d9cbd43d865154a2381ae540d4488",
+    "Z_hex_lattice_transmon_1200.json": "c0fa49e51101861a54c49a8691f2ab609e599366af050fc6277f6ba3eb17eb96",
+    "Z_hex_lattice_transmon_1300.json": "ffaac5311e89d58099e43aa1c239482bcab65bbded47dab34289f7220405423e",
+    "Z_hex_lattice_transmon_1400.json": "6c544cd8da159b7961a44c912808033d69f6c76a4052d6857d1f663cb94d4ea0",
+    "Z_hex_lattice_transmon_1500.json": "b482dde093e399fc47b1f6e0feb9e2a64bfb7e41cbf69317a258074c991f11b8",
+    "Z_hex_lattice_transmon_1600.json": "ffb08dcc750761f85414a1305c02e616d516cc999e48892fa35e13589851be17",
+    "Z_hex_lattice_transmon_1700.json": "73a43648933a87f876a509c8f700d57c3ab0e9557d7fdf3adc1396fc625660c6",
+    "Z_hex_lattice_transmon_1800.json": "5166b6f27e2ded2c095ed604c5c24f39dc3cc7406c039ede83374d75210902c3",
+    "Z_hex_lattice_transmon_1900.json": "b28225760f3e8aa4b24ec1c87e65fdb280c92c1e68dd71fed00da2d6624537cf"
+  }
+}

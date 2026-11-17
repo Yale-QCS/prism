@@ -1,0 +1,21 @@
+name: "\U0001F680 Feature Request"
+description: Suggest a new idea for the PRISM artifact
+title: "[Feature Request]: "
+labels: ["enhancement"]
+assignees:
+  - evmckinney9
+body:
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description and Why
+      placeholder: Describe the feature and its use.
+    validations:
+      required: true
+  - type: textarea
+    id: more-details
+    attributes:
+      label: Additional Details / Helpful Resources
+      placeholder: Add examples or references.
+    validations:
+      required: false

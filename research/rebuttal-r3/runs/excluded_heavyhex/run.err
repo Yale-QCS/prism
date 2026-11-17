@@ -1,0 +1,10 @@
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement

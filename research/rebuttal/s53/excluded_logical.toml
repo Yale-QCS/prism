@@ -1,0 +1,26 @@
+# Option (b), s53/README.md §5: configs/paper/logical.toml on the nine excluded MQT workloads.
+experiment_id = "s53_excluded_logical"
+objective = "error"
+reschedule = true
+widths = [8]
+# Seeds are 100 apart: a run's random layout starts use seeds base..base+42,
+# so closer seeds share starts and are not independent.
+seeds = [
+  0, 100, 200, 300, 400,
+  500, 600, 700, 800, 900,
+  1000, 1100, 1200, 1300, 1400,
+  1500, 1600, 1700, 1800, 1900,
+]
+topologies = ["grid", "hex_lattice", "heavy_hex"]
+arms = ["logical"]
+circuits = [
+  "bmw_quark_cardinality",
+  "bv",
+  "ghz",
+  "ghz_dynamic",
+  "graphstate",
+  "qnn",
+  "vqe_real_amp",
+  "vqe_su2",
+  "wstate",
+]

@@ -1,0 +1,110 @@
+{
+  "protocol": "physical-transmon-memory-v2",
+  "basis": "Z",
+  "topo": "hex_lattice",
+  "seed": 1700,
+  "code": "steane",
+  "rounds": 3,
+  "constituents": 13,
+  "sites": 48,
+  "duration_us": 3.7599999999999927,
+  "op_counts": {
+    "sx": 234,
+    "rz": 222,
+    "cz": 162,
+    "x": 52,
+    "measure": 25,
+    "reset": 12
+  },
+  "route": {
+    "variant": "logical_preprocessing",
+    "transpiler_seed": 1717,
+    "score": 0.9224245779231307,
+    "routing_swaps_before_native_optimization": 30
+  },
+  "candidates": 80,
+  "sabre": {
+    "layout_trials": 1,
+    "max_iterations": 16,
+    "swap_trials": 40
+  },
+  "unitary_synthesis_method": "clifford",
+  "reschedule": false,
+  "selection_cz_error": 0.003,
+  "results": [
+    {
+      "cz_error": 0.001,
+      "device": {
+        "name": "transmon",
+        "t1": 136.5,
+        "dephasing": 0.007572951393176112,
+        "durations": {
+          "cz": 0.042,
+          "sx": 0.025,
+          "x": 0.025,
+          "rz": 0.0
+        },
+        "pauli_z": {},
+        "depolarizing": {
+          "cz": 0.0006665530956076762,
+          "sx": 0.00032779729745449567,
+          "x": 0.00032779729745449567
+        },
+        "loss": {},
+        "erasure": {},
+        "idle_dephasing": false
+      },
+      "shots": 50000,
+      "errors": 1005,
+      "logical_error": 0.0201,
+      "rng_seed": 1741206162707081372,
+      "dem_mechanisms": 356,
+      "ambiguous_dem_mechanisms": 48,
+      "stim": "Z_hex_lattice_transmon_1700_0.001.stim"
+    },
+    {
+      "cz_error": 0.003,
+      "device": {
+        "name": "transmon",
+        "t1": 136.5,
+        "dephasing": 0.007572951393176112,
+        "durations": {
+          "cz": 0.042,
+          "sx": 0.025,
+          "x": 0.025,
+          "rz": 0.0
+        },
+        "pauli_z": {},
+        "depolarizing": {
+          "cz": 0.0033350002168477705,
+          "sx": 0.00032779729745449567,
+          "x": 0.00032779729745449567
+        },
+        "loss": {},
+        "erasure": {},
+        "idle_dephasing": false
+      },
+      "shots": 50000,
+      "errors": 2532,
+      "logical_error": 0.05064,
+      "rng_seed": 832543492249307367,
+      "dem_mechanisms": 356,
+      "ambiguous_dem_mechanisms": 48,
+      "stim": "Z_hex_lattice_transmon_1700_0.003.stim"
+    }
+  ],
+  "noise": "Pauli twirl of shared thermal channel, shared residual depolarization",
+  "decoder": "ldpc.BpOsdDecoder/OSD_CS/serial",
+  "bp_iterations": 7,
+  "osd_order": 2,
+  "source_sha256": {
+    "research/rebuttal/outer_qec/bare_memory.py": "ec68f570700023a8e19bcb433dd93a5243a5e772e8e2a5d8d77b66166ca07d5a",
+    "research/rebuttal/outer_qec/mehta_memory.py": "c2c60e6a167b5e124ca08187716d03ecd772377e6ace0b14f89905695d813c6b",
+    "research/rebuttal/wallclock/bare_report.py": "cce518dd2496beadb838d007978b0713ff982052c76ce22c742971eac948c6e2",
+    "research/rebuttal/wallclock/bare.py": "6dcdeef8b0f3f151b4a44b8e8fe071ebf577adc05101b510d7b9ab858d139d01",
+    "research/rebuttal/wallclock/sim.py": "55b48e3474b965ca03d0fcef9e2f7d03b0ae4fc38364b9b8911a23d2b19444f4",
+    "research/rebuttal/outer_qec/qec_circuits.py": "c0dfda28b1ab412c601db1e9b2b178ba84cab9d19feaa9c3728853130d5c8bf0",
+    "research/rebuttal/outer_qec/erasure_pilot.py": "5525b1a61f83fa63b987dc5df4c389a322555acb0ab2edfb7961fb55bfb281e6"
+  },
+  "seconds": 233.63173602199822
+}

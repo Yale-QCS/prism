@@ -1,0 +1,21 @@
+# Logical-SABRE context arm on the three QASMBench circuits the mechanical rule adds, each at its own width (suite/README.md).
+experiment_id = "logical"
+objective = "error"
+reschedule = true
+widths = []
+# Seeds are 100 apart: a run's random layout starts use seeds base..base+42,
+# so closer seeds share starts and are not independent.
+seeds = [
+  0, 100, 200, 300, 400,
+  500, 600, 700, 800, 900,
+  1000, 1100, 1200, 1300, 1400,
+  1500, 1600, 1700, 1800, 1900,
+]
+topologies = ["grid", "hex_lattice", "heavy_hex"]
+arms = ["logical"]
+circuits = ["cc", "qf21", "bv"]
+
+[circuit_widths]
+cc = [12]
+qf21 = [15]
+bv = [19]

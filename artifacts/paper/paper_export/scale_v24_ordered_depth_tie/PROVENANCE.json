@@ -1,0 +1,76 @@
+{
+  "input": "artifacts/paper/raw/scale_v24_ordered_depth_tie_n8_32.jsonl",
+  "validations": [
+    "artifacts/paper/raw/scale_v24_ordered_depth_tie_n8_32_fairness_validation.json"
+  ],
+  "rows": 2240,
+  "widths": [
+    8,
+    12,
+    16,
+    20,
+    24,
+    28,
+    32
+  ],
+  "benchmarks": [
+    "dj",
+    "qaoa",
+    "draper_qft_adder",
+    "modular_adder",
+    "qft",
+    "qpeexact",
+    "qpeinexact",
+    "qftentangled",
+    "bmw_quark_copula",
+    "hhl",
+    "ae",
+    "cdkm_ripple_carry_adder",
+    "full_adder",
+    "vqe_two_local",
+    "rg_qft_multiplier",
+    "multiplier"
+  ],
+  "topologies": [
+    "grid",
+    "hex_lattice"
+  ],
+  "seeds": [
+    42,
+    7,
+    123,
+    1001,
+    2002
+  ],
+  "arms": [
+    "greedy_early_commit",
+    "prism_retained_set"
+  ],
+  "source_fingerprints": [
+    "dfc943c007635148"
+  ],
+  "config_fingerprints": [
+    "6f1340f5c1a2f770"
+  ],
+  "code_git_shas": [
+    "5db5e0d8b38fc52a53eb382a6822b5ddae95ab05"
+  ],
+  "generated_at_utc": "2026-11-14T04:20:36.468046+00:00",
+  "duration_model": {
+    "sws_ns": 500.0,
+    "beamsplitter_ns": 200.0,
+    "software_tracked_z_ns": 0.0,
+    "synthetic_preparation_ns": 0.0
+  },
+  "aggregation": "Average five seeds within each workload. Scaling reductions use the ratio of the sums of the 16 workload means; the CSV also reports the unweighted mean of workload-relative reductions. Timing points average the 16 workload means.",
+  "timing_scope": "Descriptive per-compilation wall time recorded during the same 12-worker experiment. Each compiler invocation is single-threaded.",
+  "outputs": [
+    "artifacts/paper/paper_export/scale_v24_ordered_depth_tie/scaling_summary.csv",
+    "artifacts/paper/paper_export/scale_v24_ordered_depth_tie/timing_summary.csv",
+    "artifacts/paper/paper_export/scale_v24_ordered_depth_tie/eval_scaling_combined_v24.pdf",
+    "artifacts/paper/paper_export/scale_v24_ordered_depth_tie/eval_scaling_combined_v24.png",
+    "paper/figures/eval_scaling_combined_v24.pdf"
+  ],
+  "regenerate": ".venv/bin/python scripts/paper/export_scaling_v24.py",
+  "export_script_sha256": "7522e11d8302a53ee33e23a6e180046e738b4295771dc0b1491b313864b030a9"
+}

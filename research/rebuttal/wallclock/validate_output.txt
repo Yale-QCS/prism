@@ -1,0 +1,11 @@
+1. noiseless engine vs Statevector, 3 saved circuits, 1 - |overlap|: 5.7e-15 (tolerance 1e-12) pass
+2. legacy_x25: engine vs full rail density matrix, 3 circuits, max |dP_keep|, |dF|: 8.3e-16 (tolerance 1e-06) pass
+2. mehta_x25: engine vs full rail density matrix, 3 circuits, max |dP_keep|, |dF|: 7.2e-16 (tolerance 1e-06) pass
+2. mehta_idle_x25: engine vs full rail density matrix, 3 circuits, max |dP_keep|, |dF|: 5.3e-16 (tolerance 1e-06) pass
+3. legacy: P_keep vs closed form, 20 saved circuits, relative: 1.0e-14 (tolerance 1e-12) pass
+3. mehta: P_keep vs closed form, 20 saved circuits, relative: 2.4e-14 (tolerance 1e-12) pass
+3. mehta_idle: P_keep vs closed form, 20 saved circuits, relative: 2.4e-14 (tolerance 1e-12) pass
+4. mehta: trajectories vs exact, 4 saved circuits, |dF| / SE: 1.1e+00 (tolerance 3) pass
+4. mehta: trajectories vs exact, 4 saved circuits, relative dP_keep: 1.4e-14 (tolerance 1e-12) pass
+4. mehta_idle: trajectories vs exact, 4 saved circuits, |dF| / SE: 8.9e-01 (tolerance 3) pass
+4. mehta_idle: trajectories vs exact, 4 saved circuits, relative dP_keep: 1.3e-14 (tolerance 1e-12) pass

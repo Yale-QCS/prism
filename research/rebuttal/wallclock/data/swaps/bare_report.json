@@ -1,0 +1,716 @@
+{
+  "width": 8,
+  "topologies": [
+    "grid",
+    "hex_lattice"
+  ],
+  "seeds": [
+    0,
+    100,
+    200,
+    300,
+    400
+  ],
+  "assumptions": "Ideal preparation and terminal checks on both platforms; exact state fidelity before readout. Independent local noise, uniform device parameters. One program per device. No mitigation-cost conversion.",
+  "timing": "For per-attempt overhead h (preparation, checking, readout, reset), time per retained sample in us = time_intercept_us + time_slope * h. Platforms may have different h; no measured h is asserted.",
+  "resources": "Same coupling graphs (20 grid sites, 30 hexagonal sites); a site is one cavity rail or one bare transmon. Eight program qubits except VBE's seven. Additional cavity control and readout hardware is not equated.",
+  "transmon": {
+    "cz": 0.003,
+    "sq": 0.000288,
+    "t1": 136.5,
+    "t2": 89.0,
+    "readout": 0.0
+  },
+  "cz_errors": [
+    0.001,
+    0.003
+  ],
+  "sources_sha256": {
+    "bare.py": "6dcdeef8b0f3f151b4a44b8e8fe071ebf577adc05101b510d7b9ab858d139d01",
+    "sim.py": "55b48e3474b965ca03d0fcef9e2f7d03b0ae4fc38364b9b8911a23d2b19444f4",
+    "data/bare_n8.jsonl": "bd77d2a2dcc8e8e44af9f863633629ec404e8b7ca3a523f3cc80aab9191ccd9d",
+    "data/bare_direct_n8.jsonl": "b02c5a8e09e4883ebf55a3363095588f3ddd83034809a6c88b77c90d056c5bb0",
+    "bare_report.py": "cce518dd2496beadb838d007978b0713ff982052c76ce22c742971eac948c6e2",
+    "data/swaps/v3_n8.jsonl": "63ff05f2f992219ef6e2c4945d84b6a009c1f7358acb84c7149bf19366807e42",
+    "data/swaps/v2_n8.jsonl": "3416cf66ac547ed08957d15d06269e4180c9779f908284dabb75d4dc1b06fcea",
+    "data/swaps/v2_n12.jsonl": "cd4cf2dd22ca2d8c60673ca8f2e93469684ffae0b912d843b9260e357a3b3849",
+    "data/swaps/v2_n16.jsonl": "48ec881a1d69fa9a7cc96cc867f76293744f04157769a40b8679416d31ea9159"
+  },
+  "workloads": {
+    "dj": {
+      "greedy": {
+        "fidelity": 0.9972707436700785,
+        "p_keep": 0.9186105557657511,
+        "duration_us": 2.74,
+        "time_intercept_us": 2.9830319276687316,
+        "time_slope": 1.0886077817905488
+      },
+      "prism": {
+        "fidelity": 0.9971634782320974,
+        "p_keep": 0.9179861671254994,
+        "duration_us": 2.7700000000000005,
+        "time_intercept_us": 3.0185384760665563,
+        "time_slope": 1.0893645706388326
+      },
+      "bare_0.001": {
+        "fidelity": 0.9631753462077173,
+        "p_keep": 1.0,
+        "duration_us": 0.5830000000000001,
+        "time_intercept_us": 0.5830000000000001,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.944689586647691,
+        "p_keep": 1.0,
+        "duration_us": 0.5830000000000001,
+        "time_intercept_us": 0.5830000000000001,
+        "time_slope": 1.0
+      }
+    },
+    "qaoa": {
+      "greedy": {
+        "fidelity": 0.977772388507244,
+        "p_keep": 0.7907236447033702,
+        "duration_us": 6.760000000000001,
+        "time_intercept_us": 8.556241390440688,
+        "time_slope": 1.264774685765775
+      },
+      "prism": {
+        "fidelity": 0.9777385363446058,
+        "p_keep": 0.7906022705698218,
+        "duration_us": 6.6800000000000015,
+        "time_intercept_us": 8.482181300341097,
+        "time_slope": 1.2655060268754823
+      },
+      "bare_0.001": {
+        "fidelity": 0.7299187045017741,
+        "p_keep": 1.0,
+        "duration_us": 3.7940999999999923,
+        "time_intercept_us": 3.7940999999999923,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.5860926429217723,
+        "p_keep": 1.0,
+        "duration_us": 3.7940999999999923,
+        "time_intercept_us": 3.7940999999999923,
+        "time_slope": 1.0
+      }
+    },
+    "draper_qft_adder": {
+      "greedy": {
+        "fidelity": 0.9916883878691666,
+        "p_keep": 0.7705301709119114,
+        "duration_us": 8.95,
+        "time_intercept_us": 11.657298769584814,
+        "time_slope": 1.2985499478301032
+      },
+      "prism": {
+        "fidelity": 0.9922272115872881,
+        "p_keep": 0.7905174269218889,
+        "duration_us": 7.670000000000002,
+        "time_intercept_us": 9.711507590755247,
+        "time_slope": 1.2651624254254599
+      },
+      "bare_0.001": {
+        "fidelity": 0.8475191302217583,
+        "p_keep": 1.0,
+        "duration_us": 3.0197999999999956,
+        "time_intercept_us": 3.0197999999999956,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.7471677778723066,
+        "p_keep": 1.0,
+        "duration_us": 3.0197999999999956,
+        "time_intercept_us": 3.0197999999999956,
+        "time_slope": 1.0
+      }
+    },
+    "modular_adder": {
+      "greedy": {
+        "fidelity": 0.9777656080325613,
+        "p_keep": 0.4697531237618132,
+        "duration_us": 27.509999999999984,
+        "time_intercept_us": 58.57122235605344,
+        "time_slope": 2.1289304190870846
+      },
+      "prism": {
+        "fidelity": 0.9777563483771271,
+        "p_keep": 0.46940057738859553,
+        "duration_us": 27.579999999999984,
+        "time_intercept_us": 58.77854206204719,
+        "time_slope": 2.13070412295308
+      },
+      "bare_0.001": {
+        "fidelity": 0.8537116783899054,
+        "p_keep": 1.0,
+        "duration_us": 4.049999999999992,
+        "time_intercept_us": 4.049999999999992,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.7327950198672182,
+        "p_keep": 1.0,
+        "duration_us": 4.049999999999992,
+        "time_intercept_us": 4.049999999999992,
+        "time_slope": 1.0
+      }
+    },
+    "qft": {
+      "greedy": {
+        "fidelity": 0.9811664225955783,
+        "p_keep": 0.7386729140740952,
+        "duration_us": 9.919999999999998,
+        "time_intercept_us": 13.469042554758982,
+        "time_slope": 1.3544862734452
+      },
+      "prism": {
+        "fidelity": 0.9824178767947721,
+        "p_keep": 0.7578774589300525,
+        "duration_us": 8.680000000000001,
+        "time_intercept_us": 11.483024765021154,
+        "time_slope": 1.3199912402646945
+      },
+      "bare_0.001": {
+        "fidelity": 0.788937250899729,
+        "p_keep": 1.0,
+        "duration_us": 3.559699999999993,
+        "time_intercept_us": 3.559699999999993,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.6646275870057914,
+        "p_keep": 1.0,
+        "duration_us": 3.559699999999993,
+        "time_intercept_us": 3.559699999999993,
+        "time_slope": 1.0
+      }
+    },
+    "qpeexact": {
+      "greedy": {
+        "fidelity": 0.9835303621884899,
+        "p_keep": 0.7212189926769322,
+        "duration_us": 10.859999999999998,
+        "time_intercept_us": 15.121200663361133,
+        "time_slope": 1.387569279532575
+      },
+      "prism": {
+        "fidelity": 0.984532395839121,
+        "p_keep": 0.7423411531177531,
+        "duration_us": 9.559999999999999,
+        "time_intercept_us": 12.93342974639541,
+        "time_slope": 1.3480778603212364
+      },
+      "bare_0.001": {
+        "fidelity": 0.7635885333022391,
+        "p_keep": 1.0,
+        "duration_us": 4.4315999999999915,
+        "time_intercept_us": 4.4315999999999915,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.6405047056627946,
+        "p_keep": 1.0,
+        "duration_us": 4.4315999999999915,
+        "time_intercept_us": 4.4315999999999915,
+        "time_slope": 1.0
+      }
+    },
+    "qpeinexact": {
+      "greedy": {
+        "fidelity": 0.9795498084998597,
+        "p_keep": 0.7212189926769321,
+        "duration_us": 10.859999999999998,
+        "time_intercept_us": 15.121200663361137,
+        "time_slope": 1.3875692795325747
+      },
+      "prism": {
+        "fidelity": 0.981071982422379,
+        "p_keep": 0.7423411531177532,
+        "duration_us": 9.559999999999999,
+        "time_intercept_us": 12.93342974639541,
+        "time_slope": 1.3480778603212362
+      },
+      "bare_0.001": {
+        "fidelity": 0.741922105908831,
+        "p_keep": 1.0,
+        "duration_us": 4.48249999999999,
+        "time_intercept_us": 4.48249999999999,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.6166092179360917,
+        "p_keep": 1.0,
+        "duration_us": 4.48249999999999,
+        "time_intercept_us": 4.48249999999999,
+        "time_slope": 1.0
+      }
+    },
+    "qftentangled": {
+      "greedy": {
+        "fidelity": 0.9657474250381475,
+        "p_keep": 0.6791896411730429,
+        "duration_us": 12.809999999999997,
+        "time_intercept_us": 18.915219049798374,
+        "time_slope": 1.4732844406900978
+      },
+      "prism": {
+        "fidelity": 0.9682248847492497,
+        "p_keep": 0.7035462746757168,
+        "duration_us": 11.229999999999999,
+        "time_intercept_us": 15.990182237570476,
+        "time_slope": 1.4218853399182065
+      },
+      "bare_0.001": {
+        "fidelity": 0.7374319498681137,
+        "p_keep": 1.0,
+        "duration_us": 3.714499999999993,
+        "time_intercept_us": 3.714499999999993,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.5874789567622439,
+        "p_keep": 1.0,
+        "duration_us": 3.714499999999993,
+        "time_intercept_us": 3.714499999999993,
+        "time_slope": 1.0
+      }
+    },
+    "bmw_quark_copula": {
+      "greedy": {
+        "fidelity": 0.9509041948900953,
+        "p_keep": 0.5876224619731374,
+        "duration_us": 17.379999999999992,
+        "time_intercept_us": 30.135583015371047,
+        "time_slope": 1.71076160236245
+      },
+      "prism": {
+        "fidelity": 0.9556630131120066,
+        "p_keep": 0.6241883108526363,
+        "duration_us": 14.469999999999994,
+        "time_intercept_us": 23.699018093581373,
+        "time_slope": 1.6105520674892992
+      },
+      "bare_0.001": {
+        "fidelity": 0.7732186642550494,
+        "p_keep": 1.0,
+        "duration_us": 2.677799999999997,
+        "time_intercept_us": 2.677799999999997,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.6346203889756314,
+        "p_keep": 1.0,
+        "duration_us": 2.677799999999997,
+        "time_intercept_us": 2.677799999999997,
+        "time_slope": 1.0
+      }
+    },
+    "hhl": {
+      "greedy": {
+        "fidelity": 0.9607401157297046,
+        "p_keep": 0.5575268517203017,
+        "duration_us": 19.82999999999999,
+        "time_intercept_us": 35.66156089110247,
+        "time_slope": 1.7950526758992755
+      },
+      "prism": {
+        "fidelity": 0.9638650397181261,
+        "p_keep": 0.5879188199349904,
+        "duration_us": 17.31999999999999,
+        "time_intercept_us": 29.540891841058794,
+        "time_slope": 1.7022607643169738
+      },
+      "bare_0.001": {
+        "fidelity": 0.5826495636841775,
+        "p_keep": 1.0,
+        "duration_us": 8.305400000000002,
+        "time_intercept_us": 8.305400000000002,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.4184630377998566,
+        "p_keep": 1.0,
+        "duration_us": 8.305400000000002,
+        "time_intercept_us": 8.305400000000002,
+        "time_slope": 1.0
+      }
+    },
+    "ae": {
+      "greedy": {
+        "fidelity": 0.958166237184179,
+        "p_keep": 0.5985915815443057,
+        "duration_us": 18.33999999999999,
+        "time_intercept_us": 30.674761542825753,
+        "time_slope": 1.6711366337569857
+      },
+      "prism": {
+        "fidelity": 0.9589520755332275,
+        "p_keep": 0.6093468388116273,
+        "duration_us": 17.70999999999999,
+        "time_intercept_us": 29.08627008249396,
+        "time_slope": 1.6414745100116281
+      },
+      "bare_0.001": {
+        "fidelity": 0.7170022980679357,
+        "p_keep": 1.0,
+        "duration_us": 4.507399999999992,
+        "time_intercept_us": 4.507399999999992,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.588164033745921,
+        "p_keep": 1.0,
+        "duration_us": 4.507399999999992,
+        "time_intercept_us": 4.507399999999992,
+        "time_slope": 1.0
+      }
+    },
+    "cdkm_ripple_carry_adder": {
+      "greedy": {
+        "fidelity": 0.9923827414094968,
+        "p_keep": 0.5543924592633305,
+        "duration_us": 21.839999999999986,
+        "time_intercept_us": 39.41123484193921,
+        "time_slope": 1.8039925798381957
+      },
+      "prism": {
+        "fidelity": 0.9925681900255408,
+        "p_keep": 0.5590649403870549,
+        "duration_us": 21.429999999999986,
+        "time_intercept_us": 38.34094060700185,
+        "time_slope": 1.7888234728902739
+      },
+      "bare_0.001": {
+        "fidelity": 0.8633501782179633,
+        "p_keep": 1.0,
+        "duration_us": 4.292199999999993,
+        "time_intercept_us": 4.292199999999993,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.7526151333413129,
+        "p_keep": 1.0,
+        "duration_us": 4.292199999999993,
+        "time_intercept_us": 4.292199999999993,
+        "time_slope": 1.0
+      }
+    },
+    "vbe_ripple_carry_adder": {
+      "greedy": {
+        "fidelity": 0.9956314995016309,
+        "p_keep": 0.6711682528654984,
+        "duration_us": 15.87999999999999,
+        "time_intercept_us": 23.696063517744346,
+        "time_slope": 1.4904886108600548
+      },
+      "prism": {
+        "fidelity": 0.9957279059525719,
+        "p_keep": 0.6761166155440241,
+        "duration_us": 15.509999999999994,
+        "time_intercept_us": 22.94481473064284,
+        "time_slope": 1.4791049624100518
+      },
+      "bare_0.001": {
+        "fidelity": 0.8810634547716358,
+        "p_keep": 1.0,
+        "duration_us": 2.7611999999999965,
+        "time_intercept_us": 2.7611999999999965,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.7995855092977745,
+        "p_keep": 1.0,
+        "duration_us": 2.7611999999999965,
+        "time_intercept_us": 2.7611999999999965,
+        "time_slope": 1.0
+      }
+    },
+    "vqe_two_local": {
+      "greedy": {
+        "fidelity": 0.9422463381842224,
+        "p_keep": 0.38993513738389884,
+        "duration_us": 30.939999999999976,
+        "time_intercept_us": 79.6031647881907,
+        "time_slope": 2.567769291939924
+      },
+      "prism": {
+        "fidelity": 0.9472522558930251,
+        "p_keep": 0.43045634003529615,
+        "duration_us": 26.449999999999978,
+        "time_intercept_us": 61.74361131426976,
+        "time_slope": 2.3270213072273753
+      },
+      "bare_0.001": {
+        "fidelity": 0.5615471441895192,
+        "p_keep": 1.0,
+        "duration_us": 7.615599999999999,
+        "time_intercept_us": 7.615599999999999,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.36042850632071755,
+        "p_keep": 1.0,
+        "duration_us": 7.615599999999999,
+        "time_intercept_us": 7.615599999999999,
+        "time_slope": 1.0
+      }
+    },
+    "rg_qft_multiplier": {
+      "greedy": {
+        "fidelity": 0.9895097455548608,
+        "p_keep": 0.3252115229692484,
+        "duration_us": 38.97000000000001,
+        "time_intercept_us": 123.03675956039903,
+        "time_slope": 3.1118702554749413
+      },
+      "prism": {
+        "fidelity": 0.9899773649460132,
+        "p_keep": 0.38563539415416137,
+        "duration_us": 31.46999999999998,
+        "time_intercept_us": 82.49876199064364,
+        "time_slope": 2.6048949459492263
+      },
+      "bare_0.001": {
+        "fidelity": 0.5909022752335081,
+        "p_keep": 1.0,
+        "duration_us": 11.453300000000016,
+        "time_intercept_us": 11.453300000000016,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.39061725890155413,
+        "p_keep": 1.0,
+        "duration_us": 11.453300000000016,
+        "time_intercept_us": 11.453300000000016,
+        "time_slope": 1.0
+      }
+    },
+    "multiplier": {
+      "greedy": {
+        "fidelity": 0.9901218477120152,
+        "p_keep": 0.33134827576550313,
+        "duration_us": 38.150000000000006,
+        "time_intercept_us": 117.91521059504423,
+        "time_slope": 3.051044914525066
+      },
+      "prism": {
+        "fidelity": 0.9889514876301334,
+        "p_keep": 0.3805009258581068,
+        "duration_us": 32.19999999999998,
+        "time_intercept_us": 85.62676305815258,
+        "time_slope": 2.641355705164537
+      },
+      "bare_0.001": {
+        "fidelity": 0.5910612057513338,
+        "p_keep": 1.0,
+        "duration_us": 11.453300000000016,
+        "time_intercept_us": 11.453300000000016,
+        "time_slope": 1.0
+      },
+      "bare_0.003": {
+        "fidelity": 0.39072084942234164,
+        "p_keep": 1.0,
+        "duration_us": 11.453300000000016,
+        "time_intercept_us": 11.453300000000016,
+        "time_slope": 1.0
+      }
+    }
+  },
+  "dualrail_rows": "data/swaps/v3_n8.jsonl",
+  "dualrail_device": "mehta_idle",
+  "noise_version": "ideal-spam-rb-includes-gate-relaxation-v1",
+  "residual_depolarizing": {
+    "0.001": {
+      "cz": 0.0006665530956076762,
+      "sx": 0.00032779729745449567,
+      "x": 0.00032779729745449567
+    },
+    "0.003": {
+      "cz": 0.0033350002168477705,
+      "sx": 0.00032779729745449567,
+      "x": 0.00032779729745449567
+    }
+  },
+  "prism_attempts_by_width": {
+    "8": {
+      "dj": 1.0893645706388326,
+      "qaoa": 1.265506026875482,
+      "draper_qft_adder": 1.2651624254254603,
+      "modular_adder": 2.1307041229530803,
+      "qft": 1.3199912402646945,
+      "qpeexact": 1.3480778603212367,
+      "qpeinexact": 1.3480778603212367,
+      "qftentangled": 1.4218853399182063,
+      "bmw_quark_copula": 1.6105520674892997,
+      "hhl": 1.7022607643169736,
+      "ae": 1.6414745100116286,
+      "cdkm_ripple_carry_adder": 1.7888234728902739,
+      "vbe_ripple_carry_adder": 1.479104962410052,
+      "vqe_two_local": 2.327021307227375,
+      "rg_qft_multiplier": 2.604894945949229,
+      "multiplier": 2.6413557051645378
+    },
+    "12": {
+      "dj": 1.202194486812798,
+      "qaoa": 2.078730928347752,
+      "draper_qft_adder": 1.8826787690162015,
+      "modular_adder": 5.906564315328593,
+      "qft": 2.059325286561294,
+      "qpeexact": 2.220117593905548,
+      "qpeinexact": 2.2931001916914626,
+      "qftentangled": 2.558609319704445,
+      "bmw_quark_copula": 4.610180501999421,
+      "hhl": 4.8740143229795,
+      "ae": 3.5986772677691277,
+      "cdkm_ripple_carry_adder": 4.031362652268946,
+      "vbe_ripple_carry_adder": 2.1971559333091446,
+      "vqe_two_local": 9.021365799430413,
+      "rg_qft_multiplier": 74.22350602770564,
+      "multiplier": 75.08528328685337
+    },
+    "16": {
+      "dj": 1.4181200426130027,
+      "qaoa": 3.739482127796464,
+      "draper_qft_adder": 3.7189876358238,
+      "modular_adder": 28.383563911537188,
+      "qft": 4.42870784174639,
+      "qpeexact": 5.870594015813103,
+      "qpeinexact": 5.870594015813099,
+      "qftentangled": 6.3737395689539245,
+      "bmw_quark_copula": 29.070555466020522,
+      "hhl": 23.002639976676786,
+      "ae": 11.861684438948572,
+      "cdkm_ripple_carry_adder": 12.989626020413349,
+      "vbe_ripple_carry_adder": 7.518329905114224,
+      "vqe_two_local": 114.16217341360291,
+      "rg_qft_multiplier": 579477.3595221158,
+      "multiplier": 684901.6757726959
+    }
+  },
+  "spam_yield": {
+    "source": "https://arxiv.org/html/2503.10935v2",
+    "assumptions": "Yield-only sensitivity: multiply circuit acceptance by (1-e)^n once, using each circuit's actual encoded-qubit count. A uniform total SPAM rejection e is independent across qubits and of circuit loss. The endpoints are two measured qubits, not confidence bounds. No separate preparation/readout loss is charged; no SPAM-adjusted fidelity is inferred.",
+    "rejections": [
+      0.0643,
+      0.0679
+    ],
+    "prism_attempts_by_width": {
+      "8": {
+        "0.0643": {
+          "dj": 1.8538739878915347,
+          "qaoa": 2.1536304447358825,
+          "draper_qft_adder": 2.1530457058820893,
+          "modular_adder": 3.6260192922554317,
+          "qft": 2.2463530488570584,
+          "qpeexact": 2.294150687713701,
+          "qpeinexact": 2.294150687713701,
+          "qftentangled": 2.4197558067202944,
+          "bmw_quark_copula": 2.740827693994503,
+          "hhl": 2.8968969953970207,
+          "ae": 2.7934513182423517,
+          "cdkm_ripple_carry_adder": 3.0442088853471114,
+          "vbe_ripple_carry_adder": 2.355280236104071,
+          "vqe_two_local": 3.9601106801264327,
+          "rg_qft_multiplier": 4.432994345183688,
+          "multiplier": 4.495043043029992
+        },
+        "0.0679": {
+          "dj": 1.911935261209186,
+          "qaoa": 2.22107975719926,
+          "draper_qft_adder": 2.2204767049743146,
+          "modular_adder": 3.7395821873377244,
+          "qft": 2.3167063302502373,
+          "qpeexact": 2.366000938044208,
+          "qpeinexact": 2.3660009380442077,
+          "qftentangled": 2.495539869808503,
+          "bmw_quark_copula": 2.826667371824274,
+          "hhl": 2.9876245903260186,
+          "ae": 2.8809391095093773,
+          "cdkm_ripple_carry_adder": 3.139550124979685,
+          "vbe_ripple_carry_adder": 2.4196995198657723,
+          "vqe_two_local": 4.084136946242004,
+          "rg_qft_multiplier": 4.571830802231149,
+          "multiplier": 4.635822796346883
+        }
+      },
+      "12": {
+        "0.0643": {
+          "dj": 2.6689176777744494,
+          "qaoa": 4.614862056731192,
+          "draper_qft_adder": 4.17961877492823,
+          "modular_adder": 13.112798377478303,
+          "qft": 4.57178079077917,
+          "qpeexact": 4.9287458544428215,
+          "qpeinexact": 5.090770009051227,
+          "qftentangled": 5.6802104141914915,
+          "bmw_quark_copula": 10.234776797336377,
+          "hhl": 10.820497956876315,
+          "ae": 7.989200983625603,
+          "cdkm_ripple_carry_adder": 8.949779063356903,
+          "vbe_ripple_carry_adder": 4.27065594888464,
+          "vqe_two_local": 20.027776640036194,
+          "rg_qft_multiplier": 164.77901830087905,
+          "multiplier": 166.69219673121862
+        },
+        "0.0679": {
+          "dj": 2.795275617555597,
+          "qaoa": 4.8333492984766915,
+          "draper_qft_adder": 4.377499744382083,
+          "modular_adder": 13.733614149182955,
+          "qft": 4.788228381750052,
+          "qpeexact": 5.162093693178558,
+          "qpeinexact": 5.331788761933769,
+          "qftentangled": 5.949135788487474,
+          "bmw_quark_copula": 10.719334759165207,
+          "hhl": 11.33278645517767,
+          "ae": 8.367443814116442,
+          "cdkm_ripple_carry_adder": 9.373499754841566,
+          "vbe_ripple_carry_adder": 4.438495668334975,
+          "vqe_two_local": 20.97597695947888,
+          "rg_qft_multiplier": 172.5803594381679,
+          "multiplier": 174.5841158907914
+        }
+      },
+      "16": {
+        "0.0643": {
+          "dj": 4.107020999318435,
+          "qaoa": 10.829923535342918,
+          "draper_qft_adder": 10.770569385924789,
+          "modular_adder": 82.20171037522803,
+          "qft": 12.825991847900474,
+          "qpeexact": 17.001841999913978,
+          "qpeinexact": 17.00184199991397,
+          "qftentangled": 18.459003093734687,
+          "bmw_quark_copula": 84.1913083329712,
+          "hhl": 66.61800312045531,
+          "ae": 34.352653946196895,
+          "cdkm_ripple_carry_adder": 37.61928837902287,
+          "vbe_ripple_carry_adder": 21.773854026639906,
+          "vqe_two_local": 330.62535571641376,
+          "rg_qft_multiplier": 1678225.8290361085,
+          "multiplier": 1983545.454786633
+        },
+        "0.0679": {
+          "dj": 4.368304132632119,
+          "qaoa": 11.518908655051728,
+          "draper_qft_adder": 11.455778474749483,
+          "modular_adder": 87.43127225332603,
+          "qft": 13.641964139844282,
+          "qpeexact": 18.083476242977,
+          "qpeinexact": 18.083476242976992,
+          "qftentangled": 19.63333995906321,
+          "bmw_quark_copula": 89.54744574806303,
+          "hhl": 70.85615057412113,
+          "ae": 36.53812342935575,
+          "cdkm_ripple_carry_adder": 40.01257673628557,
+          "vbe_ripple_carry_adder": 23.15907723473633,
+          "vqe_two_local": 351.6592946490056,
+          "rg_qft_multiplier": 1784992.2914163298,
+          "multiplier": 2109735.939710566
+        }
+      }
+    }
+  }
+}

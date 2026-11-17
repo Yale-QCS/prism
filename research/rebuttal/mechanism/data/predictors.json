@@ -1,0 +1,114 @@
+[
+ {
+  "circuit": "dj",
+  "A": 1.75,
+  "A_prime": 1.75,
+  "n_crz": 7,
+  "n_intervals": 8
+ },
+ {
+  "circuit": "qaoa",
+  "A": 3.5,
+  "A_prime": 3.5,
+  "n_crz": 28,
+  "n_intervals": 16
+ },
+ {
+  "circuit": "draper_qft_adder",
+  "A": 3.142857142857143,
+  "A_prime": 2.7142857142857144,
+  "n_crz": 22,
+  "n_intervals": 14
+ },
+ {
+  "circuit": "modular_adder",
+  "A": 1.59375,
+  "A_prime": 1.3125,
+  "n_crz": 51,
+  "n_intervals": 64
+ },
+ {
+  "circuit": "qft",
+  "A": 4.0,
+  "A_prime": 4.0,
+  "n_crz": 28,
+  "n_intervals": 14
+ },
+ {
+  "circuit": "qpeexact",
+  "A": 4.0,
+  "A_prime": 4.0,
+  "n_crz": 28,
+  "n_intervals": 14
+ },
+ {
+  "circuit": "qpeinexact",
+  "A": 4.0,
+  "A_prime": 4.0,
+  "n_crz": 28,
+  "n_intervals": 14
+ },
+ {
+  "circuit": "qftentangled",
+  "A": 3.1818181818181817,
+  "A_prime": 3.1818181818181817,
+  "n_crz": 35,
+  "n_intervals": 22
+ },
+ {
+  "circuit": "bmw_quark_copula",
+  "A": 1.8571428571428572,
+  "A_prime": 1.4285714285714286,
+  "n_crz": 52,
+  "n_intervals": 56
+ },
+ {
+  "circuit": "hhl",
+  "A": 4.8,
+  "A_prime": 3.75,
+  "n_crz": 48,
+  "n_intervals": 20
+ },
+ {
+  "circuit": "ae",
+  "A": 1.8421052631578947,
+  "A_prime": 1.8421052631578947,
+  "n_crz": 35,
+  "n_intervals": 38
+ },
+ {
+  "circuit": "cdkm_ripple_carry_adder",
+  "A": 1.5918367346938775,
+  "A_prime": 1.183673469387755,
+  "n_crz": 39,
+  "n_intervals": 49
+ },
+ {
+  "circuit": "vbe_ripple_carry_adder",
+  "A": 1.8888888888888888,
+  "A_prime": 1.2777777777777777,
+  "n_crz": 34,
+  "n_intervals": 36
+ },
+ {
+  "circuit": "vqe_two_local",
+  "A": 4.0,
+  "A_prime": 4.0,
+  "n_crz": 84,
+  "n_intervals": 42
+ },
+ {
+  "circuit": "rg_qft_multiplier",
+  "A": 2.329113924050633,
+  "A_prime": 1.4177215189873418,
+  "n_crz": 92,
+  "n_intervals": 79
+ },
+ {
+  "circuit": "multiplier",
+  "A": 2.3,
+  "A_prime": 1.4,
+  "n_crz": 92,
+  "n_intervals": 80
+ }
+]

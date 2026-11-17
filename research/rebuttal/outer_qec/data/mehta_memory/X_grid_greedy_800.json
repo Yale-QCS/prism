@@ -1,0 +1,4740 @@
+{
+  "protocol": "mehta-memory-v2",
+  "code": "steane",
+  "rounds": 3,
+  "basis": "X",
+  "topo": "grid",
+  "arm": "greedy",
+  "seed": 800,
+  "shots": 50000,
+  "errors": 44,
+  "logical_error": 0.00088,
+  "heralded_shots": 21489,
+  "objective": "mehta_no_fault",
+  "score": 0.6196699073228749,
+  "budget": {
+    "heuristic_config": "qiskit_sabre",
+    "tie_break": "load",
+    "layout_starts": 40,
+    "refinement_iterations": 16,
+    "prism_swap_trials": 40
+  },
+  "reschedule": false,
+  "device": {
+    "name": "mehta_idle",
+    "t1": 356.51217142473047,
+    "dephasing": 0.0002291666666666667,
+    "durations": {
+      "crz": 0.5,
+      "rswap": 0.2,
+      "swap": 0.2,
+      "x": 0.2,
+      "rx": 0.2,
+      "rz": 0.0
+    },
+    "pauli_z": {
+      "crz": [
+        0.00039,
+        0.00011
+      ],
+      "rswap": [
+        9.9e-05
+      ],
+      "swap": [
+        9.9e-05
+      ],
+      "rx": [
+        9.9e-05
+      ]
+    },
+    "depolarizing": {},
+    "loss": {},
+    "erasure": {
+      "crz": [
+        0.004,
+        0.00096
+      ],
+      "rswap": [
+        0.000724,
+        0.000724
+      ],
+      "swap": [
+        0.000724,
+        0.000724
+      ],
+      "rx": [
+        0.000724,
+        0.000724
+      ]
+    },
+    "idle_dephasing": true
+  },
+  "duration_us": 10.2,
+  "metrics": {
+    "swaps": 42,
+    "depth": 35,
+    "active_gates": 242,
+    "size": 389,
+    "duration": 10200.0,
+    "n_evaluated": 1,
+    "pair_idle_us": 46.29999999999999,
+    "pair_touches": {
+      "rswap": 78,
+      "crz_control": 72,
+      "crz_target": 72,
+      "swap": 79
+    }
+  },
+  "winning_score": [
+    0.6196699073228749,
+    242,
+    496
+  ],
+  "sites": [
+    {
+      "tick": 0,
+      "qubit": 1,
+      "kind": "idle",
+      "erasure": 0.0005608333387984466,
+      "pauli_z": 4.583123270307531e-05,
+      "time_us": 0.2,
+      "idle_us": 0.2
+    },
+    {
+      "tick": 1,
+      "qubit": 5,
+      "kind": "idle",
+      "erasure": 0.0005608333387984466,
+      "pauli_z": 4.583123270307531e-05,
+      "time_us": 0.2,
+      "idle_us": 0.2
+    },
+    {
+      "tick": 2,
+      "qubit": 10,
+      "kind": "idle",
+      "erasure": 0.0005608333387984466,
+      "pauli_z": 4.583123270307531e-05,
+      "time_us": 0.2,
+      "idle_us": 0.2
+    },
+    {
+      "tick": 3,
+      "qubit": 3,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 0.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 4,
+      "qubit": 4,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 0.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 5,
+      "qubit": 7,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 0.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 6,
+      "qubit": 8,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 0.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 7,
+      "qubit": 12,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 0.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 8,
+      "qubit": 8,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 0.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 9,
+      "qubit": 9,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 0.6000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 10,
+      "qubit": 0,
+      "kind": "idle",
+      "erasure": 0.0019615409852467274,
+      "pauli_z": 0.0001603909359115571,
+      "time_us": 0.7,
+      "idle_us": 0.7
+    },
+    {
+      "tick": 11,
+      "qubit": 4,
+      "kind": "idle",
+      "erasure": 0.0014014936508117708,
+      "pauli_z": 0.00011457020499593381,
+      "time_us": 0.7,
+      "idle_us": 0.49999999999999994
+    },
+    {
+      "tick": 12,
+      "qubit": 1,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 0.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 13,
+      "qubit": 3,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 0.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 14,
+      "qubit": 3,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 0.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 15,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 0.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 16,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 0.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 17,
+      "qubit": 7,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 0.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 18,
+      "qubit": 10,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 0.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 19,
+      "qubit": 7,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 0.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 20,
+      "qubit": 8,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 0.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 21,
+      "qubit": 12,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 0.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 22,
+      "qubit": 10,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 0.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 23,
+      "qubit": 12,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 0.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 24,
+      "qubit": 1,
+      "kind": "idle",
+      "erasure": 0.0005608333387984464,
+      "pauli_z": 4.58312327030753e-05,
+      "time_us": 0.8999999999999999,
+      "idle_us": 0.19999999999999996
+    },
+    {
+      "tick": 25,
+      "qubit": 2,
+      "kind": "idle",
+      "erasure": 0.002521274226465228,
+      "pauli_z": 0.00020620746678601796,
+      "time_us": 0.8999999999999999,
+      "idle_us": 0.8999999999999999
+    },
+    {
+      "tick": 26,
+      "qubit": 12,
+      "kind": "idle",
+      "erasure": 0.0005608333387984464,
+      "pauli_z": 4.58312327030753e-05,
+      "time_us": 0.8999999999999999,
+      "idle_us": 0.19999999999999996
+    },
+    {
+      "tick": 27,
+      "qubit": 3,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 0.8999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 28,
+      "qubit": 4,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 0.8999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 29,
+      "qubit": 7,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 0.8999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 30,
+      "qubit": 4,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 0.8999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 31,
+      "qubit": 7,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 0.8999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 32,
+      "qubit": 8,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 0.8999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 33,
+      "qubit": 5,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 0.8999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 34,
+      "qubit": 10,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 0.8999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 35,
+      "qubit": 6,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.0999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 36,
+      "qubit": 0,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 1.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 37,
+      "qubit": 3,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 1.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 38,
+      "qubit": 6,
+      "kind": "idle",
+      "erasure": 0.0008411320469075619,
+      "pauli_z": 6.874527365412668e-05,
+      "time_us": 1.4,
+      "idle_us": 0.30000000000000004
+    },
+    {
+      "tick": 39,
+      "qubit": 11,
+      "kind": "idle",
+      "erasure": 0.003919234327456653,
+      "pauli_z": 0.000320730421318469,
+      "time_us": 1.4,
+      "idle_us": 1.4
+    },
+    {
+      "tick": 40,
+      "qubit": 0,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 41,
+      "qubit": 1,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 1.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 42,
+      "qubit": 7,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 1.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 43,
+      "qubit": 2,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 1.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 44,
+      "qubit": 7,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 1.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 45,
+      "qubit": 8,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 1.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 46,
+      "qubit": 3,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 1.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 47,
+      "qubit": 12,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 1.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 48,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 1.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 49,
+      "qubit": 10,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 1.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 50,
+      "qubit": 4,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 1.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 51,
+      "qubit": 1,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.5999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 52,
+      "qubit": 2,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.5999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 53,
+      "qubit": 7,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.5999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 54,
+      "qubit": 3,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.5999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 55,
+      "qubit": 6,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 1.5999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 56,
+      "qubit": 8,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 1.5999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 57,
+      "qubit": 5,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.5999999999999999,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 58,
+      "qubit": 4,
+      "kind": "idle",
+      "erasure": 0.001121352143562985,
+      "pauli_z": 9.165826440236843e-05,
+      "time_us": 1.7999999999999998,
+      "idle_us": 0.3999999999999999
+    },
+    {
+      "tick": 59,
+      "qubit": 9,
+      "kind": "idle",
+      "erasure": 0.0033602855488218675,
+      "pauli_z": 0.00027492438886267715,
+      "time_us": 1.7999999999999998,
+      "idle_us": 1.1999999999999997
+    },
+    {
+      "tick": 60,
+      "qubit": 3,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.7999999999999998,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 61,
+      "qubit": 5,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.7999999999999998,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 62,
+      "qubit": 8,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.7999999999999998,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 63,
+      "qubit": 7,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.7999999999999998,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 64,
+      "qubit": 11,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 1.9,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 65,
+      "qubit": 12,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 1.9,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 66,
+      "qubit": 2,
+      "kind": "idle",
+      "erasure": 0.001121352143562985,
+      "pauli_z": 9.165826440236843e-05,
+      "time_us": 1.9999999999999998,
+      "idle_us": 0.3999999999999999
+    },
+    {
+      "tick": 67,
+      "qubit": 8,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.9999999999999998,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 68,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 1.9999999999999998,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 69,
+      "qubit": 3,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.9999999999999998,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 70,
+      "qubit": 4,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 1.9999999999999998,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 71,
+      "qubit": 7,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 1.9999999999999998,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 72,
+      "qubit": 1,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 2.0999999999999996,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 73,
+      "qubit": 6,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 2.0999999999999996,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 74,
+      "qubit": 11,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 2.1,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 75,
+      "qubit": 12,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 2.1,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 76,
+      "qubit": 10,
+      "kind": "idle",
+      "erasure": 0.0022414468564960965,
+      "pauli_z": 0.00018329972632987035,
+      "time_us": 2.1999999999999997,
+      "idle_us": 0.7999999999999998
+    },
+    {
+      "tick": 77,
+      "qubit": 8,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 2.1999999999999997,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 78,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 2.1999999999999997,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 79,
+      "qubit": 6,
+      "kind": "idle",
+      "erasure": 0.000560833338798447,
+      "pauli_z": 4.583123270307535e-05,
+      "time_us": 2.3,
+      "idle_us": 0.20000000000000018
+    },
+    {
+      "tick": 80,
+      "qubit": 7,
+      "kind": "idle",
+      "erasure": 0.0008411320469075619,
+      "pauli_z": 6.874527365412668e-05,
+      "time_us": 2.3,
+      "idle_us": 0.30000000000000004
+    },
+    {
+      "tick": 81,
+      "qubit": 4,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 2.3,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 82,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 2.3,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 83,
+      "qubit": 12,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 2.3000000000000003,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 84,
+      "qubit": 1,
+      "kind": "idle",
+      "erasure": 0.0011213521435629863,
+      "pauli_z": 9.165826440236854e-05,
+      "time_us": 2.5,
+      "idle_us": 0.40000000000000036
+    },
+    {
+      "tick": 85,
+      "qubit": 8,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 2.5,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 86,
+      "qubit": 9,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 2.5,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 87,
+      "qubit": 4,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 2.5,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 88,
+      "qubit": 7,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 2.5,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 89,
+      "qubit": 2,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 2.5,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 90,
+      "qubit": 4,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 2.5,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 91,
+      "qubit": 12,
+      "kind": "idle",
+      "erasure": 0.001121352143562984,
+      "pauli_z": 9.165826440236834e-05,
+      "time_us": 2.6999999999999997,
+      "idle_us": 0.39999999999999947
+    },
+    {
+      "tick": 92,
+      "qubit": 9,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 2.6999999999999997,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 93,
+      "qubit": 10,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 2.6999999999999997,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 94,
+      "qubit": 2,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 2.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 95,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 2.8,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 96,
+      "qubit": 6,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 2.8,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 97,
+      "qubit": 11,
+      "kind": "idle",
+      "erasure": 0.0022414468564960965,
+      "pauli_z": 0.00018329972632987035,
+      "time_us": 2.9,
+      "idle_us": 0.7999999999999998
+    },
+    {
+      "tick": 98,
+      "qubit": 7,
+      "kind": "idle",
+      "erasure": 0.001121352143562985,
+      "pauli_z": 9.165826440236843e-05,
+      "time_us": 2.9,
+      "idle_us": 0.3999999999999999
+    },
+    {
+      "tick": 99,
+      "qubit": 10,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 2.9,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 100,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 2.9,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 101,
+      "qubit": 12,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 2.9,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 102,
+      "qubit": 8,
+      "kind": "idle",
+      "erasure": 0.001401493650811771,
+      "pauli_z": 0.00011457020499593383,
+      "time_us": 3.0,
+      "idle_us": 0.5
+    },
+    {
+      "tick": 103,
+      "qubit": 9,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 3.0,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 104,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 3.0,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 105,
+      "qubit": 1,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 3.0,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 106,
+      "qubit": 4,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 3.0,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 107,
+      "qubit": 6,
+      "kind": "idle",
+      "erasure": 0.0011213521435629863,
+      "pauli_z": 9.165826440236854e-05,
+      "time_us": 3.2,
+      "idle_us": 0.40000000000000036
+    },
+    {
+      "tick": 108,
+      "qubit": 3,
+      "kind": "idle",
+      "erasure": 0.003360285548821869,
+      "pauli_z": 0.0002749243888626773,
+      "time_us": 3.2,
+      "idle_us": 1.2000000000000004
+    },
+    {
+      "tick": 109,
+      "qubit": 5,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 110,
+      "qubit": 8,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 3.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 111,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 112,
+      "qubit": 1,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 113,
+      "qubit": 4,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 114,
+      "qubit": 10,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 3.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 115,
+      "qubit": 12,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 3.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 116,
+      "qubit": 9,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 3.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 117,
+      "qubit": 11,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 3.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 118,
+      "qubit": 10,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 3.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 119,
+      "qubit": 7,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 3.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 120,
+      "qubit": 12,
+      "kind": "idle",
+      "erasure": 1.245649504967384e-18,
+      "pauli_z": 1.0177044392397269e-19,
+      "time_us": 3.4000000000000004,
+      "idle_us": 4.440892098500626e-16
+    },
+    {
+      "tick": 121,
+      "qubit": 8,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.4000000000000004,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 122,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 3.4000000000000004,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 123,
+      "qubit": 4,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.4000000000000004,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 124,
+      "qubit": 11,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.6,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 125,
+      "qubit": 10,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.6,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 126,
+      "qubit": 2,
+      "kind": "idle",
+      "erasure": 0.0025212742264652294,
+      "pauli_z": 0.00020620746678601807,
+      "time_us": 3.6000000000000005,
+      "idle_us": 0.9000000000000004
+    },
+    {
+      "tick": 127,
+      "qubit": 10,
+      "kind": "idle",
+      "erasure": 1.245649504967384e-18,
+      "pauli_z": 1.0177044392397269e-19,
+      "time_us": 3.6000000000000005,
+      "idle_us": 4.440892098500626e-16
+    },
+    {
+      "tick": 128,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 3.6000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 129,
+      "qubit": 12,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.6000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 130,
+      "qubit": 4,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.6000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 131,
+      "qubit": 7,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 3.6000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 132,
+      "qubit": 0,
+      "kind": "idle",
+      "erasure": 0.006430627089424588,
+      "pauli_z": 0.0005268056140890845,
+      "time_us": 3.7,
+      "idle_us": 2.3000000000000003
+    },
+    {
+      "tick": 133,
+      "qubit": 8,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 3.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 134,
+      "qubit": 6,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 3.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 135,
+      "qubit": 3,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 3.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 136,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 3.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 137,
+      "qubit": 1,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 3.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 138,
+      "qubit": 3,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 3.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 139,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 3.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 140,
+      "qubit": 7,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 3.7,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 141,
+      "qubit": 9,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.8000000000000007,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 142,
+      "qubit": 1,
+      "kind": "idle",
+      "erasure": 0.000560833338798447,
+      "pauli_z": 4.583123270307535e-05,
+      "time_us": 3.9000000000000004,
+      "idle_us": 0.20000000000000018
+    },
+    {
+      "tick": 143,
+      "qubit": 12,
+      "kind": "idle",
+      "erasure": 0.0008411320469075612,
+      "pauli_z": 6.874527365412663e-05,
+      "time_us": 3.9000000000000004,
+      "idle_us": 0.2999999999999998
+    },
+    {
+      "tick": 144,
+      "qubit": 8,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.9000000000000004,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 145,
+      "qubit": 4,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 3.9000000000000004,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 146,
+      "qubit": 7,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 3.9000000000000004,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 147,
+      "qubit": 9,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 4.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 148,
+      "qubit": 2,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 4.1000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 149,
+      "qubit": 7,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 4.1000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 150,
+      "qubit": 10,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 4.1000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 151,
+      "qubit": 4,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 4.1000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 152,
+      "qubit": 3,
+      "kind": "idle",
+      "erasure": 0.001401493650811771,
+      "pauli_z": 0.00011457020499593383,
+      "time_us": 4.2,
+      "idle_us": 0.5
+    },
+    {
+      "tick": 153,
+      "qubit": 0,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 4.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 154,
+      "qubit": 6,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 4.2,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 155,
+      "qubit": 2,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 4.300000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 156,
+      "qubit": 9,
+      "kind": "idle",
+      "erasure": 0.001121352143562984,
+      "pauli_z": 9.165826440236834e-05,
+      "time_us": 4.4,
+      "idle_us": 0.39999999999999947
+    },
+    {
+      "tick": 157,
+      "qubit": 0,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 4.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 158,
+      "qubit": 8,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 4.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 159,
+      "qubit": 12,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 4.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 160,
+      "qubit": 3,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 4.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 161,
+      "qubit": 6,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 4.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 162,
+      "qubit": 1,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 4.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 163,
+      "qubit": 7,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 4.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 164,
+      "qubit": 5,
+      "kind": "idle",
+      "erasure": 0.0025212742264652294,
+      "pauli_z": 0.00020620746678601807,
+      "time_us": 4.6000000000000005,
+      "idle_us": 0.9000000000000004
+    },
+    {
+      "tick": 165,
+      "qubit": 8,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 4.6000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 166,
+      "qubit": 6,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 4.6000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 167,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 4.6000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 168,
+      "qubit": 12,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 4.6000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 169,
+      "qubit": 1,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 4.6000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 170,
+      "qubit": 7,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 4.6000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 171,
+      "qubit": 1,
+      "kind": "idle",
+      "erasure": 0.000560833338798447,
+      "pauli_z": 4.583123270307535e-05,
+      "time_us": 4.800000000000001,
+      "idle_us": 0.20000000000000018
+    },
+    {
+      "tick": 172,
+      "qubit": 4,
+      "kind": "idle",
+      "erasure": 0.0019615409852467283,
+      "pauli_z": 0.00016039093591155716,
+      "time_us": 4.800000000000001,
+      "idle_us": 0.7000000000000002
+    },
+    {
+      "tick": 173,
+      "qubit": 6,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 4.800000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 174,
+      "qubit": 7,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 4.800000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 175,
+      "qubit": 0,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 4.9,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 176,
+      "qubit": 3,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 4.9,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 177,
+      "qubit": 2,
+      "kind": "idle",
+      "erasure": 0.0019615409852467283,
+      "pauli_z": 0.00016039093591155716,
+      "time_us": 5.000000000000001,
+      "idle_us": 0.7000000000000002
+    },
+    {
+      "tick": 178,
+      "qubit": 4,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 5.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 179,
+      "qubit": 7,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 5.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 180,
+      "qubit": 9,
+      "kind": "idle",
+      "erasure": 0.001401493650811771,
+      "pauli_z": 0.00011457020499593383,
+      "time_us": 5.1000000000000005,
+      "idle_us": 0.5
+    },
+    {
+      "tick": 181,
+      "qubit": 8,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 5.1000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 182,
+      "qubit": 3,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 5.1000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 183,
+      "qubit": 0,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 5.1000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 184,
+      "qubit": 12,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 5.1000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 185,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 5.1000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 186,
+      "qubit": 3,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 5.1000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 187,
+      "qubit": 6,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 5.1000000000000005,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 188,
+      "qubit": 10,
+      "kind": "idle",
+      "erasure": 0.0033602855488218688,
+      "pauli_z": 0.00027492438886267726,
+      "time_us": 5.300000000000001,
+      "idle_us": 1.2000000000000002
+    },
+    {
+      "tick": 189,
+      "qubit": 11,
+      "kind": "idle",
+      "erasure": 0.004757069780772052,
+      "pauli_z": 0.0003894315975714304,
+      "time_us": 5.300000000000001,
+      "idle_us": 1.7000000000000006
+    },
+    {
+      "tick": 190,
+      "qubit": 8,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 5.300000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 191,
+      "qubit": 5,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 5.300000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 192,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 5.300000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 193,
+      "qubit": 12,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 5.300000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 194,
+      "qubit": 3,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 5.300000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 195,
+      "qubit": 1,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 5.300000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 196,
+      "qubit": 6,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 5.300000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 197,
+      "qubit": 6,
+      "kind": "idle",
+      "erasure": 0.000560833338798447,
+      "pauli_z": 4.583123270307535e-05,
+      "time_us": 5.500000000000001,
+      "idle_us": 0.20000000000000018
+    },
+    {
+      "tick": 198,
+      "qubit": 3,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 5.500000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 199,
+      "qubit": 2,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 5.500000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 200,
+      "qubit": 4,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 5.500000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 201,
+      "qubit": 3,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 5.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 202,
+      "qubit": 6,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 5.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 203,
+      "qubit": 2,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 5.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 204,
+      "qubit": 7,
+      "kind": "idle",
+      "erasure": 0.0022414468564960965,
+      "pauli_z": 0.00018329972632987035,
+      "time_us": 5.800000000000001,
+      "idle_us": 0.7999999999999998
+    },
+    {
+      "tick": 205,
+      "qubit": 8,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 5.800000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 206,
+      "qubit": 9,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 5.800000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 207,
+      "qubit": 9,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 5.800000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 208,
+      "qubit": 10,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 5.800000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 209,
+      "qubit": 11,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 5.800000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 210,
+      "qubit": 12,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 5.800000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 211,
+      "qubit": 4,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 5.800000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 212,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 5.800000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 213,
+      "qubit": 3,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 5.900000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 214,
+      "qubit": 6,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 5.900000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 215,
+      "qubit": 1,
+      "kind": "idle",
+      "erasure": 0.0019615409852467283,
+      "pauli_z": 0.00016039093591155716,
+      "time_us": 6.000000000000001,
+      "idle_us": 0.7000000000000002
+    },
+    {
+      "tick": 216,
+      "qubit": 8,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 217,
+      "qubit": 11,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 218,
+      "qubit": 12,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 219,
+      "qubit": 10,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 220,
+      "qubit": 4,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 221,
+      "qubit": 7,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 6.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 222,
+      "qubit": 12,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 223,
+      "qubit": 9,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 6.300000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 224,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 6.300000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 225,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 6.300000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 226,
+      "qubit": 6,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 6.300000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 227,
+      "qubit": 11,
+      "kind": "idle",
+      "erasure": 0.0011213521435629863,
+      "pauli_z": 9.165826440236854e-05,
+      "time_us": 6.400000000000001,
+      "idle_us": 0.40000000000000036
+    },
+    {
+      "tick": 228,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 6.400000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 229,
+      "qubit": 12,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.400000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 230,
+      "qubit": 0,
+      "kind": "idle",
+      "erasure": 0.003919234327456654,
+      "pauli_z": 0.0003207304213184691,
+      "time_us": 6.500000000000001,
+      "idle_us": 1.4000000000000004
+    },
+    {
+      "tick": 231,
+      "qubit": 3,
+      "kind": "idle",
+      "erasure": 0.0016815565906947876,
+      "pauli_z": 0.0001374810954829537,
+      "time_us": 6.500000000000001,
+      "idle_us": 0.5999999999999996
+    },
+    {
+      "tick": 232,
+      "qubit": 5,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.500000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 233,
+      "qubit": 8,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 6.500000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 234,
+      "qubit": 6,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 6.500000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 235,
+      "qubit": 1,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 6.500000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 236,
+      "qubit": 4,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 6.500000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 237,
+      "qubit": 10,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 6.500000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 238,
+      "qubit": 7,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 6.500000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 239,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 6.600000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 240,
+      "qubit": 12,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.600000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 241,
+      "qubit": 10,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 6.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 242,
+      "qubit": 12,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 6.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 243,
+      "qubit": 8,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 244,
+      "qubit": 1,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 245,
+      "qubit": 4,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 246,
+      "qubit": 9,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 6.900000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 247,
+      "qubit": 11,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 6.900000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 248,
+      "qubit": 10,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.900000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 249,
+      "qubit": 4,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 6.900000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 250,
+      "qubit": 0,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 7.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 251,
+      "qubit": 6,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 7.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 252,
+      "qubit": 3,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 7.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 253,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 7.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 254,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 7.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 255,
+      "qubit": 7,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 7.000000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 256,
+      "qubit": 2,
+      "kind": "idle",
+      "erasure": 0.003919234327456654,
+      "pauli_z": 0.0003207304213184691,
+      "time_us": 7.100000000000001,
+      "idle_us": 1.4000000000000004
+    },
+    {
+      "tick": 257,
+      "qubit": 10,
+      "kind": "idle",
+      "erasure": 0.000560833338798447,
+      "pauli_z": 4.583123270307535e-05,
+      "time_us": 7.100000000000001,
+      "idle_us": 0.20000000000000018
+    },
+    {
+      "tick": 258,
+      "qubit": 9,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.100000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 259,
+      "qubit": 11,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.100000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 260,
+      "qubit": 4,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.100000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 261,
+      "qubit": 7,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 7.100000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 262,
+      "qubit": 0,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 263,
+      "qubit": 3,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 264,
+      "qubit": 6,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 7.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 265,
+      "qubit": 8,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 7.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 266,
+      "qubit": 12,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 7.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 267,
+      "qubit": 1,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 7.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 268,
+      "qubit": 3,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 7.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 269,
+      "qubit": 4,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 270,
+      "qubit": 7,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 7.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 271,
+      "qubit": 12,
+      "kind": "idle",
+      "erasure": 0.00028045599718240255,
+      "pauli_z": 2.2916141501079075e-05,
+      "time_us": 7.300000000000002,
+      "idle_us": 0.10000000000000053
+    },
+    {
+      "tick": 272,
+      "qubit": 9,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.300000000000002,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 273,
+      "qubit": 6,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.400000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 274,
+      "qubit": 8,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.400000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 275,
+      "qubit": 5,
+      "kind": "idle",
+      "erasure": 0.0014014936508117734,
+      "pauli_z": 0.00011457020499593403,
+      "time_us": 7.500000000000002,
+      "idle_us": 0.5000000000000009
+    },
+    {
+      "tick": 276,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.500000000000002,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 277,
+      "qubit": 12,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 7.500000000000002,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 278,
+      "qubit": 6,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.600000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 279,
+      "qubit": 2,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 7.600000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 280,
+      "qubit": 7,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 7.600000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 281,
+      "qubit": 10,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 7.600000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 282,
+      "qubit": 4,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 7.600000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 283,
+      "qubit": 0,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 7.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 284,
+      "qubit": 3,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 7.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 285,
+      "qubit": 1,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 7.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 286,
+      "qubit": 7,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 7.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 287,
+      "qubit": 2,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.800000000000002,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 288,
+      "qubit": 6,
+      "kind": "idle",
+      "erasure": 0.0008411320469075612,
+      "pauli_z": 6.874527365412663e-05,
+      "time_us": 7.900000000000001,
+      "idle_us": 0.2999999999999998
+    },
+    {
+      "tick": 289,
+      "qubit": 4,
+      "kind": "idle",
+      "erasure": 0.0008411320469075612,
+      "pauli_z": 6.874527365412663e-05,
+      "time_us": 7.900000000000001,
+      "idle_us": 0.2999999999999998
+    },
+    {
+      "tick": 290,
+      "qubit": 8,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 7.900000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 291,
+      "qubit": 3,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 7.900000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 292,
+      "qubit": 0,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.900000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 293,
+      "qubit": 1,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.900000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 294,
+      "qubit": 7,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 7.900000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 295,
+      "qubit": 9,
+      "kind": "idle",
+      "erasure": 0.001401493650811771,
+      "pauli_z": 0.00011457020499593383,
+      "time_us": 8.000000000000002,
+      "idle_us": 0.5
+    },
+    {
+      "tick": 296,
+      "qubit": 12,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 8.000000000000002,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 297,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 8.000000000000002,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 298,
+      "qubit": 2,
+      "kind": "idle",
+      "erasure": 0.0008411320469075612,
+      "pauli_z": 6.874527365412663e-05,
+      "time_us": 8.100000000000001,
+      "idle_us": 0.2999999999999998
+    },
+    {
+      "tick": 299,
+      "qubit": 8,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 8.100000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 300,
+      "qubit": 3,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 8.100000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 301,
+      "qubit": 6,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 8.100000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 302,
+      "qubit": 4,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 8.100000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 303,
+      "qubit": 10,
+      "kind": "idle",
+      "erasure": 0.0016815565906947876,
+      "pauli_z": 0.0001374810954829537,
+      "time_us": 8.200000000000001,
+      "idle_us": 0.5999999999999996
+    },
+    {
+      "tick": 304,
+      "qubit": 11,
+      "kind": "idle",
+      "erasure": 0.003080693550621219,
+      "pauli_z": 0.0002520197980043024,
+      "time_us": 8.200000000000001,
+      "idle_us": 1.0999999999999996
+    },
+    {
+      "tick": 305,
+      "qubit": 5,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 8.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 306,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 8.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 307,
+      "qubit": 12,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 8.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 308,
+      "qubit": 3,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 8.3,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 309,
+      "qubit": 1,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 8.400000000000002,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 310,
+      "qubit": 6,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 8.400000000000002,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 311,
+      "qubit": 8,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 8.600000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 312,
+      "qubit": 9,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 8.600000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 313,
+      "qubit": 2,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 8.600000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 314,
+      "qubit": 4,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 8.600000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 315,
+      "qubit": 6,
+      "kind": "idle",
+      "erasure": 0.0008411320469075588,
+      "pauli_z": 6.874527365412642e-05,
+      "time_us": 8.700000000000001,
+      "idle_us": 0.29999999999999893
+    },
+    {
+      "tick": 316,
+      "qubit": 9,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 8.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 317,
+      "qubit": 10,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 8.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 318,
+      "qubit": 11,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 8.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 319,
+      "qubit": 12,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 8.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 320,
+      "qubit": 4,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 8.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 321,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 8.700000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 322,
+      "qubit": 8,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 8.8,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 323,
+      "qubit": 2,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 8.8,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 324,
+      "qubit": 1,
+      "kind": "idle",
+      "erasure": 0.001401493650811766,
+      "pauli_z": 0.00011457020499593342,
+      "time_us": 8.9,
+      "idle_us": 0.4999999999999982
+    },
+    {
+      "tick": 325,
+      "qubit": 11,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 8.9,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 326,
+      "qubit": 12,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 8.9,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 327,
+      "qubit": 10,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 8.9,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 328,
+      "qubit": 4,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 8.9,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 329,
+      "qubit": 9,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 9.100000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 330,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 9.100000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 331,
+      "qubit": 5,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 9.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 332,
+      "qubit": 6,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 9.200000000000001,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 333,
+      "qubit": 0,
+      "kind": "idle",
+      "erasure": 0.003919234327456652,
+      "pauli_z": 0.0003207304213184689,
+      "time_us": 9.3,
+      "idle_us": 1.3999999999999995
+    },
+    {
+      "tick": 334,
+      "qubit": 11,
+      "kind": "idle",
+      "erasure": 0.0011213521435629863,
+      "pauli_z": 9.165826440236854e-05,
+      "time_us": 9.3,
+      "idle_us": 0.40000000000000036
+    },
+    {
+      "tick": 335,
+      "qubit": 9,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 9.3,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 336,
+      "qubit": 8,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 9.3,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 337,
+      "qubit": 6,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 9.3,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 338,
+      "qubit": 5,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 9.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 339,
+      "qubit": 1,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 9.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 340,
+      "qubit": 4,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 9.4,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 341,
+      "qubit": 8,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 9.5,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 342,
+      "qubit": 1,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 9.6,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 343,
+      "qubit": 4,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 9.6,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 344,
+      "qubit": 9,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 9.8,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 345,
+      "qubit": 11,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 9.8,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 346,
+      "qubit": 0,
+      "kind": "gate:crz",
+      "erasure": 0.00096,
+      "pauli_z": 0.00011,
+      "time_us": 9.8,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 347,
+      "qubit": 6,
+      "kind": "gate:crz",
+      "erasure": 0.004,
+      "pauli_z": 0.00039,
+      "time_us": 9.8,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 348,
+      "qubit": 9,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 10.0,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 349,
+      "qubit": 11,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 10.0,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 350,
+      "qubit": 0,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 10.0,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 351,
+      "qubit": 6,
+      "kind": "gate:swap",
+      "erasure": 0.000724,
+      "pauli_z": 0.0,
+      "time_us": 10.0,
+      "idle_us": 0.0
+    },
+    {
+      "tick": 352,
+      "qubit": 6,
+      "kind": "gate:rswap",
+      "erasure": 0.000724,
+      "pauli_z": 9.9e-05,
+      "time_us": 10.2,
+      "idle_us": 0.0
+    }
+  ],
+  "columns": [
+    [
+      13,
+      0
+    ],
+    [
+      14,
+      0
+    ],
+    [
+      11,
+      0
+    ],
+    [
+      36,
+      36
+    ],
+    [
+      32768,
+      32768
+    ],
+    [
+      72,
+      72
+    ],
+    [
+      7,
+      0
+    ],
+    [
+      18,
+      18
+    ],
+    [
+      7,
+      0
+    ],
+    [
+      8192,
+      8192
+    ],
+    [
+      4,
+      0
+    ],
+    [
+      32768,
+      32768
+    ],
+    [
+      41,
+      0
+    ],
+    [
+      36,
+      36
+    ],
+    [
+      36,
+      36
+    ],
+    [
+      42,
+      0
+    ],
+    [
+      98,
+      0
+    ],
+    [
+      0,
+      72
+    ],
+    [
+      67,
+      0
+    ],
+    [
+      0,
+      72
+    ],
+    [
+      21,
+      0
+    ],
+    [
+      18,
+      18
+    ],
+    [
+      81,
+      0
+    ],
+    [
+      18,
+      18
+    ],
+    [
+      41,
+      0
+    ],
+    [
+      8,
+      0
+    ],
+    [
+      18,
+      18
+    ],
+    [
+      36,
+      36
+    ],
+    [
+      32768,
+      32768
+    ],
+    [
+      0,
+      72
+    ],
+    [
+      32768,
+      32768
+    ],
+    [
+      0,
+      72
+    ],
+    [
+      21,
+      0
+    ],
+    [
+      98,
+      0
+    ],
+    [
+      81,
+      81
+    ],
+    [
+      16384,
+      16384
+    ],
+    [
+      32,
+      0
+    ],
+    [
+      36,
+      36
+    ],
+    [
+      16384,
+      16384
+    ],
+    [
+      2,
+      0
+    ],
+    [
+      32,
+      32
+    ],
+    [
+      97,
+      0
+    ],
+    [
+      0,
+      72
+    ],
+    [
+      64,
+      0
+    ],
+    [
+      0,
+      72
+    ],
+    [
+      49,
+      0
+    ],
+    [
+      36,
+      36
+    ],
+    [
+      18,
+      18
+    ],
+    [
+      112,
+      0
+    ],
+    [
+      32849,
+      81
+    ],
+    [
+      81,
+      32768
+    ],
+    [
+      97,
+      97
+    ],
+    [
+      64,
+      64
+    ],
+    [
+      72,
+      0
+    ],
+    [
+      36,
+      36
+    ],
+    [
+      16384,
+      16384
+    ],
+    [
+      49,
+      0
+    ],
+    [
+      112,
+      0
+    ],
+    [
+      81,
+      32768
+    ],
+    [
+      8192,
+      8192
+    ],
+    [
+      36,
+      0
+    ],
+    [
+      112,
+      112
+    ],
+    [
+      49,
+      49
+    ],
+    [
+      576,
+      576
+    ],
+    [
+      16,
+      0
+    ],
+    [
+      18,
+      18
+    ],
+    [
+      64,
+      64
+    ],
+    [
+      0,
+      49
+    ],
+    [
+      8192,
+      8192
+    ],
+    [
+      288,
+      288
+    ],
+    [
+      81,
+      32768
+    ],
+    [
+      0,
+      576
+    ],
+    [
+      16481,
+      97
+    ],
+    [
+      97,
+      16384
+    ],
+    [
+      16,
+      16
+    ],
+    [
+      18,
+      0
+    ],
+    [
+      32849,
+      81
+    ],
+    [
+      0,
+      49
+    ],
+    [
+      8192,
+      8192
+    ],
+    [
+      97,
+      16384
+    ],
+    [
+      0,
+      576
+    ],
+    [
+      32801,
+      32768
+    ],
+    [
+      32880,
+      112
+    ],
+    [
+      144,
+      144
+    ],
+    [
+      16481,
+      97
+    ],
+    [
+      8192,
+      49
+    ],
+    [
+      49,
+      8192
+    ],
+    [
+      32801,
+      32768
+    ],
+    [
+      0,
+      576
+    ],
+    [
+      32832,
+      64
+    ],
+    [
+      97,
+      32768
+    ],
+    [
+      0,
+      144
+    ],
+    [
+      8288,
+      8192
+    ],
+    [
+      41041,
+      81
+    ],
+    [
+      32832,
+      32768
+    ],
+    [
+      49264,
+      112
+    ],
+    [
+      16401,
+      16384
+    ],
+    [
+      16,
+      16
+    ],
+    [
+      0,
+      576
+    ],
+    [
+      41041,
+      40960
+    ],
+    [
+      8288,
+      8192
+    ],
+    [
+      0,
+      144
+    ],
+    [
+      8192,
+      49
+    ],
+    [
+      16,
+      8192
+    ],
+    [
+      57456,
+      112
+    ],
+    [
+      49249,
+      97
+    ],
+    [
+      32768,
+      32768
+    ],
+    [
+      16401,
+      16384
+    ],
+    [
+      288,
+      288
+    ],
+    [
+      57456,
+      57344
+    ],
+    [
+      8192,
+      49
+    ],
+    [
+      16,
+      8192
+    ],
+    [
+      49249,
+      49152
+    ],
+    [
+      32768,
+      0
+    ],
+    [
+      193,
+      40960
+    ],
+    [
+      40960,
+      144
+    ],
+    [
+      8192,
+      8192
+    ],
+    [
+      8208,
+      16
+    ],
+    [
+      41601,
+      40960
+    ],
+    [
+      40960,
+      576
+    ],
+    [
+      40960,
+      144
+    ],
+    [
+      8192,
+      49
+    ],
+    [
+      8192,
+      8192
+    ],
+    [
+      294912,
+      294912
+    ],
+    [
+      8208,
+      8192
+    ],
+    [
+      41601,
+      641
+    ],
+    [
+      64,
+      32768
+    ],
+    [
+      41601,
+      641
+    ],
+    [
+      8192,
+      8192
+    ],
+    [
+      40960,
+      144
+    ],
+    [
+      294912,
+      294912
+    ],
+    [
+      40960,
+      576
+    ],
+    [
+      32,
+      32
+    ],
+    [
+      24576,
+      49
+    ],
+    [
+      32,
+      16384
+    ],
+    [
+      57632,
+      288
+    ],
+    [
+      57680,
+      57344
+    ],
+    [
+      321,
+      49152
+    ],
+    [
+      8480,
+      288
+    ],
+    [
+      784,
+      57344
+    ],
+    [
+      16384,
+      576
+    ],
+    [
+      8192,
+      0
+    ],
+    [
+      321,
+      49152
+    ],
+    [
+      40960,
+      144
+    ],
+    [
+      24625,
+      24576
+    ],
+    [
+      294912,
+      294912
+    ],
+    [
+      16384,
+      576
+    ],
+    [
+      73728,
+      73728
+    ],
+    [
+      33280,
+      32768
+    ],
+    [
+      49152,
+      576
+    ],
+    [
+      270977,
+      641
+    ],
+    [
+      641,
+      294912
+    ],
+    [
+      8480,
+      288
+    ],
+    [
+      16416,
+      32
+    ],
+    [
+      16384,
+      16384
+    ],
+    [
+      33280,
+      512
+    ],
+    [
+      0,
+      73728
+    ],
+    [
+      16416,
+      16384
+    ],
+    [
+      161,
+      24576
+    ],
+    [
+      49152,
+      144
+    ],
+    [
+      8480,
+      288
+    ],
+    [
+      16384,
+      16384
+    ],
+    [
+      49921,
+      49152
+    ],
+    [
+      576,
+      576
+    ],
+    [
+      784,
+      57344
+    ],
+    [
+      161,
+      24576
+    ],
+    [
+      16384,
+      0
+    ],
+    [
+      0,
+      73728
+    ],
+    [
+      49152,
+      144
+    ],
+    [
+      49921,
+      769
+    ],
+    [
+      576,
+      0
+    ],
+    [
+      49921,
+      769
+    ],
+    [
+      641,
+      294912
+    ],
+    [
+      147456,
+      147456
+    ],
+    [
+      4608,
+      4608
+    ],
+    [
+      16640,
+      16384
+    ],
+    [
+      24864,
+      288
+    ],
+    [
+      33280,
+      512
+    ],
+    [
+      641,
+      294912
+    ],
+    [
+      0,
+      4608
+    ],
+    [
+      73728,
+      73728
+    ],
+    [
+      24961,
+      24576
+    ],
+    [
+      288,
+      288
+    ],
+    [
+      16640,
+      256
+    ],
+    [
+      8192,
+      144
+    ],
+    [
+      58240,
+      57344
+    ],
+    [
+      288,
+      288
+    ],
+    [
+      0,
+      147456
+    ],
+    [
+      270977,
+      641
+    ],
+    [
+      16,
+      8192
+    ],
+    [
+      24961,
+      385
+    ],
+    [
+      58240,
+      896
+    ],
+    [
+      73728,
+      73728
+    ],
+    [
+      8192,
+      144
+    ],
+    [
+      288,
+      0
+    ],
+    [
+      164609,
+      769
+    ],
+    [
+      148225,
+      147456
+    ],
+    [
+      148225,
+      147456
+    ],
+    [
+      2304,
+      2304
+    ],
+    [
+      262656,
+      512
+    ],
+    [
+      295041,
+      294912
+    ],
+    [
+      0,
+      2304
+    ],
+    [
+      148225,
+      147456
+    ],
+    [
+      262656,
+      262144
+    ],
+    [
+      0,
+      4608
+    ],
+    [
+      81920,
+      385
+    ],
+    [
+      385,
+      73728
+    ],
+    [
+      74496,
+      73728
+    ],
+    [
+      328321,
+      641
+    ],
+    [
+      8320,
+      8192
+    ],
+    [
+      0,
+      144
+    ],
+    [
+      769,
+      294912
+    ],
+    [
+      287616,
+      896
+    ],
+    [
+      0,
+      2304
+    ],
+    [
+      148225,
+      147456
+    ],
+    [
+      164609,
+      769
+    ],
+    [
+      81920,
+      385
+    ],
+    [
+      8320,
+      128
+    ],
+    [
+      144,
+      0
+    ],
+    [
+      328321,
+      327680
+    ],
+    [
+      769,
+      294912
+    ],
+    [
+      0,
+      4608
+    ],
+    [
+      1152,
+      1152
+    ],
+    [
+      128,
+      73728
+    ],
+    [
+      344960,
+      896
+    ],
+    [
+      459648,
+      896
+    ],
+    [
+      129,
+      147456
+    ],
+    [
+      8320,
+      128
+    ],
+    [
+      128,
+      73728
+    ],
+    [
+      0,
+      1152
+    ],
+    [
+      16640,
+      256
+    ],
+    [
+      0,
+      2304
+    ],
+    [
+      459648,
+      458752
+    ],
+    [
+      196608,
+      385
+    ],
+    [
+      147712,
+      147456
+    ],
+    [
+      393985,
+      769
+    ],
+    [
+      294912,
+      294912
+    ],
+    [
+      4225,
+      327680
+    ],
+    [
+      327680,
+      4608
+    ],
+    [
+      128,
+      73728
+    ],
+    [
+      0,
+      1152
+    ],
+    [
+      332801,
+      327680
+    ],
+    [
+      327680,
+      1152
+    ],
+    [
+      196993,
+      196608
+    ],
+    [
+      393985,
+      393216
+    ],
+    [
+      294912,
+      0
+    ],
+    [
+      73728,
+      73728
+    ],
+    [
+      65664,
+      128
+    ],
+    [
+      332801,
+      5121
+    ],
+    [
+      262144,
+      262144
+    ],
+    [
+      131328,
+      256
+    ],
+    [
+      147456,
+      147456
+    ],
+    [
+      458752,
+      2304
+    ],
+    [
+      461440,
+      458752
+    ],
+    [
+      6272,
+      458752
+    ],
+    [
+      131072,
+      4608
+    ],
+    [
+      512,
+      262144
+    ],
+    [
+      332801,
+      5121
+    ],
+    [
+      73728,
+      0
+    ],
+    [
+      65664,
+      65536
+    ],
+    [
+      0,
+      262144
+    ],
+    [
+      131072,
+      4608
+    ],
+    [
+      131328,
+      131072
+    ],
+    [
+      458752,
+      2304
+    ],
+    [
+      147456,
+      147456
+    ],
+    [
+      1281,
+      196608
+    ],
+    [
+      393216,
+      1152
+    ],
+    [
+      2561,
+      393216
+    ],
+    [
+      65536,
+      2304
+    ],
+    [
+      262144,
+      262144
+    ],
+    [
+      131072,
+      4608
+    ],
+    [
+      393216,
+      1152
+    ],
+    [
+      65536,
+      65536
+    ],
+    [
+      147456,
+      0
+    ],
+    [
+      1281,
+      196608
+    ],
+    [
+      6272,
+      458752
+    ],
+    [
+      0,
+      65536
+    ],
+    [
+      393216,
+      1152
+    ],
+    [
+      131072,
+      131072
+    ],
+    [
+      266240,
+      262144
+    ],
+    [
+      393216,
+      4608
+    ],
+    [
+      70657,
+      5121
+    ],
+    [
+      5121,
+      262144
+    ],
+    [
+      133120,
+      131072
+    ],
+    [
+      196608,
+      2304
+    ],
+    [
+      399361,
+      393216
+    ],
+    [
+      4608,
+      4608
+    ],
+    [
+      266240,
+      4096
+    ],
+    [
+      0,
+      131072
+    ],
+    [
+      5121,
+      262144
+    ],
+    [
+      199681,
+      196608
+    ],
+    [
+      2304,
+      2304
+    ],
+    [
+      133120,
+      2048
+    ],
+    [
+      399361,
+      6145
+    ],
+    [
+      4608,
+      0
+    ],
+    [
+      65536,
+      65536
+    ],
+    [
+      65536,
+      1152
+    ],
+    [
+      465920,
+      458752
+    ],
+    [
+      266240,
+      4096
+    ],
+    [
+      199681,
+      3073
+    ],
+    [
+      2304,
+      2304
+    ],
+    [
+      0,
+      131072
+    ],
+    [
+      5121,
+      262144
+    ],
+    [
+      70657,
+      5121
+    ],
+    [
+      128,
+      65536
+    ],
+    [
+      465920,
+      7168
+    ],
+    [
+      65536,
+      65536
+    ],
+    [
+      65536,
+      1152
+    ],
+    [
+      2304,
+      0
+    ],
+    [
+      268289,
+      6145
+    ],
+    [
+      137217,
+      131072
+    ],
+    [
+      131072,
+      3073
+    ],
+    [
+      3073,
+      65536
+    ],
+    [
+      4096,
+      4096
+    ],
+    [
+      263169,
+      262144
+    ],
+    [
+      137217,
+      131072
+    ],
+    [
+      71680,
+      65536
+    ],
+    [
+      5121,
+      5121
+    ],
+    [
+      66560,
+      65536
+    ],
+    [
+      0,
+      1152
+    ],
+    [
+      6145,
+      262144
+    ],
+    [
+      203776,
+      7168
+    ],
+    [
+      131072,
+      3073
+    ],
+    [
+      4096,
+      0
+    ],
+    [
+      268289,
+      6145
+    ],
+    [
+      66560,
+      1024
+    ],
+    [
+      1152,
+      0
+    ],
+    [
+      5121,
+      0
+    ],
+    [
+      6145,
+      262144
+    ],
+    [
+      1024,
+      65536
+    ],
+    [
+      138240,
+      7168
+    ],
+    [
+      7168,
+      7168
+    ],
+    [
+      1025,
+      131072
+    ],
+    [
+      133120,
+      2048
+    ],
+    [
+      66560,
+      1024
+    ],
+    [
+      1024,
+      65536
+    ],
+    [
+      0,
+      3073
+    ],
+    [
+      133120,
+      131072
+    ],
+    [
+      7168,
+      0
+    ],
+    [
+      6145,
+      6145
+    ],
+    [
+      262144,
+      262144
+    ],
+    [
+      3073,
+      0
+    ],
+    [
+      6145,
+      0
+    ],
+    [
+      262144,
+      0
+    ],
+    [
+      65536,
+      65536
+    ],
+    [
+      1024,
+      1024
+    ],
+    [
+      2048,
+      2048
+    ],
+    [
+      131072,
+      131072
+    ],
+    [
+      65536,
+      0
+    ],
+    [
+      1024,
+      0
+    ],
+    [
+      2048,
+      0
+    ],
+    [
+      131072,
+      131072
+    ],
+    [
+      131072,
+      0
+    ]
+  ],
+  "n_detectors": 43,
+  "decoder": "ldpc.BpOsdDecoder/OSD_CS/serial",
+  "bp_iterations": 7,
+  "versions": {
+    "qiskit": "2.4.1",
+    "qldpc": "0.4.1",
+    "stim": "1.16.0",
+    "ldpc": "2.4.1"
+  },
+  "rng_seed": 7927988995789353289,
+  "checked_fault_columns": 706,
+  "noiseless_shots": 256,
+  "commit": "db203af87ef1cb0a5687edb26ceae8fe0b77dcd4",
+  "source_sha256": {
+    "research/rebuttal/outer_qec/mehta_memory.py": "c2c60e6a167b5e124ca08187716d03ecd772377e6ace0b14f89905695d813c6b",
+    "research/rebuttal/outer_qec/erasure_pilot.py": "5525b1a61f83fa63b987dc5df4c389a322555acb0ab2edfb7961fb55bfb281e6",
+    "research/rebuttal/outer_qec/to_stim.py": "c59245dd503a72dc0c7d42b7ef88cc82e3f7e5dc8ab99afbc2b5f21420ca5647",
+    "research/rebuttal/outer_qec/route.py": "0e4420afebb0b0e2899958bbc14f534aad6708d10253dca80f915bf951f6e91a",
+    "research/rebuttal/outer_qec/qec_circuits.py": "c0dfda28b1ab412c601db1e9b2b178ba84cab9d19feaa9c3728853130d5c8bf0",
+    "research/rebuttal/wallclock/sim.py": "55b48e3474b965ca03d0fcef9e2f7d03b0ae4fc38364b9b8911a23d2b19444f4",
+    "src/marabbecca/lowering/commit.py": "eb4a64a02362550b51bbb481086f3a3f11d0fa61d574c36f740f8f7f3e257b07",
+    "src/marabbecca/lowering/commit_policies/prism_routing.py": "d2cd3b7acbbffdff4fda0498fc304fe26a8499a51fc7686a14af9856d80863bb",
+    "src/marabbecca/staged_pms.py": "9b572af52a8cf3dde4b5cec192dcd48b3b80cda2b566c8120dbcfabd981a748c"
+  },
+  "seconds": 15.33332920599787,
+  "osd0_audit": {
+    "errors": 110,
+    "logical_error": 0.0022,
+    "decoder": "ldpc.BpOsdDecoder/OSD_0",
+    "bp_iterations": 30,
+    "source_sha256": {
+      "research/rebuttal/outer_qec/mehta_memory.py": "8451fc6a1a34384697e103ba57ef82c80bae67a89643d0cc9eecd37b368f57c1",
+      "research/rebuttal/outer_qec/erasure_pilot.py": "5525b1a61f83fa63b987dc5df4c389a322555acb0ab2edfb7961fb55bfb281e6",
+      "research/rebuttal/outer_qec/to_stim.py": "c59245dd503a72dc0c7d42b7ef88cc82e3f7e5dc8ab99afbc2b5f21420ca5647",
+      "research/rebuttal/outer_qec/route.py": "0e4420afebb0b0e2899958bbc14f534aad6708d10253dca80f915bf951f6e91a",
+      "research/rebuttal/outer_qec/qec_circuits.py": "c0dfda28b1ab412c601db1e9b2b178ba84cab9d19feaa9c3728853130d5c8bf0",
+      "research/rebuttal/wallclock/sim.py": "55b48e3474b965ca03d0fcef9e2f7d03b0ae4fc38364b9b8911a23d2b19444f4",
+      "src/marabbecca/lowering/commit.py": "eb4a64a02362550b51bbb481086f3a3f11d0fa61d574c36f740f8f7f3e257b07",
+      "src/marabbecca/lowering/commit_policies/prism_routing.py": "d2cd3b7acbbffdff4fda0498fc304fe26a8499a51fc7686a14af9856d80863bb",
+      "src/marabbecca/staged_pms.py": "9b572af52a8cf3dde4b5cec192dcd48b3b80cda2b566c8120dbcfabd981a748c"
+    },
+    "settings": {
+      "bp_method": "product_sum",
+      "schedule": "parallel",
+      "osd_method": "OSD_0",
+      "osd_order": 0,
+      "max_iter": 30
+    }
+  },
+  "osd_order": 2,
+  "circuit_revalidated": true,
+  "single_residual_faults_checked": 316,
+  "single_residual_faults_failed": 0,
+  "redecode_seconds": 4.860870689000876
+}

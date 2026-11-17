@@ -1,0 +1,12 @@
+timing ok: readout X greedy seed 0, 434 sites, 25 flags
+timing ok: readout X prism seed 0, 376 sites, 25 flags
+timing ok: readout Z greedy seed 0, 422 sites, 25 flags
+timing ok: readout Z prism seed 0, 387 sites, 25 flags
+timing ok: checks X greedy seed 0, 409 sites, 39 flags
+timing ok: checks X prism seed 0, 371 sites, 39 flags
+timing ok: checks Z greedy seed 0, 430 sites, 39 flags
+timing ok: checks Z prism seed 0, 430 sites, 39 flags
+timing ok: checks3 X greedy seed 0, 526 sites, 46 flags
+timing ok: checks3 X prism seed 0, 415 sites, 46 flags
+timing ok: checks3 Z greedy seed 0, 449 sites, 39 flags
+timing ok: checks3 Z prism seed 0, 415 sites, 39 flags

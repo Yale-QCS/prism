@@ -1,0 +1,35 @@
+# SWAP-selected ablation re-run (objective = "swaps"), 2026-10-11; otherwise identical to research/ablations/excluded.toml.
+# The nine excluded zero-pressure workloads (§5.1), 20 seeds.
+experiment_id = "excluded_swaps"
+objective = "swaps"
+reschedule = true
+heuristic_config = "qiskit_sabre"
+tie_break = "load"
+layout_starts = 40
+refinement_iterations = 16
+prism_swap_trials = 40
+widths = [8]
+# Seeds are 100 apart: a run's random layout starts use seeds base..base+42,
+# so closer seeds share starts and are not independent.
+seeds = [
+  0, 100, 200, 300, 400,
+  500, 600, 700, 800, 900,
+  1000, 1100, 1200, 1300, 1400,
+  1500, 1600, 1700, 1800, 1900,
+]
+topologies = ["grid", "hex_lattice"]
+arms = [
+  "greedy",
+  "prism",
+]
+circuits = [
+  "bmw_quark_cardinality",
+  "bv",
+  "ghz",
+  "ghz_dynamic",
+  "graphstate",
+  "qnn",
+  "vqe_real_amp",
+  "vqe_su2",
+  "wstate",
+]

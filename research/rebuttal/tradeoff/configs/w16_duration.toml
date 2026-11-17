@@ -1,0 +1,36 @@
+# R3 trade-off figure at 16 logical qubits; five seeds (0–400); seed 0 rows were compiled before 561bcfb, which leaves routes unchanged at defaults.
+experiment_id = "tradeoff_w16_duration"
+objective = "duration"
+reschedule = true
+heuristic_config = "qiskit_sabre"
+tie_break = "load"
+layout_starts = 40
+refinement_iterations = 16
+prism_swap_trials = 40
+widths = [16]
+# Seeds are 100 apart: a run's random layout starts use seeds base..base+42,
+# so closer seeds share starts and are not independent.
+seeds = [0, 100, 200, 300, 400]
+topologies = ["grid", "hex_lattice", "heavy_hex"]
+arms = [
+  "greedy",
+  "prism",
+]
+circuits = [
+  "dj",
+  "qaoa",
+  "draper_qft_adder",
+  "modular_adder",
+  "qft",
+  "qpeexact",
+  "qpeinexact",
+  "qftentangled",
+  "bmw_quark_copula",
+  "hhl",
+  "ae",
+  "cdkm_ripple_carry_adder",
+  "vbe_ripple_carry_adder",
+  "vqe_two_local",
+  "rg_qft_multiplier",
+  "multiplier",
+]

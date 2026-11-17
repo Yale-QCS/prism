@@ -1,0 +1,1219 @@
+{
+  "cells": 60,
+  "samples": 60000000,
+  "checked_fault_columns": 39016,
+  "source_hashes": {
+    "qec_circuits.py": [
+      "c0dfda28b1ab412c601db1e9b2b178ba84cab9d19feaa9c3728853130d5c8bf0"
+    ],
+    "to_stim.py": [
+      "c59245dd503a72dc0c7d42b7ef88cc82e3f7e5dc8ab99afbc2b5f21420ca5647"
+    ],
+    "erasure_pilot.py": [
+      "0866f12a0d95823fb429bcc9eef14d91e3195570f7ddf2280b15146c3f3daa8a",
+      "6d8a2fd27c6a7a4a85aba451a7c8e7379f978ac44dd81f1bd2cd1fbb5b4fbc38"
+    ],
+    "check_noiseless.py": [
+      "88b456cab5a91f4e632823c166971b10feb3339f4bd58bcffb288734e4b68683"
+    ],
+    "route.py": [
+      "0e4420afebb0b0e2899958bbc14f534aad6708d10253dca80f915bf951f6e91a"
+    ]
+  },
+  "results": [
+    {
+      "basis": "X",
+      "topo": "grid",
+      "p": 0.0001,
+      "probability": {
+        "logical": 0.0,
+        "greedy": 2e-06,
+        "prism": 1e-06
+      },
+      "counts": {
+        "logical": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "greedy": [
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "prism": [
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "prism_reduction": 0.5,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.3263598326359831,
+      "mean_cost": {
+        "logical": {
+          "swaps": 43.2,
+          "active_duration": 11560.0,
+          "n_sites": 308.4,
+          "ambiguous_pairs": 97.6
+        },
+        "greedy": {
+          "swaps": 41.6,
+          "active_duration": 12380.0,
+          "n_sites": 300.4,
+          "ambiguous_pairs": 95.6
+        },
+        "prism": {
+          "swaps": 29.0,
+          "active_duration": 10240.0,
+          "n_sites": 277.0,
+          "ambiguous_pairs": 64.4
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "grid",
+      "p": 0.0003,
+      "probability": {
+        "logical": 6e-06,
+        "greedy": 7e-06,
+        "prism": 7e-06
+      },
+      "counts": {
+        "logical": [
+          2,
+          0,
+          1,
+          3,
+          0
+        ],
+        "greedy": [
+          1,
+          3,
+          2,
+          0,
+          1
+        ],
+        "prism": [
+          2,
+          1,
+          1,
+          2,
+          1
+        ]
+      },
+      "prism_reduction": 0.0,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.3263598326359831,
+      "mean_cost": {
+        "logical": {
+          "swaps": 43.2,
+          "active_duration": 11560.0,
+          "n_sites": 308.4,
+          "ambiguous_pairs": 97.6
+        },
+        "greedy": {
+          "swaps": 41.6,
+          "active_duration": 12380.0,
+          "n_sites": 300.4,
+          "ambiguous_pairs": 95.6
+        },
+        "prism": {
+          "swaps": 29.0,
+          "active_duration": 10240.0,
+          "n_sites": 277.0,
+          "ambiguous_pairs": 64.4
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "grid",
+      "p": 0.001,
+      "probability": {
+        "logical": 0.000108,
+        "greedy": 0.000116,
+        "prism": 6.2e-05
+      },
+      "counts": {
+        "logical": [
+          26,
+          18,
+          22,
+          15,
+          27
+        ],
+        "greedy": [
+          13,
+          23,
+          32,
+          22,
+          26
+        ],
+        "prism": [
+          17,
+          9,
+          11,
+          12,
+          13
+        ]
+      },
+      "prism_reduction": 0.4655172413793104,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.3263598326359831,
+      "mean_cost": {
+        "logical": {
+          "swaps": 43.2,
+          "active_duration": 11560.0,
+          "n_sites": 308.4,
+          "ambiguous_pairs": 97.6
+        },
+        "greedy": {
+          "swaps": 41.6,
+          "active_duration": 12380.0,
+          "n_sites": 300.4,
+          "ambiguous_pairs": 95.6
+        },
+        "prism": {
+          "swaps": 29.0,
+          "active_duration": 10240.0,
+          "n_sites": 277.0,
+          "ambiguous_pairs": 64.4
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "grid",
+      "p": 0.003,
+      "probability": {
+        "logical": 0.001093,
+        "greedy": 0.001029,
+        "prism": 0.000717
+      },
+      "counts": {
+        "logical": [
+          247,
+          215,
+          213,
+          234,
+          184
+        ],
+        "greedy": [
+          134,
+          225,
+          236,
+          218,
+          216
+        ],
+        "prism": [
+          125,
+          126,
+          168,
+          164,
+          134
+        ]
+      },
+      "prism_reduction": 0.3032069970845481,
+      "seed_bootstrap_95": [
+        0.19497607655502391,
+        0.39044183949504063
+      ],
+      "fixed_routes_mc_95": [
+        0.23353046024193247,
+        0.3665495316810826
+      ],
+      "exact_pair_reduction": 0.3263598326359831,
+      "mean_cost": {
+        "logical": {
+          "swaps": 43.2,
+          "active_duration": 11560.0,
+          "n_sites": 308.4,
+          "ambiguous_pairs": 97.6
+        },
+        "greedy": {
+          "swaps": 41.6,
+          "active_duration": 12380.0,
+          "n_sites": 300.4,
+          "ambiguous_pairs": 95.6
+        },
+        "prism": {
+          "swaps": 29.0,
+          "active_duration": 10240.0,
+          "n_sites": 277.0,
+          "ambiguous_pairs": 64.4
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "grid",
+      "p": 0.01,
+      "probability": {
+        "logical": 0.017274,
+        "greedy": 0.017232,
+        "prism": 0.012558
+      },
+      "counts": {
+        "logical": [
+          3202,
+          3355,
+          3643,
+          3858,
+          3216
+        ],
+        "greedy": [
+          2957,
+          3459,
+          3730,
+          3440,
+          3646
+        ],
+        "prism": [
+          2404,
+          2412,
+          2554,
+          2810,
+          2378
+        ]
+      },
+      "prism_reduction": 0.27123955431754876,
+      "seed_bootstrap_95": [
+        0.20999200147665043,
+        0.3259019274065126
+      ],
+      "fixed_routes_mc_95": [
+        0.2544120280934704,
+        0.28768729217393385
+      ],
+      "exact_pair_reduction": 0.3263598326359831,
+      "mean_cost": {
+        "logical": {
+          "swaps": 43.2,
+          "active_duration": 11560.0,
+          "n_sites": 308.4,
+          "ambiguous_pairs": 97.6
+        },
+        "greedy": {
+          "swaps": 41.6,
+          "active_duration": 12380.0,
+          "n_sites": 300.4,
+          "ambiguous_pairs": 95.6
+        },
+        "prism": {
+          "swaps": 29.0,
+          "active_duration": 10240.0,
+          "n_sites": 277.0,
+          "ambiguous_pairs": 64.4
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "hex_lattice",
+      "p": 0.0001,
+      "probability": {
+        "logical": 2e-06,
+        "greedy": 2e-06,
+        "prism": 1e-06
+      },
+      "counts": {
+        "logical": [
+          0,
+          0,
+          1,
+          0,
+          1
+        ],
+        "greedy": [
+          0,
+          0,
+          1,
+          0,
+          1
+        ],
+        "prism": [
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "prism_reduction": 0.5,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.20292504570383918,
+      "mean_cost": {
+        "logical": {
+          "swaps": 96.6,
+          "active_duration": 14980.0,
+          "n_sites": 406.0,
+          "ambiguous_pairs": 183.0
+        },
+        "greedy": {
+          "swaps": 67.0,
+          "active_duration": 13160.0,
+          "n_sites": 342.2,
+          "ambiguous_pairs": 109.4
+        },
+        "prism": {
+          "swaps": 51.8,
+          "active_duration": 10320.0,
+          "n_sites": 319.6,
+          "ambiguous_pairs": 87.2
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "hex_lattice",
+      "p": 0.0003,
+      "probability": {
+        "logical": 1.4e-05,
+        "greedy": 9e-06,
+        "prism": 7e-06
+      },
+      "counts": {
+        "logical": [
+          3,
+          3,
+          3,
+          0,
+          5
+        ],
+        "greedy": [
+          0,
+          3,
+          1,
+          2,
+          3
+        ],
+        "prism": [
+          2,
+          0,
+          3,
+          2,
+          0
+        ]
+      },
+      "prism_reduction": 0.2222222222222222,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.20292504570383918,
+      "mean_cost": {
+        "logical": {
+          "swaps": 96.6,
+          "active_duration": 14980.0,
+          "n_sites": 406.0,
+          "ambiguous_pairs": 183.0
+        },
+        "greedy": {
+          "swaps": 67.0,
+          "active_duration": 13160.0,
+          "n_sites": 342.2,
+          "ambiguous_pairs": 109.4
+        },
+        "prism": {
+          "swaps": 51.8,
+          "active_duration": 10320.0,
+          "n_sites": 319.6,
+          "ambiguous_pairs": 87.2
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "hex_lattice",
+      "p": 0.001,
+      "probability": {
+        "logical": 0.000199,
+        "greedy": 0.000135,
+        "prism": 0.000101
+      },
+      "counts": {
+        "logical": [
+          28,
+          23,
+          33,
+          53,
+          62
+        ],
+        "greedy": [
+          19,
+          30,
+          26,
+          28,
+          32
+        ],
+        "prism": [
+          32,
+          19,
+          16,
+          17,
+          17
+        ]
+      },
+      "prism_reduction": 0.2518518518518519,
+      "seed_bootstrap_95": [
+        -0.1504424778761062,
+        0.4342105263157895
+      ],
+      "fixed_routes_mc_95": [
+        0.03179332425737125,
+        0.42189445125630265
+      ],
+      "exact_pair_reduction": 0.20292504570383918,
+      "mean_cost": {
+        "logical": {
+          "swaps": 96.6,
+          "active_duration": 14980.0,
+          "n_sites": 406.0,
+          "ambiguous_pairs": 183.0
+        },
+        "greedy": {
+          "swaps": 67.0,
+          "active_duration": 13160.0,
+          "n_sites": 342.2,
+          "ambiguous_pairs": 109.4
+        },
+        "prism": {
+          "swaps": 51.8,
+          "active_duration": 10320.0,
+          "n_sites": 319.6,
+          "ambiguous_pairs": 87.2
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "hex_lattice",
+      "p": 0.003,
+      "probability": {
+        "logical": 0.001964,
+        "greedy": 0.001305,
+        "prism": 0.001037
+      },
+      "counts": {
+        "logical": [
+          305,
+          318,
+          373,
+          480,
+          488
+        ],
+        "greedy": [
+          217,
+          230,
+          272,
+          248,
+          338
+        ],
+        "prism": [
+          275,
+          233,
+          160,
+          223,
+          146
+        ]
+      },
+      "prism_reduction": 0.20536398467432948,
+      "seed_bootstrap_95": [
+        -0.08493870402802095,
+        0.45184696569920846
+      ],
+      "fixed_routes_mc_95": [
+        0.13789921962446916,
+        0.26754921091986317
+      ],
+      "exact_pair_reduction": 0.20292504570383918,
+      "mean_cost": {
+        "logical": {
+          "swaps": 96.6,
+          "active_duration": 14980.0,
+          "n_sites": 406.0,
+          "ambiguous_pairs": 183.0
+        },
+        "greedy": {
+          "swaps": 67.0,
+          "active_duration": 13160.0,
+          "n_sites": 342.2,
+          "ambiguous_pairs": 109.4
+        },
+        "prism": {
+          "swaps": 51.8,
+          "active_duration": 10320.0,
+          "n_sites": 319.6,
+          "ambiguous_pairs": 87.2
+        }
+      }
+    },
+    {
+      "basis": "X",
+      "topo": "hex_lattice",
+      "p": 0.01,
+      "probability": {
+        "logical": 0.033825,
+        "greedy": 0.022262,
+        "prism": 0.017332
+      },
+      "counts": {
+        "logical": [
+          5008,
+          5442,
+          6884,
+          8377,
+          8114
+        ],
+        "greedy": [
+          4095,
+          3941,
+          4985,
+          3854,
+          5387
+        ],
+        "prism": [
+          4324,
+          3547,
+          2940,
+          3508,
+          3013
+        ]
+      },
+      "prism_reduction": 0.2214535980594735,
+      "seed_bootstrap_95": [
+        0.03165482131155806,
+        0.38051999999999997
+      ],
+      "fixed_routes_mc_95": [
+        0.20599875406104107,
+        0.2366076211155742
+      ],
+      "exact_pair_reduction": 0.20292504570383918,
+      "mean_cost": {
+        "logical": {
+          "swaps": 96.6,
+          "active_duration": 14980.0,
+          "n_sites": 406.0,
+          "ambiguous_pairs": 183.0
+        },
+        "greedy": {
+          "swaps": 67.0,
+          "active_duration": 13160.0,
+          "n_sites": 342.2,
+          "ambiguous_pairs": 109.4
+        },
+        "prism": {
+          "swaps": 51.8,
+          "active_duration": 10320.0,
+          "n_sites": 319.6,
+          "ambiguous_pairs": 87.2
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "grid",
+      "p": 0.0001,
+      "probability": {
+        "logical": 0.0,
+        "greedy": 0.0,
+        "prism": 0.0
+      },
+      "counts": {
+        "logical": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "greedy": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "prism": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "prism_reduction": null,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.1324324324324324,
+      "mean_cost": {
+        "logical": {
+          "swaps": 38.8,
+          "active_duration": 11240.0,
+          "n_sites": 299.6,
+          "ambiguous_pairs": 87.8
+        },
+        "greedy": {
+          "swaps": 45.2,
+          "active_duration": 12720.0,
+          "n_sites": 306.8,
+          "ambiguous_pairs": 74.0
+        },
+        "prism": {
+          "swaps": 33.8,
+          "active_duration": 10300.0,
+          "n_sites": 286.2,
+          "ambiguous_pairs": 64.2
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "grid",
+      "p": 0.0003,
+      "probability": {
+        "logical": 9e-06,
+        "greedy": 4e-06,
+        "prism": 6e-06
+      },
+      "counts": {
+        "logical": [
+          1,
+          2,
+          0,
+          3,
+          3
+        ],
+        "greedy": [
+          2,
+          0,
+          0,
+          1,
+          1
+        ],
+        "prism": [
+          0,
+          1,
+          2,
+          2,
+          1
+        ]
+      },
+      "prism_reduction": -0.5,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.1324324324324324,
+      "mean_cost": {
+        "logical": {
+          "swaps": 38.8,
+          "active_duration": 11240.0,
+          "n_sites": 299.6,
+          "ambiguous_pairs": 87.8
+        },
+        "greedy": {
+          "swaps": 45.2,
+          "active_duration": 12720.0,
+          "n_sites": 306.8,
+          "ambiguous_pairs": 74.0
+        },
+        "prism": {
+          "swaps": 33.8,
+          "active_duration": 10300.0,
+          "n_sites": 286.2,
+          "ambiguous_pairs": 64.2
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "grid",
+      "p": 0.001,
+      "probability": {
+        "logical": 0.0001,
+        "greedy": 7.8e-05,
+        "prism": 6.4e-05
+      },
+      "counts": {
+        "logical": [
+          28,
+          14,
+          18,
+          19,
+          21
+        ],
+        "greedy": [
+          8,
+          17,
+          20,
+          22,
+          11
+        ],
+        "prism": [
+          16,
+          15,
+          10,
+          10,
+          13
+        ]
+      },
+      "prism_reduction": 0.17948717948717952,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.1324324324324324,
+      "mean_cost": {
+        "logical": {
+          "swaps": 38.8,
+          "active_duration": 11240.0,
+          "n_sites": 299.6,
+          "ambiguous_pairs": 87.8
+        },
+        "greedy": {
+          "swaps": 45.2,
+          "active_duration": 12720.0,
+          "n_sites": 306.8,
+          "ambiguous_pairs": 74.0
+        },
+        "prism": {
+          "swaps": 33.8,
+          "active_duration": 10300.0,
+          "n_sites": 286.2,
+          "ambiguous_pairs": 64.2
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "grid",
+      "p": 0.003,
+      "probability": {
+        "logical": 0.00101,
+        "greedy": 0.00094,
+        "prism": 0.000691
+      },
+      "counts": {
+        "logical": [
+          261,
+          159,
+          201,
+          196,
+          193
+        ],
+        "greedy": [
+          149,
+          202,
+          235,
+          198,
+          156
+        ],
+        "prism": [
+          161,
+          145,
+          110,
+          136,
+          139
+        ]
+      },
+      "prism_reduction": 0.26489361702127656,
+      "seed_bootstrap_95": [
+        0.05368289637952561,
+        0.42870632672332387
+      ],
+      "fixed_routes_mc_95": [
+        0.18906266501490365,
+        0.333633597834051
+      ],
+      "exact_pair_reduction": 0.1324324324324324,
+      "mean_cost": {
+        "logical": {
+          "swaps": 38.8,
+          "active_duration": 11240.0,
+          "n_sites": 299.6,
+          "ambiguous_pairs": 87.8
+        },
+        "greedy": {
+          "swaps": 45.2,
+          "active_duration": 12720.0,
+          "n_sites": 306.8,
+          "ambiguous_pairs": 74.0
+        },
+        "prism": {
+          "swaps": 33.8,
+          "active_duration": 10300.0,
+          "n_sites": 286.2,
+          "ambiguous_pairs": 64.2
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "grid",
+      "p": 0.01,
+      "probability": {
+        "logical": 0.01534,
+        "greedy": 0.015822,
+        "prism": 0.01273
+      },
+      "counts": {
+        "logical": [
+          3266,
+          2824,
+          3330,
+          2900,
+          3020
+        ],
+        "greedy": [
+          2663,
+          3527,
+          3750,
+          3313,
+          2569
+        ],
+        "prism": [
+          2872,
+          2529,
+          2571,
+          2370,
+          2388
+        ]
+      },
+      "prism_reduction": 0.1954240930350145,
+      "seed_bootstrap_95": [
+        0.03919062832800857,
+        0.29694669461281364
+      ],
+      "fixed_routes_mc_95": [
+        0.17656548146718876,
+        0.21385079748422708
+      ],
+      "exact_pair_reduction": 0.1324324324324324,
+      "mean_cost": {
+        "logical": {
+          "swaps": 38.8,
+          "active_duration": 11240.0,
+          "n_sites": 299.6,
+          "ambiguous_pairs": 87.8
+        },
+        "greedy": {
+          "swaps": 45.2,
+          "active_duration": 12720.0,
+          "n_sites": 306.8,
+          "ambiguous_pairs": 74.0
+        },
+        "prism": {
+          "swaps": 33.8,
+          "active_duration": 10300.0,
+          "n_sites": 286.2,
+          "ambiguous_pairs": 64.2
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "hex_lattice",
+      "p": 0.0001,
+      "probability": {
+        "logical": 1e-06,
+        "greedy": 1e-06,
+        "prism": 1e-06
+      },
+      "counts": {
+        "logical": [
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "greedy": [
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "prism": [
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "prism_reduction": 0.0,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.022727272727272707,
+      "mean_cost": {
+        "logical": {
+          "swaps": 92.6,
+          "active_duration": 16380.0,
+          "n_sites": 398.2,
+          "ambiguous_pairs": 130.2
+        },
+        "greedy": {
+          "swaps": 69.4,
+          "active_duration": 13940.0,
+          "n_sites": 348.8,
+          "ambiguous_pairs": 79.2
+        },
+        "prism": {
+          "swaps": 45.4,
+          "active_duration": 10300.0,
+          "n_sites": 308.4,
+          "ambiguous_pairs": 77.4
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "hex_lattice",
+      "p": 0.0003,
+      "probability": {
+        "logical": 1.3e-05,
+        "greedy": 5e-06,
+        "prism": 9e-06
+      },
+      "counts": {
+        "logical": [
+          4,
+          3,
+          4,
+          1,
+          1
+        ],
+        "greedy": [
+          1,
+          1,
+          0,
+          1,
+          2
+        ],
+        "prism": [
+          1,
+          2,
+          4,
+          0,
+          2
+        ]
+      },
+      "prism_reduction": -0.8,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.022727272727272707,
+      "mean_cost": {
+        "logical": {
+          "swaps": 92.6,
+          "active_duration": 16380.0,
+          "n_sites": 398.2,
+          "ambiguous_pairs": 130.2
+        },
+        "greedy": {
+          "swaps": 69.4,
+          "active_duration": 13940.0,
+          "n_sites": 348.8,
+          "ambiguous_pairs": 79.2
+        },
+        "prism": {
+          "swaps": 45.4,
+          "active_duration": 10300.0,
+          "n_sites": 308.4,
+          "ambiguous_pairs": 77.4
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "hex_lattice",
+      "p": 0.001,
+      "probability": {
+        "logical": 0.000139,
+        "greedy": 9.6e-05,
+        "prism": 0.000101
+      },
+      "counts": {
+        "logical": [
+          36,
+          31,
+          29,
+          26,
+          17
+        ],
+        "greedy": [
+          20,
+          15,
+          20,
+          21,
+          20
+        ],
+        "prism": [
+          12,
+          19,
+          21,
+          23,
+          26
+        ]
+      },
+      "prism_reduction": -0.05208333333333326,
+      "seed_bootstrap_95": null,
+      "fixed_routes_mc_95": null,
+      "exact_pair_reduction": 0.022727272727272707,
+      "mean_cost": {
+        "logical": {
+          "swaps": 92.6,
+          "active_duration": 16380.0,
+          "n_sites": 398.2,
+          "ambiguous_pairs": 130.2
+        },
+        "greedy": {
+          "swaps": 69.4,
+          "active_duration": 13940.0,
+          "n_sites": 348.8,
+          "ambiguous_pairs": 79.2
+        },
+        "prism": {
+          "swaps": 45.4,
+          "active_duration": 10300.0,
+          "n_sites": 308.4,
+          "ambiguous_pairs": 77.4
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "hex_lattice",
+      "p": 0.003,
+      "probability": {
+        "logical": 0.001557,
+        "greedy": 0.000985,
+        "prism": 0.000875
+      },
+      "counts": {
+        "logical": [
+          410,
+          342,
+          315,
+          243,
+          247
+        ],
+        "greedy": [
+          197,
+          179,
+          229,
+          186,
+          194
+        ],
+        "prism": [
+          157,
+          162,
+          191,
+          158,
+          207
+        ]
+      },
+      "prism_reduction": 0.1116751269035533,
+      "seed_bootstrap_95": [
+        0.017819706498951815,
+        0.17726396917148357
+      ],
+      "fixed_routes_mc_95": [
+        0.027036012735132564,
+        0.1889513995475377
+      ],
+      "exact_pair_reduction": 0.022727272727272707,
+      "mean_cost": {
+        "logical": {
+          "swaps": 92.6,
+          "active_duration": 16380.0,
+          "n_sites": 398.2,
+          "ambiguous_pairs": 130.2
+        },
+        "greedy": {
+          "swaps": 69.4,
+          "active_duration": 13940.0,
+          "n_sites": 348.8,
+          "ambiguous_pairs": 79.2
+        },
+        "prism": {
+          "swaps": 45.4,
+          "active_duration": 10300.0,
+          "n_sites": 308.4,
+          "ambiguous_pairs": 77.4
+        }
+      }
+    },
+    {
+      "basis": "Z",
+      "topo": "hex_lattice",
+      "p": 0.01,
+      "probability": {
+        "logical": 0.028663,
+        "greedy": 0.019172,
+        "prism": 0.01532
+      },
+      "counts": {
+        "logical": [
+          7667,
+          5713,
+          5987,
+          4435,
+          4861
+        ],
+        "greedy": [
+          3882,
+          3613,
+          5209,
+          3536,
+          2932
+        ],
+        "prism": [
+          2969,
+          2802,
+          3470,
+          2822,
+          3257
+        ]
+      },
+      "prism_reduction": 0.2009180054245775,
+      "seed_bootstrap_95": [
+        0.045976305935792716,
+        0.2960133473832104
+      ],
+      "fixed_routes_mc_95": [
+        0.18391573423986018,
+        0.21756605188328637
+      ],
+      "exact_pair_reduction": 0.022727272727272707,
+      "mean_cost": {
+        "logical": {
+          "swaps": 92.6,
+          "active_duration": 16380.0,
+          "n_sites": 398.2,
+          "ambiguous_pairs": 130.2
+        },
+        "greedy": {
+          "swaps": 69.4,
+          "active_duration": 13940.0,
+          "n_sites": 348.8,
+          "ambiguous_pairs": 79.2
+        },
+        "prism": {
+          "swaps": 45.4,
+          "active_duration": 10300.0,
+          "n_sites": 308.4,
+          "ambiguous_pairs": 77.4
+        }
+      }
+    }
+  ]
+}

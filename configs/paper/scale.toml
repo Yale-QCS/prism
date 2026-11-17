@@ -1,0 +1,40 @@
+# Five-seed scaling experiment for the adopted paper configuration.
+experiment_id = "scale"
+objective = "error"
+reschedule = true
+heuristic_config = "qiskit_sabre"
+tie_break = "load"
+layout_starts = 40
+refinement_iterations = 16
+prism_swap_trials = 40
+widths = [8, 12, 16, 20, 24, 28, 32]
+# Seeds are 100 apart: a run's random layout starts use seeds base..base+42,
+# so closer seeds share starts and are not independent.
+seeds = [0, 100, 200, 300, 400]
+# Quick profile (run_fairness --quick, make quick-scale): one seed at widths 8-16, about 9 minutes;
+# the device export needs width 16, and width 24 adds minutes per workload.
+quick_seeds = [0]
+quick_widths = [8, 12, 16]
+topologies = ["grid", "hex_lattice"]
+arms = [
+  "greedy",
+  "prism",
+]
+circuits = [
+  "dj",
+  "qaoa",
+  "draper_qft_adder",
+  "modular_adder",
+  "qft",
+  "qpeexact",
+  "qpeinexact",
+  "qftentangled",
+  "bmw_quark_copula",
+  "hhl",
+  "ae",
+  "cdkm_ripple_carry_adder",
+  "vbe_ripple_carry_adder",
+  "vqe_two_local",
+  "rg_qft_multiplier",
+  "multiplier",
+]

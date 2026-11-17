@@ -1,0 +1,48 @@
+
+X memory / grid: mean over all 20 seeds
+logical {"swaps": 43.5, "active_duration": 11815.0, "n_sites": 309.0, "ambiguous_singles": 0.0, "ambiguous_pairs": 96.15}
+greedy {"swaps": 43.95, "active_duration": 11970.0, "n_sites": 303.75, "ambiguous_singles": 0.0, "ambiguous_pairs": 80.65}
+prism {"swaps": 30.9, "active_duration": 10130.0, "n_sites": 280.2, "ambiguous_singles": 0.0, "ambiguous_pairs": 68.8}
+p=0.0001: P_L Logical-SABRE / Greedy / PRISM = 0.0000002 / 0.0000004 / 0.0000001; ratio unresolved (low event counts)
+p=0.0003: P_L Logical-SABRE / Greedy / PRISM = 0.0000039 / 0.0000035 / 0.0000035; ratio unresolved (low event counts)
+p=0.001: P_L Logical-SABRE / Greedy / PRISM = 0.0000533 / 0.0000464 / 0.0000341; reduction 26.4% [8.3, 40.9]
+p=0.003: P_L Logical-SABRE / Greedy / PRISM = 0.0005484 / 0.0004678 / 0.0003799; reduction 18.8% [8.6, 27.2]
+p=0.01: P_L Logical-SABRE / Greedy / PRISM = 0.0086109 / 0.0082051 / 0.0064060; reduction 21.9% [13.6, 29.2]
+Unrecoverable two-location pattern reduction: 14.7% [1.8, 25.5]
+
+X memory / hex_lattice: mean over all 20 seeds
+logical {"swaps": 91.6, "active_duration": 15390.0, "n_sites": 397.05, "ambiguous_singles": 0.0, "ambiguous_pairs": 161.4}
+greedy {"swaps": 69.1, "active_duration": 13365.0, "n_sites": 348.0, "ambiguous_singles": 0.0, "ambiguous_pairs": 107.3}
+prism {"swaps": 48.15, "active_duration": 10580.0, "n_sites": 312.85, "ambiguous_singles": 0.0, "ambiguous_pairs": 81.4}
+p=0.0001: P_L Logical-SABRE / Greedy / PRISM = 0.0000013 / 0.0000006 / 0.0000005; ratio unresolved (low event counts)
+p=0.0003: P_L Logical-SABRE / Greedy / PRISM = 0.0000085 / 0.0000051 / 0.0000041; ratio unresolved (low event counts)
+p=0.001: P_L Logical-SABRE / Greedy / PRISM = 0.0000870 / 0.0000636 / 0.0000474; reduction 25.5% [12.0, 36.3]
+p=0.003: P_L Logical-SABRE / Greedy / PRISM = 0.0009089 / 0.0006435 / 0.0004769; reduction 25.9% [16.1, 35.2]
+p=0.01: P_L Logical-SABRE / Greedy / PRISM = 0.0155569 / 0.0115163 / 0.0079941; reduction 30.6% [23.2, 37.3]
+Unrecoverable two-location pattern reduction: 24.1% [13.6, 33.9]
+
+Z memory / grid: mean over all 20 seeds
+logical {"swaps": 39.9, "active_duration": 11485.0, "n_sites": 301.8, "ambiguous_singles": 0.0, "ambiguous_pairs": 86.45}
+greedy {"swaps": 45.4, "active_duration": 12405.0, "n_sites": 306.55, "ambiguous_singles": 0.0, "ambiguous_pairs": 75.95}
+prism {"swaps": 30.2, "active_duration": 9850.0, "n_sites": 279.15, "ambiguous_singles": 0.0, "ambiguous_pairs": 65.5}
+p=0.0001: P_L Logical-SABRE / Greedy / PRISM = 0.0000004 / 0.0000000 / 0.0000002; ratio unresolved (low event counts)
+p=0.0003: P_L Logical-SABRE / Greedy / PRISM = 0.0000038 / 0.0000030 / 0.0000034; ratio unresolved (low event counts)
+p=0.001: P_L Logical-SABRE / Greedy / PRISM = 0.0000474 / 0.0000421 / 0.0000360; reduction 14.5% [-5.4, 29.6]
+p=0.003: P_L Logical-SABRE / Greedy / PRISM = 0.0004896 / 0.0004402 / 0.0003665; reduction 16.8% [5.6, 26.5]
+p=0.01: P_L Logical-SABRE / Greedy / PRISM = 0.0076994 / 0.0076406 / 0.0060717; reduction 20.5% [12.0, 28.1]
+Unrecoverable two-location pattern reduction: 13.8% [2.7, 23.4]
+
+Z memory / hex_lattice: mean over all 20 seeds
+logical {"swaps": 88.1, "active_duration": 16225.0, "n_sites": 389.9, "ambiguous_singles": 0.0, "ambiguous_pairs": 144.45}
+greedy {"swaps": 77.8, "active_duration": 13585.0, "n_sites": 363.75, "ambiguous_singles": 0.0, "ambiguous_pairs": 105.5}
+prism {"swaps": 47.55, "active_duration": 10545.0, "n_sites": 311.65, "ambiguous_singles": 0.0, "ambiguous_pairs": 79.45}
+p=0.0001: P_L Logical-SABRE / Greedy / PRISM = 0.0000002 / 0.0000004 / 0.0000004; ratio unresolved (low event counts)
+p=0.0003: P_L Logical-SABRE / Greedy / PRISM = 0.0000071 / 0.0000052 / 0.0000035; ratio unresolved (low event counts)
+p=0.001: P_L Logical-SABRE / Greedy / PRISM = 0.0000735 / 0.0000573 / 0.0000453; reduction 21.0% [3.3, 36.7]
+p=0.003: P_L Logical-SABRE / Greedy / PRISM = 0.0008290 / 0.0006504 / 0.0004634; reduction 28.8% [16.9, 39.3]
+p=0.01: P_L Logical-SABRE / Greedy / PRISM = 0.0139743 / 0.0117841 / 0.0076812; reduction 34.8% [24.9, 43.4]
+Unrecoverable two-location pattern reduction: 24.7% [10.4, 37.4]
+
+240 cells; 240,000,000 erasure samples; 156,146 independent fault-column checks.
+Bracketed intervals bootstrap the observed per-seed estimates in pairs. Conditional Monte Carlo intervals for the fixed routes are in summary.json. Neither covers model uncertainty. Low-count ratios are withheld.
+P_L is half the ambiguity probability under this uniform erasure model. The explicit decoder audit checks that identity; it is not a conversion from acceptance.

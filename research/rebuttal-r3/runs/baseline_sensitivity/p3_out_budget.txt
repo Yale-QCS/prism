@@ -1,0 +1,10 @@
+== old 20/4/20
+grid default 832.4 alts 618.6..912.2 (-25.7% .. +9.6%) lower than default 10 of 11 unplaceable matchings [] failed runs {}
+   per matching: {None: np.float64(832.4), 100: np.float64(822.8), 0: np.float64(656.4), 1: np.float64(664.2), 2: np.float64(814.8), 3: np.float64(793.8), 4: np.float64(618.6), 5: np.float64(773.8), 6: np.float64(677.6), 9: np.float64(912.2), 10: np.float64(723.2), 11: np.float64(787.4)}
+heavy_hex default 2464.6 alts 1571.6..2442.6 (-36.2% .. -0.9%) lower than default 7 of 7 unplaceable matchings [0, 8] failed runs {0: 85, 7: 80, 8: 85, 29: 80}
+   per matching: {None: np.float64(2464.6), 1: np.float64(2442.6), 3: np.float64(2065.8), 4: np.float64(2096.8), 5: np.float64(1741.8), 10: np.float64(1802.0), 11: np.float64(1571.6), 25: np.float64(1794.2)}
+== new 40/16/40
+grid default 777.6 alts 592.4..844.0 (-23.8% .. +8.5%) lower than default 7 of 11 unplaceable matchings [] failed runs {}
+   per matching: {None: np.float64(777.6), 100: np.float64(783.0), 0: np.float64(636.8), 1: np.float64(621.6), 2: np.float64(810.0), 3: np.float64(752.4), 4: np.float64(592.4), 5: np.float64(733.6), 6: np.float64(652.8), 9: np.float64(844.0), 10: np.float64(690.2), 11: np.float64(781.2)}
+heavy_hex default 2436.8 alts 1568.0..2424.2 (-35.7% .. -0.5%) lower than default 7 of 7 unplaceable matchings [0, 8] failed runs {0: 85, 7: 80, 8: 85, 29: 80}
+   per matching: {None: np.float64(2436.8), 1: np.float64(2424.2), 3: np.float64(2058.8), 4: np.float64(2081.2), 5: np.float64(1734.8), 10: np.float64(1782.6), 11: np.float64(1568.0), 25: np.float64(1771.0)}

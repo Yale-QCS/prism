@@ -1,0 +1,88 @@
+Direct bare-transmon comparison, nominal width eight
+Ideal preparation and terminal checks on both platforms; exact state fidelity before readout. Independent local noise, uniform device parameters. One program per device. No mitigation-cost conversion.
+For per-attempt overhead h (preparation, checking, readout, reset), time per retained sample in us = time_intercept_us + time_slope * h. Platforms may have different h; no measured h is asserted.
+Dual-rail rows data/swaps/v3_n8.jsonl, device mehta_idle (MODEL.md section 1).
+Each workload averages both topologies and five seeds. All 16 workloads retained.
+workload | arm | fidelity | acceptance | time per retained sample (us), h in us
+dj                       greedy       0.997271 0.918611 2.983 + 1.089 h
+dj                       prism        0.997163 0.917986 3.019 + 1.089 h
+dj                       bare_0.001   0.963175 1.000000 0.583 + 1.000 h
+dj                       bare_0.003   0.944690 1.000000 0.583 + 1.000 h
+qaoa                     greedy       0.977772 0.790724 8.556 + 1.265 h
+qaoa                     prism        0.977739 0.790602 8.482 + 1.266 h
+qaoa                     bare_0.001   0.729919 1.000000 3.794 + 1.000 h
+qaoa                     bare_0.003   0.586093 1.000000 3.794 + 1.000 h
+draper_qft_adder         greedy       0.991688 0.770530 11.657 + 1.299 h
+draper_qft_adder         prism        0.992227 0.790517 9.712 + 1.265 h
+draper_qft_adder         bare_0.001   0.847519 1.000000 3.020 + 1.000 h
+draper_qft_adder         bare_0.003   0.747168 1.000000 3.020 + 1.000 h
+modular_adder            greedy       0.977766 0.469753 58.571 + 2.129 h
+modular_adder            prism        0.977756 0.469401 58.779 + 2.131 h
+modular_adder            bare_0.001   0.853712 1.000000 4.050 + 1.000 h
+modular_adder            bare_0.003   0.732795 1.000000 4.050 + 1.000 h
+qft                      greedy       0.981166 0.738673 13.469 + 1.354 h
+qft                      prism        0.982418 0.757877 11.483 + 1.320 h
+qft                      bare_0.001   0.788937 1.000000 3.560 + 1.000 h
+qft                      bare_0.003   0.664628 1.000000 3.560 + 1.000 h
+qpeexact                 greedy       0.983530 0.721219 15.121 + 1.388 h
+qpeexact                 prism        0.984532 0.742341 12.933 + 1.348 h
+qpeexact                 bare_0.001   0.763589 1.000000 4.432 + 1.000 h
+qpeexact                 bare_0.003   0.640505 1.000000 4.432 + 1.000 h
+qpeinexact               greedy       0.979550 0.721219 15.121 + 1.388 h
+qpeinexact               prism        0.981072 0.742341 12.933 + 1.348 h
+qpeinexact               bare_0.001   0.741922 1.000000 4.482 + 1.000 h
+qpeinexact               bare_0.003   0.616609 1.000000 4.482 + 1.000 h
+qftentangled             greedy       0.965747 0.679190 18.915 + 1.473 h
+qftentangled             prism        0.968225 0.703546 15.990 + 1.422 h
+qftentangled             bare_0.001   0.737432 1.000000 3.714 + 1.000 h
+qftentangled             bare_0.003   0.587479 1.000000 3.714 + 1.000 h
+bmw_quark_copula         greedy       0.950904 0.587622 30.136 + 1.711 h
+bmw_quark_copula         prism        0.955663 0.624188 23.699 + 1.611 h
+bmw_quark_copula         bare_0.001   0.773219 1.000000 2.678 + 1.000 h
+bmw_quark_copula         bare_0.003   0.634620 1.000000 2.678 + 1.000 h
+hhl                      greedy       0.960740 0.557527 35.662 + 1.795 h
+hhl                      prism        0.963865 0.587919 29.541 + 1.702 h
+hhl                      bare_0.001   0.582650 1.000000 8.305 + 1.000 h
+hhl                      bare_0.003   0.418463 1.000000 8.305 + 1.000 h
+ae                       greedy       0.958166 0.598592 30.675 + 1.671 h
+ae                       prism        0.958952 0.609347 29.086 + 1.641 h
+ae                       bare_0.001   0.717002 1.000000 4.507 + 1.000 h
+ae                       bare_0.003   0.588164 1.000000 4.507 + 1.000 h
+cdkm_ripple_carry_adder  greedy       0.992383 0.554392 39.411 + 1.804 h
+cdkm_ripple_carry_adder  prism        0.992568 0.559065 38.341 + 1.789 h
+cdkm_ripple_carry_adder  bare_0.001   0.863350 1.000000 4.292 + 1.000 h
+cdkm_ripple_carry_adder  bare_0.003   0.752615 1.000000 4.292 + 1.000 h
+vbe_ripple_carry_adder   greedy       0.995631 0.671168 23.696 + 1.490 h
+vbe_ripple_carry_adder   prism        0.995728 0.676117 22.945 + 1.479 h
+vbe_ripple_carry_adder   bare_0.001   0.881063 1.000000 2.761 + 1.000 h
+vbe_ripple_carry_adder   bare_0.003   0.799586 1.000000 2.761 + 1.000 h
+vqe_two_local            greedy       0.942246 0.389935 79.603 + 2.568 h
+vqe_two_local            prism        0.947252 0.430456 61.744 + 2.327 h
+vqe_two_local            bare_0.001   0.561547 1.000000 7.616 + 1.000 h
+vqe_two_local            bare_0.003   0.360429 1.000000 7.616 + 1.000 h
+rg_qft_multiplier        greedy       0.989510 0.325212 123.037 + 3.112 h
+rg_qft_multiplier        prism        0.989977 0.385635 82.499 + 2.605 h
+rg_qft_multiplier        bare_0.001   0.590902 1.000000 11.453 + 1.000 h
+rg_qft_multiplier        bare_0.003   0.390617 1.000000 11.453 + 1.000 h
+multiplier               greedy       0.990122 0.331348 117.915 + 3.051 h
+multiplier               prism        0.988951 0.380501 85.627 + 2.641 h
+multiplier               bare_0.001   0.591061 1.000000 11.453 + 1.000 h
+multiplier               bare_0.003   0.390721 1.000000 11.453 + 1.000 h
+greedy: median workload-mean F 0.980358; mean inverse acceptance range 1.089 to 3.112
+prism: median workload-mean F 0.981745; mean inverse acceptance range 1.089 to 2.641
+bare_0.001: median workload-mean F 0.752755; mean inverse acceptance range 1.000 to 1.000
+bare_0.003: median workload-mean F 0.625615; mean inverse acceptance range 1.000 to 1.000
+PRISM/Greedy time geomean at common illustrative overhead h=0 us: 0.864414
+PRISM/Greedy time geomean at common illustrative overhead h=20 us: 0.912609
+PRISM/Greedy time geomean at common illustrative overhead h=100 us: 0.941243
+At every common per-attempt overhead h >= 0, PRISM costs more time per retained sample than bare on every workload mean.
+PRISM width 8, all workloads: attempts median 1.545, range 1.089 to 2.641; 0 above 100
+PRISM width 12, all workloads: attempts median 3.079, range 1.202 to 75.085; 0 above 100
+PRISM width 16, all workloads: attempts median 9.690, range 1.418 to 684901.676; 3 above 100
+Yield-only sensitivity: multiply circuit acceptance by (1-e)^n once, using each circuit's actual encoded-qubit count. A uniform total SPAM rejection e is independent across qubits and of circuit loss. The endpoints are two measured qubits, not confidence bounds. No separate preparation/readout loss is charged; no SPAM-adjusted fidelity is inferred.
+PRISM width 8, SPAM rejection 6.43%: attempts median 2.580, range 1.854 to 4.495
+PRISM width 8, SPAM rejection 6.79%: attempts median 2.661, range 1.912 to 4.636
+PRISM width 12, SPAM rejection 6.43%: attempts median 6.835, range 2.669 to 166.692
+PRISM width 12, SPAM rejection 6.79%: attempts median 7.158, range 2.795 to 174.584
+PRISM width 16, SPAM rejection 6.43%: attempts median 28.063, range 4.107 to 1983545.455
+PRISM width 16, SPAM rejection 6.79%: attempts median 29.849, range 4.368 to 2109735.940

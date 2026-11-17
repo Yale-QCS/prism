@@ -1,0 +1,44 @@
+# Reviewer ablation (review W1/Q1): PRISM with Greedy's exact tie-break.
+# Identical to configs/paper/core.toml except
+# tie_break = "default" (default-then-lowest-index, no load/usage history) and
+# only the prism arm (greedy rows reuse core; the load knob is structurally
+# unused in greedy binding, so its rows are tie-break-invariant).
+experiment_id = "tiebreak"
+objective = "error"
+reschedule = true
+heuristic_config = "qiskit_sabre"
+tie_break = "default"
+layout_starts = 40
+refinement_iterations = 16
+prism_swap_trials = 40
+widths = [8]
+# Seeds are 100 apart: a run's random layout starts use seeds base..base+42,
+# so closer seeds share starts and are not independent.
+seeds = [
+  0, 100, 200, 300, 400,
+  500, 600, 700, 800, 900,
+  1000, 1100, 1200, 1300, 1400,
+  1500, 1600, 1700, 1800, 1900,
+]
+topologies = ["grid", "hex_lattice"]
+arms = [
+  "prism",
+]
+circuits = [
+  "dj",
+  "qaoa",
+  "draper_qft_adder",
+  "modular_adder",
+  "qft",
+  "qpeexact",
+  "qpeinexact",
+  "qftentangled",
+  "bmw_quark_copula",
+  "hhl",
+  "ae",
+  "cdkm_ripple_carry_adder",
+  "vbe_ripple_carry_adder",
+  "vqe_two_local",
+  "rg_qft_multiplier",
+  "multiplier",
+]

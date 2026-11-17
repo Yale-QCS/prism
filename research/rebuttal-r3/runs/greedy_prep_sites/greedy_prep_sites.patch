@@ -1,0 +1,164 @@
+diff -ru a/scripts/paper/run_fairness.py b/scripts/paper/run_fairness.py
+--- a/scripts/paper/run_fairness.py	2026-11-13 21:56:11.281478477 -0500
++++ b/scripts/paper/run_fairness.py	2026-11-13 21:56:30.468945330 -0500
+@@ -72,6 +72,8 @@
+     if spec.get("front_commit"):
+         # False scores lookahead gates on the minimum, as PRISM does; true reproduces the submitted ablation.
+         spec["front_commit_witness"] = bool(cfg.get("front_commit_witness", True))
++    if spec["strategy"] == "greedy" and cfg.get("greedy_prep_sites", False):
++        spec["greedy_prep_sites"] = True
+     # Rescheduling runs after routing, so every arm takes it.
+     spec["reschedule"] = bool(cfg.get("reschedule", False))
+     return spec
+@@ -372,6 +374,7 @@
+         row["tie_break"] = spec.get("tie_break")
+         row["commute_diagonal"] = spec.get("commute_diagonal", False)
+         row["reschedule"] = spec.get("reschedule", False)
++        row["greedy_prep_sites"] = spec.get("greedy_prep_sites", False)
+         row["wait_scale"] = spec.get("wait_scale", 0.0)
+         row["wait_realizations"] = spec.get("wait_realizations", True)
+         row["wait_mode"] = spec.get("wait_mode", "additive")
+diff -ru a/src/marabbecca/lowering/commit_policies/prism_routing.py b/src/marabbecca/lowering/commit_policies/prism_routing.py
+--- a/src/marabbecca/lowering/commit_policies/prism_routing.py	2026-11-13 21:56:11.278994919 -0500
++++ b/src/marabbecca/lowering/commit_policies/prism_routing.py	2026-11-13 21:56:30.468652820 -0500
+@@ -164,6 +164,7 @@
+         wait_realizations: bool = True,
+         wait_mode: str = "additive",
+         route_score: Callable[[QuantumCircuit], float] | None = None,
++        greedy_prep_sites: bool = False,
+     ) -> None:
+         """Bind connectivity and iteration/trial budgets.
+ 
+@@ -204,7 +205,12 @@
+         rails are free soonest, with no weight.
+         ``objective="custom"`` selects the final route by ``route_score(qc)``,
+         followed by active gate count and size, without changing route search.
++        ``greedy_prep_sites=True`` (``greedy`` only) commits the final route at
++        the sites where each pair is prepared instead of its entry layout
++        (``_prep_sites``); ``False`` reproduces the published rows.
+         """
++        if greedy_prep_sites and binding_mode != "greedy":
++            raise ValueError("greedy_prep_sites needs binding_mode 'greedy'")
+         if coupling_map is None:
+             raise ValueError("PrismRouting requires coupling_map")
+         if objective not in OBJECTIVES:
+@@ -257,6 +263,7 @@
+                 f"wait_mode must be 'additive' or 'lexicographic', got {wait_mode!r}"
+             )
+         self.wait_mode = wait_mode
++        self.greedy_prep_sites = bool(greedy_prep_sites)
+ 
+     @property
+     def num_starts(self) -> int:
+@@ -356,12 +363,24 @@
+                     )
+ 
+                 final_initial_v2p = list(v2p)
++                final_seed = (trial_seed * 1000 + 2 * self.max_iterations) % (1 << 64)
++                commit_v2p = None
++                if self.greedy_prep_sites:
++                    probe_trace, probe_ctx, _ = self._route(
++                        ctx_fwd, final_initial_v2p, final_seed, 1
++                    )
++                    calls["routing_invocations"] += 1
++                    calls["route_trial_executions"] += 1
++                    commit_v2p = self._prep_sites(
++                        probe_trace, probe_ctx, final_initial_v2p
++                    )
+                 calls["final_attempted"] += 1
+                 final_trace, final_ctx, final_choices = self._route(
+                     ctx_fwd,
+                     final_initial_v2p,
+-                    (trial_seed * 1000 + 2 * self.max_iterations) % (1 << 64),
++                    final_seed,
+                     self.swap_trials,
++                    commit_v2p=commit_v2p,
+                 )
+                 calls["final_completed"] += 1
+                 calls["routing_invocations"] += 1
+@@ -508,12 +527,19 @@
+         )
+ 
+     def _route(
+-        self, ctx: "_Ctx", v2p: list[int], seed: int, swap_trials: int
++        self,
++        ctx: "_Ctx",
++        v2p: list[int],
++        seed: int,
++        swap_trials: int,
++        commit_v2p: list[int] | None = None,
+     ) -> tuple[tuple, "_Ctx", list[int] | None]:
+-        """Route once, fixing all realizations at the entry layout under greedy binding."""
++        """Route once, fixing all realizations at ``commit_v2p`` (default: the entry layout) under greedy binding."""
+         choices = None
+         if self.binding_mode == "greedy":
+-            ctx, choices = self._greedy_commit_ctx(ctx, v2p)
++            ctx, choices = self._greedy_commit_ctx(
++                ctx, v2p if commit_v2p is None else commit_v2p
++            )
+         trace = prism_routing(
+             *self._flatten_ctx(ctx),
+             RoutingTarget.from_coupling_list(
+@@ -587,6 +613,33 @@
+                 p2v[a], p2v[b] = p2v[b], p2v[a]
+         return self._emit_circuit(emitted, ctx.n_phys)
+ 
++    def _prep_sites(self, trace: tuple, ctx: "_Ctx", v2p_initial: list[int]) -> list[int]:
++        """Site of each virtual rail when its pair's preparation herald fires in ``trace``; entry site otherwise.
++
++        Greedy otherwise commits from the entry layout (``_route`` ->
++        ``_greedy_commit_ctx``), in which the last backward pass can leave a
++        pair separated until the final route joins it before its preparation
++        (``LowerExpansion`` emits preparations first, expansion.py:68-86). The
++        Rust router returns only an event stream ``(kind, a, b)``
++        (crates/src/prism_routing/routing.rs:71-78), with no per-operation
++        layout, so the sites are read by replaying it as
++        ``_emit_circuit_from_trace`` does.
++        """
++        events, _, _ = trace
++        v2p = list(v2p_initial)
++        p2v = self._invert(v2p, ctx.n_phys)
++        sites = list(v2p_initial)
++        for kind, a, b in events:
++            if kind == self._EVENT_SWAP:
++                v_a, v_b = p2v[a], p2v[b]
++                v2p[v_a], v2p[v_b] = v2p[v_b], v2p[v_a]
++                p2v[a], p2v[b] = p2v[b], p2v[a]
++            elif ctx.op_nodes[a].op.name in ("joint_herald", "reset"):
++                for q in ctx.op_nodes[a].qargs:
++                    v = ctx.q_to_virt[q]
++                    sites[v] = v2p[v]
++        return sites
++
+     @staticmethod
+     def _trace_to_payload(trace: tuple, ctx: "_Ctx") -> dict:
+         """Convert a Rust trace tuple into the payload shape _finalize expects."""
+diff -ru a/src/marabbecca/staged_pms.py b/src/marabbecca/staged_pms.py
+--- a/src/marabbecca/staged_pms.py	2026-11-13 21:56:11.280278619 -0500
++++ b/src/marabbecca/staged_pms.py	2026-11-13 21:56:30.468840320 -0500
+@@ -463,6 +463,7 @@
+     wait_realizations: bool = True,
+     wait_mode: str = "additive",
+     route_score: Callable[[QuantumCircuit], float] | None = None,
++    greedy_prep_sites: bool = False,
+ ) -> StagedPassManager:
+     """3-stage PM for ``enc`` on ``coupling_map``. ``strategy`` selects the lowering algorithm.
+ 
+@@ -504,6 +505,9 @@
+     ``objective="custom"`` uses ``route_score(qc)`` to select the final route,
+     with active gate count and size as tie breakers. It supports both kernel
+     strategies and leaves their routing search and effort unchanged.
++
++    ``greedy_prep_sites`` (``greedy`` only) commits Greedy's final route at
++    the sites where each pair is prepared; off reproduces the published rows.
+     """
+     kernel = strategy in ("greedy", "prism")
+     if (objective == "custom") != (route_score is not None):
+@@ -569,6 +573,7 @@
+                 wait_realizations=wait_realizations,
+                 wait_mode=wait_mode,
+                 route_score=route_score,
++                greedy_prep_sites=greedy_prep_sites,
+             ),
+         ]
+     else:

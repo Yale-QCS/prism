@@ -1,0 +1,24 @@
+name: "\U0001F41B Bug Report"
+description: File a bug report for the PRISM artifact
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees:
+  - evmckinney9
+body:
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug Description
+      placeholder: Describe the expected and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: minimal-reproducible-example
+    attributes:
+      label: Minimal Reproducible Example
+      placeholder: |
+        from marabbecca.staged_pms import build_pm
+        ...
+      render: python
+    validations:
+      required: true

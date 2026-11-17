@@ -1,0 +1,2 @@
+published rows reproduced exactly, errors per 1,000,000 shots: {('X', 'greedy'): 971, ('X', 'prism'): 749, ('Z', 'greedy'): 965, ('Z', 'prism'): 649}
+noise off: zero logical errors and zero flags in {'checks3': 80, 'checks': 80, 'ideal': 80, 'readout': 80}

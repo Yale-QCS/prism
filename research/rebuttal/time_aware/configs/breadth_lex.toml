@@ -1,0 +1,46 @@
+# R4 lexicographic follow-up: breadth with distance primary and wait as tie-break (research/rebuttal/time_aware/README.md).
+# Breadth: Greedy and PRISM on QASMBench families outside the primary suite,
+# 20 seeds, grid, hex and heavy-hex, each circuit at its own width. The circuits
+# are fixed files from artifacts/paper/manifests/qasmbench/.
+experiment_id = "ta_breadth_lex"
+objective = "error"
+reschedule = true
+wait_scale = 1.0
+wait_mode = "lexicographic"
+heuristic_config = "qiskit_sabre"
+tie_break = "load"
+layout_starts = 40
+refinement_iterations = 16
+prism_swap_trials = 40
+widths = []
+# Seeds are 100 apart: a run's random layout starts use seeds base..base+42,
+# so closer seeds share starts and are not independent.
+seeds = [
+  0, 100, 200, 300, 400,
+  500, 600, 700, 800, 900,
+  1000, 1100, 1200, 1300, 1400,
+  1500, 1600, 1700, 1800, 1900,
+]
+topologies = ["grid", "hex_lattice", "heavy_hex"]
+arms = [
+  "greedy",
+  "prism",
+]
+circuits = [
+  "sat",
+  "seca",
+  "multiply",
+  "gcm_h6",
+  "qec9xz",
+  "qram",
+  "knn",
+]
+
+[circuit_widths]
+sat = [11]
+seca = [11]
+multiply = [13]
+gcm_h6 = [13]
+qec9xz = [17]
+qram = [20]
+knn = [25]

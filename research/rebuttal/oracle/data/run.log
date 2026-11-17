@@ -1,0 +1,128 @@
+[run ] crz_chain_n3_chain6 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=0 (exact)
+       S_greedy=0 S_prism=0
+       opp=0 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] crz_ring_n3_chain6 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=0 (exact)
+       S_greedy=0 S_prism=0
+       opp=0 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] k3_chain6 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=0 (exact)
+       S_greedy=0 S_prism=0
+       opp=0 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] rand_dag_n3_chain6 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=0 (exact)
+       S_greedy=0 S_prism=0
+       opp=0 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] crz_chain_n3_grid23 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=0 (exact)
+       S_greedy=0 S_prism=0
+       opp=0 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] k3_grid23 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=0 (exact)
+       S_greedy=0 S_prism=0
+       opp=0 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] crz_chain_n4_chain8 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=0 (exact)
+       S_greedy=0 S_prism=0
+       opp=0 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] k4_chain8 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=3 (exact)
+       S_greedy=0 S_prism=0
+       opp=3 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] rand_dag_n4_chain8 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=2 (exact)
+       S_greedy=0 S_prism=0
+       opp=2 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] crz_chain_n4_grid24 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=0 (exact)
+       S_greedy=0 S_prism=0
+       opp=0 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] k4_grid24 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=0 (exact)
+       S_greedy=0 S_prism=0
+       opp=0 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] k4_repeated_chain8 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=6 (exact)
+       S_greedy=0 S_prism=0
+       opp=6 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] rand_dag_n4_deep_s42_chain8 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=2 (exact)
+       S_greedy=0 S_prism=0
+       opp=2 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] rand_dag_n4_deep_s43_chain8 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=4 (exact)
+       S_greedy=0 S_prism=0
+       opp=4 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] rand_dag_n4_deep_s44_chain8 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=3 (exact)
+       S_greedy=0 S_prism=0
+       opp=3 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] k5_chain10 ...
+       S_multi_opt=1 (exact)
+       S_default_opt=-1 (bound)
+       HARD FAILURE: certificate replay failed!
+       S_greedy=1 S_prism=1
+       opp=None g_gap=0 p_gap=0 captured=undef [ok]
+[run ] rand_dag_n5_s42_chain10 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=-1 (bound)
+       HARD FAILURE: certificate replay failed!
+       S_greedy=0 S_prism=0
+       opp=None g_gap=0 p_gap=0 captured=undef [ok]
+[run ] k5_grid25 ...
+       S_multi_opt=0 (exact)
+       S_default_opt=-1 (bound)
+       HARD FAILURE: certificate replay failed!
+       S_greedy=0 S_prism=0
+       opp=None g_gap=0 p_gap=0 captured=undef [ok]
+[run ] k4_chain10_spare ...
+       S_multi_opt=0 (exact)
+       S_default_opt=3 (exact)
+       S_greedy=0 S_prism=0
+       opp=3 g_gap=0 p_gap=0 captured=undef [ok]
+[run ] k4_grid25_spare ...
+       S_multi_opt=0 (exact)
+       S_default_opt=0 (exact)
+       S_greedy=0 S_prism=0
+       opp=0 g_gap=0 p_gap=0 captured=undef [ok]
+
+Instance                     n_l n_g S_def S_opt S_grd S_prm  Opp G_grd G_prm   Capt    St
+------------------------------------------------------------------------------------------
+crz_chain_n3_chain6            3   2     0     0     0     0    0     0     0  undef exact
+crz_ring_n3_chain6             3   3     0     0     0     0    0     0     0  undef exact
+k3_chain6                      3   3     0     0     0     0    0     0     0  undef exact
+rand_dag_n3_chain6             3   4     0     0     0     0    0     0     0  undef exact
+crz_chain_n3_grid23            3   2     0     0     0     0    0     0     0  undef exact
+k3_grid23                      3   3     0     0     0     0    0     0     0  undef exact
+crz_chain_n4_chain8            4   3     0     0     0     0    0     0     0  undef exact
+k4_chain8                      4   6     3     0     0     0    3     0     0  undef exact
+rand_dag_n4_chain8             4   5     2     0     0     0    2     0     0  undef exact
+crz_chain_n4_grid24            4   3     0     0     0     0    0     0     0  undef exact
+k4_grid24                      4   6     0     0     0     0    0     0     0  undef exact
+k4_repeated_chain8             4  12     6     0     0     0    6     0     0  undef exact
+rand_dag_n4_deep_s42_chain8    4  15     2     0     0     0    2     0     0  undef exact
+rand_dag_n4_deep_s43_chain8    4  15     4     0     0     0    4     0     0  undef exact
+rand_dag_n4_deep_s44_chain8    4  15     3     0     0     0    3     0     0  undef exact
+k5_chain10                     5  10    -1     1     1     1 None     0     0  undef  FAIL
+rand_dag_n5_s42_chain10        5   8    -1     0     0     0 None     0     0  undef  FAIL
+k5_grid25                      5  10    -1     0     0     0 None     0     0  undef  FAIL
+k4_chain10_spare               4   6     3     0     0     0    3     0     0  undef exact
+k4_grid25_spare                4   6     0     0     0     0    0     0     0  undef exact
+
+Results written to research/rebuttal/oracle/data/oracle.jsonl and artifacts/paper/results/X01_RESULT.md

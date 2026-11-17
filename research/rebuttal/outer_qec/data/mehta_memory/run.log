@@ -1,0 +1,480 @@
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 100, "shots": 50000, "errors": 110, "logical_error": 0.0022, "score": 0.6584707755051308, "seconds": 16.148766158003127}
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 0, "shots": 50000, "errors": 112, "logical_error": 0.00224, "score": 0.7382069960815496, "seconds": 16.03889220799465}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 200, "shots": 50000, "errors": 91, "logical_error": 0.00182, "score": 0.6443299299096341, "seconds": 16.69417480199627}
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 300, "shots": 50000, "errors": 140, "logical_error": 0.0028, "score": 0.6695720500019753, "seconds": 18.597620266999}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 400, "shots": 50000, "errors": 112, "logical_error": 0.00224, "score": 0.6858908798029227, "seconds": 17.095267098993645}
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 500, "shots": 50000, "errors": 129, "logical_error": 0.00258, "score": 0.691039340135239, "seconds": 15.745826867998403}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 600, "shots": 50000, "errors": 105, "logical_error": 0.0021, "score": 0.6830022915910874, "seconds": 13.912115965002158}
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 700, "shots": 50000, "errors": 91, "logical_error": 0.00182, "score": 0.6467739359324376, "seconds": 16.176358591997996}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 900, "shots": 50000, "errors": 84, "logical_error": 0.00168, "score": 0.6166682337472829, "seconds": 11.43791415799933}
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 800, "shots": 50000, "errors": 110, "logical_error": 0.0022, "score": 0.6196699073228749, "seconds": 15.33332920599787}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 1000, "shots": 50000, "errors": 120, "logical_error": 0.0024, "score": 0.6703329153379991, "seconds": 12.378074861997447}
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 1100, "shots": 50000, "errors": 96, "logical_error": 0.00192, "score": 0.6572832693200453, "seconds": 15.052523491998727}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 1200, "shots": 50000, "errors": 127, "logical_error": 0.00254, "score": 0.650644994375237, "seconds": 16.657393661000242}
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 1300, "shots": 50000, "errors": 101, "logical_error": 0.00202, "score": 0.7066474064605509, "seconds": 13.544008828997903}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 1400, "shots": 50000, "errors": 173, "logical_error": 0.00346, "score": 0.7144795208072333, "seconds": 16.905401395997615}
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 1500, "shots": 50000, "errors": 108, "logical_error": 0.00216, "score": 0.6404636881901347, "seconds": 19.671654846999445}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 1700, "shots": 50000, "errors": 86, "logical_error": 0.00172, "score": 0.6871665899179686, "seconds": 11.66042399500293}
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 1600, "shots": 50000, "errors": 126, "logical_error": 0.00252, "score": 0.6858551082610541, "seconds": 14.691797331994167}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 1900, "shots": 50000, "errors": 122, "logical_error": 0.00244, "score": 0.668901242736639, "seconds": 11.764809913001955}
+{"basis": "X", "topo": "grid", "arm": "greedy", "seed": 1800, "shots": 50000, "errors": 137, "logical_error": 0.00274, "score": 0.6877651124123111, "seconds": 15.53212325500499}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 100, "shots": 50000, "errors": 95, "logical_error": 0.0019, "score": 0.6239878187567208, "seconds": 15.4772109169935}
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 0, "shots": 50000, "errors": 65, "logical_error": 0.0013, "score": 0.5922888334350613, "seconds": 21.056431154000165}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 200, "shots": 50000, "errors": 91, "logical_error": 0.00182, "score": 0.6119886551848808, "seconds": 15.092100781999761}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 300, "shots": 50000, "errors": 92, "logical_error": 0.00184, "score": 0.5884877232027359, "seconds": 19.510348562995205}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 400, "shots": 50000, "errors": 112, "logical_error": 0.00224, "score": 0.6721696587553108, "seconds": 15.24900644999434}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 500, "shots": 50000, "errors": 103, "logical_error": 0.00206, "score": 0.5937233442405246, "seconds": 13.595826643999317}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 600, "shots": 50000, "errors": 88, "logical_error": 0.00176, "score": 0.6353725348259536, "seconds": 16.63192892499501}
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 700, "shots": 50000, "errors": 95, "logical_error": 0.0019, "score": 0.5812821415210386, "seconds": 14.449728475003212}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 800, "shots": 50000, "errors": 96, "logical_error": 0.00192, "score": 0.6436040504952456, "seconds": 17.474049775999447}
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 900, "shots": 50000, "errors": 111, "logical_error": 0.00222, "score": 0.6112979134673152, "seconds": 13.935590610999498}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 1100, "shots": 50000, "errors": 99, "logical_error": 0.00198, "score": 0.624884277195513, "seconds": 17.144870373995218}
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 1000, "shots": 50000, "errors": 89, "logical_error": 0.00178, "score": 0.6058215300438962, "seconds": 16.952097094996134}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 1200, "shots": 50000, "errors": 80, "logical_error": 0.0016, "score": 0.6007992423171004, "seconds": 15.76705267199577}
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 1300, "shots": 50000, "errors": 103, "logical_error": 0.00206, "score": 0.5841501872566965, "seconds": 19.253788709997025}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 1400, "shots": 50000, "errors": 102, "logical_error": 0.00204, "score": 0.6441347478086172, "seconds": 13.794470291002654}
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 1500, "shots": 50000, "errors": 100, "logical_error": 0.002, "score": 0.6258035860163275, "seconds": 11.80638228799944}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 1700, "shots": 50000, "errors": 80, "logical_error": 0.0016, "score": 0.5770343735352232, "seconds": 16.77985426899977}
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 1600, "shots": 50000, "errors": 100, "logical_error": 0.002, "score": 0.6450600087537504, "seconds": 16.713613360996533}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 1900, "shots": 50000, "errors": 105, "logical_error": 0.0021, "score": 0.5997607359724899, "seconds": 14.306374885003606}
+{"basis": "X", "topo": "grid", "arm": "prism", "seed": 1800, "shots": 50000, "errors": 111, "logical_error": 0.00222, "score": 0.5889206209913941, "seconds": 16.31954457500251}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 0, "shots": 50000, "errors": 146, "logical_error": 0.00292, "score": 0.8017019280091223, "seconds": 14.75264633900224}
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 100, "shots": 50000, "errors": 90, "logical_error": 0.0018, "score": 0.6507872230283483, "seconds": 14.906478024000535}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 200, "shots": 50000, "errors": 105, "logical_error": 0.0021, "score": 0.7050715016779545, "seconds": 16.99479455400433}
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 300, "shots": 50000, "errors": 101, "logical_error": 0.00202, "score": 0.7100025245640961, "seconds": 15.198900438001147}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 500, "shots": 50000, "errors": 126, "logical_error": 0.00252, "score": 0.7547292757883699, "seconds": 18.510675655998057}
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 400, "shots": 50000, "errors": 121, "logical_error": 0.00242, "score": 0.7091140456975731, "seconds": 19.307795550004812}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 600, "shots": 50000, "errors": 123, "logical_error": 0.00246, "score": 0.755475684779424, "seconds": 15.432448662999377}
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 700, "shots": 50000, "errors": 107, "logical_error": 0.00214, "score": 0.7043941218831186, "seconds": 18.254062811996846}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 800, "shots": 50000, "errors": 124, "logical_error": 0.00248, "score": 0.7201121446213997, "seconds": 15.708716019995336}
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 900, "shots": 50000, "errors": 178, "logical_error": 0.00356, "score": 0.7553089932164508, "seconds": 16.198416854000243}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 1000, "shots": 50000, "errors": 132, "logical_error": 0.00264, "score": 0.7212533537558251, "seconds": 18.98176930799673}
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 1100, "shots": 50000, "errors": 135, "logical_error": 0.0027, "score": 0.7199581358441008, "seconds": 16.19992423200165}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 1300, "shots": 50000, "errors": 152, "logical_error": 0.00304, "score": 0.7743724210958519, "seconds": 14.563933694000298}
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 1200, "shots": 50000, "errors": 128, "logical_error": 0.00256, "score": 0.7325563572767312, "seconds": 16.738264403000358}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 1400, "shots": 50000, "errors": 127, "logical_error": 0.00254, "score": 0.6741216615801779, "seconds": 14.833558302998426}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 1500, "shots": 50000, "errors": 114, "logical_error": 0.00228, "score": 0.7264256895694889, "seconds": 17.068553254001017}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 1600, "shots": 50000, "errors": 98, "logical_error": 0.00196, "score": 0.7431768630133722, "seconds": 16.459864203003235}
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 1700, "shots": 50000, "errors": 104, "logical_error": 0.00208, "score": 0.6600930540136672, "seconds": 14.505598853997071}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 1800, "shots": 50000, "errors": 130, "logical_error": 0.0026, "score": 0.6813072679731609, "seconds": 18.316329164998024}
+{"basis": "X", "topo": "hex_lattice", "arm": "greedy", "seed": 1900, "shots": 50000, "errors": 90, "logical_error": 0.0018, "score": 0.8019296203003783, "seconds": 15.124505530999159}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 100, "shots": 50000, "errors": 91, "logical_error": 0.00182, "score": 0.6542642262226008, "seconds": 17.172841731997323}
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 0, "shots": 50000, "errors": 128, "logical_error": 0.00256, "score": 0.6465406745983518, "seconds": 17.831458421998832}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 300, "shots": 50000, "errors": 117, "logical_error": 0.00234, "score": 0.6132863185827016, "seconds": 20.273302608999074}
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 200, "shots": 50000, "errors": 94, "logical_error": 0.00188, "score": 0.5883306868483328, "seconds": 21.701426142004493}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 400, "shots": 50000, "errors": 105, "logical_error": 0.0021, "score": 0.639364149169404, "seconds": 21.262565753000672}
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 500, "shots": 50000, "errors": 88, "logical_error": 0.00176, "score": 0.6344347829257304, "seconds": 20.5594876499963}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 600, "shots": 50000, "errors": 95, "logical_error": 0.0019, "score": 0.6168448223545925, "seconds": 14.234758642996894}
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 700, "shots": 50000, "errors": 117, "logical_error": 0.00234, "score": 0.6802100548824578, "seconds": 18.46701456500159}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 900, "shots": 50000, "errors": 110, "logical_error": 0.0022, "score": 0.6073705437047537, "seconds": 16.108377605996793}
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 800, "shots": 50000, "errors": 100, "logical_error": 0.002, "score": 0.6332516460161042, "seconds": 19.58624110499659}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 1000, "shots": 50000, "errors": 93, "logical_error": 0.00186, "score": 0.6350111929944771, "seconds": 17.63870017499721}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 1100, "shots": 50000, "errors": 121, "logical_error": 0.00242, "score": 0.6097824346978054, "seconds": 20.85658335500193}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 1200, "shots": 50000, "errors": 82, "logical_error": 0.00164, "score": 0.6084102092978149, "seconds": 20.8142715569993}
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 1300, "shots": 50000, "errors": 116, "logical_error": 0.00232, "score": 0.6943965850010029, "seconds": 19.21451162500307}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 1500, "shots": 50000, "errors": 78, "logical_error": 0.00156, "score": 0.6710862085093989, "seconds": 18.020231747999787}
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 1400, "shots": 50000, "errors": 109, "logical_error": 0.00218, "score": 0.6360200969934274, "seconds": 23.49730873700173}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 1600, "shots": 50000, "errors": 90, "logical_error": 0.0018, "score": 0.5849183120644385, "seconds": 18.290011502002017}
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 1700, "shots": 50000, "errors": 101, "logical_error": 0.00202, "score": 0.6498401217127739, "seconds": 18.635376256999734}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 1800, "shots": 50000, "errors": 84, "logical_error": 0.00168, "score": 0.6302317596976393, "seconds": 19.196028408994607}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "X", "topo": "hex_lattice", "arm": "prism", "seed": 1900, "shots": 50000, "errors": 83, "logical_error": 0.00166, "score": 0.6377924874059673, "seconds": 20.641010626000934}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 0, "shots": 50000, "errors": 111, "logical_error": 0.00222, "score": 0.6605216313680335, "seconds": 14.100110685998516}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 100, "shots": 50000, "errors": 101, "logical_error": 0.00202, "score": 0.7338062457221357, "seconds": 15.109961263995501}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 200, "shots": 50000, "errors": 113, "logical_error": 0.00226, "score": 0.7226740421008144, "seconds": 17.387042198002746}
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 300, "shots": 50000, "errors": 123, "logical_error": 0.00246, "score": 0.6642419279102899, "seconds": 13.703255456995976}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 400, "shots": 50000, "errors": 107, "logical_error": 0.00214, "score": 0.656542459226157, "seconds": 16.939245300003677}
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 500, "shots": 50000, "errors": 107, "logical_error": 0.00214, "score": 0.6780096002101315, "seconds": 13.953954515003716}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 600, "shots": 50000, "errors": 86, "logical_error": 0.00172, "score": 0.6786496401044424, "seconds": 18.21289914999943}
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 700, "shots": 50000, "errors": 99, "logical_error": 0.00198, "score": 0.7415499958338487, "seconds": 16.082005090000166}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 800, "shots": 50000, "errors": 98, "logical_error": 0.00196, "score": 0.6512760536136674, "seconds": 17.034605872999236}
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 900, "shots": 50000, "errors": 95, "logical_error": 0.0019, "score": 0.6185008244752958, "seconds": 16.88525225599733}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 1100, "shots": 50000, "errors": 114, "logical_error": 0.00228, "score": 0.6770120276224967, "seconds": 11.924071926005126}
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 1000, "shots": 50000, "errors": 123, "logical_error": 0.00246, "score": 0.6859789561157456, "seconds": 13.86004903200228}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 1200, "shots": 50000, "errors": 105, "logical_error": 0.0021, "score": 0.640123157738874, "seconds": 12.295372972999758}
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 1300, "shots": 50000, "errors": 134, "logical_error": 0.00268, "score": 0.6742220860008954, "seconds": 16.911622448002163}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 1400, "shots": 50000, "errors": 76, "logical_error": 0.00152, "score": 0.637015880561878, "seconds": 16.004754990004585}
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 1500, "shots": 50000, "errors": 119, "logical_error": 0.00238, "score": 0.6658059582520782, "seconds": 18.16684079600236}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 1600, "shots": 50000, "errors": 90, "logical_error": 0.0018, "score": 0.6972171757025469, "seconds": 14.748635558004025}
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 1700, "shots": 50000, "errors": 100, "logical_error": 0.002, "score": 0.6800889585782969, "seconds": 13.611560593999457}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 1800, "shots": 50000, "errors": 103, "logical_error": 0.00206, "score": 0.6953278711571771, "seconds": 18.147442387999035}
+{"basis": "Z", "topo": "grid", "arm": "greedy", "seed": 1900, "shots": 50000, "errors": 103, "logical_error": 0.00206, "score": 0.6960646764460863, "seconds": 19.282010742994316}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 0, "shots": 50000, "errors": 105, "logical_error": 0.0021, "score": 0.6199992334700088, "seconds": 16.532838299994182}
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 100, "shots": 50000, "errors": 88, "logical_error": 0.00176, "score": 0.5943636425202304, "seconds": 16.652150678004546}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 300, "shots": 50000, "errors": 103, "logical_error": 0.00206, "score": 0.5976186473769037, "seconds": 20.1205640219996}
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 200, "shots": 50000, "errors": 112, "logical_error": 0.00224, "score": 0.651962360934273, "seconds": 19.5497812600006}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 500, "shots": 50000, "errors": 89, "logical_error": 0.00178, "score": 0.6135578036996195, "seconds": 19.877729774001637}
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 400, "shots": 50000, "errors": 86, "logical_error": 0.00172, "score": 0.6167563027076697, "seconds": 19.274440490000416}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 700, "shots": 50000, "errors": 104, "logical_error": 0.00208, "score": 0.6329163423216697, "seconds": 16.068375979994016}
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 600, "shots": 50000, "errors": 71, "logical_error": 0.00142, "score": 0.6343067395009963, "seconds": 17.65978146099951}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 800, "shots": 50000, "errors": 102, "logical_error": 0.00204, "score": 0.6056736500638816, "seconds": 17.72174062299746}
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 900, "shots": 50000, "errors": 109, "logical_error": 0.00218, "score": 0.5802513105856122, "seconds": 18.41932283499773}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 1000, "shots": 50000, "errors": 101, "logical_error": 0.00202, "score": 0.5790712335033372, "seconds": 18.194102587003727}
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 1100, "shots": 50000, "errors": 95, "logical_error": 0.0019, "score": 0.5816813476061001, "seconds": 15.581411737999588}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 1200, "shots": 50000, "errors": 99, "logical_error": 0.00198, "score": 0.5752338407200868, "seconds": 16.878322753997054}
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 1300, "shots": 50000, "errors": 92, "logical_error": 0.00184, "score": 0.5946334460556308, "seconds": 18.01203644999623}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 1500, "shots": 50000, "errors": 96, "logical_error": 0.00192, "score": 0.6001862781826759, "seconds": 12.308065173005161}
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 1400, "shots": 50000, "errors": 102, "logical_error": 0.00204, "score": 0.5856606236052946, "seconds": 17.808964560004824}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 1600, "shots": 50000, "errors": 93, "logical_error": 0.00186, "score": 0.5767658994045044, "seconds": 17.716316723999626}
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 1700, "shots": 50000, "errors": 88, "logical_error": 0.00176, "score": 0.5830993441433577, "seconds": 17.922595486001228}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 1800, "shots": 50000, "errors": 97, "logical_error": 0.00194, "score": 0.5823981717899458, "seconds": 15.395022766002512}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "grid", "arm": "prism", "seed": 1900, "shots": 50000, "errors": 94, "logical_error": 0.00188, "score": 0.5945496291693713, "seconds": 17.332612865000556}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 0, "shots": 50000, "errors": 123, "logical_error": 0.00246, "score": 0.7059364979805578, "seconds": 18.70451574600156}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 100, "shots": 50000, "errors": 105, "logical_error": 0.0021, "score": 0.7602201750918187, "seconds": 19.212966626997513}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 200, "shots": 50000, "errors": 129, "logical_error": 0.00258, "score": 0.7601916983201217, "seconds": 20.56221983300202}
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 300, "shots": 50000, "errors": 131, "logical_error": 0.00262, "score": 0.7143799577739656, "seconds": 19.693008504000318}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 500, "shots": 50000, "errors": 145, "logical_error": 0.0029, "score": 0.7323568303275311, "seconds": 14.859913508000318}
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 400, "shots": 50000, "errors": 133, "logical_error": 0.00266, "score": 0.7475857141724722, "seconds": 20.78072031999909}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 600, "shots": 50000, "errors": 123, "logical_error": 0.00246, "score": 0.7322067374586713, "seconds": 19.31317112000397}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 700, "shots": 50000, "errors": 129, "logical_error": 0.00258, "score": 0.7568773425834747, "seconds": 27.17207756300195}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 800, "shots": 50000, "errors": 139, "logical_error": 0.00278, "score": 0.6826857123732337, "seconds": 20.11583076199895}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 900, "shots": 50000, "errors": 96, "logical_error": 0.00192, "score": 0.6951607496435329, "seconds": 19.242605983999965}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 1000, "shots": 50000, "errors": 127, "logical_error": 0.00254, "score": 0.7529297220872394, "seconds": 18.485708756998065}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 1100, "shots": 50000, "errors": 99, "logical_error": 0.00198, "score": 0.689313495451532, "seconds": 19.854952766996576}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 1200, "shots": 50000, "errors": 102, "logical_error": 0.00204, "score": 0.7537256205228601, "seconds": 18.814747536998766}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 1300, "shots": 50000, "errors": 100, "logical_error": 0.002, "score": 0.654939662199137, "seconds": 17.50867849399947}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 1400, "shots": 50000, "errors": 135, "logical_error": 0.0027, "score": 0.7827163226219029, "seconds": 16.062562701998104}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 1500, "shots": 50000, "errors": 112, "logical_error": 0.00224, "score": 0.7059854707420359, "seconds": 17.44173962900095}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 1600, "shots": 50000, "errors": 144, "logical_error": 0.00288, "score": 0.7663170098632263, "seconds": 19.87862089600094}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 1700, "shots": 50000, "errors": 142, "logical_error": 0.00284, "score": 0.7513257978472292, "seconds": 19.52114080899628}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 1800, "shots": 50000, "errors": 165, "logical_error": 0.0033, "score": 0.7561390767235343, "seconds": 23.451536815999134}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "greedy", "seed": 1900, "shots": 50000, "errors": 138, "logical_error": 0.00276, "score": 0.7717242871046054, "seconds": 24.16075642299984}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 0, "shots": 50000, "errors": 98, "logical_error": 0.00196, "score": 0.6556138534114873, "seconds": 24.431946014003188}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 100, "shots": 50000, "errors": 89, "logical_error": 0.00178, "score": 0.591948596643424, "seconds": 20.553122231001907}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 200, "shots": 50000, "errors": 103, "logical_error": 0.00206, "score": 0.6203881533419539, "seconds": 19.44099369500327}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 300, "shots": 50000, "errors": 90, "logical_error": 0.0018, "score": 0.5784933057072256, "seconds": 21.328388508001808}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 400, "shots": 50000, "errors": 98, "logical_error": 0.00196, "score": 0.6465970838150363, "seconds": 20.416194639001333}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 500, "shots": 50000, "errors": 77, "logical_error": 0.00154, "score": 0.5876140396479878, "seconds": 21.759969163002097}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 600, "shots": 50000, "errors": 95, "logical_error": 0.0019, "score": 0.6219691044362894, "seconds": 20.947007577997283}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 700, "shots": 50000, "errors": 97, "logical_error": 0.00194, "score": 0.6330627912279745, "seconds": 17.89860849300021}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 800, "shots": 50000, "errors": 87, "logical_error": 0.00174, "score": 0.5952983479371122, "seconds": 20.832639913001913}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 900, "shots": 50000, "errors": 101, "logical_error": 0.00202, "score": 0.6318475297084314, "seconds": 20.024967739002022}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 1000, "shots": 50000, "errors": 111, "logical_error": 0.00222, "score": 0.7067967425391123, "seconds": 22.63040288600314}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 1100, "shots": 50000, "errors": 121, "logical_error": 0.00242, "score": 0.6401614598601715, "seconds": 22.482601263000106}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 1200, "shots": 50000, "errors": 107, "logical_error": 0.00214, "score": 0.5961443793060396, "seconds": 17.06021439399774}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 1300, "shots": 50000, "errors": 110, "logical_error": 0.0022, "score": 0.6557038550739572, "seconds": 20.953624103996844}
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 1400, "shots": 50000, "errors": 88, "logical_error": 0.00176, "score": 0.642428919416593, "seconds": 16.569256213995686}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 1500, "shots": 50000, "errors": 90, "logical_error": 0.0018, "score": 0.5925414831678872, "seconds": 21.64344485800393}
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 1600, "shots": 50000, "errors": 131, "logical_error": 0.00262, "score": 0.6576721676598801, "seconds": 20.912416375002067}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 1800, "shots": 50000, "errors": 83, "logical_error": 0.00166, "score": 0.6073521818125879, "seconds": 19.542764083002112}
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 1700, "shots": 50000, "errors": 103, "logical_error": 0.00206, "score": 0.6813756209141307, "seconds": 18.836480813995877}
+src/marabbecca/staged_pms.py:77: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"basis": "Z", "topo": "hex_lattice", "arm": "prism", "seed": 1900, "shots": 50000, "errors": 89, "logical_error": 0.00178, "score": 0.6169057268883678, "seconds": 19.477807028000825}

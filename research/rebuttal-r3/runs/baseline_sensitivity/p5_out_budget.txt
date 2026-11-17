@@ -1,0 +1,18 @@
+re-run rows identical to raw rows (router SWAPs, depth, pairs): 1480 different: 0
+failed: Counter({('knn', 'heavy_hex', "TranspilerError: 'More virtual qubits (25) exist than physic"): 20})
+quotient-level second SabreSwap added SWAPs in 0 runs
+VBE device sizes: {'grid': 20, 'hex_lattice': 30, 'heavy_hex': 19} n_logical 7
+raw grid workloads 25 seeds {64} sum of means 1163.59
+raw hex_lattice workloads 25 seeds {64} sum of means 1678.31
+raw heavy_hex workloads 24 seeds {64} sum of means 3614.62
+
+family | workloads | L-SABRE SWAPs (sum of means) | lowered logical-SWAP part | router-added part | added share | logical SWAPs: aligned / crossed-only / neither (share two-disjoint) | variant chosen a/b | added per 'neither' SWAP | CRz off committed edge | rswap off matched pair | runs with any CRz moved | runs ending permuted
+grid | 25 | 1158.3 | 755.5 | 402.8 | 34.8% | 3747 / 0 / 3808 (49.6%) | 7555/0 | 2.12 | 529/29422 (1.8%) | 457/28301 (1.6%) | 145/500 | 226/500
+   runs with no 'neither' SWAP: 27 of which router added >0: 0 | physical SabreSwap skipped (no record): 27 | edges-between-pairs histogram: {'edges1': 3808, 'edges2': 3747}
+   n=8 MQT17 only: total 779.8, added 292.8
+hex_lattice | 25 | 1693.6 | 790.8 | 902.8 | 53.3% | 0 / 0 / 7908 (0.0%) | 7908/0 | 2.28 | 661/29820 (2.2%) | 687/28900 (2.4%) | 182/500 | 379/500
+   runs with no 'neither' SWAP: 0 of which router added >0: 0 | physical SabreSwap skipped (no record): 0 | edges-between-pairs histogram: {'edges1': 7908}
+   n=8 MQT17 only: total 1081.7, added 570.0
+heavy_hex | 24 | 3600.2 | 1860.5 | 1739.7 | 48.3% | 0 / 0 / 18605 (0.0%) | 18605/0 | 1.87 | 485/28140 (1.7%) | 971/26700 (3.6%) | 122/480 | 373/480
+   runs with no 'neither' SWAP: 0 of which router added >0: 0 | physical SabreSwap skipped (no record): 0 | edges-between-pairs histogram: {'edges1': 18605}
+   n=8 MQT17 only: total 2439.7, added 1178.7

@@ -1,0 +1,30 @@
+{
+ "eq19_n8_cz0.001": {
+  "n": 160,
+  "median_infid_ratio": 1.242671667995541,
+  "min_ratio": 1.0072537151857082,
+  "bound_on_all": true,
+  "max_duration_mismatch_us": 0
+ },
+ "eq19_n8_cz0.003": {
+  "n": 160,
+  "median_infid_ratio": 1.2013073268535577,
+  "min_ratio": 1.0087713006802252,
+  "bound_on_all": true,
+  "max_duration_mismatch_us": 0
+ },
+ "eq18_n16_traj": {
+  "n": 320,
+  "median_infid_ratio": 1.7501422334900727,
+  "min_ratio": 0.7836005091435122,
+  "proxy_below_sim_within_2se": 320
+ },
+ "eq19_by_width_median_workload_mean": {
+  "n8_cz0.001": 0.7158409009347181,
+  "n8_cz0.003": 0.5644222640825145,
+  "n12_cz0.001": 0.38462206700178636,
+  "n12_cz0.003": 0.21829324385059307,
+  "n16_cz0.001": 0.15088028315308735,
+  "n16_cz0.003": 0.04973742744875982
+ }
+}

@@ -1,0 +1,14 @@
+src/marabbecca/staged_pms.py:76: InducedQuotientWarning: marabbecca.utils.quotient: logical-routing baselines induce logical connectivity via maximum matching unless ``pairs`` is supplied explicitly. Different matchings yield different quotient graphs.
+  from marabbecca.utils.quotient import make_placement
+{"cell": "X_grid_logical_0", "p": 0.01, "shots": 100000, "ambiguous": 1625, "decoded_errors": 809, "errors_on_recoverable_patterns": 0, "rank_sampler_z": 0.4925041596388018}
+{"cell": "X_grid_greedy_0", "p": 0.01, "shots": 100000, "ambiguous": 1532, "decoded_errors": 743, "errors_on_recoverable_patterns": 0, "rank_sampler_z": 1.1378048449753129}
+{"cell": "X_grid_prism_0", "p": 0.01, "shots": 100000, "ambiguous": 1253, "decoded_errors": 641, "errors_on_recoverable_patterns": 0, "rank_sampler_z": 1.2000130930862554}
+{"cell": "X_hex_lattice_logical_0", "p": 0.01, "shots": 100000, "ambiguous": 2498, "decoded_errors": 1250, "errors_on_recoverable_patterns": 0, "rank_sampler_z": -0.09918913768480979}
+{"cell": "X_hex_lattice_greedy_0", "p": 0.01, "shots": 100000, "ambiguous": 2006, "decoded_errors": 1022, "errors_on_recoverable_patterns": 0, "rank_sampler_z": -0.7591439848776457}
+{"cell": "X_hex_lattice_prism_0", "p": 0.01, "shots": 100000, "ambiguous": 2208, "decoded_errors": 1141, "errors_on_recoverable_patterns": 0, "rank_sampler_z": 0.8138230620230295}
+{"cell": "Z_grid_logical_0", "p": 0.01, "shots": 100000, "ambiguous": 1664, "decoded_errors": 835, "errors_on_recoverable_patterns": 0, "rank_sampler_z": 0.9678707617828404}
+{"cell": "Z_grid_greedy_0", "p": 0.01, "shots": 100000, "ambiguous": 1290, "decoded_errors": 640, "errors_on_recoverable_patterns": 0, "rank_sampler_z": -0.8611825371735967}
+{"cell": "Z_grid_prism_0", "p": 0.01, "shots": 100000, "ambiguous": 1470, "decoded_errors": 752, "errors_on_recoverable_patterns": 0, "rank_sampler_z": 0.7350465022109004}
+{"cell": "Z_hex_lattice_logical_0", "p": 0.01, "shots": 100000, "ambiguous": 3799, "decoded_errors": 1939, "errors_on_recoverable_patterns": 0, "rank_sampler_z": -0.4646118189138079}
+{"cell": "Z_hex_lattice_greedy_0", "p": 0.01, "shots": 100000, "ambiguous": 1918, "decoded_errors": 962, "errors_on_recoverable_patterns": 0, "rank_sampler_z": -0.43128875033948133}
+{"cell": "Z_hex_lattice_prism_0", "p": 0.01, "shots": 100000, "ambiguous": 1458, "decoded_errors": 731, "errors_on_recoverable_patterns": 0, "rank_sampler_z": -0.567458830068549}

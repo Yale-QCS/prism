@@ -1,0 +1,52 @@
+Nominal MEHTA_IDLE: three-round Steane memory, direct Stim + ldpc serial BP/OSD-CS(2).
+160 circuits, 20 seeds per arm and family, 50,000 shots per circuit.
+No postselection. Logical error = wrong decoded logical outcomes / shots.
+Both arms use the same physical-fault route score and 40/16/40 budget.
+Ideal preparation, readout and immediate erasure recovery; no check/reset cost.
+Intervals resample paired routing seeds (20,000 bootstrap replicates).
+They do not quantify uncertainty in the hardware or recovery assumptions.
+
+Family      Greedy errors/shots (P_L %)     PRISM errors/shots (P_L %)      Reduction, percentage points [95% seed CI]   Relative % [95% seed CI]
+X grid        878/1000000 (0.0878%)         695/1000000 (0.0695%)         0.0183 [0.0091, 0.0285]                  20.8428 [10.9755, 30.4256]
+X hex_lattice 971/1000000 (0.0971%)         749/1000000 (0.0749%)         0.0222 [0.0135, 0.0317]                  22.8630 [14.5927, 31.2629]
+Z grid        820/1000000 (0.0820%)         641/1000000 (0.0641%)         0.0179 [0.0097, 0.0261]                  21.8293 [12.6212, 29.6640]
+Z hex_lattice 965/1000000 (0.0965%)         649/1000000 (0.0649%)         0.0316 [0.0220, 0.0421]                  32.7461 [24.5771, 40.7124]
+
+Routing and decoder diagnostics:
+X grid: SWAPs 45.25 -> 30.80; duration 12.06 -> 10.23 us; physical-fault score 0.6712 -> 0.6125; seeds with lower/equal/higher PRISM logical error [17, 0, 3]
+X hex_lattice: SWAPs 70.15 -> 47.75; duration 13.37 -> 10.69 us; physical-fault score 0.7251 -> 0.6336; seeds with lower/equal/higher PRISM logical error [17, 1, 2]
+Z grid: SWAPs 46.85 -> 30.20; duration 12.49 -> 9.87 us; physical-fault score 0.6777 -> 0.6000; seeds with lower/equal/higher PRISM logical error [18, 0, 2]
+Z hex_lattice: SWAPs 78.50 -> 48.90; duration 13.59 -> 10.52 us; physical-fault score 0.7336 -> 0.6280; seeds with lower/equal/higher PRISM logical error [19, 1, 0]
+
+All rates are the shared nominal device values; there is no fitted noise multiplier.
+The old uniform-p sweep is historical evidence, not a Mehta calibration or sensitivity axis.
+The route score is a physical-fault proxy; decoded logical error is measured separately.
+All 52741 supported single residual faults are distinguishable and correctly decoded across the 160 routes. The separate eight-circuit mixed-channel and erasure-limit audits pass.
+
+Physical-transmon control: same Steane code, rounds, site graphs and twenty seeds.
+One transmon per constituent: 13 transmons versus 26 cavity rails, with unused graph sites available for routing.
+Shared bare_report.transmon_device, CZ error 0.1% and 0.3%. Thermal noise uses its Pauli twirl.
+Ideal preparation/readout on both platforms; dual rail additionally assumes immediate ideal erasure recovery.
+Native Qiskit O3 with Clifford synthesis, eighty candidates, selection at 0.3% CZ error; no final rescheduling.
+This same-code extraction circuit is not a matched-resource or optimized fault-tolerant platform comparison.
+The unflagged extraction has ambiguous single-fault effects. Its result includes that circuit limitation.
+Family       CZ error   Errors/shots       Logical error % [95% seed CI]   Duration us   Native CZs
+X grid        0.1%   11429/1000000   1.1429 [1.1141, 1.1712]   2.716   128.40
+X grid        0.3%   32636/1000000   3.2636 [3.1692, 3.3456]   2.716   128.40
+X hex_lattice 0.1%   21724/1000000   2.1724 [2.0275, 2.3436]   3.838   166.25
+X hex_lattice 0.3%   56250/1000000   5.6250 [5.3609, 5.9136]   3.838   166.25
+Z grid        0.1%   10623/1000000   1.0623 [1.0305, 1.0994]   2.713   128.10
+Z grid        0.3%   31605/1000000   3.1605 [3.0770, 3.2347]   2.713   128.10
+Z hex_lattice 0.1%   20526/1000000   2.0526 [1.9527, 2.1723]   3.774   164.80
+Z hex_lattice 0.3%   52801/1000000   5.2801 [5.1051, 5.4845]   3.774   164.80
+
+Seed-zero decoder audit (exact optimum for the stipulated Pauli circuit, not primary performance data):
+The ldpc estimates use finite shots and can fall below an exact bound within sampling noise.
+X_grid_transmon_0 CZ 0.1%: optimal failure 1.0273%, sampled ldpc 1.1280%; unambiguous single DEM mechanisms missed 4
+X_grid_transmon_0 CZ 0.3%: optimal failure 3.2483%, sampled ldpc 3.4520%; unambiguous single DEM mechanisms missed 0
+X_hex_lattice_transmon_0 CZ 0.1%: optimal failure 2.5367%, sampled ldpc 2.5300%; unambiguous single DEM mechanisms missed 0
+X_hex_lattice_transmon_0 CZ 0.3%: optimal failure 6.1919%, sampled ldpc 6.4560%; unambiguous single DEM mechanisms missed 0
+Z_grid_transmon_0 CZ 0.1%: optimal failure 0.9665%, sampled ldpc 1.0840%; unambiguous single DEM mechanisms missed 4
+Z_grid_transmon_0 CZ 0.3%: optimal failure 2.7537%, sampled ldpc 2.8480%; unambiguous single DEM mechanisms missed 0
+Z_hex_lattice_transmon_0 CZ 0.1%: optimal failure 2.5228%, sampled ldpc 2.6400%; unambiguous single DEM mechanisms missed 1
+Z_hex_lattice_transmon_0 CZ 0.3%: optimal failure 6.1078%, sampled ldpc 6.3120%; unambiguous single DEM mechanisms missed 0
