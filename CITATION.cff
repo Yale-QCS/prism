@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: "If you use PRISM, please cite the paper below."
+title: "PRISM: A Logical-Physical Boundary Compiler for Dual-Rail Qubits"
+authors:
+  - family-names: "McKinney"
+    given-names: "Evan"
+    orcid: "https://orcid.org/0000-0002-4865-5458"
+  - family-names: "Liu"
+    given-names: "Kun"
+    orcid: "https://orcid.org/0009-0002-9038-8733"
+  - family-names: "Babla"
+    given-names: "Harshvardhan K."
+    orcid: "https://orcid.org/0009-0009-0601-3500"
+  - family-names: "Schoelkopf"
+    given-names: "Robert J."
+    orcid: "https://orcid.org/0000-0002-2469-5068"
+  - family-names: "Ding"
+    given-names: "Yongshan"
+    orcid: "https://orcid.org/0000-0002-2338-1315"
+license: Apache-2.0
+repository-code: "https://github.com/Yale-QCS/prism"
+preferred-citation:
+  type: article
+  title: "PRISM: A Logical-Physical Boundary Compiler for Dual-Rail Qubits"
+  authors:
+    - family-names: "McKinney"
+      given-names: "Evan"
+      orcid: "https://orcid.org/0000-0002-4865-5458"
+    - family-names: "Liu"
+      given-names: "Kun"
+      orcid: "https://orcid.org/0009-0002-9038-8733"
+    - family-names: "Babla"
+      given-names: "Harshvardhan K."
+      orcid: "https://orcid.org/0009-0009-0601-3500"
+    - family-names: "Schoelkopf"
+      given-names: "Robert J."
+      orcid: "https://orcid.org/0000-0002-2469-5068"
+    - family-names: "Ding"
+      given-names: "Yongshan"
+      orcid: "https://orcid.org/0000-0002-2338-1315"
+  journal: "arXiv preprint arXiv:2611.23009"
+  year: 2026
+  month: 11
+  doi: "10.48550/arXiv.2611.23009"
+  url: "https://arxiv.org/abs/2611.23009"
